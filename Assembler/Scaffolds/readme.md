@@ -10,7 +10,7 @@ A scaffold is a named group of FileKey templates. Each catalog section defines o
 
 ```ini
 [WebViewScaffold: WebCookies]
-FileKeyBase=%WebViewRoot%\*\Network|Cookies*;Device Bound Sessions*
+FileKeyBase=<WebViewRoot>\*\Network|Cookies*;Device Bound Sessions*
 ```
 
 The section name format is `[WebViewScaffold: Name]` in `webview.ini`, `[QtWebEngineScaffold: Name]` in `qtwebengine.ini`, and `[ElectronScaffold: Name]` in `electron.ini`. Each `FileKeyBase=` line is a FileKey template; the family placeholder is substituted by the consuming module once per root the entry declares.
@@ -19,16 +19,22 @@ The three families each define a root differently, and getting this wrong is the
 
 | Family | Placeholder | What the root names |
 | :- | :- | :- |
-| WebView2 | `%WebViewRoot%` | The folder containing the profiles (`...\EBWebView`). Profile-scoped templates use `%WebViewRoot%\*\`.
-| QtWebEngine | `%QtWebEngineRoot%` | One profile directory, segment included (`...\QtWebEngine\Default`) |
-| Electron | `%ElectronRoot%` | One profile directory, which is the app's `userData` folder (`%AppData%\Signal`). |
+| WebView2 | `<WebViewRoot>` | The folder containing the profiles (`...\EBWebView`). Profile-scoped templates use `<WebViewRoot>\*\`.
+| QtWebEngine | `<QtWebEngineRoot>` | One profile directory, segment included (`...\QtWebEngine\Default`) |
+| Electron | `<ElectronRoot>` | One profile directory, which is the app's `userData` folder (`%AppData%\Signal`). |
 
 Two families have a second placeholder, declared separately because it can't be inferred from the first:
 
-* `%ElectronUpdaterRoot%`: the electron-updater download cache (`%LocalAppData%\signal-updater`)
-* `%QtWebEngineCacheRoot%`: the folder holding the profile's HTTP `Cache\`, which Qt keeps apart from the profile (`%LocalAppData%\VideoKeeper\cache\QtWebEngine\Default`)
+* `<ElectronUpdaterRoot>`: the electron-updater download cache (`%LocalAppData%\signal-updater`)
+* `<QtWebEngineCacheRoot>`: the folder holding the profile's HTTP `Cache\`, which Qt keeps apart from the profile (`%LocalAppData%\VideoKeeper\cache\QtWebEngine\Default`)
 
 A template whose placeholder has no declared root is dropped.
+
+Placeholders match in any case. They share the `<Name>` spelling of the builders' variables but are substituted as text before variable expansion, so a `<Package>` or `<Root>` inside a declared root expands along with the template. The old `%WebViewRoot%` spelling and its siblings (and UWPBuilder's old `%Package%`) are refused: a template holding one, even with its closing `%` missing, is dropped with a warning naming the new spelling, and the build fails:
+
+```
+`%ElectronRoot%` in [ElectronScaffold: Caches].FileKeyBase is now spelled `<ElectronRoot>`; template dropped
+```
 
 ### How do entries select scaffolds?
 
@@ -64,7 +70,7 @@ A section carrying `Tier=Legacy` stays in the catalog but is withheld from `All`
 ```ini
 [WebViewScaffold: LegacyWebHistory]
 Tier=Legacy
-FileKeyBase=%WebViewRoot%\*|shortcuts*
+FileKeyBase=<WebViewRoot>\*|shortcuts*
 ```
 
 It holds patterns that modern hosts no longer write, but that older hosts may.

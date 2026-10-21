@@ -47,16 +47,18 @@ Imports System.Text
 ''' the selected scaffolds (<c> WebViewScaffolds= </c> / <c> ExcludeWebViewScaffolds= </c>,
 ''' <c> QtWebEngineScaffolds= </c> / <c> ExcludeQtWebEngineScaffolds= </c>, and
 ''' <c> ElectronScaffolds= </c> / <c> ExcludeElectronScaffolds= </c>) into <c> FileKey </c>
-''' lines, substituting the family's placeholder (<c> %WebViewRoot% </c>,
-''' <c> %QtWebEngineRoot% </c> or <c> %ElectronRoot% </c>) against each declared root. The
+''' lines, substituting the family's placeholder (<c> &lt;WebViewRoot&gt; </c>,
+''' <c> &lt;QtWebEngineRoot&gt; </c> or <c> &lt;ElectronRoot&gt; </c>) against each declared root. The
 ''' families are independent: an entry may declare any combination, or none. Non-scaffold
 ''' targets are written via <c> FileKeyBase= </c> / <c> RegKeyBase= </c> /
 ''' <c> ExcludeKeyBase= </c> with the same substitution rule (any placeholder), and literal
 ''' <c> FileKey= </c> / <c> RegKey= </c> / <c> ExcludeKey= </c> values get it as well. An entry
-''' that declares no root gets no scaffold keys. <br /><br />
+''' that declares no root gets no scaffold keys. Placeholders match case-insensitively, and the
+''' retired <c> %WebViewRoot% </c> spelling (and its siblings) is refused: the key is dropped and
+''' the run fails. <br /><br />
 '''
 ''' The Electron family carries a <b>second</b> root key, <c> ElectronUpdaterRoot= </c>
-''' (<c> %ElectronUpdaterRoot% </c>), naming the electron-updater download cache. That folder
+''' (<c> &lt;ElectronUpdaterRoot&gt; </c>), naming the electron-updater download cache. That folder
 ''' is a sibling of the userData folder under <c> %LocalAppData% </c>, and its name is
 ''' electron-builder's appId slug, so it can't be derived from the userData path. It is
 ''' optional and orthogonal: declaring it alone opts the entry into the updater scaffolds only.
@@ -67,7 +69,7 @@ Imports System.Text
 ''' <br /><br />
 '''
 ''' The QtWebEngine family has a second root key on the same terms, <c> QtWebEngineCacheRoot= </c>
-''' (<c> %QtWebEngineCacheRoot% </c>), naming the profile's HTTP cache directory. Qt splits its
+''' (<c> &lt;QtWebEngineCacheRoot&gt; </c>), naming the profile's HTTP cache directory. Qt splits its
 ''' CacheLocation from its AppDataLocation, so the cache sits outside the profile directory
 ''' <c> QtWebEngineRoot= </c> names.
 ''' <br /><br />
@@ -83,9 +85,9 @@ Imports System.Text
 ''' Scaffolds are loaded from one shared scaffold <em>directory</em> (typically
 ''' <c> Assembler\Scaffolds </c>) via <see cref="ScaffoldCatalogs.LoadCatalogDirectory"/>, which
 ''' takes each family from its section headers rather than from a configured per-family
-''' path: <c> webview.ini </c> (<c> %WebViewRoot% </c> templates), <c> qtwebengine.ini </c>
-''' (<c> %QtWebEngineRoot% </c> / <c> %QtWebEngineCacheRoot% </c> templates), and
-''' <c> electron.ini </c> (<c> %ElectronRoot% </c> / <c> %ElectronUpdaterRoot% </c> templates),
+''' path: <c> webview.ini </c> (<c> &lt;WebViewRoot&gt; </c> templates), <c> qtwebengine.ini </c>
+''' (<c> &lt;QtWebEngineRoot&gt; </c> / <c> &lt;QtWebEngineCacheRoot&gt; </c> templates), and
+''' <c> electron.ini </c> (<c> &lt;ElectronRoot&gt; </c> / <c> &lt;ElectronUpdaterRoot&gt; </c> templates),
 ''' each substituted per declared root at generation time. UWPBuilder reads the same directory
 ''' and binds the same families. See <see cref="ScaffoldCatalogs.ScaffoldFamilies"/> for the
 ''' parity contract.
@@ -254,7 +256,7 @@ Public Module EntryBuilder
 
         ''' <summary>
         ''' Root paths of the application's Chromium-data folders, each substituted as written
-        ''' for <c> %WebViewRoot% </c> in scaffold templates and in every FileKey, RegKey and
+        ''' for <c> &lt;WebViewRoot&gt; </c> in scaffold templates and in every FileKey, RegKey and
         ''' ExcludeKey value, base or literal. Multiple roots produce one expansion per root.
         ''' </summary>
         Public WebViewRoots As List(Of String)
@@ -357,7 +359,7 @@ Public Module EntryBuilder
         ''' <see cref="WebViewRoots"/>, which names the folder holding the profiles. The
         ''' QtWebEngine catalog does not bake the profile segment into its templates, so a
         ''' host running several profiles declares one root per profile. Each is substituted as
-        ''' written for <c> %QtWebEngineRoot% </c>. Declaring this or a
+        ''' written for <c> &lt;QtWebEngineRoot&gt; </c>. Declaring this or a
         ''' <c> QtWebEngineCacheRoot= </c> opts the entry into QtWebEngine scaffold emission.
         ''' </summary>
         Public QtWebEngineRoots As List(Of String)
@@ -366,7 +368,7 @@ Public Module EntryBuilder
         ''' Paths of the application's QtWebEngine HTTP cache directories, e.g.
         ''' <c> %LocalAppData%\VideoKeeper\cache\QtWebEngine\Default </c>. Declared separately from
         ''' <see cref="QtWebEngineRoots"/> because Qt keeps the cache under its CacheLocation, not
-        ''' inside the profile directory. Substituted for <c> %QtWebEngineCacheRoot% </c>; when
+        ''' inside the profile directory. Substituted for <c> &lt;QtWebEngineCacheRoot&gt; </c>; when
         ''' empty, templates referencing that placeholder are dropped.
         ''' </summary>
         Public QtWebEngineCacheRoots As List(Of String)
@@ -397,7 +399,7 @@ Public Module EntryBuilder
         ''' <c> %AppData%\&lt;ProductName&gt; </c>. For Electron this folder <em>is</em> the
         ''' Chromium profile directory, so unlike <see cref="WebViewRoots"/> there is no
         ''' profile segment above or below it. Each is substituted as written for
-        ''' <c> %ElectronRoot% </c>. An app using <c> session.fromPartition() </c>
+        ''' <c> &lt;ElectronRoot&gt; </c>. An app using <c> session.fromPartition() </c>
         ''' declares its sub-profiles as additional roots (<c> ...\Partitions\* </c>), since each
         ''' partition directory is itself a complete profile. Declaring this or an
         ''' <c> ElectronUpdaterRoot= </c> opts the entry into Electron scaffold emission.
@@ -410,7 +412,7 @@ Public Module EntryBuilder
         ''' <see cref="ElectronRoots"/> because the directory name is electron-builder's appId
         ''' slug and is not derivable from the userData path (<c> %AppData%\Humble App </c> pairs
         ''' with <c> %LocalAppData%\humble-client-updater </c>). Substituted for
-        ''' <c> %ElectronUpdaterRoot% </c>; when empty, templates referencing that placeholder are
+        ''' <c> &lt;ElectronUpdaterRoot&gt; </c>; when empty, templates referencing that placeholder are
         ''' dropped.
         ''' </summary>
         Public ElectronUpdaterRoots As List(Of String)
@@ -1120,6 +1122,45 @@ Public Module EntryBuilder
     End Sub
 
     ''' <summary>
+    ''' Checks <paramref name="value"/> for a token in
+    ''' <see cref="ScaffoldCatalogs.RetiredRootStems"/>. On a hit we warn, naming the new
+    ''' spelling, and fail the run, since generator warnings are invisible in a silent build and a
+    ''' dropped key would otherwise publish a thinner entry unnoticed. <c> %Package% </c> is
+    ''' UWPBuilder's and never meant anything here, so it isn't refused.
+    ''' </summary>
+    '''
+    ''' <param name="value">
+    ''' The key value to check
+    ''' </param>
+    '''
+    ''' <param name="context">
+    ''' Where the value came from, e.g. <c> [Discord *].FileKeyBase1 </c>
+    ''' </param>
+    '''
+    ''' <param name="menuOutput">
+    ''' The <c> MenuSection </c> receiving the warning for display
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' <c> True </c> when the caller should drop the key, otherwise <c> False </c>
+    ''' </returns>
+    Private Function refuseRetiredToken(value As String,
+                                        context As String,
+                                        menuOutput As MenuSection) As Boolean
+
+        Dim retiredMsg = RetiredTokens.FindRetiredToken(value, ScaffoldCatalogs.RetiredRootStems, context)
+        If retiredMsg.Length = 0 Then Return False
+
+        Dim dropMsg = $"{retiredMsg}; key dropped"
+        gLog(dropMsg)
+        menuOutput.AddWarning(dropMsg)
+        markRunFailed()
+
+        Return True
+
+    End Function
+
+    ''' <summary>
     ''' Parses one source section into a populated <see cref="EntrySpec"/>, resolves the
     ''' nested references among its variables, and infers detection from a <c> Root </c>
     ''' variable via <see cref="inferRootDetection"/>. Sets <c> ShouldSkip </c> with a warning
@@ -1131,7 +1172,8 @@ Public Module EntryBuilder
     ''' both <c> Section= </c> and <c> LangSecRef= </c> are present, keeping
     ''' <c> LangSecRef= </c>; and warns on missing detection unless the entry is already
     ''' skipped. A repeated <c> Section= </c>, <c> LangSecRef= </c> or <c> DetectOS= </c> keeps
-    ''' its last value.
+    ''' its last value. A key other than <c> Warning= </c> holding a retired root token is
+    ''' dropped through <see cref="refuseRetiredToken"/>.
     ''' </summary>
     '''
     ''' <param name="entrySection">
@@ -1153,7 +1195,13 @@ Public Module EntryBuilder
 
         For Each key In entrySection.Keys
 
-            Select Case key.KeyType.ToUpperInvariant()
+            Dim keyType = key.KeyType.ToUpperInvariant()
+
+            ' Warning= is prose, so it can't hold a token
+            If keyType <> "WARNING" AndAlso
+               refuseRetiredToken(key.Value, $"[{entrySection.Name}].{key.Name}", menuOutput) Then Continue For
+
+            Select Case keyType
 
                 Case "SECTION" : spec.SectionName = key.Value
 
@@ -1605,7 +1653,7 @@ Public Module EntryBuilder
 
         End If
 
-        ' 3. DetectFile keys (phase-2 expansion, Filesystem domain; no %WebViewRoot% by convention)
+        ' 3. DetectFile keys (phase-2 expansion, Filesystem domain; no root substitution by convention)
         Dim detectFileValues As New List(Of String)
         For Each df In spec.DetectFiles : detectFileValues.AddRange(expandPhase2(df, spec, ExpansionDomain.Filesystem, "DetectFile", stats, menuOutput)) : Next
 
@@ -1648,7 +1696,7 @@ Public Module EntryBuilder
 
             Dim selectedScaffolds = resolveWebViewScaffolds(spec, catalog, menuOutput)
             Dim webViewBindings As New List(Of ScaffoldCatalogs.ScaffoldRootBinding) From {
-                New ScaffoldCatalogs.ScaffoldRootBinding("%WebViewRoot%", spec.WebViewRoots)
+                New ScaffoldCatalogs.ScaffoldRootBinding(ScaffoldCatalogs.WebViewRootPlaceholder, spec.WebViewRoots)
             }
             fileKeys.AddRange(expandScaffoldFamily(webViewBindings, selectedScaffolds, spec.WebViewScaffoldsKeyPresent, catalog, spec, stats, menuOutput))
 
@@ -1662,8 +1710,8 @@ Public Module EntryBuilder
 
             Dim selectedQtScaffolds = resolveQtWebEngineScaffolds(spec, qtCatalog, menuOutput)
             Dim qtBindings As New List(Of ScaffoldCatalogs.ScaffoldRootBinding) From {
-                New ScaffoldCatalogs.ScaffoldRootBinding("%QtWebEngineRoot%", spec.QtWebEngineRoots),
-                New ScaffoldCatalogs.ScaffoldRootBinding("%QtWebEngineCacheRoot%", spec.QtWebEngineCacheRoots)
+                New ScaffoldCatalogs.ScaffoldRootBinding(ScaffoldCatalogs.QtWebEngineRootPlaceholder, spec.QtWebEngineRoots),
+                New ScaffoldCatalogs.ScaffoldRootBinding(ScaffoldCatalogs.QtWebEngineCacheRootPlaceholder, spec.QtWebEngineCacheRoots)
             }
             fileKeys.AddRange(expandScaffoldFamily(qtBindings, selectedQtScaffolds, spec.QtWebEngineScaffoldsKeyPresent, qtCatalog, spec, stats, menuOutput))
 
@@ -1678,8 +1726,8 @@ Public Module EntryBuilder
 
             Dim selectedElectronScaffolds = resolveElectronScaffolds(spec, electronCatalog, menuOutput)
             Dim electronBindings As New List(Of ScaffoldCatalogs.ScaffoldRootBinding) From {
-                New ScaffoldCatalogs.ScaffoldRootBinding("%ElectronRoot%", spec.ElectronRoots),
-                New ScaffoldCatalogs.ScaffoldRootBinding("%ElectronUpdaterRoot%", spec.ElectronUpdaterRoots)
+                New ScaffoldCatalogs.ScaffoldRootBinding(ScaffoldCatalogs.ElectronRootPlaceholder, spec.ElectronRoots),
+                New ScaffoldCatalogs.ScaffoldRootBinding(ScaffoldCatalogs.ElectronUpdaterRootPlaceholder, spec.ElectronUpdaterRoots)
             }
             fileKeys.AddRange(expandScaffoldFamily(electronBindings, selectedElectronScaffolds, spec.ElectronScaffoldsKeyPresent, electronCatalog, spec, stats, menuOutput))
 
@@ -1703,7 +1751,7 @@ Public Module EntryBuilder
 
         Next
 
-        ' 7. RegKeys with %WebViewRoot% / %QtWebEngineRoot% + variable expansion (Registry domain),
+        ' 7. RegKeys with root substitution + variable expansion (Registry domain),
         ' renumbered from 1: RegKeyBase= templates (generated) first, then literal RegKey= (pass-through).
         Dim regKeyValues As New List(Of String)
         For Each rkb In spec.RegKeyBases : regKeyValues.AddRange(expandFully(rkb, spec, ExpansionDomain.Registry, "RegKey", stats, menuOutput)) : Next
@@ -1721,7 +1769,7 @@ Public Module EntryBuilder
 
         Next
 
-        ' 8. ExcludeKeys with %WebViewRoot% / %QtWebEngineRoot% expansion, renumbered from 1 after fan-out:
+        ' 8. ExcludeKeys with root substitution + variable expansion, renumbered from 1 after fan-out:
         ' ExcludeKeyBase= templates (generated) first, then literal ExcludeKey= (pass-through).
         Dim excludeKeyValues As New List(Of String)
 
@@ -1922,8 +1970,8 @@ Public Module EntryBuilder
     ''' <summary>
     ''' Expands a template's root placeholders against the entry's declared roots, chaining one
     ''' <see cref="ScaffoldCatalogs.FanOutPlaceholder"/> pass for each of the five placeholders:
-    ''' <c> %WebViewRoot% </c>, <c> %QtWebEngineRoot% </c>, <c> %QtWebEngineCacheRoot% </c>,
-    ''' <c> %ElectronRoot% </c> and <c> %ElectronUpdaterRoot% </c>. Matching is case-sensitive.
+    ''' <c> &lt;WebViewRoot&gt; </c>, <c> &lt;QtWebEngineRoot&gt; </c>, <c> &lt;QtWebEngineCacheRoot&gt; </c>,
+    ''' <c> &lt;ElectronRoot&gt; </c> and <c> &lt;ElectronUpdaterRoot&gt; </c>. Matching is case-insensitive.
     ''' A template containing several placeholders multiplies across all of their root lists. A
     ''' template containing a placeholder the entry declared no root for is dropped, with no
     ''' warning.
@@ -1946,11 +1994,11 @@ Public Module EntryBuilder
                                  spec As EntrySpec) As List(Of String)
 
         Dim result As New List(Of String) From {template}
-        result = ScaffoldCatalogs.FanOutPlaceholder(result, "%WebViewRoot%", spec.WebViewRoots)
-        result = ScaffoldCatalogs.FanOutPlaceholder(result, "%QtWebEngineRoot%", spec.QtWebEngineRoots)
-        result = ScaffoldCatalogs.FanOutPlaceholder(result, "%QtWebEngineCacheRoot%", spec.QtWebEngineCacheRoots)
-        result = ScaffoldCatalogs.FanOutPlaceholder(result, "%ElectronRoot%", spec.ElectronRoots)
-        result = ScaffoldCatalogs.FanOutPlaceholder(result, "%ElectronUpdaterRoot%", spec.ElectronUpdaterRoots)
+        result = ScaffoldCatalogs.FanOutPlaceholder(result, ScaffoldCatalogs.WebViewRootPlaceholder, spec.WebViewRoots)
+        result = ScaffoldCatalogs.FanOutPlaceholder(result, ScaffoldCatalogs.QtWebEngineRootPlaceholder, spec.QtWebEngineRoots)
+        result = ScaffoldCatalogs.FanOutPlaceholder(result, ScaffoldCatalogs.QtWebEngineCacheRootPlaceholder, spec.QtWebEngineCacheRoots)
+        result = ScaffoldCatalogs.FanOutPlaceholder(result, ScaffoldCatalogs.ElectronRootPlaceholder, spec.ElectronRoots)
+        result = ScaffoldCatalogs.FanOutPlaceholder(result, ScaffoldCatalogs.ElectronUpdaterRootPlaceholder, spec.ElectronUpdaterRoots)
         Return result
 
     End Function

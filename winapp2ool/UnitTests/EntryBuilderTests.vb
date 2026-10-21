@@ -21,9 +21,11 @@ Imports System.Text
 
 ''' <summary>
 ''' Tests for EntryBuilder's scaffold-family wiring of <c> QtWebEngineCacheRoot= </c>: that the key
-''' is parsed, bound to <c> %QtWebEngineCacheRoot% </c> in catalog templates and <c> FileKeyBase= </c>
+''' is parsed, bound to <c> &lt;QtWebEngineCacheRoot&gt; </c> in catalog templates and <c> FileKeyBase= </c>
 ''' values, and opts the entry into the QtWebEngine family on its own. The substitution engine itself
 ''' is covered by <see cref="ScaffoldCatalogsTests"/>; these tests cover the parser and generator around it.
+''' Also covers the refusal of the retired <c> %...Root% </c> spellings, which leaves
+''' <c> %Package% </c> alone.
 ''' </summary>
 <TestClass()> Public Class EntryBuilderTests
 
@@ -97,13 +99,13 @@ Imports System.Text
     Private Shared Function QtCatalog() As Dictionary(Of String, List(Of String))
 
         Return New Dictionary(Of String, List(Of String)) From {
-            {"Caches", New List(Of String) From {"%QtWebEngineRoot%\GPUCache|*", "%QtWebEngineCacheRoot%\Cache|*|RECURSE"}}
+            {"Caches", New List(Of String) From {"<QtWebEngineRoot>\GPUCache|*", "<QtWebEngineCacheRoot>\Cache|*|RECURSE"}}
         }
 
     End Function
 
     ''' <summary>
-    ''' <c> QtWebEngineCacheRoot= </c> binds <c> %QtWebEngineCacheRoot% </c> independently of the
+    ''' <c> QtWebEngineCacheRoot= </c> binds <c> &lt;QtWebEngineCacheRoot&gt; </c> independently of the
     ''' profile root
     ''' </summary>
     <TestMethod()> Public Sub QtWebEngine_CacheRoot_BindsAndSubstitutes()
@@ -126,7 +128,7 @@ Imports System.Text
 
     ''' <summary>
     ''' An entry declaring only <c> QtWebEngineRoot= </c> drops the cache templates rather than
-    ''' emitting a literal <c> %QtWebEngineCacheRoot% </c> into a FileKey
+    ''' emitting a literal <c> &lt;QtWebEngineCacheRoot&gt; </c> into a FileKey
     ''' </summary>
     <TestMethod()> Public Sub QtWebEngine_NoCacheRoot_DropsCacheTemplates()
 
@@ -160,7 +162,7 @@ Imports System.Text
     End Sub
 
     ''' <summary>
-    ''' <c> FileKeyBase= </c> substitutes <c> %QtWebEngineCacheRoot% </c> like every other root
+    ''' <c> FileKeyBase= </c> substitutes <c> &lt;QtWebEngineCacheRoot&gt; </c> like every other root
     ''' placeholder
     ''' </summary>
     <TestMethod()> Public Sub QtWebEngine_CacheRoot_SubstitutesInFileKeyBase()
@@ -169,11 +171,124 @@ Imports System.Text
         Dim fileKeys = BuildQt(Preamble &
                                "QtWebEngineCacheRoot=%LocalAppData%\VideoKeeper\cache\QtWebEngine\Default" & vbCrLf &
                                "ExcludeQtWebEngineScaffolds=Caches" & vbCrLf &
-                               "FileKeyBase=%QtWebEngineCacheRoot%\Cache\Cache_Data|*" & vbCrLf,
+                               "FileKeyBase=<QtWebEngineCacheRoot>\Cache\Cache_Data|*" & vbCrLf,
                                QtCatalog(), skipped)
 
         CollectionAssert.AreEqual(
             New List(Of String) From {"%LocalAppData%\VideoKeeper\cache\QtWebEngine\Default\Cache\Cache_Data|*"},
+            fileKeys)
+
+    End Sub
+
+    ' ----- Retired %...Root% spelling -----
+
+    ''' <summary>
+    ''' Parses the first section of <paramref name="text"/> from a zero exit code, restoring the
+    ''' previous exit code afterwards
+    ''' </summary>
+    '''
+    ''' <param name="text">Literal source ini text for one EntryBuilder entry</param>
+    '''
+    ''' <param name="log">Set to every line the parser wrote to the log</param>
+    '''
+    ''' <param name="exitCode">Set to the exit code parsing left</param>
+    Private Shared Function ParseLogged(text As String,
+                                        ByRef log As List(Of String),
+                                        ByRef exitCode As Integer) As winapp2ool.EntryBuilder.EntrySpec
+
+        Dim savedExitCode = Environment.ExitCode
+
+        Try
+
+            Environment.ExitCode = 0
+
+            Using cap = winapp2ool.gLogCapture()
+
+                Dim spec = winapp2ool.EntryBuilder.parseEntrySpec(FirstSection(text), New winapp2ool.MenuSection)
+                log = cap.Lines.ToList()
+                exitCode = Environment.ExitCode
+                Return spec
+
+            End Using
+
+        Finally
+
+            Environment.ExitCode = savedExitCode
+
+        End Try
+
+    End Function
+
+    ''' <summary>
+    ''' A <c> FileKeyBase= </c> still spelled <c> %QtWebEngineCacheRoot% </c> is dropped with a
+    ''' warning naming the new spelling, and the run fails
+    ''' </summary>
+    <TestMethod()> Public Sub RetiredRootToken_InFileKeyBase_IsRefused()
+
+        Dim log As List(Of String) = Nothing
+        Dim exitCode As Integer
+        Dim spec = ParseLogged(Preamble &
+                               "QtWebEngineCacheRoot=%LocalAppData%\VideoKeeper\cache\QtWebEngine\Default" & vbCrLf &
+                               "FileKeyBase=%QtWebEngineCacheRoot%\Cache|*" & vbCrLf, log, exitCode)
+
+        Assert.AreEqual(1, exitCode)
+        Assert.AreEqual(0, spec.FileKeyBases.Count)
+        Assert.IsTrue(log.Any(Function(l) l.Contains("`%QtWebEngineCacheRoot%` in [Test App *].FileKeyBase is now spelled `<QtWebEngineCacheRoot>`; key dropped")),
+                      "Expected a refusal, got: " & String.Join(" | ", log))
+
+    End Sub
+
+    ''' <summary>
+    ''' A root token missing its closing <c> % </c> is refused too, in a literal
+    ''' <c> FileKey= </c> and in a root declaration
+    ''' </summary>
+    <TestMethod()> Public Sub RetiredRootToken_UnclosedAndInRootDeclaration_IsRefused()
+
+        Dim log As List(Of String) = Nothing
+        Dim exitCode As Integer
+        Dim spec = ParseLogged(Preamble &
+                               "ElectronRoot=%AppData%\Signal" & vbCrLf &
+                               "FileKey=%ElectronRoot\logs|*" & vbCrLf &
+                               "QtWebEngineRoot=%ElectronRoot%\QtWebEngine\Default" & vbCrLf, log, exitCode)
+
+        Assert.AreEqual(1, exitCode)
+        Assert.AreEqual(0, spec.FileKeys.Count)
+        Assert.AreEqual(0, spec.QtWebEngineRoots.Count)
+        CollectionAssert.AreEqual({"%AppData%\Signal"}, spec.ElectronRoots)
+        Assert.IsTrue(log.Any(Function(l) l.Contains("`%ElectronRoot` in [Test App *].FileKey looks like the retired `%ElectronRoot%` token, which is now spelled `<ElectronRoot>`; key dropped")),
+                      "Expected an unclosed-token refusal, got: " & String.Join(" | ", log))
+
+    End Sub
+
+    ''' <summary>
+    ''' <c> %Package% </c> is UWPBuilder's retired token and never meant anything here, so
+    ''' EntryBuilder leaves it alone
+    ''' </summary>
+    <TestMethod()> Public Sub RetiredPackageToken_IsNotRefused()
+
+        Dim log As List(Of String) = Nothing
+        Dim exitCode As Integer
+        Dim spec = ParseLogged(Preamble & "FileKey=%Package%\LocalState|*.log" & vbCrLf, log, exitCode)
+
+        Assert.AreEqual(0, exitCode)
+        CollectionAssert.AreEqual({"%Package%\LocalState|*.log"}, spec.FileKeys)
+
+    End Sub
+
+    ''' <summary>
+    ''' A literal <c> FileKey= </c> takes a root placeholder in any case
+    ''' </summary>
+    <TestMethod()> Public Sub RootPlaceholder_InFileKey_MatchesCaseInsensitively()
+
+        Dim skipped As Boolean
+        Dim fileKeys = BuildQt(Preamble &
+                               "QtWebEngineRoot=%LocalAppData%\VideoKeeper\QtWebEngine\Default" & vbCrLf &
+                               "ExcludeQtWebEngineScaffolds=Caches" & vbCrLf &
+                               "FileKey=<qtwebengineroot>\Visited Links|*" & vbCrLf,
+                               QtCatalog(), skipped)
+
+        CollectionAssert.AreEqual(
+            New List(Of String) From {"%LocalAppData%\VideoKeeper\QtWebEngine\Default\Visited Links|*"},
             fileKeys)
 
     End Sub

@@ -64,7 +64,7 @@ Public Module RetiredTokens
         For Each stem In retiredStems
 
             Dim name = stem.TrimStart("%"c)
-            Dim m = Regex.Match(template, $"%{Regex.Escape(name)}([^%\\|;]*)(%?)", RegexOptions.IgnoreCase)
+            Dim m = Regex.Match(template, $"%{Regex.Escape(name)}([^%\\|;]*)(%?)", RegexOptions.IgnoreCase Or RegexOptions.CultureInvariant)
 
             If Not m.Success Then Continue For
 

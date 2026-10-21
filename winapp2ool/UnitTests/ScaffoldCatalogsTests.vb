@@ -34,7 +34,7 @@ Option Strict On
 ''' exclusions applied to either source, and unknown-name filtering. A regression in any of these
 ''' silently changes what gets deleted on users' machines rather than failing loudly. The
 ''' substitution engine's drop-on-empty-roots rule matters for the same reason in reverse: lose it
-''' and a literal <c> %ElectronUpdaterRoot% </c> ships inside a published FileKey.
+''' and a literal <c> &lt;ElectronUpdaterRoot&gt; </c> ships inside a published FileKey.
 ''' </summary>
 <TestClass()> Public Class ScaffoldCatalogsTests
 
@@ -259,16 +259,16 @@ Option Strict On
     <TestMethod()> Public Sub ParseSection_CollectsTemplatesInOrder()
 
         Dim section As New winapp2ool.iniSection("ElectronScaffold: Caches")
-        section.AddKey(New winapp2ool.iniKey("FileKeyBase=%ElectronRoot%\blob_storage|*|REMOVESELF"))
-        section.AddKey(New winapp2ool.iniKey("FileKeyBase=%ElectronRoot%\*Cache*|*|REMOVESELF"))
+        section.AddKey(New winapp2ool.iniKey("FileKeyBase=<ElectronRoot>\blob_storage|*|REMOVESELF"))
+        section.AddKey(New winapp2ool.iniKey("FileKeyBase=<ElectronRoot>\*Cache*|*|REMOVESELF"))
 
         Dim catalog As New Dictionary(Of String, List(Of String))(StringComparer.InvariantCultureIgnoreCase)
         winapp2ool.ScaffoldCatalogs.ParseSection(section, catalog, New winapp2ool.MenuSection, "ElectronScaffold:")
 
         Assert.IsTrue(catalog.ContainsKey("Caches"))
         Assert.AreEqual(2, catalog("Caches").Count)
-        Assert.AreEqual("%ElectronRoot%\blob_storage|*|REMOVESELF", catalog("Caches")(0))
-        Assert.AreEqual("%ElectronRoot%\*Cache*|*|REMOVESELF", catalog("Caches")(1))
+        Assert.AreEqual("<ElectronRoot>\blob_storage|*|REMOVESELF", catalog("Caches")(0))
+        Assert.AreEqual("<ElectronRoot>\*Cache*|*|REMOVESELF", catalog("Caches")(1))
 
     End Sub
 
@@ -297,16 +297,16 @@ Option Strict On
         Dim catalog As New Dictionary(Of String, List(Of String))(StringComparer.InvariantCultureIgnoreCase)
 
         Dim first As New winapp2ool.iniSection("ElectronScaffold: Caches")
-        first.AddKey(New winapp2ool.iniKey("FileKeyBase=%ElectronRoot%\one|*"))
+        first.AddKey(New winapp2ool.iniKey("FileKeyBase=<ElectronRoot>\one|*"))
         winapp2ool.ScaffoldCatalogs.ParseSection(first, catalog, New winapp2ool.MenuSection, "ElectronScaffold:")
 
         Dim second As New winapp2ool.iniSection("ElectronScaffold: Caches")
-        second.AddKey(New winapp2ool.iniKey("FileKeyBase=%ElectronRoot%\two|*"))
+        second.AddKey(New winapp2ool.iniKey("FileKeyBase=<ElectronRoot>\two|*"))
         winapp2ool.ScaffoldCatalogs.ParseSection(second, catalog, New winapp2ool.MenuSection, "ElectronScaffold:")
 
         Assert.AreEqual(1, catalog.Count)
         Assert.AreEqual(1, catalog("Caches").Count)
-        Assert.AreEqual("%ElectronRoot%\two|*", catalog("Caches")(0))
+        Assert.AreEqual("<ElectronRoot>\two|*", catalog("Caches")(0))
 
     End Sub
 
@@ -405,12 +405,12 @@ Option Strict On
 
         Dim first As New winapp2ool.iniSection("WebViewScaffold: WebApps")
         first.AddKey(New winapp2ool.iniKey("Tier=Legacy"))
-        first.AddKey(New winapp2ool.iniKey("FileKeyBase=%WebViewRoot%\one|*"))
+        first.AddKey(New winapp2ool.iniKey("FileKeyBase=<WebViewRoot>\one|*"))
         winapp2ool.ScaffoldCatalogs.ParseSection(first, catalog, New winapp2ool.MenuSection)
         Assert.IsTrue(catalog.Legacy.Contains("WebApps"))
 
         Dim second As New winapp2ool.iniSection("WebViewScaffold: WebApps")
-        second.AddKey(New winapp2ool.iniKey("FileKeyBase=%WebViewRoot%\two|*"))
+        second.AddKey(New winapp2ool.iniKey("FileKeyBase=<WebViewRoot>\two|*"))
         winapp2ool.ScaffoldCatalogs.ParseSection(second, catalog, New winapp2ool.MenuSection)
         Assert.IsFalse(catalog.Legacy.Contains("WebApps"))
 
@@ -470,8 +470,8 @@ Option Strict On
         Dim warnings As List(Of String) = Nothing
 
         Dim loaded = LoadDir(New Dictionary(Of String, String) From {
-            {"anything.ini", "[WebViewScaffold: Caches]" & vbCrLf & "FileKeyBase=%WebViewRoot%\Cache|*" & vbCrLf & vbCrLf &
-                             "[ElectronScaffold: AppLogs]" & vbCrLf & "FileKeyBase=%ElectronRoot%\logs|*" & vbCrLf}}, warnings)
+            {"anything.ini", "[WebViewScaffold: Caches]" & vbCrLf & "FileKeyBase=<WebViewRoot>\Cache|*" & vbCrLf & vbCrLf &
+                             "[ElectronScaffold: AppLogs]" & vbCrLf & "FileKeyBase=<ElectronRoot>\logs|*" & vbCrLf}}, warnings)
 
         Assert.AreEqual(1, loaded.ForFamily("WebView").Count)
         Assert.AreEqual(1, loaded.ForFamily("Electron").Count)
@@ -489,9 +489,9 @@ Option Strict On
         Dim warnings As List(Of String) = Nothing
 
         Dim loaded = LoadDir(New Dictionary(Of String, String) From {
-            {"webview.ini", "[WebViewScaffold: Caches]" & vbCrLf & "FileKeyBase=%WebViewRoot%\Cache|*" & vbCrLf & vbCrLf &
-                            "[WebViewScaffold: LegacyWebApps]" & vbCrLf & "Tier=Legacy" & vbCrLf & "FileKeyBase=%WebViewRoot%\Default\Web Applications|*" & vbCrLf & vbCrLf &
-                            "[WebViewScaffold: Odd]" & vbCrLf & "Tier=Retired" & vbCrLf & "FileKeyBase=%WebViewRoot%\Odd|*" & vbCrLf}}, warnings)
+            {"webview.ini", "[WebViewScaffold: Caches]" & vbCrLf & "FileKeyBase=<WebViewRoot>\Cache|*" & vbCrLf & vbCrLf &
+                            "[WebViewScaffold: LegacyWebApps]" & vbCrLf & "Tier=Legacy" & vbCrLf & "FileKeyBase=<WebViewRoot>\Default\Web Applications|*" & vbCrLf & vbCrLf &
+                            "[WebViewScaffold: Odd]" & vbCrLf & "Tier=Retired" & vbCrLf & "FileKeyBase=<WebViewRoot>\Odd|*" & vbCrLf}}, warnings)
 
         CollectionAssert.AreEqual({"LegacyWebApps"}, loaded.ForFamily("WebView").Legacy.ToList())
         Assert.AreEqual(0, loaded.ForFamily("Electron").Legacy.Count)
@@ -508,8 +508,8 @@ Option Strict On
         Dim warnings As List(Of String) = Nothing
 
         Dim loaded = LoadDir(New Dictionary(Of String, String) From {
-            {"a.ini", "[ElectronScaffold: Caches]" & vbCrLf & "FileKeyBase=%ElectronRoot%\Cache|*" & vbCrLf},
-            {"b.ini", "[ElectronScaffold: AppLogs]" & vbCrLf & "FileKeyBase=%ElectronRoot%\logs|*" & vbCrLf}}, warnings)
+            {"a.ini", "[ElectronScaffold: Caches]" & vbCrLf & "FileKeyBase=<ElectronRoot>\Cache|*" & vbCrLf},
+            {"b.ini", "[ElectronScaffold: AppLogs]" & vbCrLf & "FileKeyBase=<ElectronRoot>\logs|*" & vbCrLf}}, warnings)
 
         Assert.AreEqual(2, loaded.ForFamily("Electron").Count)
 
@@ -528,7 +528,7 @@ Option Strict On
         Dim warnings As List(Of String) = Nothing
 
         LoadDir(New Dictionary(Of String, String) From {
-            {"typo.ini", "[ElctronScaffold: Caches]" & vbCrLf & "FileKeyBase=%ElectronRoot%\Cache|*" & vbCrLf}}, warnings)
+            {"typo.ini", "[ElctronScaffold: Caches]" & vbCrLf & "FileKeyBase=<ElectronRoot>\Cache|*" & vbCrLf}}, warnings)
 
         Assert.IsTrue(warnings.Any(Function(w) w.Contains("Elctron") AndAlso w.Contains("not consumed")),
                       "Expected an unconsumed-family warning, got: " & String.Join(" | ", warnings))
@@ -581,13 +581,13 @@ Option Strict On
     ''' A template referencing a placeholder whose binding has no roots is <em>dropped</em>. This is
     ''' the whole mechanism behind Electron's default-on <c> UpdaterCache </c> costing nothing for an
     ''' entry that declares no <c> ElectronUpdaterRoot= </c>; without it a literal
-    ''' <c> %ElectronUpdaterRoot% </c> would ship inside a published FileKey.
+    ''' <c> &lt;ElectronUpdaterRoot&gt; </c> would ship inside a published FileKey.
     ''' </summary>
     <TestMethod()> Public Sub FanOutPlaceholder_EmptyRoots_DropsTemplate()
 
         Dim result = winapp2ool.ScaffoldCatalogs.FanOutPlaceholder(
-            New List(Of String) From {"%ElectronUpdaterRoot%\pending|*"},
-            "%ElectronUpdaterRoot%", New List(Of String))
+            New List(Of String) From {"<ElectronUpdaterRoot>\pending|*"},
+            "<ElectronUpdaterRoot>", New List(Of String))
 
         Assert.AreEqual(0, result.Count)
 
@@ -600,11 +600,11 @@ Option Strict On
     <TestMethod()> Public Sub FanOutPlaceholder_PlaceholderAbsent_PassesThroughOnce()
 
         Dim result = winapp2ool.ScaffoldCatalogs.FanOutPlaceholder(
-            New List(Of String) From {"%ElectronRoot%\logs|*"},
-            "%ElectronUpdaterRoot%", New List(Of String) From {"C:\a", "C:\b"})
+            New List(Of String) From {"<ElectronRoot>\logs|*"},
+            "<ElectronUpdaterRoot>", New List(Of String) From {"C:\a", "C:\b"})
 
         Assert.AreEqual(1, result.Count)
-        Assert.AreEqual("%ElectronRoot%\logs|*", result(0))
+        Assert.AreEqual("<ElectronRoot>\logs|*", result(0))
 
     End Sub
 
@@ -625,6 +625,129 @@ Option Strict On
     End Sub
 
     ''' <summary>
+    ''' The placeholder matches case-insensitively, as <c> &lt;name&gt; </c> tokens do, and every
+    ''' occurrence takes the same root
+    ''' </summary>
+    <TestMethod()> Public Sub FanOutPlaceholder_MatchesCaseInsensitively()
+
+        Dim result = winapp2ool.ScaffoldCatalogs.FanOutPlaceholder(
+            New List(Of String) From {"<webviewroot>\*\Cache|*;<WEBVIEWROOT>"},
+            winapp2ool.ScaffoldCatalogs.WebViewRootPlaceholder, New List(Of String) From {"C:\a", "C:\b"})
+
+        CollectionAssert.AreEqual({"C:\a\*\Cache|*;C:\a", "C:\b\*\Cache|*;C:\b"}, result)
+
+    End Sub
+
+    ''' <summary>
+    ''' A root holding <c> $1 </c> or <c> $&amp; </c> goes in as written, never read as a
+    ''' regex substitution pattern
+    ''' </summary>
+    <TestMethod()> Public Sub FanOutPlaceholder_DollarInRoot_IsLiteral()
+
+        Dim result = winapp2ool.ScaffoldCatalogs.FanOutPlaceholder(
+            New List(Of String) From {"<ElectronRoot>\logs|*"},
+            winapp2ool.ScaffoldCatalogs.ElectronRootPlaceholder, New List(Of String) From {"C:\$1\x", "C:\$&\y", "C:\$$"})
+
+        CollectionAssert.AreEqual({"C:\$1\x\logs|*", "C:\$&\y\logs|*", "C:\$$\logs|*"}, result)
+
+    End Sub
+
+    ''' <summary>
+    ''' Parses one Electron scaffold section holding <paramref name="templates"/>, from a zero exit
+    ''' code, restoring the previous exit code afterwards
+    ''' </summary>
+    '''
+    ''' <param name="templates">The <c> FileKeyBase= </c> values to put in the section</param>
+    '''
+    ''' <param name="log">Set to every line the parser wrote to the log</param>
+    '''
+    ''' <param name="exitCode">Set to the exit code parsing left</param>
+    '''
+    ''' <returns>The templates the catalog kept</returns>
+    Private Shared Function ParseTemplates(templates As String(),
+                                           ByRef log As List(Of String),
+                                           ByRef exitCode As Integer) As List(Of String)
+
+        Dim section As New winapp2ool.iniSection("ElectronScaffold: Caches")
+        For Each t In templates : section.AddKey(New winapp2ool.iniKey($"FileKeyBase={t}")) : Next
+
+        Dim catalog As New Dictionary(Of String, List(Of String))(StringComparer.InvariantCultureIgnoreCase)
+        Dim savedExitCode = Environment.ExitCode
+
+        Try
+
+            Environment.ExitCode = 0
+
+            Using cap = winapp2ool.gLogCapture()
+
+                winapp2ool.ScaffoldCatalogs.ParseSection(section, catalog, New winapp2ool.MenuSection, "ElectronScaffold:")
+                log = cap.Lines.ToList()
+
+            End Using
+
+            exitCode = Environment.ExitCode
+
+        Finally
+
+            Environment.ExitCode = savedExitCode
+
+        End Try
+
+        Return catalog("Caches")
+
+    End Function
+
+    ''' <summary>
+    ''' A catalog template still spelled <c> %ElectronRoot% </c> is dropped with a warning naming
+    ''' the new spelling, the rest of the scaffold is kept, and the run fails
+    ''' </summary>
+    <TestMethod()> Public Sub ParseSection_RetiredRootToken_DropsTemplateAndFails()
+
+        Dim log As List(Of String) = Nothing
+        Dim exitCode As Integer
+        Dim kept = ParseTemplates({"%ElectronRoot%\Cache|*", "<ElectronRoot>\GPUCache|*"}, log, exitCode)
+
+        Assert.AreEqual(1, exitCode)
+        CollectionAssert.AreEqual({"<ElectronRoot>\GPUCache|*"}, kept)
+        Assert.IsTrue(log.Any(Function(l) l.Contains("`%ElectronRoot%` in [ElectronScaffold: Caches].FileKeyBase is now spelled `<ElectronRoot>`; template dropped")),
+                      "Expected a refusal, got: " & String.Join(" | ", log))
+
+    End Sub
+
+    ''' <summary>
+    ''' A catalog is shared by both builders, so a <c> %Package% </c> in one is refused too, as is
+    ''' a root token missing its closing <c> % </c>
+    ''' </summary>
+    <TestMethod()> Public Sub ParseSection_RetiredPackageToken_DropsTemplateAndFails()
+
+        Dim log As List(Of String) = Nothing
+        Dim exitCode As Integer
+        Dim kept = ParseTemplates({"%Package%\LocalCache|*", "%webviewroot\*\Cache|*"}, log, exitCode)
+
+        Assert.AreEqual(1, exitCode)
+        Assert.AreEqual(0, kept.Count)
+        Assert.IsTrue(log.Any(Function(l) l.Contains("`%Package%` in [ElectronScaffold: Caches].FileKeyBase is now spelled `<Package>`; template dropped")),
+                      "Expected a %Package% refusal, got: " & String.Join(" | ", log))
+        Assert.IsTrue(log.Any(Function(l) l.Contains("which is now spelled `<WebViewRoot>`; template dropped")),
+                      "Expected an unclosed-root refusal, got: " & String.Join(" | ", log))
+
+    End Sub
+
+    ''' <summary>
+    ''' A clean catalog leaves the exit code alone
+    ''' </summary>
+    <TestMethod()> Public Sub ParseSection_CleanTemplates_LeaveExitCodeAlone()
+
+        Dim log As List(Of String) = Nothing
+        Dim exitCode As Integer
+        Dim kept = ParseTemplates({"<ElectronRoot>\Cache|*", "<ElectronUpdaterRoot>\pending|*"}, log, exitCode)
+
+        Assert.AreEqual(0, exitCode)
+        Assert.AreEqual(2, kept.Count)
+
+    End Sub
+
+    ''' <summary>
     ''' <see cref="winapp2ool.ScaffoldCatalogs.BindFamilyTemplates"/> reports the pre-substitution
     ''' template count alongside the substituted results, so a consumer can tell an empty scaffold (a
     ''' legitimate no-op) from a non-empty one whose every template was dropped for want of a root.
@@ -633,12 +756,12 @@ Option Strict On
     <TestMethod()> Public Sub BindFamilyTemplates_ReportsTemplateCountSeparately()
 
         Dim catalog As New Dictionary(Of String, List(Of String))(StringComparer.InvariantCultureIgnoreCase) From {
-            {"UpdaterCache", New List(Of String) From {"%ElectronUpdaterRoot%\pending|*"}},
+            {"UpdaterCache", New List(Of String) From {"<ElectronUpdaterRoot>\pending|*"}},
             {"Empty", New List(Of String)}}
 
         Dim bindings As New List(Of winapp2ool.ScaffoldCatalogs.ScaffoldRootBinding) From {
-            New winapp2ool.ScaffoldCatalogs.ScaffoldRootBinding("%ElectronRoot%", New List(Of String) From {"C:\ud"}),
-            New winapp2ool.ScaffoldCatalogs.ScaffoldRootBinding("%ElectronUpdaterRoot%", New List(Of String))}
+            New winapp2ool.ScaffoldCatalogs.ScaffoldRootBinding("<ElectronRoot>", New List(Of String) From {"C:\ud"}),
+            New winapp2ool.ScaffoldCatalogs.ScaffoldRootBinding("<ElectronUpdaterRoot>", New List(Of String))}
 
         Dim results = winapp2ool.ScaffoldCatalogs.BindFamilyTemplates(
             bindings, New List(Of String) From {"UpdaterCache", "Empty"}, catalog)

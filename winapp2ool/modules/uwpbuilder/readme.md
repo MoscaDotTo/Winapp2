@@ -28,6 +28,7 @@ UWPBuilder reads a source directory containing a scaffold template (`UWP.ini`) a
    - [Standard winapp2.ini keys](#standard-winapp2ini-keys)
    - [Winapp2ool-exclusive keys](#winapp2ool-exclusive-keys)
    - [Package variables](#package-variables)
+   - [Root placeholders in AppInfo keys](#root-placeholders-in-appinfo-keys)
    - [Variables](#variables)
    - [Skip and SkipUWPFileKeys](#skip-and-skipuwpfilekeys)
 7. [WebView Scaffolds](#webview-scaffolds)
@@ -166,9 +167,9 @@ These keys carry their normal winapp2.ini meaning and are passed into the genera
 | `Detect=` | Registry detection | Repeatable. Unnumbered in the output when only one is present. `<>`-expanded |
 | `DetectFile=` | File system detection, appended after the scaffold-generated detection paths | Repeatable. `<>`-expanded, `<Package>` included. Use for hybrid apps that need win32 detection alongside package detection |
 | `DetectOS=` | Windows kernel version filter, e.g. `6.1\|10.0` | Emitted verbatim, never expanded |
-| `FileKey=` | Cleaning target; equivalent to `FileKeyBase=` | `<>`-expanded, `<Package>` included; keys without a token pass through verbatim |
-| `RegKey=` | Registry cleaning target | Renumbered from 1. `<>`-expanded |
-| `ExcludeKey=` | Exclusion; equivalent to `ExcludeKeyBase=` | `<>`-expanded, `<Package>` included, in the domain its flag names |
+| `FileKey=` | Cleaning target; equivalent to `FileKeyBase=` | [Root placeholders](#root-placeholders-in-appinfo-keys) substituted, then `<>`-expanded, `<Package>` included; keys without a token pass through verbatim |
+| `RegKey=` | Registry cleaning target | Renumbered from 1. [Root placeholders](#root-placeholders-in-appinfo-keys) substituted, then `<>`-expanded |
+| `ExcludeKey=` | Exclusion; equivalent to `ExcludeKeyBase=` | [Root placeholders](#root-placeholders-in-appinfo-keys) substituted, then `<>`-expanded, `<Package>` included, in the domain the substituted value's flag names |
 | `Warning=` | Warning shown to the user | Emitted verbatim, never expanded |
 
 ###### Note: Key numbers in the source are ignored: everything is renumbered during generation and normalized again by the lint pass.
@@ -191,11 +192,11 @@ Every other unrecognised key name is a [variable declaration](#variables). There
 | `WebViewScaffolds=` | Comma-separated scaffold selection, replacing the default set | `All` sentinel expands to the whole catalog except the legacy tier |
 | `ExcludeWebViewScaffolds=` | Comma-separated scaffold names subtracted from the active selection | |
 | `QtWebEngineRoot=` (alias `QtWebEnginePath=`) | Declares one embedded QtWebEngine profile directory (profile segment included, e.g. `...\QtWebEngine\Default`); opts the entry into [QtWebEngine scaffolds](#qtwebengine-scaffolds) | Repeatable, one per profile. `<Package>` variables are expanded |
-| `QtWebEngineCacheRoot=` (alias `QtWebEngineCachePath=`) | Declares a QtWebEngine HTTP cache directory for `%QtWebEngineCacheRoot%`; also opts the entry into QtWebEngine scaffolds | Repeatable. `<Package>` variables are expanded |
+| `QtWebEngineCacheRoot=` (alias `QtWebEngineCachePath=`) | Declares a QtWebEngine HTTP cache directory for `<QtWebEngineCacheRoot>`; also opts the entry into QtWebEngine scaffolds | Repeatable. `<Package>` variables are expanded |
 | `QtWebEngineScaffolds=` | Scaffold selection for the QtWebEngine family | Same grammar as `WebViewScaffolds=` |
 | `ExcludeQtWebEngineScaffolds=` | Exclusions for the QtWebEngine family | |
 | `ElectronRoot=` (alias `ElectronPath=`) | Declares an Electron `userData` folder; opts the entry into [Electron scaffolds](#electron-scaffolds) | Repeatable. `<Package>` variables are expanded |
-| `ElectronUpdaterRoot=` (alias `ElectronUpdaterPath=`) | Declares an electron-updater download cache for `%ElectronUpdaterRoot%`; also opts the entry into Electron scaffolds | Repeatable. `<Package>` variables are expanded |
+| `ElectronUpdaterRoot=` (alias `ElectronUpdaterPath=`) | Declares an electron-updater download cache for `<ElectronUpdaterRoot>`; also opts the entry into Electron scaffolds | Repeatable. `<Package>` variables are expanded |
 | `ElectronScaffolds=` | Scaffold selection for the Electron family | Same grammar as `WebViewScaffolds=` |
 | `ExcludeElectronScaffolds=` | Exclusions for the Electron family | |
 
@@ -211,9 +212,30 @@ Every other unrecognised key name is a [variable declaration](#variables). There
 
 Package detection comes from the scaffold's `DetectFileBase=`, so an app-specific `DetectFile=<Package>` is never needed.
 
-### The retired `%Package%` spelling
+### The retired `%Package%` and `%WebViewRoot%` spellings
 
-Earlier versions spelled these `%Package%` and `%Package1%`, `%Package2%`. A key still written that way, including one with the closing `%` missing (`%Package\LocalCache`), is dropped with a warning naming the new spelling, and the run fails with exit code 1. `%...%` is winapp2.ini's environment-variable syntax, so a stale or mistyped token used to reach the output looking like a real path. `Package=` values and `Warning=` prose are not checked.
+Winapp2ool v1.7.x.x versions spelled these `%Package%` and `%Package1%`, `%Package2%`, and the [root placeholders](#root-placeholders-in-appinfo-keys) `%WebViewRoot%`, `%QtWebEngineRoot%`, `%QtWebEngineCacheRoot%`, `%ElectronRoot%` and `%ElectronUpdaterRoot%`. A key still written that way, including one with the closing `%` missing (`%Package\LocalCache`, `%ElectronRoot\logs`), is dropped with a warning naming the new spelling, and the run fails with exit code 1:
+
+```
+`%WebViewRoot%` in [Test App *].FileKeyBase is now spelled `<WebViewRoot>`; key dropped
+```
+
+`Package=` and `Warning=` values are not checked. The shared scaffold catalogs refuse the same spellings as they load: a catalog template holding one is dropped (`...; template dropped`) and the run fails.
+
+## Root placeholders in AppInfo keys
+
+An app's own `FileKey=` / `FileKeyBase=`, `RegKey=` / `RegKeyBase=` and `ExcludeKey=` / `ExcludeKeyBase=` values take the same root placeholders as the scaffold catalogs: `<WebViewRoot>`, `<QtWebEngineRoot>`, `<QtWebEngineCacheRoot>`, `<ElectronRoot>` and `<ElectronUpdaterRoot>`, matched in any case. Each is replaced with every path the entry declared for it (`WebViewRoot=` / `WebViewPath=` and so on) before variables are expanded, so a key fans out once per path, and a `<Package>` inside a path expands per package along with the key:
+
+```ini
+[Hazel Viewer *]
+Package=Hazel.Viewer_abc123
+LangSecRef=3021
+WebViewPath1=<Package>\LocalState
+WebViewPath2=%LocalAppData%\Hazel Viewer
+FileKeyBase=<WebViewRoot>\EBWebView\*\Cache|*
+```
+
+generates `%LocalAppData%\Packages\Hazel.Viewer_abc123\LocalState\EBWebView\*\Cache|*` and `%LocalAppData%\Hazel Viewer\EBWebView\*\Cache|*`, alongside the baseline FileKeys and the default WebView scaffolds for both paths. A key naming a root the entry declared no path for is dropped without a warning, as a catalog template is. An ExcludeKey's flag is read after substitution. `Detect=` and `DetectFile=` values are never root-substituted: a placeholder there is an undeclared token.
 
 ## Variables
 
@@ -295,7 +317,7 @@ WebViewRoot=<Package>\LocalState\EBWebView
 LangSecRef=3021
 ```
 
-Each selected scaffold's templates are expanded once per declared root, with `%WebViewRoot%` substituted for the (package-expanded) root path. The root is the folder that holds the profiles; profile-scoped templates use `%WebViewRoot%\*\`, so `Default` and named profiles such as `WV2Profile_*` are all covered. An app with two WebView folders declares two roots (`WebViewRoot1=`, `WebViewRoot2=`) and receives the full selection for each. The root does not have to be package-relative: a win32 path like `%AppData%\Microsoft\Teams` is equally valid.
+Each selected scaffold's templates are expanded once per declared root, with `<WebViewRoot>` substituted for the (package-expanded) root path. The root is the folder that holds the profiles; profile-scoped templates use `<WebViewRoot>\*\`, so `Default` and named profiles such as `WV2Profile_*` are all covered. An app with two WebView folders declares two roots (`WebViewRoot1=`, `WebViewRoot2=`) and receives the full selection for each. The root does not have to be package-relative: a win32 path like `%AppData%\Microsoft\Teams` is equally valid.
 
 ## Selecting scaffolds
 
@@ -331,7 +353,7 @@ A second, structurally identical scaffold family covers applications embedding Q
 
 The grammar mirrors the WebView family: `QtWebEngineRoot=` (alias `QtWebEnginePath=`) opts in, and `QtWebEngineScaffolds=` / `ExcludeQtWebEngineScaffolds=` select (with the same `All` value and warning behavior). Two things differ.
 
-The root names a profile directory, profile segment included: `...\QtWebEngine\Default`, not the `QtWebEngine` folder above it. Qt keeps the HTTP cache outside that directory, so a second root, `QtWebEngineCacheRoot=` (alias `QtWebEngineCachePath=`), declares it for `%QtWebEngineCacheRoot%`. Either root alone opts the entry in, and a template whose placeholder has no declared root is dropped.
+The root names a profile directory, profile segment included: `...\QtWebEngine\Default`, not the `QtWebEngine` folder above it. Qt keeps the HTTP cache outside that directory, so a second root, `QtWebEngineCacheRoot=` (alias `QtWebEngineCachePath=`), declares it for `<QtWebEngineCacheRoot>`. Either root alone opts the entry in, and a template whose placeholder has no declared root is dropped.
 
 The default selection is wider: Caches + StorageQuota + Telemetry + VisitedLinks. QtWebEngine's catalog breaks out two low-risk targets (`QuotaManager`, `Visited Links`) that the WebView catalog keeps out of its default set, in the legacy `LegacyStorageQuota` and the host-risk `WebHistory` respectively; see the [EntryBuilder readme](../entrybuilder/readme.md#qtwebengineroot--qtwebenginecacheroot--qtwebenginescaffolds) or the catalog header for why.
 
@@ -436,6 +458,7 @@ Paths may be absolute, or relative to the working directory using a leading back
 | "No app definitions found in: {dir}" | The `AppInfo\` subdirectory is missing, empty, or contains no parseable sections |
 | "Unexpected section in template file: [{name}]" | `UWP.ini` contains a section that isn't an `[EntryScaffold: ...]` |
 | "Unexpected key in scaffold [{name}]: {key}" | An `[EntryScaffold: ...]` section contains a key other than `DetectFileBase=`/`FileKeyBase=` |
+| "`%Package%` in [{name}].{key} is now spelled `<Package>`; key dropped" | The key uses a [retired spelling](#the-retired-package-and-webviewroot-spellings); the run fails with exit code 1. A shared catalog template reports `; template dropped` instead |
 | "Unexpected key type in [{name}]: {key}" | An AppInfo section contains an unsupported key; it is dropped from the generated entry |
 | "No Package key in [{name}], skipping" | The AppInfo section has no `Package=` key; the entry is not generated |
 | "No LangSecRef or Section in [{name}], skipping" | The AppInfo section has no category key; the entry is not generated |
@@ -735,7 +758,7 @@ FileKey30=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\TempS
 **Explanation**
 - Declaring `WebViewRoot=` opted the entry into scaffold emission
 - With no `WebViewScaffolds=` key, the default Caches + Telemetry selection applied
-- The catalog templates had `%WebViewRoot%` substituted with the package-expanded root path
+- The catalog templates had `<WebViewRoot>` substituted with the package-expanded root path
 - 26 WebView FileKeys were generated from a single declaration line
 - The lint pass merged scaffold templates targeting the same folder (e.g. FileKey4 combines a Caches template and a Telemetry template both targeting `EBWebView\*`)
 

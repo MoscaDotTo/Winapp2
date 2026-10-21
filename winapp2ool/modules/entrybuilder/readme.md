@@ -114,11 +114,11 @@ Each run proceeds through the same fixed steps:
 3. **Resolve variables**: variable values that reference other variables (`<Other>` tokens inside a declaration) are resolved so every value list is fully literal. Cyclic references are warned about and not expanded.
 4. **Infer detection**: if the entry declares a variable named `Root`, a `Detect=<Root>` or `DetectFile=<Root>` is generated automatically (see [The Reserved Root Variable](#the-reserved-root-variable)).
 5. **Validate**: structurally invalid entries are skipped with warnings; questionable ones are emitted with warnings (see [Validation and Warnings](#validation-and-warnings)).
-6. **Generate**: keys are emitted per entry in canonical winapp2 order. Each content key goes through, in order: scaffold expansion (catalog templates copied in for each selected scaffold and declared root), **root substitution** (`%WebViewRoot%` / `%QtWebEngineRoot%` / `%ElectronRoot%` replaced with each declared root), then **token expansion** (`<Name>` fan-out). Numbered key families are renumbered from 1.
+6. **Generate**: keys are emitted per entry in canonical winapp2 order. Each content key goes through, in order: scaffold expansion (catalog templates copied in for each selected scaffold and declared root), **root substitution** (`<WebViewRoot>`, `<QtWebEngineRoot>`, `<QtWebEngineCacheRoot>`, `<ElectronRoot>` and `<ElectronUpdaterRoot>`, in any case, replaced with each declared root), then **token expansion** (`<Name>` fan-out). Numbered key families are renumbered from 1.
 7. **Normalize**: the whole in-memory file is passed through WinappDebug with all repairs and optimizations enabled.
 8. **Save**: the output file is written with a generated comment header (see [Run Output](#run-output)).
 
-Because root substitution (step 6) happens before token expansion, `<Name>` tokens inside a `WebViewRoot=` / `QtWebEngineRoot=` value survive substitution and are expanded like any other token in the resulting key.
+Because root substitution (step 6) happens before token expansion, `<Name>` tokens inside a `WebViewRoot=` / `QtWebEngineRoot=` value survive substitution and are expanded like any other token in the resulting key. Root placeholders share the `<Name>` spelling but aren't variables: they are substituted as text first, so a `<Root>` inside a root value and a `<Root>` in the template are one token and co-vary.
 
 Not every key family receives every processing step:
 
@@ -131,7 +131,7 @@ Not every key family receives every processing step:
 | `ExcludeKey` / `ExcludeKeyBase` |  Yes | By flag: `REG` → Registry, otherwise Filesystem |
 | Scaffold catalog templates | Yes (their purpose) | Filesystem |
 
-The expansion domain matters when a `<Name>` token doesn't match any declared variable, see [Undeclared Tokens](#undeclared-tokens). Note that `%WebViewRoot%` / `%QtWebEngineRoot%` / `%ElectronRoot%` are **not** substituted in `Detect` / `DetectFile`. Write the path (or a `<Variable>`) directly in detection keys.
+The expansion domain matters when a `<Name>` token doesn't match any declared variable, see [Undeclared Tokens](#undeclared-tokens). Note that root placeholders are **not** substituted in `Detect` / `DetectFile`, where they reach token expansion as undeclared tokens: a `DetectFile` holding one is dropped, and a `Detect` keeps it literally. Write the path (or a `<Variable>`) directly in detection keys.
 
 ---
 
@@ -197,10 +197,21 @@ These are winapp2ool-private keys that are consumed during generation and never 
 
 The full path to a Chromium-data folder for this application, typically `%AppData%\<AppName>` or `%LocalAppData%\<AppName>\<Subfolder>\EBWebView`.
 
-- The root is the folder that holds the profiles, not a profile. Profile-scoped templates use `%WebViewRoot%\*\`, so `Default` and named profiles such as `WV2Profile_*` are all covered.
+- The root is the folder that holds the profiles, not a profile. Profile-scoped templates use `<WebViewRoot>\*\`, so `Default` and named profiles such as `WV2Profile_*` are all covered.
 - Multiple `WebViewRoot=` keys are permitted; each scaffold FileKey is generated once per root.
-- The literal string `%WebViewRoot%` can be used in any `FileKey` / `RegKey` / `ExcludeKey` value (`Base=` or plain form); it is substituted against each declared root at generation time, fanning the key out per root.
+- The literal string `<WebViewRoot>` can be used in any `FileKey` / `RegKey` / `ExcludeKey` value (`Base=` or plain form); it is substituted against each declared root at generation time, fanning the key out per root.
 - An entry with no roots and no FileKey/RegKey content is skipped with a warning.
+
+### The retired `%WebViewRoot%` spelling
+
+Earlier versions spelled the root placeholders `%WebViewRoot%`, `%QtWebEngineRoot%`, `%QtWebEngineCacheRoot%`, `%ElectronRoot%` and `%ElectronUpdaterRoot%`. A key still written that way, including one with the closing `%` missing (`%ElectronRoot\logs|*`), is dropped with a warning naming the new spelling, and the run fails with exit code 1:
+
+```
+`%QtWebEngineCacheRoot%` in [Test App *].FileKeyBase is now spelled `<QtWebEngineCacheRoot>`; key dropped
+`%ElectronRoot` in [Test App *].FileKey looks like the retired `%ElectronRoot%` token, which is now spelled `<ElectronRoot>`; key dropped
+```
+
+`%...%` is winapp2.ini's environment-variable syntax, so a stale token would otherwise reach the output looking like a real path. Every key is checked except `Warning=` prose. UWPBuilder's retired `%Package%` means nothing here and is left alone. The shared catalogs in `Assembler\Scaffolds` are checked as they load, and a catalog template holding a retired token is dropped and fails the run the same way.
 
 ## WebViewScaffolds / ExcludeWebViewScaffolds
 
@@ -240,7 +251,7 @@ QtWebEngine is a second independent scaffold family for apps that embed Qt's Web
 | `WebViewRoot=` | `QtWebEngineRoot=` |
 | `WebViewScaffolds=` | `QtWebEngineScaffolds=` |
 | `ExcludeWebViewScaffolds=` | `ExcludeQtWebEngineScaffolds=` |
-| `%WebViewRoot%` placeholder | `%QtWebEngineRoot%` placeholder |
+| `<WebViewRoot>` placeholder | `<QtWebEngineRoot>` placeholder |
 | `webview.ini` catalog | `qtwebengine.ini` catalog |
 
 The `All` value for scaffolds, the legacy tier, and exclusion format work identically, and a single entry may declare both families. The QtWebEngine catalog is smaller: `Caches`, `Favicons`, `PrivacySandbox`, `Security`, `StorageQuota`, `Telemetry`, `VisitedLinks`, `WebCookies`, `WebHistory`, `WebSession`, `WebStorage`, and in the legacy tier `LegacyTelemetry`, `LegacyWebStorage`.
@@ -257,7 +268,7 @@ QtWebEngineRoot=<QtRoot>\<Default,OffTheRecord,viewer-lookup>
 
 ### QtWebEngineCacheRoot
 
-`QtWebEngineCacheRoot=` names the profile's HTTP cache directory, bound to `%QtWebEngineCacheRoot%`. Qt keeps the cache under its CacheLocation rather than inside the profile directory, so `QtWebEngineRoot=` can't reach it:
+`QtWebEngineCacheRoot=` names the profile's HTTP cache directory, bound to `<QtWebEngineCacheRoot>`. Qt keeps the cache under its CacheLocation rather than inside the profile directory, so `QtWebEngineRoot=` can't reach it:
 
 ```ini
 QtWebEngineRoot=%LocalAppData%\VideoKeeper\QtWebEngine\Default
@@ -275,7 +286,7 @@ Electron is a third independent scaffold family, for apps that bundle their own 
 | `WebViewRoot=` | `ElectronRoot=` |
 | `WebViewScaffolds=` | `ElectronScaffolds=` |
 | `ExcludeWebViewScaffolds=` | `ExcludeElectronScaffolds=` |
-| `%WebViewRoot%` placeholder | `%ElectronRoot%` placeholder |
+| `<WebViewRoot>` placeholder | `<ElectronRoot>` placeholder |
 | `webview.ini` catalog | `electron.ini` catalog |
 
 The default set is: `AppLogs`, `Caches`, `StorageQuota`, `Telemetry` and `UpdaterCache`. The full catalog adds `MediaDRM`, `PrivacySandbox`, `Security`, `TempFiles` (opt-in, safe) and `WebCookies`, `WebStorage` (opt-in, host-risk).
@@ -578,7 +589,8 @@ When the same declared variable appears multiple times in a single key, referenc
 | `No EntryBuilder source definitions found in: <dir>` | Source directory is empty, missing, or contains no `*.ini` files with parseable sections | Verify the source directory in **Choose source directory** or via `-1d` |
 | Entry is silently absent from the output | `Skip=` is set, or the entry was skipped by validation (`No Section or LangSecRef...` / `...nothing to emit, skipping`), or a duplicate section name in an alphabetically-earlier file won | Check the run log for the corresponding message |
 | Output is missing expected scaffold FileKeys | Scaffold directory not found (`Scaffold directory not found: <dir>...`), scaffold name misspelled (`Unknown WebView scaffold 'X'...`), or scaffold excluded by `Exclude*Scaffolds=` | Check the `Loaded N WebView scaffold(s)` / `Loaded N QtWebEngine scaffold(s)` lines and the warnings |
-| Output key contains a literal `%WebViewRoot%` / `%QtWebEngineRoot%` / `%QtWebEngineCacheRoot%` / `%ElectronRoot%` | The matching root key wasn't declared on the entry - or the placeholder was used in a `Detect`/`DetectFile`, where it is never substituted | Declare the root key, or write the path / a `<Variable>` directly in detection keys |
+| A key holding `<WebViewRoot>` / `<QtWebEngineRoot>` / `<QtWebEngineCacheRoot>` / `<ElectronRoot>` / `<ElectronUpdaterRoot>` is missing from the output | The matching root key wasn't declared on the entry, which drops the key silently, or the placeholder was used in a `DetectFile`, where it is never substituted and drops as an undeclared token (a `Detect` keeps it literally) | Declare the root key, or write the path / a `<Variable>` directly in detection keys |
+| `... is now spelled <WebViewRoot>; key dropped` and exit code 1 | The key still uses a retired `%WebViewRoot%`-style spelling | Respell it as the message says (see [The retired `%WebViewRoot%` spelling](#the-retired-webviewroot-spelling)) |
 | Entry gained a `Detect`/`DetectFile` you didn't write | The entry declares a variable named `Root` - detection inference is automatic | Intended? Delete your redundant hand-written detection. Not intended? Rename the variable (`DiskRoot`, `AppRoot`, ...) |
 | Output RegKey contains a literal `<Name>` | The variable wasn't declared - the registry domain emits literal text and logs `...passed through as literal` as an advisory | Declare the variable, or accept the literal if intentional |
 | Output is missing a FileKey/DetectFile entirely | An undeclared `<Name>` token dropped the key (`...dropping key`), or a referenced variable had no values | Fix the typo, or declare the variable |
@@ -977,7 +989,7 @@ FileKey26=%AppData%\discord\OriginTrials|*|REMOVESELF
 **Explanation**
 
 - No `WebViewScaffolds=` key is present, so the default set applies: `Caches` + `Telemetry`
-- Every `FileKeyBase=` template in each selected catalog scaffold is copied in with `%WebViewRoot%` replaced by `%AppData%\discord`
+- Every `FileKeyBase=` template in each selected catalog scaffold is copied in with `<WebViewRoot>` replaced by `%AppData%\discord`
 - The lint pass merged templates that share a path: FileKey2 and FileKey3 each combine a Caches pattern list with a Telemetry one
 - The exact keys (and their count, 26 here) track the catalog: when the catalog gains a pattern, every entry that selects that scaffold gains the key on the next build, with no source edits
 
@@ -1116,7 +1128,7 @@ FileKey22=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\viewer-lookup\Sha
 - One `QtWebEngineRoot=` line produced three roots. Root substitution happens before token expansion, so the `<Default,OffTheRecord,viewer-lookup>` inline list inside the root value fans out normally and `<QtRoot>` resolves in the same pass
 - Each root got keys for all the default scaffolds (`Caches`, `StorageQuota`, `Telemetry`, `VisitedLinks`)
 - FileKey3, 10 and 17 are each the merged product of two scaffolds, this is caused by the optimization pass through WinappDebug
-- The `%QtWebEngineCacheRoot%` template in `Caches` was dropped, since the entry declares no `QtWebEngineCacheRoot=`; calibre's own cache is covered by the hand-written FileKey1 instead
+- The `<QtWebEngineCacheRoot>` template in `Caches` was dropped, since the entry declares no `QtWebEngineCacheRoot=`; calibre's own cache is covered by the hand-written FileKey1 instead
 - `Favicons`, `PrivacySandbox`, `Security` and the host-risk `WebCookies`, `WebHistory`, `WebSession`, `WebStorage` would require `QtWebEngineScaffolds=All` or an explicit list. The legacy `LegacyTelemetry` and `LegacyWebStorage` must be named even beside `All`
 
 ---
@@ -1141,7 +1153,7 @@ LangSecRef=3022
 DetectFile=%AppData%\Signal
 ElectronRoot=%AppData%\Signal
 ElectronUpdaterRoot=%LocalAppData%\Signal-Desktop-Updater
-FileKeyBase=%ElectronRoot%\Temp|*
+FileKeyBase=<ElectronRoot>\Temp|*
 ```
 
 **Command**
@@ -1182,8 +1194,8 @@ FileKey18=%LocalAppData%\Signal-Desktop-Updater\pending|*|REMOVESELF
 
 - Five source lines produced eighteen FileKeys, from the default set `AppLogs`, `Caches`, `StorageQuota`, `Telemetry`, `UpdaterCache`
 - FileKey1 is the merged product of several scaffolds' root-level pattern lists
-- FileKey17 and 18 came from `%ElectronUpdaterRoot%`. Had `ElectronUpdaterRoot=` been omitted, those two templates would not be generated
-- Note the placeholder in `FileKeyBase=` is `%ElectronRoot%`, not `<ElectronRoot>`. Root keys are not `<>` variables; writing `<ElectronRoot>` warns and drops the key
+- FileKey17 and 18 came from `<ElectronUpdaterRoot>`. Had `ElectronUpdaterRoot=` been omitted, those two templates would not be generated
+- The placeholder in `FileKeyBase=` is `<ElectronRoot>`. The old `%ElectronRoot%` spelling is refused and fails the run
 
 ---
 

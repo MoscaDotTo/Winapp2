@@ -23,7 +23,8 @@ Imports System.Text
 ''' Tests for UWPBuilder's integration of the shared <c> VariableExpander </c> substrate:
 ''' the two-phase expansion order (root placeholder → <c> &lt;var&gt; </c>), the reserved
 ''' <c> &lt;Package&gt; </c> variable and its indexes, the refusal of the retired
-''' <c> %Package% </c> spelling, per-key-class domain classification, the open-vocabulary
+''' <c> %Package% </c> and <c> %WebViewRoot% </c> spellings, root substitution in AppInfo keys,
+''' per-key-class domain classification, the open-vocabulary
 ''' parser and its typo backstops, and the vocabulary shared with EntryBuilder. Also covers the
 ''' Electron family's two roots and QtWebEngine's cache root. The expansion engine itself is
 ''' covered by <see cref="VariableExpanderTests"/>; these tests cover the wiring.
@@ -310,7 +311,7 @@ Imports System.Text
     <TestMethod()> Public Sub PackageInRoot_YieldsScaffoldFileKeysPerPackage()
 
         Dim catalog As New Dictionary(Of String, List(Of String)) From {
-            {"Caches", New List(Of String) From {"%WebViewRoot%\*\Cache|*|RECURSE"}}
+            {"Caches", New List(Of String) From {"<WebViewRoot>\*\Cache|*|RECURSE"}}
         }
 
         Dim section = Build(TwoPackages &
@@ -445,6 +446,20 @@ Imports System.Text
         Assert.AreEqual(1, exitCode)
         CollectionAssert.AreEqual(New List(Of String) From {"<Package>\TempState|*|REMOVESELF"}, fileKeys)
         CollectionAssert.AreEqual(New List(Of String) From {"<Package>"}, detectFiles)
+
+    End Sub
+
+    ''' <summary>
+    ''' The retired root spellings are refused in AppInfo keys too: a <c> %WebViewRoot% </c>
+    ''' template and a root declaration holding an unclosed <c> %ElectronRoot </c>
+    ''' </summary>
+    <TestMethod()> Public Sub RetiredRoot_InAppInfoKey_IsRefused()
+
+        Dim app = ParseRefused(Preamble & "FileKeyBase=%WebViewRoot%\EBWebView\*\Cache|*" & vbCrLf, "<WebViewRoot>")
+        Assert.AreEqual(0, app.AppKeys.Count)
+
+        app = ParseRefused(Preamble & "ElectronPath=%ElectronRoot\Signal" & vbCrLf, "<ElectronRoot>")
+        Assert.AreEqual(0, app.ElectronPaths.Count)
 
     End Sub
 
@@ -618,7 +633,7 @@ Imports System.Text
     <TestMethod()> Public Sub PhaseOrder_RootThenVariables()
 
         Dim catalog As New Dictionary(Of String, List(Of String)) From {
-            {"Caches", New List(Of String) From {"%WebViewRoot%\Default\Cache|*|RECURSE"}}
+            {"Caches", New List(Of String) From {"<WebViewRoot>\Default\Cache|*|RECURSE"}}
         }
 
         Dim section = Build(Preamble &
@@ -644,7 +659,7 @@ Imports System.Text
     <TestMethod()> Public Sub PhaseOrder_AppliesToQtWebEngineBlock()
 
         Dim catalog As New Dictionary(Of String, List(Of String)) From {
-            {"Caches", New List(Of String) From {"%QtWebEngineRoot%\Cache|*|RECURSE"}}
+            {"Caches", New List(Of String) From {"<QtWebEngineRoot>\Cache|*|RECURSE"}}
         }
 
         Dim section = Build(Preamble &
@@ -666,8 +681,8 @@ Imports System.Text
     <TestMethod()> Public Sub Electron_EmitsForHybridWin32Root()
 
         Dim catalog As New Dictionary(Of String, List(Of String)) From {
-            {"Caches", New List(Of String) From {"%ElectronRoot%\Cache|*|RECURSE"}},
-            {"UpdaterCache", New List(Of String) From {"%ElectronUpdaterRoot%\pending|*"}}
+            {"Caches", New List(Of String) From {"<ElectronRoot>\Cache|*|RECURSE"}},
+            {"UpdaterCache", New List(Of String) From {"<ElectronUpdaterRoot>\pending|*"}}
         }
 
         Dim section = Build(Preamble &
@@ -686,14 +701,14 @@ Imports System.Text
 
     ''' <summary>
     ''' An entry declaring only <c> ElectronRoot= </c> drops the updater templates rather than
-    ''' emitting a literal <c> %ElectronUpdaterRoot% </c> into a FileKey. That drop rule is what
+    ''' emitting a literal <c> &lt;ElectronUpdaterRoot&gt; </c> into a FileKey. That drop rule is what
     ''' lets <c> UpdaterCache </c> stay in the default set at no cost.
     ''' </summary>
     <TestMethod()> Public Sub Electron_NoUpdaterRoot_DropsUpdaterTemplates()
 
         Dim catalog As New Dictionary(Of String, List(Of String)) From {
-            {"Caches", New List(Of String) From {"%ElectronRoot%\Cache|*|RECURSE"}},
-            {"UpdaterCache", New List(Of String) From {"%ElectronUpdaterRoot%\pending|*"}}
+            {"Caches", New List(Of String) From {"<ElectronRoot>\Cache|*|RECURSE"}},
+            {"UpdaterCache", New List(Of String) From {"<ElectronUpdaterRoot>\pending|*"}}
         }
 
         Dim section = Build(Preamble & "ElectronRoot=%AppData%\Signal" & vbCrLf,
@@ -713,7 +728,7 @@ Imports System.Text
     <TestMethod()> Public Sub Electron_UpdaterRootAlone_OptsInToFamily()
 
         Dim catalog As New Dictionary(Of String, List(Of String)) From {
-            {"UpdaterCache", New List(Of String) From {"%ElectronUpdaterRoot%\pending|*"}}
+            {"UpdaterCache", New List(Of String) From {"<ElectronUpdaterRoot>\pending|*"}}
         }
 
         Dim section = Build(Preamble &
@@ -729,13 +744,13 @@ Imports System.Text
 
     ''' <summary>
     ''' <c> QtWebEngineCachePath= </c>, UWPBuilder's alias of <c> QtWebEngineCacheRoot= </c>, binds
-    ''' <c> %QtWebEngineCacheRoot% </c> independently of the profile root, and expands
+    ''' <c> &lt;QtWebEngineCacheRoot&gt; </c> independently of the profile root, and expands
     ''' <c> &lt;Package&gt; </c> like every other root
     ''' </summary>
     <TestMethod()> Public Sub QtWebEngine_CacheRoot_BindsAndSubstitutes()
 
         Dim catalog As New Dictionary(Of String, List(Of String)) From {
-            {"Caches", New List(Of String) From {"%QtWebEngineRoot%\GPUCache|*", "%QtWebEngineCacheRoot%\Cache|*|RECURSE"}}
+            {"Caches", New List(Of String) From {"<QtWebEngineRoot>\GPUCache|*", "<QtWebEngineCacheRoot>\Cache|*|RECURSE"}}
         }
 
         Dim section = Build(Preamble &
@@ -754,12 +769,12 @@ Imports System.Text
 
     ''' <summary>
     ''' An entry declaring only <c> QtWebEngineRoot= </c> drops the cache templates rather than
-    ''' emitting a literal <c> %QtWebEngineCacheRoot% </c> into a FileKey
+    ''' emitting a literal <c> &lt;QtWebEngineCacheRoot&gt; </c> into a FileKey
     ''' </summary>
     <TestMethod()> Public Sub QtWebEngine_NoCacheRoot_DropsCacheTemplates()
 
         Dim catalog As New Dictionary(Of String, List(Of String)) From {
-            {"Caches", New List(Of String) From {"%QtWebEngineRoot%\GPUCache|*", "%QtWebEngineCacheRoot%\Cache|*|RECURSE"}}
+            {"Caches", New List(Of String) From {"<QtWebEngineRoot>\GPUCache|*", "<QtWebEngineCacheRoot>\Cache|*|RECURSE"}}
         }
 
         Dim section = Build(Preamble & "QtWebEngineRoot=%LocalAppData%\VideoKeeper\QtWebEngine\Default" & vbCrLf,
@@ -778,7 +793,7 @@ Imports System.Text
     <TestMethod()> Public Sub QtWebEngine_CacheRootAlone_OptsInToFamily()
 
         Dim catalog As New Dictionary(Of String, List(Of String)) From {
-            {"Caches", New List(Of String) From {"%QtWebEngineRoot%\GPUCache|*", "%QtWebEngineCacheRoot%\Cache|*|RECURSE"}}
+            {"Caches", New List(Of String) From {"<QtWebEngineRoot>\GPUCache|*", "<QtWebEngineCacheRoot>\Cache|*|RECURSE"}}
         }
 
         Dim section = Build(Preamble &
@@ -788,6 +803,101 @@ Imports System.Text
         CollectionAssert.AreEqual(
             New List(Of String) From {"%LocalAppData%\VideoKeeper\cache\QtWebEngine\Default\Cache|*|RECURSE"},
             ValuesOf(section, "FileKey"))
+
+    End Sub
+
+    ' ----- Root substitution in AppInfo keys -----
+
+    ''' <summary>
+    ''' An AppInfo <c> FileKeyBase= </c> takes <c> &lt;WebViewRoot&gt; </c> once per declared
+    ''' path. A path holding <c> &lt;Package&gt; </c> fans out per package along with the
+    ''' template, giving one key per package rather than a product with the other path.
+    ''' </summary>
+    <TestMethod()> Public Sub AppInfoFileKeyBase_RootIsSubstitutedPerPath()
+
+        Dim section = Build(TwoPackages &
+                            "WebViewPath1=<Package>\LocalState" & vbCrLf &
+                            "WebViewPath2=%LocalAppData%\Contoso" & vbCrLf &
+                            "WebViewScaffolds=" & vbCrLf &
+                            "FileKeyBase=<WebViewRoot>\EBWebView\*\Cache|*" & vbCrLf)
+
+        CollectionAssert.AreEqual(
+            New List(Of String) From {
+                "%LocalAppData%\Packages\Hazel.One_abc123\LocalState\EBWebView\*\Cache|*",
+                "%LocalAppData%\Packages\Hazel.Two_abc123\LocalState\EBWebView\*\Cache|*",
+                "%LocalAppData%\Contoso\EBWebView\*\Cache|*"},
+            ValuesOf(section, "FileKey"))
+
+    End Sub
+
+    ''' <summary>
+    ''' A root token for a family the entry declared no path for drops the key silently, as
+    ''' <c> FanOutPlaceholder </c> does for a catalog template, and doesn't fail the run
+    ''' </summary>
+    <TestMethod()> Public Sub AppInfoFileKeyBase_UndeclaredRoot_IsDropped()
+
+        Dim section As winapp2ool.iniSection = Nothing
+        Dim exitCode = ExitCodeAfter(Sub() section = Build(Preamble &
+                                                           "FileKeyBase=<ElectronRoot>\logs|*" & vbCrLf &
+                                                           "FileKey=<Package>\LocalState|*.log" & vbCrLf))
+
+        Assert.AreEqual(0, exitCode)
+        CollectionAssert.AreEqual(
+            New List(Of String) From {"%LocalAppData%\Packages\Hazel.App_abc123\LocalState|*.log"},
+            ValuesOf(section, "FileKey"))
+
+    End Sub
+
+    ''' <summary>
+    ''' An AppInfo ExcludeKey takes root substitution, and a declared root is matched in any case
+    ''' </summary>
+    <TestMethod()> Public Sub AppInfoExcludeKey_RootIsSubstituted()
+
+        Dim section = Build(Preamble &
+                            "WebViewPath=<Package>\LocalState" & vbCrLf &
+                            "WebViewScaffolds=" & vbCrLf &
+                            "ExcludeKey=PATH|<webviewroot>\EBWebView\|*.json" & vbCrLf)
+
+        CollectionAssert.AreEqual(
+            New List(Of String) From {"PATH|%LocalAppData%\Packages\Hazel.App_abc123\LocalState\EBWebView\|*.json"},
+            ValuesOf(section, "ExcludeKey"))
+
+    End Sub
+
+    ''' <summary>
+    ''' An ExcludeKey's domain comes from its root-substituted value. Before substitution this
+    ''' template has no flag and would read as a filesystem key, dropping the undeclared token;
+    ''' the root supplies <c> REG| </c>, so the token stays literal.
+    ''' </summary>
+    <TestMethod()> Public Sub AppInfoExcludeKey_DomainComesFromRootExpandedFlag()
+
+        Dim section = Build(Preamble &
+                            "WebViewPath=REG|HKCU\Software\Contoso" & vbCrLf &
+                            "WebViewScaffolds=" & vbCrLf &
+                            "ExcludeKey=<WebViewRoot>\<Missing>" & vbCrLf)
+
+        CollectionAssert.AreEqual(
+            New List(Of String) From {"REG|HKCU\Software\Contoso\<Missing>"},
+            ValuesOf(section, "ExcludeKey"))
+
+    End Sub
+
+    ''' <summary>
+    ''' An AppInfo RegKey takes <c> &lt;WebViewRoot&gt; </c> once per declared path, and one
+    ''' naming a root the entry didn't declare is dropped
+    ''' </summary>
+    <TestMethod()> Public Sub AppInfoRegKey_RootIsSubstitutedOrDropped()
+
+        Dim section = Build(Preamble &
+                            "WebViewPath1=HKCU\Software\Contoso" & vbCrLf &
+                            "WebViewPath2=HKCU\Software\Fabrikam" & vbCrLf &
+                            "WebViewScaffolds=" & vbCrLf &
+                            "RegKey=<WebViewRoot>\WebView2" & vbCrLf &
+                            "RegKeyBase=<QtWebEngineRoot>\Qt" & vbCrLf)
+
+        CollectionAssert.AreEqual(
+            New List(Of String) From {"HKCU\Software\Contoso\WebView2", "HKCU\Software\Fabrikam\WebView2"},
+            ValuesOf(section, "RegKey"))
 
     End Sub
 

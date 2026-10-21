@@ -460,8 +460,10 @@ End Class
 ''' <br /><br />
 '''
 ''' This module is the phase-2 pass of the builder DSL pipeline. Before it, each builder
-''' runs its own percent-style substitution of root placeholders such as
-''' <c> %WebViewRoot% </c> in phase 1. We run last, on the merged string, so a <c> &lt;name&gt; </c> token that
+''' substitutes root placeholders such as <c> &lt;WebViewRoot&gt; </c> as plain text in phase 1
+''' (<see cref="ScaffoldCatalogs.FanOutPlaceholder"/>). They share the <c> &lt;name&gt; </c>
+''' spelling but are not variables, so one that reaches us unsubstituted is an undeclared token.
+''' We run last, on the merged string, so a <c> &lt;name&gt; </c> token that
 ''' arrived inside a root (<c> WebViewRoot=&lt;Root&gt;\EBWebView </c>) joins the same
 ''' cartesian product as the template's own tokens. This engine leaves
 ''' <c> %...% </c> text alone.

@@ -18,6 +18,7 @@
 Option Strict On
 
 Imports System.IO
+Imports System.Text.RegularExpressions
 
 ''' <summary>
 ''' Shared, use-case-agnostic substrate for embedded-Chromium FileKey generation. Consumed
@@ -32,17 +33,17 @@ Imports System.IO
 ''' builders actually bind:
 ''' <list type="bullet">
 ''' <item><c> WebView </c>: WebView2 / EBWebView layout (<c> Assembler\Scaffolds\webview.ini </c>),
-''' templates use the <c> %WebViewRoot% </c> placeholder.</item>
+''' templates use the <c> &lt;WebViewRoot&gt; </c> placeholder.</item>
 ''' <item><c> QtWebEngine </c>: QtWebEngine layout (<c> Assembler\Scaffolds\qtwebengine.ini </c>),
-''' templates use the <c> %QtWebEngineRoot% </c> placeholder. QtWebEngine bundles an older
-''' Chromium with a flatter on-disk layout. A second placeholder, <c> %QtWebEngineCacheRoot% </c>, names the profile's
+''' templates use the <c> &lt;QtWebEngineRoot&gt; </c> placeholder. QtWebEngine bundles an older
+''' Chromium with a flatter on-disk layout. A second placeholder, <c> &lt;QtWebEngineCacheRoot&gt; </c>, names the profile's
 ''' HTTP cache directory, which Qt keeps under its CacheLocation rather than beside the
 ''' profile (<c> %LocalAppData%\App\cache\QtWebEngine\Default </c> against
 ''' <c> %LocalAppData%\App\QtWebEngine\Default </c>).</item>
 ''' <item><c> Electron </c>: Electron layout (<c> Assembler\Scaffolds\electron.ini </c>),
-''' templates use <c> %ElectronRoot% </c> (the app's <c> userData </c> folder, which for
+''' templates use <c> &lt;ElectronRoot&gt; </c> (the app's <c> userData </c> folder, which for
 ''' Electron <em>is</em> the Chromium profile, with no <c> ProfileName\ </c> segment) and
-''' <c> %ElectronUpdaterRoot% </c> (the electron-updater download cache, whose directory name
+''' <c> &lt;ElectronUpdaterRoot&gt; </c> (the electron-updater download cache, whose directory name
 ''' is not derivable from the userData path). Like QtWebEngine it has two placeholders, and its
 ''' consumers bind both through <see cref="BindFamilyTemplates"/>. </item>
 ''' </list>
@@ -72,6 +73,14 @@ Imports System.IO
 ''' plain text, so a root may still carry <c> &lt;name&gt; </c> tokens
 ''' (<c> WebViewRoot=&lt;Root&gt;\EBWebView </c>). The consumer's later
 ''' <see cref="VariableExpander.Expand"/> pass fans those out along with the template's own.
+''' The placeholders share the <c> &lt;name&gt; </c> spelling but are not variables: they are
+''' substituted before <see cref="VariableExpander.Expand"/> runs, so a root's own tokens
+''' co-vary with the template's instead of being flattened by
+''' <see cref="VariableExpander.ResolveAll"/>.
+''' <br /><br />
+'''
+''' The old <c> %WebViewRoot% </c> spelling and its siblings are refused: a catalog template
+''' holding one (or <c> %Package% </c>) is dropped by <see cref="ParseSection"/> and the run fails.
 ''' </summary>
 Public Module ScaffoldCatalogs
 
@@ -83,6 +92,35 @@ Public Module ScaffoldCatalogs
     ''' <see cref="LoadCatalogDirectory"/> finds the marker case-insensitively.
     ''' </summary>
     Public Const FamilyMarker As String = "Scaffold:"
+
+    ''' <summary> The WebView family's root placeholder, bound to <c> WebViewRoot= </c> </summary>
+    Public Const WebViewRootPlaceholder As String = "<WebViewRoot>"
+
+    ''' <summary> The QtWebEngine family's profile placeholder, bound to <c> QtWebEngineRoot= </c> </summary>
+    Public Const QtWebEngineRootPlaceholder As String = "<QtWebEngineRoot>"
+
+    ''' <summary> The QtWebEngine family's HTTP cache placeholder, bound to <c> QtWebEngineCacheRoot= </c> </summary>
+    Public Const QtWebEngineCacheRootPlaceholder As String = "<QtWebEngineCacheRoot>"
+
+    ''' <summary> The Electron family's <c> userData </c> placeholder, bound to <c> ElectronRoot= </c> </summary>
+    Public Const ElectronRootPlaceholder As String = "<ElectronRoot>"
+
+    ''' <summary> The Electron family's updater cache placeholder, bound to <c> ElectronUpdaterRoot= </c> </summary>
+    Public Const ElectronUpdaterRootPlaceholder As String = "<ElectronUpdaterRoot>"
+
+    ''' <summary>
+    ''' The retired <c> %...% </c> spellings of the five root placeholders, as stems for
+    ''' <see cref="RetiredTokens.FindRetiredToken"/>. Both builders refuse them in their sources.
+    ''' </summary>
+    Public ReadOnly RetiredRootStems As String() = {"%WebViewRoot", "%QtWebEngineRoot", "%QtWebEngineCacheRoot",
+                                                    "%ElectronRoot", "%ElectronUpdaterRoot"}
+
+    ''' <summary>
+    ''' The stems <see cref="ParseSection"/> refuses in a catalog template: the root stems plus
+    ''' UWPBuilder's retired <c> %Package </c>. Catalogs are shared, so a <c> %Package% </c> in
+    ''' one would be wrong for both builders. UWPBuilder refuses the same list in its own sources.
+    ''' </summary>
+    Public ReadOnly RetiredCatalogStems As String() = {"%Package"}.Concat(RetiredRootStems).ToArray()
 
     ''' <summary>
     ''' The scaffold families the builders bind. A section in a scaffold directory naming a
@@ -172,8 +210,8 @@ Public Module ScaffoldCatalogs
 
     ''' <summary>
     ''' One (placeholder, roots) pair for a scaffold family. WebView binds a single pair,
-    ''' QtWebEngine binds two (<c> %QtWebEngineRoot% </c> and <c> %QtWebEngineCacheRoot% </c>),
-    ''' Electron binds two (<c> %ElectronRoot% </c> and <c> %ElectronUpdaterRoot% </c>), and <see cref="BindFamilyTemplates"/> chains a
+    ''' QtWebEngine binds two (<c> &lt;QtWebEngineRoot&gt; </c> and <c> &lt;QtWebEngineCacheRoot&gt; </c>),
+    ''' Electron binds two (<c> &lt;ElectronRoot&gt; </c> and <c> &lt;ElectronUpdaterRoot&gt; </c>), and <see cref="BindFamilyTemplates"/> chains a
     ''' substitution per binding so a template referencing several placeholders multiplies
     ''' across all of their root lists. Binding a placeholder to an empty root list is
     ''' meaningful: it is what keeps the Electron <c> UpdaterCache </c> scaffold inert for
@@ -182,7 +220,7 @@ Public Module ScaffoldCatalogs
     ''' </summary>
     Public Structure ScaffoldRootBinding
 
-        ''' <summary> The literal placeholder token, e.g. <c> %ElectronRoot% </c> </summary>
+        ''' <summary> The literal placeholder token, e.g. <c> &lt;ElectronRoot&gt; </c> </summary>
         Public Placeholder As String
 
         ''' <summary> The roots substituted for the placeholder, possibly empty </summary>
@@ -274,6 +312,11 @@ Public Module ScaffoldCatalogs
     ''' tier, it warns and is dropped. Any other <c> Tier= </c> value warns and leaves the
     ''' scaffold untiered. A redefinition resets the tier along with the templates, so
     ''' last-definition-wins covers both.
+    ''' <br /><br />
+    '''
+    ''' A template holding a token in <see cref="RetiredCatalogStems"/> (<c> %WebViewRoot% </c>,
+    ''' <c> %Package% </c>, or one missing its closing <c> % </c>) is dropped with a warning naming
+    ''' the new spelling, and we fail the run through <c> markRunFailed </c>.
     ''' </summary>
     '''
     ''' <param name="scaffoldSection">
@@ -328,7 +371,22 @@ Public Module ScaffoldCatalogs
 
             Select Case key.KeyType.ToUpperInvariant()
 
-                Case "FILEKEYBASE" : keys.Add(key.Value)
+                Case "FILEKEYBASE"
+
+                    Dim retiredMsg = RetiredTokens.FindRetiredToken(key.Value, RetiredCatalogStems, $"[{scaffoldSection.Name}].{key.Name}")
+
+                    If retiredMsg.Length = 0 Then
+
+                        keys.Add(key.Value)
+
+                    Else
+
+                        Dim dropMsg = $"{retiredMsg}; template dropped"
+                        gLog(dropMsg)
+                        menuOutput.AddWarning(dropMsg)
+                        markRunFailed()
+
+                    End If
 
                 Case "TIER"
 
@@ -690,8 +748,10 @@ Public Module ScaffoldCatalogs
     ''' <summary>
     ''' Replaces <paramref name="placeholder"/> in each input template with every root in
     ''' <paramref name="roots"/>, producing one output per (template, root) pair. The match is
-    ''' case-sensitive. Templates that do not contain the placeholder pass through unchanged
-    ''' (one output each), so calls can be chained per placeholder without dropping
+    ''' case-insensitive, as <c> &lt;name&gt; </c> tokens are, and every occurrence in a template
+    ''' takes the same root. A root is inserted as written, so a <c> $ </c> in it is never read
+    ''' as a substitution pattern. Templates that do not contain the placeholder pass through
+    ''' unchanged (one output each), so calls can be chained per placeholder without dropping
     ''' placeholder-free strings.
     ''' </summary>
     '''
@@ -700,7 +760,7 @@ Public Module ScaffoldCatalogs
     ''' </param>
     '''
     ''' <param name="placeholder">
-    ''' The literal placeholder token to substitute (e.g. <c> %WebViewRoot% </c>)
+    ''' The literal placeholder token to substitute (e.g. <c> &lt;WebViewRoot&gt; </c>)
     ''' </param>
     '''
     ''' <param name="roots">
@@ -716,13 +776,14 @@ Public Module ScaffoldCatalogs
                                       roots As List(Of String)) As List(Of String)
 
         Dim result As New List(Of String)
+        Dim pattern = Regex.Escape(placeholder)
 
         For Each t In templates
 
-            If t.Contains(placeholder) Then
+            If Regex.IsMatch(t, pattern, RegexOptions.IgnoreCase Or RegexOptions.CultureInvariant) Then
 
                 For Each root In roots
-                    result.Add(t.Replace(placeholder, root))
+                    result.Add(Regex.Replace(t, pattern, Function(m) root, RegexOptions.IgnoreCase Or RegexOptions.CultureInvariant))
                 Next
 
             Else

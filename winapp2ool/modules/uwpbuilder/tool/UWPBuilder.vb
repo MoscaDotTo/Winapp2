@@ -112,9 +112,11 @@ Public Module UWPBuilder
     ''' <summary>
     ''' The token stems UWPBuilder refuses, passed to <see cref="RetiredTokens.FindRetiredToken"/>.
     ''' <c> %Package% </c> and <c> %PackageN% </c> are now <c> &lt;Package&gt; </c> and
-    ''' <c> &lt;Package[N]&gt; </c>.
+    ''' <c> &lt;Package[N]&gt; </c>, and the five root placeholders such as
+    ''' <c> %WebViewRoot% </c> are now <c> &lt;WebViewRoot&gt; </c>. It is the list the shared
+    ''' catalogs refuse too (<see cref="ScaffoldCatalogs.RetiredCatalogStems"/>).
     ''' </summary>
-    Friend ReadOnly UWPRetiredStems As String() = {"%Package"}
+    Friend ReadOnly UWPRetiredStems As String() = ScaffoldCatalogs.RetiredCatalogStems
 
     ''' <summary>
     ''' Stores the parsed information for a single UWP application entry
@@ -164,19 +166,22 @@ Public Module UWPBuilder
 
         ''' <summary>
         ''' App-specific FileKey and FileKeyBase values in their original file order.
-        ''' Generation variable-expands every value, <c> &lt;Package&gt; </c> included.
+        ''' Generation substitutes the entry's scaffold roots (<c> &lt;WebViewRoot&gt; </c> and the
+        ''' rest), then variable-expands every value, <c> &lt;Package&gt; </c> included.
         ''' </summary>
         Public AppKeys As List(Of String)
 
         ''' <summary>
         ''' <c> RegKey= </c> and <c> RegKeyBase= </c> values in their original file order.
-        ''' Generation variable-expands them in the registry domain and renumbers them from 1.
+        ''' Generation substitutes the entry's scaffold roots, then variable-expands them in the
+        ''' registry domain and renumbers them from 1.
         ''' </summary>
         Public RegKeys As List(Of String)
 
         ''' <summary>
         ''' <c> ExcludeKey= </c> and <c> ExcludeKeyBase= </c> values in their original file order.
-        ''' Generation variable-expands every value in the domain its flag names.
+        ''' Generation substitutes the entry's scaffold roots, then variable-expands every value in
+        ''' the domain its flag names.
         ''' </summary>
         Public ExcludeKeys As List(Of String)
 
@@ -252,7 +257,7 @@ Public Module UWPBuilder
         ''' QtWebEngine catalog does not bake the profile segment into its templates, so a host
         ''' running several profiles declares one path per profile. Each entry is a path
         ''' template that may contain <c> &lt;Package&gt; </c> / <c> &lt;Package[N]&gt; </c>
-        ''' references, substituted for <c> %QtWebEngineRoot% </c> in QtWebEngine scaffold
+        ''' references, substituted for <c> &lt;QtWebEngineRoot&gt; </c> in QtWebEngine scaffold
         ''' templates and expanded per package with them. Declaring any path
         ''' here opts the entry into <c> QtWebEngineScaffold </c> emission.
         ''' </summary>
@@ -261,7 +266,7 @@ Public Module UWPBuilder
         ''' <summary>
         ''' Paths of the application's QtWebEngine HTTP cache directories. Declared separately
         ''' from <see cref="QtWebEnginePaths"/> because Qt keeps the cache under its CacheLocation,
-        ''' not inside the profile directory. Substituted for <c> %QtWebEngineCacheRoot% </c>;
+        ''' not inside the profile directory. Substituted for <c> &lt;QtWebEngineCacheRoot&gt; </c>;
         ''' when empty, templates referencing that placeholder are dropped rather than emitted
         ''' with the placeholder literal.
         ''' </summary>
@@ -292,7 +297,7 @@ Public Module UWPBuilder
         ''' folder <em>is</em> the Chromium profile, with no <c> Default\ </c> segment, unlike
         ''' <see cref="WebViewPaths"/>. Each entry is a path template that may contain
         ''' <c> &lt;Package&gt; </c> / <c> &lt;Package[N]&gt; </c> references, substituted for
-        ''' <c> %ElectronRoot% </c> and expanded per package with the template.
+        ''' <c> &lt;ElectronRoot&gt; </c> and expanded per package with the template.
         ''' <br /><br />
         '''
         ''' Relevant to UWPBuilder because a <b> hybrid win32+UWP </b> entry carries the win32
@@ -306,7 +311,7 @@ Public Module UWPBuilder
         ''' Paths of the application's electron-updater download caches. Declared separately from
         ''' <see cref="ElectronPaths"/> because the directory name is electron-builder's appId
         ''' slug and is not derivable from the userData path. Substituted for
-        ''' <c> %ElectronUpdaterRoot% </c>; when empty, templates referencing that placeholder
+        ''' <c> &lt;ElectronUpdaterRoot&gt; </c>; when empty, templates referencing that placeholder
         ''' are dropped rather than emitted with the placeholder literal.
         ''' </summary>
         Public ElectronUpdaterPaths As List(Of String)
@@ -1008,17 +1013,17 @@ Public Module UWPBuilder
             New UWPScaffoldFamily("WebView", app.WebViewScaffoldNames, app.ExcludedWebViewScaffolds,
                                   app.WebViewScaffoldsKeyPresent,
                                   New List(Of ScaffoldCatalogs.ScaffoldRootBinding) From {
-                                      New ScaffoldCatalogs.ScaffoldRootBinding("%WebViewRoot%", app.WebViewPaths)}),
+                                      New ScaffoldCatalogs.ScaffoldRootBinding(ScaffoldCatalogs.WebViewRootPlaceholder, app.WebViewPaths)}),
             New UWPScaffoldFamily("QtWebEngine", app.QtWebEngineScaffoldNames, app.ExcludedQtWebEngineScaffolds,
                                   app.QtWebEngineScaffoldsKeyPresent,
                                   New List(Of ScaffoldCatalogs.ScaffoldRootBinding) From {
-                                      New ScaffoldCatalogs.ScaffoldRootBinding("%QtWebEngineRoot%", app.QtWebEnginePaths),
-                                      New ScaffoldCatalogs.ScaffoldRootBinding("%QtWebEngineCacheRoot%", app.QtWebEngineCachePaths)}),
+                                      New ScaffoldCatalogs.ScaffoldRootBinding(ScaffoldCatalogs.QtWebEngineRootPlaceholder, app.QtWebEnginePaths),
+                                      New ScaffoldCatalogs.ScaffoldRootBinding(ScaffoldCatalogs.QtWebEngineCacheRootPlaceholder, app.QtWebEngineCachePaths)}),
             New UWPScaffoldFamily("Electron", app.ElectronScaffoldNames, app.ExcludedElectronScaffolds,
                                   app.ElectronScaffoldsKeyPresent,
                                   New List(Of ScaffoldCatalogs.ScaffoldRootBinding) From {
-                                      New ScaffoldCatalogs.ScaffoldRootBinding("%ElectronRoot%", app.ElectronPaths),
-                                      New ScaffoldCatalogs.ScaffoldRootBinding("%ElectronUpdaterRoot%", app.ElectronUpdaterPaths)})}
+                                      New ScaffoldCatalogs.ScaffoldRootBinding(ScaffoldCatalogs.ElectronRootPlaceholder, app.ElectronPaths),
+                                      New ScaffoldCatalogs.ScaffoldRootBinding(ScaffoldCatalogs.ElectronUpdaterRootPlaceholder, app.ElectronUpdaterPaths)})}
 
     End Function
 
@@ -1103,8 +1108,10 @@ Public Module UWPBuilder
     ''' Generates a winapp2.ini entry section for the given <c> UWPAppInfo </c> by applying
     ''' the scaffold template keys and app-specific keys, expanding any <c> &lt;token&gt; </c>
     ''' references, <c> &lt;Package&gt; </c> and <c> &lt;Package[N]&gt; </c> included, along
-    ''' the way. Keys are emitted in this order: category, Detect,
-    ''' DetectFile, DetectOS, Warning, FileKey, RegKey, ExcludeKey. FileKeys run on from
+    ''' the way. FileKeys, RegKeys and ExcludeKeys get root substitution first
+    ''' (<see cref="expandRoot"/>), as EntryBuilder's do; Detect and DetectFile values don't.
+    ''' Keys are emitted in this order: category, Detect, DetectFile, DetectOS, Warning,
+    ''' FileKey, RegKey, ExcludeKey. FileKeys run on from
     ''' <c> UWP.ini </c>'s scaffold templates to the app's own keys and then the shared
     ''' catalog families.
     ''' </summary>
@@ -1216,7 +1223,8 @@ Public Module UWPBuilder
         Next
 
         ' 4. Scaffold template FileKeys applied to all packages (suppressed when SkipUWPFileKeys is
-        '    set), then 5. the app-specific FileKey / FileKeyBase values in document order
+        '    set), then 5. the app-specific FileKey / FileKeyBase values in document order. Both get
+        '    root substitution, so a UWP.ini template naming a root is dropped for apps that declare none.
         Dim fileKeyTemplates As IEnumerable(Of String) = app.AppKeys
 
         If app.SkipUWPFileKeys Then
@@ -1233,10 +1241,14 @@ Public Module UWPBuilder
 
         For Each template In fileKeyTemplates
 
-            For Each expanded In expandPhase2(template, app, ExpansionDomain.Filesystem, "FileKey", menuOutput)
+            For Each rootExpanded In expandRoot(template, app)
 
-                section.AddKey(New iniKey($"FileKey{fileKeyNum}={expanded}"))
-                fileKeyNum += 1
+                For Each expanded In expandPhase2(rootExpanded, app, ExpansionDomain.Filesystem, "FileKey", menuOutput)
+
+                    section.AddKey(New iniKey($"FileKey{fileKeyNum}={expanded}"))
+                    fileKeyNum += 1
+
+                Next
 
             Next
 
@@ -1260,20 +1272,25 @@ Public Module UWPBuilder
 
         Next
 
-        ' 6. RegKeys, variable-expanded in the Registry domain and renumbered from 1
+        ' 6. RegKeys, root-substituted, then variable-expanded in the Registry domain and renumbered from 1
         Dim regKeyNum As Integer = 1
         For Each regKey In app.RegKeys
 
-            For Each expanded In expandPhase2(regKey, app, ExpansionDomain.Registry, "RegKey", menuOutput)
+            For Each rootExpanded In expandRoot(regKey, app)
 
-                section.AddKey(New iniKey($"RegKey{regKeyNum}={expanded}"))
-                regKeyNum += 1
+                For Each expanded In expandPhase2(rootExpanded, app, ExpansionDomain.Registry, "RegKey", menuOutput)
+
+                    section.AddKey(New iniKey($"RegKey{regKeyNum}={expanded}"))
+                    regKeyNum += 1
+
+                Next
 
             Next
 
         Next
 
-        ' 7. ExcludeKeys variable-expanded in the domain of each key's own flag, renumbered from 1
+        ' 7. ExcludeKeys root-substituted, then variable-expanded in the domain of each value's own
+        '    flag, renumbered from 1
         Dim exclNum As Integer = 1
         For Each expanded In expandExcludeKeys(app.ExcludeKeys, app, menuOutput)
 
@@ -1327,8 +1344,8 @@ Public Module UWPBuilder
 
     ''' <summary>
     ''' Runs the phase-2 variable-expansion pass on <paramref name="template"/> and routes any
-    ''' returned diagnostics onto <c> gLog </c> and <paramref name="menuOutput"/>. A scaffold
-    ''' family's caller does the phase-1 root substitution beforehand. Running last means a root value's own <c> &lt;token&gt; </c> references are
+    ''' returned diagnostics onto <c> gLog </c> and <paramref name="menuOutput"/>. The caller
+    ''' does any phase-1 root substitution beforehand. Running last means a root value's own <c> &lt;token&gt; </c> references are
     ''' already inlined into <paramref name="template"/> and participate in the same cartesian
     ''' product as the surrounding template's tokens, matching EntryBuilder's semantics.
     ''' </summary>
@@ -1379,9 +1396,46 @@ Public Module UWPBuilder
     End Function
 
     ''' <summary>
-    ''' Expands ExcludeKey templates, classifying each template's domain from its own flag: the
-    ''' flag determines whether the value lands in the registry or the file system. A
-    ''' <c> &lt;Package&gt; </c> reference substitutes only a path, so it can't change the flag.
+    ''' Substitutes the entry's declared roots for the five root placeholders in
+    ''' <paramref name="template"/>, chaining one <see cref="ScaffoldCatalogs.FanOutPlaceholder"/>
+    ''' pass each, in EntryBuilder's order: <c> &lt;WebViewRoot&gt; </c>,
+    ''' <c> &lt;QtWebEngineRoot&gt; </c>, <c> &lt;QtWebEngineCacheRoot&gt; </c>,
+    ''' <c> &lt;ElectronRoot&gt; </c>, <c> &lt;ElectronUpdaterRoot&gt; </c>. Matching is
+    ''' case-insensitive. A template naming a root the entry declared no path for is dropped, with
+    ''' no warning. The roots go in as declared text, so a <c> &lt;Package&gt; </c> in one
+    ''' co-varies with the template's own tokens in the later <see cref="expandPhase2"/> pass.
+    ''' </summary>
+    '''
+    ''' <param name="template">
+    ''' A key value that may contain any of the root placeholders
+    ''' </param>
+    '''
+    ''' <param name="app">
+    ''' The entry whose declared root paths drive the substitution
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' The fan-out of <paramref name="template"/> across whichever placeholders it contains,
+    ''' a single-element list holding it verbatim when it contains none, or an empty list when
+    ''' one of its placeholders has no declared path
+    ''' </returns>
+    Friend Function expandRoot(template As String, app As UWPAppInfo) As List(Of String)
+
+        Dim result As New List(Of String) From {template}
+        result = ScaffoldCatalogs.FanOutPlaceholder(result, ScaffoldCatalogs.WebViewRootPlaceholder, app.WebViewPaths)
+        result = ScaffoldCatalogs.FanOutPlaceholder(result, ScaffoldCatalogs.QtWebEngineRootPlaceholder, app.QtWebEnginePaths)
+        result = ScaffoldCatalogs.FanOutPlaceholder(result, ScaffoldCatalogs.QtWebEngineCacheRootPlaceholder, app.QtWebEngineCachePaths)
+        result = ScaffoldCatalogs.FanOutPlaceholder(result, ScaffoldCatalogs.ElectronRootPlaceholder, app.ElectronPaths)
+        result = ScaffoldCatalogs.FanOutPlaceholder(result, ScaffoldCatalogs.ElectronUpdaterRootPlaceholder, app.ElectronUpdaterPaths)
+        Return result
+
+    End Function
+
+    ''' <summary>
+    ''' Expands ExcludeKey templates against the entry's roots and variables. Each
+    ''' root-substituted value is classified by its own parsed flag (REG gives the registry
+    ''' domain; FILE, PATH and an unknown flag the file system), as EntryBuilder's
+    ''' <c> expandExcludeKeys </c> does, since a root's text lands before the flag is read.
     ''' </summary>
     '''
     ''' <param name="templates">
@@ -1407,12 +1461,16 @@ Public Module UWPBuilder
 
         For Each template In templates
 
-            Dim parsed As New excludeKeyParams(template)
-            Dim exclDomain As ExpansionDomain = If(parsed.Flag = excludeKeyFlag.Reg,
-                                                   ExpansionDomain.Registry,
-                                                   ExpansionDomain.Filesystem)
+            For Each rootExpanded In expandRoot(template, app)
 
-            values.AddRange(expandPhase2(template, app, exclDomain, "ExcludeKey", menuOutput))
+                Dim parsed As New excludeKeyParams(rootExpanded)
+                Dim exclDomain As ExpansionDomain = If(parsed.Flag = excludeKeyFlag.Reg,
+                                                       ExpansionDomain.Registry,
+                                                       ExpansionDomain.Filesystem)
+
+                values.AddRange(expandPhase2(rootExpanded, app, exclDomain, "ExcludeKey", menuOutput))
+
+            Next
 
         Next
 
