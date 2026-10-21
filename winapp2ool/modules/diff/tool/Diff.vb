@@ -165,9 +165,10 @@ Module Diff
 
 
     ''' <summary>
-    ''' Diffs <paramref name="firstFile"/> against the remote winapp2.ini for the current flavor.
-    ''' The Diff settings are left alone: <paramref name="firstFile"/> stands in for
-    ''' <c> DiffFile1 </c> for this run only, and a file picked because it doesn't exist isn't saved.
+    ''' Diffs <paramref name="firstFile"/> against the remote winapp2.ini for
+    ''' <paramref name="flavor"/>. The Diff settings are left alone: <paramref name="firstFile"/>
+    ''' stands in for <c> DiffFile1 </c> for this run only, and a file picked because it doesn't
+    ''' exist isn't saved.
     ''' </summary>
     '''
     ''' <param name="firstFile">The local file to use as the old version</param>
@@ -176,13 +177,20 @@ Module Diff
     ''' Indicates whether to trim the downloaded file for the current system before diffing <br /><br />
     ''' Optional, Default: <c> False </c>
     ''' </param>
+    '''
+    ''' <param name="flavor">
+    ''' The flavor to download. When <c> Nothing </c>, we download
+    ''' <see cref="CurrentWinappFlavor"/>. <br /><br />
+    ''' Optional, Default: <c> Nothing </c>
+    ''' </param>
     Public Sub DiffRemoteFile(firstFile As iniFileChooser,
-                     Optional trimFile As Boolean = False)
+                     Optional trimFile As Boolean = False,
+                     Optional flavor As WinappFlavor? = Nothing)
 
         Dim oldFile = firstFile.Load()
         If Not enforceFileHasContent(oldFile) Then Return
 
-        Dim newFile = LoadRemoteFile(trimFile)
+        Dim newFile = LoadRemoteFile(trimFile, flavor.GetValueOrDefault(CurrentWinappFlavor))
         If Not enforceFileHasContent(newFile) Then Return
 
         RunDiff(oldFile, newFile)
@@ -200,7 +208,7 @@ Module Diff
         Dim oldFile = DiffFile1.Load(DiffModuleSettingsChanged, NameOf(Diff), NameOf(DiffFile1), NameOf(DiffModuleSettingsChanged))
         If Not enforceFileHasContent(oldFile) Then Return
 
-        Dim newFile = If(DownloadDiffFile, LoadRemoteFile(TrimRemoteFile), DiffFile2.Load(DiffModuleSettingsChanged, NameOf(Diff), NameOf(DiffFile2), NameOf(DiffModuleSettingsChanged)))
+        Dim newFile = If(DownloadDiffFile, LoadRemoteFile(TrimRemoteFile, CurrentWinappFlavor), DiffFile2.Load(DiffModuleSettingsChanged, NameOf(Diff), NameOf(DiffFile2), NameOf(DiffModuleSettingsChanged)))
         If Not enforceFileHasContent(newFile) Then Return
 
         RunDiff(oldFile, newFile)
@@ -208,20 +216,25 @@ Module Diff
     End Sub
 
     ''' <summary>
-    ''' Downloads the remote winapp2.ini for the current flavor, trimmed for the current system
-    ''' when <paramref name="shouldTrim"/> is set
+    ''' Downloads the remote winapp2.ini for <paramref name="flavor"/>, trimmed for the current
+    ''' system when <paramref name="shouldTrim"/> is set
     ''' </summary>
     '''
     ''' <param name="shouldTrim">
     ''' Indicates whether to trim the downloaded file
     ''' </param>
     '''
+    ''' <param name="flavor">
+    ''' The flavor to download
+    ''' </param>
+    '''
     ''' <returns>
     ''' The file, or <c> Nothing </c> if the download failed
     ''' </returns>
-    Private Function LoadRemoteFile(shouldTrim As Boolean) As iniFile
+    Private Function LoadRemoteFile(shouldTrim As Boolean,
+                                    flavor As WinappFlavor) As iniFile
 
-        Dim remoteFile = getRemoteIniFile(getWinappLink)
+        Dim remoteFile = getRemoteIniFile(getWinappLink(flavor))
         If Not shouldTrim OrElse remoteFile Is Nothing Then Return remoteFile
 
         ' The local file was most likely trimmed with the user's Trim lists, so the menu trims

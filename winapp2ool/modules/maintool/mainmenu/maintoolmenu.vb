@@ -77,7 +77,7 @@ Module maintoolmenu
                 Sub()
                     clrConsole()
                     cwl("Downloading, this may take a moment...")
-                    download(New iniFileChooser(Environment.CurrentDirectory, "winapp2.ini"), getWinappLink, False)
+                    download(New iniFileChooser(Environment.CurrentDirectory, localWa2Name), getWinappLink(localWa2Flavor), False)
                     waUpdateIsAvail = False
                 End Sub, condition:=waUpdateIsAvail) _
             .AddDispatchedOption("Update & Trim", "Download and trim the latest winapp2.ini",
@@ -85,21 +85,21 @@ Module maintoolmenu
                     clrConsole()
                     cwl("Downloading & trimming, this may take a moment...")
                     remoteTrim(New iniFileChooser(Environment.CurrentDirectory, ""),
-                               New iniFileChooser(Environment.CurrentDirectory, "winapp2.ini", "winapp2.ini"),
-                               True)
+                               New iniFileChooser(Environment.CurrentDirectory, localWa2Name, localWa2Name),
+                               True, localWa2Flavor)
                 End Sub, condition:=waUpdateIsAvail) _
             .AddDispatchedOption("Show winapp2.ini changelog", "See the difference between your local file and the latest",
                 Sub()
                     clrConsole()
                     cwl("Downloading & diffing, this may take a moment...")
-                    DiffRemoteFile(New iniFileChooser(Environment.CurrentDirectory, "winapp2.ini"))
+                    DiffRemoteFile(New iniFileChooser(Environment.CurrentDirectory, localWa2Name), flavor:=localWa2Flavor)
                     setNextMenuHeaderText("Diff Complete", printColor:=ConsoleColor.Green)
                 End Sub, condition:=waUpdateIsAvail) _
             .AddDispatchedOption("Show trimmed changelog", "See the difference between your trimmed local file and the latest",
                                  Sub()
                                      clrConsole()
                                      cwl("Downloading, trimming, & diffing, this may take a moment...")
-                                     DiffRemoteFile(New iniFileChooser(Environment.CurrentDirectory, "winapp2.ini"), True)
+                                     DiffRemoteFile(New iniFileChooser(Environment.CurrentDirectory, localWa2Name), True, localWa2Flavor)
                                      setNextMenuHeaderText("Diff Complete", printColor:=ConsoleColor.Green)
                                  End Sub, condition:=waUpdateIsAvail) _
             .AddBlank(waUpdateIsAvail) _

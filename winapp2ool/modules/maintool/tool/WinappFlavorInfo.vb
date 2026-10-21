@@ -17,6 +17,8 @@
 
 Option Strict On
 
+Imports System.Text.RegularExpressions
+
 ''' <summary>
 ''' What a published winapp2.ini says about its own flavor: the name on its <c> ; Flavor: </c>
 ''' line, the description under it, and the release assets its links point at. One instance
@@ -39,6 +41,16 @@ Public NotInheritable Class WinappFlavorInfo
 
     ''' <summary>The flavor's changelog name among the release assets</summary>
     Public ReadOnly Property ChangelogAssetName As String
+
+    ''' <summary>The name the flavor's file has on a user's disk: <c> winapp2.rules </c> for System Ninja, <c> winapp2.ini </c> otherwise</summary>
+    Public ReadOnly Property LocalFileName As String
+        Get
+            Return If(AssetName.EndsWith(".rules", StringComparison.OrdinalIgnoreCase), "winapp2.rules", "winapp2.ini")
+        End Get
+    End Property
+
+    ' A header line naming the file's flavor, such as "; Flavor: BleachBit"
+    Private Shared ReadOnly FlavorLine As New Regex("^;\s*Flavor:\s*(.+?)\s*$", RegexOptions.IgnoreCase)
 
     Private Sub New(displayName As String,
                     assetName As String,
@@ -112,6 +124,31 @@ Public NotInheritable Class WinappFlavorInfo
         Next
 
         Return Nothing
+
+    End Function
+
+    ''' <summary>
+    ''' Returns the flavor a <c> ; Flavor: </c> header line names. A flavor line naming an
+    ''' unknown flavor is logged.
+    ''' </summary>
+    '''
+    ''' <param name="line">A line of a winapp2.ini header, leading <c> ; </c> included</param>
+    '''
+    ''' <returns>
+    ''' The flavor, <br />
+    ''' <c> Nothing </c> if <paramref name="line"/> isn't a flavor line or names an unknown flavor
+    ''' </returns>
+    Public Shared Function ParseFlavorLine(line As String) As WinappFlavor?
+
+        If line Is Nothing Then Return Nothing
+
+        Dim m = FlavorLine.Match(line)
+        If Not m.Success Then Return Nothing
+
+        Dim flavor = ParseName(m.Groups(1).Value)
+        If Not flavor.HasValue Then gLog($"Ignoring an unknown flavor: {line}")
+
+        Return flavor
 
     End Function
 

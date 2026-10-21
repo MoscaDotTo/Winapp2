@@ -160,7 +160,7 @@ Module Downloader
                     Select Case arg.ToUpperInvariant
                         Case "1", "WINAPP2"
                             fileLink = getWinappLink()
-                            downloadFile.Name = If(fileLink.Contains("SystemNinja"), "winapp2.rules", "winapp2.ini")
+                            downloadFile.Name = WinappFlavorInfo.Lookup(CurrentWinappFlavor).LocalFileName
                         Case "2", "WINAPP2OOL"
                             fileLink = toolExeLink()
                             downloadFile.Name = "winapp2ool.exe"
@@ -235,11 +235,23 @@ Module Downloader
 
     ''' <summary>
     ''' Returns the link to the winapp2.ini flavor named by <see cref="CurrentWinappFlavor"/>,
-    ''' which defaults to CCleaner. An unlisted flavor gets the base (Non-CCleaner) link.
+    ''' which defaults to CCleaner
     ''' </summary>
     Public Function getWinappLink() As String
 
-        Select Case CurrentWinappFlavor
+        Return getWinappLink(CurrentWinappFlavor)
+
+    End Function
+
+    ''' <summary>
+    ''' Returns the link to the winapp2.ini for <paramref name="flavor"/>. An unlisted flavor
+    ''' gets the base (Non-CCleaner) link.
+    ''' </summary>
+    '''
+    ''' <param name="flavor">The flavor whose file to link</param>
+    Public Function getWinappLink(flavor As WinappFlavor) As String
+
+        Select Case flavor
 
             Case WinappFlavor.NonCCleaner
 

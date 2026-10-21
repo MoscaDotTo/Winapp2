@@ -34,7 +34,7 @@ Public Module updater
     ''' empty string until a check reads it. Once read, we don't read it again this session.
     ''' </summary>
     Public Property latestVersion As String = ""
-    ''' <summary>The version of the current flavor's winapp2.ini on GitHub, or an empty string until a check reads it</summary>
+    ''' <summary>The version on GitHub of the winapp2.ini for <see cref="localWa2Flavor"/>, or an empty string until a check reads it</summary>
     Public Property latestWa2Ver As String = ""
     ''' <summary>
     ''' The version of the winapp2.ini in the working folder, or a string starting <c> 000000 </c> when
@@ -49,6 +49,16 @@ Public Module updater
     Public Property updateIsAvail As Boolean = False
     ''' <summary>Indicates whether the winapp2.ini on GitHub has a higher version number than the local one</summary>
     Public Property waUpdateIsAvail As Boolean = False
+    ''' <summary>
+    ''' The flavor of the local winapp2.ini the last update check compared, which the main menu's
+    ''' winapp2.ini update options fetch. Set by <see cref="findLocalWinapp2"/>.
+    ''' </summary>
+    Public Property localWa2Flavor As WinappFlavor = WinappFlavor.CCleaner
+    ''' <summary>
+    ''' The file name of the local winapp2.ini the last update check compared, which the main
+    ''' menu's winapp2.ini update options write. Set by <see cref="findLocalWinapp2"/>.
+    ''' </summary>
+    Public Property localWa2Name As String = "winapp2.ini"
     ''' <summary>The file version of the running winapp2ool, or an empty string until the launcher or an update check reads it</summary>
     Public Property currentVersion As String = ""
     ''' <summary>
@@ -125,8 +135,9 @@ Public Module updater
         gLog("Checking for updates")
         ' Query the latest winapp2ool.exe and winapp2.ini versions
         toolVersionCheck()
+        findLocalWinapp2(Environment.CurrentDirectory)
         ' Only the first line is read, so the check doesn't download the whole winapp2.ini
-        latestWa2Ver = getRemoteVersion(getWinappLink)
+        latestWa2Ver = getRemoteVersion(getWinappLink(localWa2Flavor))
         ' This should only be true if a user somehow has internet but cannot otherwise connect to the GitHub resources used to check for updates
         ' In this instance we should consider the update check to have failed and put the application into offline mode
         If latestVersion.Length = 0 Or latestWa2Ver.Length = 0 Then updateCheckFailed("online", True) : Return
@@ -143,14 +154,14 @@ Public Module updater
         End If
 
         updateIsAvail = IsNewerToolVersion(latestVersion, currentVersion)
-        localWa2Ver = getVersionFromLocalFile()
+        localWa2Ver = getVersionFromLocalFile(Path.Combine(Environment.CurrentDirectory, localWa2Name))
         waUpdateIsAvail = Val(latestWa2Ver) > Val(localWa2Ver)
         checkedForUpdates = True
         gLog("Update check complete:")
         gLog($"Winapp2ool:")
         gLog("  Local: " & currentVersion)
         gLog("  Remote: " & latestVersion)
-        gLog("Winapp2.ini:")
+        gLog($"Winapp2.ini ({localWa2Name}, {localWa2Flavor} flavor):")
         gLog("  Local: " & localWa2Ver)
         gLog("  Remote: " & latestWa2Ver)
         Dim bothUpdatesAreAvail = waUpdateIsAvail And updateIsAvail
@@ -324,22 +335,73 @@ Public Module updater
 
     ''' <summary>Returns the version number from the first line of a winapp2.ini on disk</summary>
     '''
-    ''' <param name="path">
-    ''' The path of the file to read <br /><br />
-    ''' Optional, Default: <c> "" </c> <br />
-    ''' which reads winapp2.ini in the working folder
-    ''' </param>
+    ''' <param name="path">The path of the file to read</param>
     '''
     ''' <returns>
     ''' The version number, <br />
     ''' <c> "000000 (file not found)" </c> if the file doesn't exist, <br />
     ''' <c> "000000 (version not found)" </c> if its first line doesn't carry one
     ''' </returns>
-    Private Function getVersionFromLocalFile(Optional path As String = "") As String
-        ' The main menu's winapp2.ini update downloads into the working folder, so that's the copy we compare
-        If path.Length = 0 Then path = Environment.CurrentDirectory & "\winapp2.ini"
+    Private Function getVersionFromLocalFile(path As String) As String
         If Not File.Exists(path) Then Return "000000 (file not found)"
         Return versionFromHeader(getFileDataAtLineNum(path))
+    End Function
+
+    ''' <summary>
+    ''' Finds the local copy the update check compares and sets <see cref="localWa2Name"/> and
+    ''' <see cref="localWa2Flavor"/> from it. The copy is <c> winapp2.ini </c> in
+    ''' <paramref name="dir"/>, or <c> winapp2.rules </c> when there's no winapp2.ini. Its flavor is
+    ''' the one its header names; a winapp2.rules naming none is System Ninja's, and any other
+    ''' copy naming none, or no copy at all, goes by <see cref="CurrentWinappFlavor"/>.
+    ''' </summary>
+    '''
+    ''' <param name="dir">The folder holding the local copy. The main menu's update options write there.</param>
+    Friend Sub findLocalWinapp2(dir As String)
+
+        For Each name In {"winapp2.ini", "winapp2.rules"}
+
+            Dim localPath = Path.Combine(dir, name)
+            If Not File.Exists(localPath) Then Continue For
+
+            Dim flavor = readHeaderFlavor(localPath)
+            localWa2Name = name
+            localWa2Flavor = If(flavor.HasValue, flavor.Value, If(name = "winapp2.rules", WinappFlavor.SystemNinja, CurrentWinappFlavor))
+            Return
+
+        Next
+
+        localWa2Flavor = CurrentWinappFlavor
+        localWa2Name = WinappFlavorInfo.Lookup(CurrentWinappFlavor).LocalFileName
+
+    End Sub
+
+    ''' <summary>
+    ''' Returns the flavor a winapp2.ini's header names, reading only the comment lines at the
+    ''' top of the file
+    ''' </summary>
+    '''
+    ''' <param name="localPath">The path of the file to read</param>
+    '''
+    ''' <returns>
+    ''' The flavor, <br />
+    ''' <c> Nothing </c> if the header names no known flavor
+    ''' </returns>
+    Private Function readHeaderFlavor(localPath As String) As WinappFlavor?
+
+        Using reader As New StreamReader(localPath)
+
+            Do
+
+                Dim line = reader.ReadLine()
+                If line Is Nothing OrElse Not line.StartsWith(";", StringComparison.Ordinal) Then Return Nothing
+
+                Dim flavor = WinappFlavorInfo.ParseFlavorLine(line)
+                If flavor.HasValue Then Return flavor
+
+            Loop
+
+        End Using
+
     End Function
 
     ''' <summary>Tests the connection to GitHub and sets <see cref="isOffline"/> from the result, so it can also bring winapp2ool back online</summary>

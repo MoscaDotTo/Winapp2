@@ -100,6 +100,7 @@
     <Compile Include="TrimOptionsTests.vb" />
     <Compile Include="UnitTools.vb" />
     <Compile Include="UpdateSignatureTests.vb" />
+    <Compile Include="UpdateTargetTests.vb" />
     <Compile Include="RetiredTokensTests.vb" />
     <Compile Include="UWPBuilderTests.vb" />
     <Compile Include="VariableExpanderTests.vb" />

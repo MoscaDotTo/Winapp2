@@ -18,7 +18,6 @@
 Option Strict On
 Imports System.Globalization
 Imports System.Text
-Imports System.Text.RegularExpressions
 
 ''' <summary>
 ''' Represents a winapp2.ini file, with its entries grouped into the file's sections.
@@ -48,9 +47,6 @@ Public Class winapp2file
         "3029", "3006", "3033", "3034", "3027", "3026", "3030", "3001",
         "Language Files", "Dangerous Long", "Dangerous"
     }
-
-    ' The preamble line naming the file's flavor, such as "; Flavor: BleachBit"
-    Private Shared ReadOnly FlavorLine As New Regex("^;\s*Flavor:\s*(.+?)\s*$", RegexOptions.IgnoreCase)
 
     Private Const RepoUrl As String = "https://github.com/MoscaDotTo/Winapp2"
     Private Const LatestDownloadUrl As String = RepoUrl & "/releases/latest/download/"
@@ -164,7 +160,7 @@ Public Class winapp2file
     End Function
 
     ''' <summary>
-    ''' Returns the flavor named by the first <c> ; Flavor: </c> line in the preamble: the
+    ''' Returns the flavor named by the first known <c> ; Flavor: </c> line in the preamble: the
     ''' comments before the first section that has a line number. Sections built in code have
     ''' none, so a file made only of those treats all its comments as preamble.
     ''' </summary>
@@ -187,13 +183,8 @@ Public Class winapp2file
 
             If comment.LineNumber >= firstSectionLine Then Exit For
 
-            Dim m = FlavorLine.Match(comment.Text)
-            If Not m.Success Then Continue For
-
-            Dim parsed = WinappFlavorInfo.ParseName(m.Groups(1).Value)
-            If Not parsed.HasValue Then gLog($"Ignoring an unknown flavor: {comment.Text}")
-
-            Return parsed
+            Dim flavor = WinappFlavorInfo.ParseFlavorLine(comment.Text)
+            If flavor.HasValue Then Return flavor
 
         Next
 

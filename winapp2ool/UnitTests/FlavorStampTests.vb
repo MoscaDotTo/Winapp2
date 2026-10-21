@@ -146,6 +146,30 @@ Imports System.IO
 
     End Sub
 
+    ''' <summary>A trimmed file keeps the flavor of the file it was trimmed from</summary>
+    <TestMethod()> Public Sub Trim_KeepsFileFlavor()
+
+        Dim savedSuppress = winapp2ool.SuppressOutput
+
+        Try
+
+            winapp2ool.SuppressOutput = True
+            File.WriteAllText(Path.Combine(_dir, "winapp2.ini"), FileText("FluentCleaner"))
+
+            winapp2ool.Trim.remoteTrim(New winapp2ool.iniFileChooser(_dir, "winapp2.ini"),
+                                       New winapp2ool.iniFileChooser(_dir, "trimmed.ini", mustExist:=False),
+                                       d:=False)
+
+            StringAssert.Contains(File.ReadAllText(Path.Combine(_dir, "trimmed.ini")), "; Flavor: FluentCleaner" & vbCrLf)
+
+        Finally
+
+            winapp2ool.SuppressOutput = savedSuppress
+
+        End Try
+
+    End Sub
+
     ''' <summary>With no flavor anywhere, the lint writes the header that names none</summary>
     <TestMethod()> Public Sub Lint_NoFlavorAnywhereStaysFlavorless()
 

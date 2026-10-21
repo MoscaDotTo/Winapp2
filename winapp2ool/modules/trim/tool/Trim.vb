@@ -205,14 +205,21 @@ Public Module Trim
     ''' Indicates whether to download the input winapp2.ini from GitHub instead of reading
     ''' <paramref name="firstFile"/>
     ''' </param>
+    '''
+    ''' <param name="flavor">
+    ''' The flavor to download when <paramref name="d"/> is set. When <c> Nothing </c>, we
+    ''' download <see cref="CurrentWinappFlavor"/>. <br /><br />
+    ''' Optional, Default: <c> Nothing </c>
+    ''' </param>
     Public Sub remoteTrim(firstFile As iniFileChooser,
                           thirdFile As iniFileChooser,
-                          d As Boolean)
+                          d As Boolean,
+                 Optional flavor As WinappFlavor? = Nothing)
 
         If firstFile Is Nothing Then argIsNull(NameOf(firstFile)) : Return
         If thirdFile Is Nothing Then argIsNull(NameOf(thirdFile)) : Return
 
-        runTrim(firstFile, thirdFile, d, TrimOptions.FromSettings(), saveChoices:=False)
+        runTrim(firstFile, thirdFile, d, flavor.GetValueOrDefault(CurrentWinappFlavor), TrimOptions.FromSettings(), saveChoices:=False)
 
     End Sub
 
@@ -222,7 +229,7 @@ Public Module Trim
     ''' </summary>
     Public Sub initTrim()
 
-        runTrim(TrimFile1, TrimFile3, DownloadFileToTrim, TrimOptions.FromSettings(), saveChoices:=True)
+        runTrim(TrimFile1, TrimFile3, DownloadFileToTrim, CurrentWinappFlavor, TrimOptions.FromSettings(), saveChoices:=True)
 
     End Sub
 
@@ -231,8 +238,7 @@ Public Module Trim
     ''' <paramref name="outputFile"/>. We mark the run failed and return without writing anything
     ''' if a download is asked for in offline mode or without a connection, or if the download
     ''' fails. An empty or missing input also returns without writing, and fails the run only on
-    ''' the command line. A download goes through <see cref="getWinappLink"/>, so it fetches the
-    ''' current flavor.
+    ''' the command line.
     ''' </summary>
     '''
     ''' <param name="inputFile">
@@ -248,6 +254,10 @@ Public Module Trim
     ''' <paramref name="inputFile"/>
     ''' </param>
     '''
+    ''' <param name="flavor">
+    ''' The flavor to download when <paramref name="download"/> is set
+    ''' </param>
+    '''
     ''' <param name="options">
     ''' The include and exclude lists to trim with
     ''' </param>
@@ -258,6 +268,7 @@ Public Module Trim
     Private Sub runTrim(inputFile As iniFileChooser,
                         outputFile As iniFileChooser,
                         download As Boolean,
+                        flavor As WinappFlavor,
                         options As TrimOptions,
                         saveChoices As Boolean)
 
@@ -274,7 +285,7 @@ Public Module Trim
 
             End If
 
-            inputIni = getRemoteIniFile(getWinappLink)
+            inputIni = getRemoteIniFile(getWinappLink(flavor))
 
             If denyActionWithHeader(inputIni Is Nothing, "Failed to download winapp2.ini") Then
 
