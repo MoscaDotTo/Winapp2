@@ -18,6 +18,7 @@
 Option Strict On
 Imports System.Globalization
 Imports System.Text
+Imports System.Text.RegularExpressions
 
 ''' <summary>
 ''' Represents a winapp2.ini file, with its entries grouped into the file's sections.
@@ -48,12 +49,11 @@ Public Class winapp2file
         "Language Files", "Dangerous Long", "Dangerous"
     }
 
-    ' The preamble substring by which a non-CCleaner winapp2.ini identifies itself
-    Private Const NCCMarkerText As String = "This is the non-CCleaner version of Winapp2"
+    ' The preamble line naming the file's flavor, such as "; Flavor: BleachBit"
+    Private Shared ReadOnly FlavorLine As New Regex("^;\s*Flavor:\s*(.+?)\s*$", RegexOptions.IgnoreCase)
 
-    ' The full preamble line carrying that marker, written by both ToWinapp2String and ToIni
-    Private Const NCCMarkerComment As String = "; " & NCCMarkerText &
-        " that contains extra entries that were removed due to them being added to CCleaner."
+    Private Const RepoUrl As String = "https://github.com/MoscaDotTo/Winapp2"
+    Private Const LatestDownloadUrl As String = RepoUrl & "/releases/latest/download/"
 
     ' 12 category lists (index matches FileSectionHeaders)
     Private ReadOnly _categories As New List(Of List(Of winapp2entry))
@@ -73,8 +73,13 @@ Public Class winapp2file
         End Get
     End Property
 
-    ''' <summary>Indicates whether this is the non-CCleaner variant of winapp2.ini</summary>
-    Public ReadOnly Property IsNCC As Boolean
+    ''' <summary>
+    ''' The flavor the file's <c> ; Flavor: </c> preamble line names, or <c> Nothing </c> when
+    ''' it has no such line or names an unknown flavor. A file without a flavor gets the header
+    ''' that names none, since guessing would mislabel an older copy of any flavor. Only a run
+    ''' told the flavor on the command line sets it.
+    ''' </summary>
+    Public Property Flavor As WinappFlavor?
 
     ''' <summary>
     ''' The version comment string, e.g. "; Version: 260219". It's <c> ; Version: 000000 </c>
@@ -130,7 +135,7 @@ Public Class winapp2file
             _categories.Add(New List(Of winapp2entry))
         Next
 
-        IsNCC = file.Comments.Any(Function(c) c.Text.Contains(NCCMarkerText))
+        Flavor = ReadFlavor(file)
 
         Version = DetermineVersionString(file, useTodaysDate)
 
@@ -155,6 +160,44 @@ Public Class winapp2file
         End If
 
         Return "; Version: 000000"
+
+    End Function
+
+    ''' <summary>
+    ''' Returns the flavor named by the first <c> ; Flavor: </c> line in the preamble: the
+    ''' comments before the first section that has a line number. Sections built in code have
+    ''' none, so a file made only of those treats all its comments as preamble.
+    ''' </summary>
+    '''
+    ''' <param name="file">A winapp2.ini format <c> iniFile </c></param>
+    '''
+    ''' <returns>
+    ''' The flavor, <br />
+    ''' <c> Nothing </c> if no preamble line names a known one
+    ''' </returns>
+    Private Shared Function ReadFlavor(file As iniFile) As WinappFlavor?
+
+        Dim firstSectionLine = Integer.MaxValue
+
+        For Each section In file
+            If section.StartingLineNumber > 0 Then firstSectionLine = Math.Min(firstSectionLine, section.StartingLineNumber)
+        Next
+
+        For Each comment In file.Comments
+
+            If comment.LineNumber >= firstSectionLine Then Exit For
+
+            Dim m = FlavorLine.Match(comment.Text)
+            If Not m.Success Then Continue For
+
+            Dim parsed = WinappFlavorInfo.ParseName(m.Groups(1).Value)
+            If Not parsed.HasValue Then gLog($"Ignoring an unknown flavor: {comment.Text}")
+
+            Return parsed
+
+        Next
+
+        Return Nothing
 
     End Function
 
@@ -186,10 +229,10 @@ Public Class winapp2file
     ''' Returns all entries as a single <c> iniFile </c> in winapp2.ini order. <br /> <br />
     '''
     ''' We re-emit the two pieces of preamble state this class carries, the version string and
-    ''' the non-CCleaner marker, as comments on the returned file. Without them
-    ''' a round trip through the winapp2 layer silently resets the version to
-    ''' <c> 000000 </c> and the file's identity to the CCleaner variant, since both are read
-    ''' back off <c> iniFile.Comments </c> by this class' own constructor and by Diff
+    ''' the flavor, as comments on the returned file. Without them a round trip through the
+    ''' winapp2 layer silently resets the version to <c> 000000 </c> and forgets the flavor,
+    ''' since this class' constructor reads both back off <c> iniFile.Comments </c>, and Diff
+    ''' reads the version there too
     ''' </summary>
     Public Function ToIni() As iniFile
 
@@ -197,8 +240,8 @@ Public Class winapp2file
 
         out.Comments.Add(New iniComment(Version, 1))
 
-        If IsNCC Then
-            out.Comments.Add(New iniComment(NCCMarkerComment, 2))
+        If Flavor.HasValue Then
+            out.Comments.Add(New iniComment($"; Flavor: {WinappFlavorInfo.Lookup(Flavor.Value).DisplayName}", 2))
         End If
 
         For Each entry In Entries
@@ -292,35 +335,54 @@ Public Class winapp2file
     End Function
 
     ''' <summary>
-    ''' Returns the complete winapp2.ini text: the license and links preamble, then each labeled
-    ''' section that has entries, wrapped in comments carrying its name and entry count, then
-    ''' the main section
+    ''' Returns the complete winapp2.ini text: the header, then each labeled section that has
+    ''' entries, wrapped in comments carrying its name and entry count, then the main section.
+    ''' <br /><br />
+    '''
+    ''' The header's first two lines, the version and the entry count, are read by the
+    ''' updater, Diff and the build, so their format is fixed. A file with a
+    ''' <see cref="Flavor"/> gets a <c> ; Flavor: </c> third line, a description and links to
+    ''' its own release assets. One without gets the same header minus those, linking to the
+    ''' latest release.
     ''' </summary>
     Public Function ToWinapp2String() As String
 
         Dim builder As New StringBuilder()
-        Dim fileName = If(IsNCC, "Winapp2 (Non-CCleaner version)", "Winapp2")
-        Dim licLink  = If(IsNCC,
-            "https://github.com/MoscaDotTo/Winapp2/blob/master/Non-CCleaner/License.md",
-            "https://github.com/MoscaDotTo/Winapp2/blob/master/License.md")
 
         builder.AppendLine(Version)
         builder.AppendLine($"; # of entries: {Count:#,###}")
-        builder.AppendLine(";")
-        builder.AppendLine($"; {fileName}.ini is fully licensed under the CC-BY-SA-4.0 license agreement. Please refer to our license agreement before using Winapp2.ini: {licLink}")
-        builder.AppendLine($"; You may copy, modify, remix, share, show, and transmit {fileName} but you must redistribute under the same license and you must attribute the original work to the winapp2 project")
-        builder.AppendLine(";")
 
-        If IsNCC Then
-            builder.AppendLine(NCCMarkerComment)
-            builder.AppendLine("; Do not use this file for CCleaner as the extra cleaners may cause conflicts with CCleaner.")
+        If Flavor.HasValue Then
+
+            Dim info = WinappFlavorInfo.Lookup(Flavor.Value)
+
+            builder.AppendLine($"; Flavor: {info.DisplayName}")
+            builder.AppendLine(";")
+            For Each line In info.Description : builder.AppendLine($"; {line}") : Next
+            builder.AppendLine(";")
+            builder.AppendLine("; Latest copy of this file:")
+            builder.AppendLine($";   {LatestDownloadUrl}{info.AssetName}")
+            builder.AppendLine("; Changelog for the latest release:")
+            builder.AppendLine($";   {LatestDownloadUrl}{info.ChangelogAssetName}")
+
+        Else
+
+            builder.AppendLine(";")
+            builder.AppendLine("; Latest copy of winapp2.ini, in every flavor:")
+            builder.AppendLine($";   {RepoUrl}/releases/latest")
+
         End If
 
-        builder.AppendLine($"; You can get the latest Winapp2.ini here: https://github.com/MoscaDotTo/Winapp2")
-        builder.AppendLine($"; Any contributions are appreciated. Please refer to our ReadMe to learn to make your own entries here: https://github.com/MoscaDotTo/Winapp2/blob/master/README.md")
         builder.AppendLine(";")
-        builder.AppendLine($"; Try out Winapp2ool for many useful additional features including updating and trimming Winapp2.ini: https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe")
-        builder.AppendLine($"; You can find the Winapp2ool ReadMe here: https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/Readme.md")
+        builder.AppendLine("; Winapp2ool installs, updates and trims this file:")
+        builder.AppendLine($";   {LatestDownloadUrl}winapp2ool.exe")
+        builder.AppendLine(";")
+        builder.AppendLine("; winapp2.ini is licensed under CC BY-SA 4.0. You may share and adapt it if you credit the")
+        builder.AppendLine("; winapp2 project and release your changes under the same license:")
+        builder.AppendLine($";   {RepoUrl}/blob/master/License.md")
+        builder.AppendLine(";")
+        builder.AppendLine("; This file is built automatically from the winapp2 repository. To add or fix an entry, see:")
+        builder.AppendLine($";   {RepoUrl}/blob/master/CONTRIBUTING.md")
 
         For i = 0 To _categories.Count - 2
 

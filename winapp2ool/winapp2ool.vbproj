@@ -224,6 +224,7 @@
     <Compile Include="modules\winappdebug\tool\LintReconciler.vb" />
     <Compile Include="modules\winappdebug\tool\WinappDebug.vb" />
     <Compile Include="modules\maintool\tool\Winapp2ool.vb" />
+    <Compile Include="modules\maintool\tool\WinappFlavorInfo.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
       <AutoGen>True</AutoGen>

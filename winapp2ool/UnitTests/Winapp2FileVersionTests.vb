@@ -20,7 +20,7 @@ Option Strict On
 Imports System.Text
 
 ''' <summary>
-''' Tests for the survival of the version comment and the non-CCleaner marker across the
+''' Tests for the survival of the version comment and the flavor line across the
 ''' <c> iniFile </c> to <c> winapp2file </c> round trip. Diff reads the version off the
 ''' first comment of the file <see cref="winapp2ool.winapp2file.ToIni"/> returns to build its header
 ''' </summary>
@@ -94,37 +94,112 @@ Imports System.Text
 
     End Sub
 
+    ''' <summary>Returns <see cref="VersionedFile"/> with <paramref name="line"/> after its entry count</summary>
+    ''' <param name="line">A preamble comment line, without its line break</param>
+    Private Shared Function WithPreambleLine(line As String) As String
+
+        Return VersionedFile.Replace("; # of entries: 2" & vbCrLf, "; # of entries: 2" & vbCrLf & line & vbCrLf)
+
+    End Function
+
     ''' <summary>
-    ''' The non-CCleaner marker must survive the round trip too, since it selects the header text
-    ''' and license link written by <c> ToWinapp2String </c>, so losing it mislabels the file
+    ''' The flavor must survive the round trip too, since it selects the header text and links
+    ''' <c> ToWinapp2String </c> writes, so losing it unlabels the file
     ''' </summary>
-    <TestMethod()> Public Sub ToIniPreservesNCCMarker()
+    <TestMethod()> Public Sub FlavorSurvivesRepeatedRoundTrips()
 
-        Dim nccText = VersionedFile.Replace("; # of entries: 2" & vbCrLf,
-            "; # of entries: 2" & vbCrLf &
-            "; This is the non-CCleaner version of Winapp2 that contains extra entries that were removed due to them being added to CCleaner." & vbCrLf)
+        Dim first As New winapp2ool.winapp2file(MakeIni(WithPreambleLine("; Flavor: BleachBit")))
+        Assert.AreEqual(winapp2ool.WinappFlavor.BleachBit, first.Flavor)
 
-        Dim first As New winapp2ool.winapp2file(MakeIni(nccText))
-        Assert.IsTrue(first.IsNCC, "the fixture was not recognized as non-CCleaner")
+        Dim third As New winapp2ool.winapp2file(New winapp2ool.winapp2file(first.ToIni()).ToIni())
+        Assert.AreEqual(winapp2ool.WinappFlavor.BleachBit, third.Flavor, "ToIni dropped the flavor")
 
-        Dim second As New winapp2ool.winapp2file(first.ToIni())
-        Assert.IsTrue(second.IsNCC, "ToIni dropped the non-CCleaner marker")
-        Assert.IsTrue(second.ToWinapp2String().Contains("Winapp2 (Non-CCleaner version)"))
+        Dim text = third.ToWinapp2String()
+        StringAssert.Contains(text, "; Flavor: BleachBit")
+        StringAssert.Contains(text, "/releases/latest/download/winapp2-bleachbit.ini")
+        StringAssert.Contains(text, "/releases/latest/download/changelog-bleachbit.txt")
 
     End Sub
 
     ''' <summary>
-    ''' A CCleaner-variant file must not pick up the marker from its own round trip, and
-    ''' <c> ToIni </c> gives it only the version comment
+    ''' The flavor line accepts the display name or the enum name, in any case and spacing
     ''' </summary>
-    <TestMethod()> Public Sub RoundTripDoesNotInventNCCMarker()
+    <TestMethod()> Public Sub FlavorNamesParse()
 
-        Dim first As New winapp2ool.winapp2file(MakeIni(VersionedFile))
-        Dim second As New winapp2ool.winapp2file(first.ToIni())
+        Assert.AreEqual(winapp2ool.WinappFlavor.NonCCleaner, winapp2ool.WinappFlavorInfo.ParseName("Base"))
+        Assert.AreEqual(winapp2ool.WinappFlavor.NonCCleaner, winapp2ool.WinappFlavorInfo.ParseName("NonCCleaner"))
+        Assert.AreEqual(winapp2ool.WinappFlavor.SystemNinja, winapp2ool.WinappFlavorInfo.ParseName("system ninja"))
+        Assert.AreEqual(winapp2ool.WinappFlavor.SystemNinja, winapp2ool.WinappFlavorInfo.ParseName("SystemNinja"))
+        Assert.AreEqual(winapp2ool.WinappFlavor.CCleaner7, winapp2ool.WinappFlavorInfo.ParseName("CCleaner 7"))
+        Assert.IsFalse(winapp2ool.WinappFlavorInfo.ParseName("Winapp3").HasValue)
 
-        Assert.IsFalse(first.IsNCC)
-        Assert.IsFalse(second.IsNCC)
-        Assert.AreEqual(1, first.ToIni().Comments.Count)
+    End Sub
+
+    ''' <summary>
+    ''' Every flavor's display name parses back to that flavor, so a new flavor can't ship a
+    ''' header its own file can't read
+    ''' </summary>
+    <TestMethod()> Public Sub EveryFlavorHasHeaderInfo()
+
+        For Each flavor As winapp2ool.WinappFlavor In [Enum].GetValues(GetType(winapp2ool.WinappFlavor))
+
+            Dim info = winapp2ool.WinappFlavorInfo.Lookup(flavor)
+            Assert.AreEqual(flavor, winapp2ool.WinappFlavorInfo.ParseName(info.DisplayName), flavor.ToString())
+            Assert.AreNotEqual(0, info.Description.Count, flavor.ToString())
+
+        Next
+
+    End Sub
+
+    ''' <summary>
+    ''' An unknown flavor name is treated as no flavor, and a file without one gets the header
+    ''' that names none and gains no flavor line on a round trip
+    ''' </summary>
+    <TestMethod()> Public Sub NoFlavorGivesTheGenericHeader()
+
+        For Each fileText In {VersionedFile, WithPreambleLine("; Flavor: Winapp3")}
+
+            Dim first As New winapp2ool.winapp2file(MakeIni(fileText))
+            Dim second As New winapp2ool.winapp2file(first.ToIni())
+
+            Assert.IsFalse(first.Flavor.HasValue)
+            Assert.IsFalse(second.Flavor.HasValue)
+            Assert.AreEqual(1, first.ToIni().Comments.Count)
+
+            Dim header = second.ToWinapp2String()
+            Assert.IsFalse(header.Contains("; Flavor:"))
+            StringAssert.Contains(header, "/releases/latest" & vbCrLf)
+
+        Next
+
+    End Sub
+
+    ''' <summary>
+    ''' A <c> ; Flavor: </c> comment below the first entry isn't part of the preamble
+    ''' </summary>
+    <TestMethod()> Public Sub FlavorLineAfterFirstSectionIsIgnored()
+
+        Dim fileText = VersionedFile.Replace("[Test Entry B *]", "; Flavor: Tron" & vbCrLf & "[Test Entry B *]")
+        Dim wa2 As New winapp2ool.winapp2file(MakeIni(fileText))
+
+        Assert.IsFalse(wa2.Flavor.HasValue)
+
+    End Sub
+
+    ''' <summary>
+    ''' The version and the entry count stay the header's first two lines, with or without a
+    ''' flavor, since the updater, Diff and the build read them there
+    ''' </summary>
+    <TestMethod()> Public Sub HeaderStartsWithVersionAndCount()
+
+        For Each fileText In {VersionedFile, WithPreambleLine("; Flavor: Tron")}
+
+            Dim lines = New winapp2ool.winapp2file(MakeIni(fileText)).ToWinapp2String().Split({vbCrLf}, StringSplitOptions.None)
+
+            Assert.AreEqual("; Version: 260219", lines(0))
+            Assert.AreEqual("; # of entries: 2", lines(1))
+
+        Next
 
     End Sub
 
