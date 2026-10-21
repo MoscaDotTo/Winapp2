@@ -39,6 +39,14 @@ Public Module commandLineHandler
     Public Property IsCommandLineMode As Boolean = False
 
     ''' <summary>
+    ''' The flavor a flavor flag named on this command line, or <c> Nothing </c> when none did.
+    ''' Unlike <see cref="CurrentWinappFlavor"/>, which always holds the saved setting, it says
+    ''' the run was told a flavor, so WinappDebug and Flavorizer stamp it on the file they
+    ''' write.
+    ''' </summary>
+    Public Property FlavorFromCommandLine As WinappFlavor? = Nothing
+
+    ''' <summary>
     ''' Each module's file slot count and command line handler, keyed by every form of its
     ''' identifier. The lookup is case-sensitive.
     ''' </summary>
@@ -287,8 +295,9 @@ Public Module commandLineHandler
     End Sub
 
     ''' <summary>
-    ''' Sets <see cref="CurrentWinappFlavor"/> to <paramref name="flavorValue"/> and removes
-    ''' <paramref name="flavorArg"/> from <see cref="cmdargs"/>, if the argument is there
+    ''' Sets <see cref="CurrentWinappFlavor"/> and <see cref="FlavorFromCommandLine"/> to
+    ''' <paramref name="flavorValue"/> and removes <paramref name="flavorArg"/> from
+    ''' <see cref="cmdargs"/>, if the argument is there
     ''' </summary>
     ''' 
     ''' <param name="flavorArg">
@@ -305,6 +314,7 @@ Public Module commandLineHandler
         gLog($"Found flavor argument: {flavorArg}")
 
         CurrentWinappFlavor = flavorValue
+        FlavorFromCommandLine = flavorValue
         cmdargs.Remove(flavorArg)
 
         gLog($"Flavor set to: {flavorValue}")

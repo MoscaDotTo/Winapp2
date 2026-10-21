@@ -1298,6 +1298,13 @@ Public Module Transmute
     ''' Optional, Default: <c> True </c>
     ''' </param>
     '''
+    ''' <param name="stampFlavor">
+    ''' The flavor to name in the output's header when <paramref name="isWinapp"/> is
+    ''' <c> True </c>. When <c> Nothing </c>, the output keeps the flavor
+    ''' <paramref name="baseFile"/> names, if any. <br /><br />
+    ''' Optional, Default: <c> Nothing </c>
+    ''' </param>
+    '''
     Public Sub Flavorize(ByRef baseFile As iniFile,
                                outputFile As iniFile,
                          ByRef menuOutput As MenuSection,
@@ -1307,7 +1314,8 @@ Public Module Transmute
                       Optional keyValueRemovalFile As iniFile = Nothing,
                       Optional sectionReplacementFile As iniFile = Nothing,
                       Optional keyReplacementFile As iniFile = Nothing,
-                      Optional isWinapp As Boolean = True)
+                      Optional isWinapp As Boolean = True,
+                      Optional stampFlavor As WinappFlavor? = Nothing)
 
         Dim flavorizingMsg = $"Flavorizing {baseFile.Name}"
         menuOutput.AddColoredLine(flavorizingMsg, ConsoleColor.Magenta)
@@ -1338,6 +1346,7 @@ Public Module Transmute
         If isWinapp Then
 
             Dim wf As New winapp2file(baseFile)
+            If stampFlavor.HasValue Then wf.Flavor = stampFlavor
             wf.SortEntries()
             saved = outputFile.OverwriteToFile(wf.ToWinapp2String())
             baseFile = wf.ToIni()

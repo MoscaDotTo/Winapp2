@@ -82,7 +82,7 @@ Public Module Flavorizer
 
         If autoDetect Then DetectFlavorFiles(FlavorizerFile9.Dir)
 
-        If FlavorizerFile1.Name.Length > 0 Then initFlavorizer()
+        If FlavorizerFile1.Name.Length > 0 Then initFlavorizer(FlavorFromCommandLine)
 
     End Sub
 
@@ -91,7 +91,13 @@ Public Module Flavorizer
     ''' is suppressed. We don't check the base file for content, and we report completion even
     ''' when <see cref="Flavorize"/> couldn't save the output.
     ''' </summary>
-    Public Sub initFlavorizer()
+    '''
+    ''' <param name="stampFlavor">
+    ''' The flavor to name in the output's header. When <c> Nothing </c>, the output keeps the
+    ''' base file's. Only the command line passes one. <br /><br />
+    ''' Optional, Default: <c> Nothing </c>
+    ''' </param>
+    Public Sub initFlavorizer(Optional stampFlavor As WinappFlavor? = Nothing)
 
         clrConsole()
 
@@ -119,7 +125,7 @@ Public Module Flavorizer
             output.AddColoredLine(numFilesApplyingMsg, ConsoleColor.Cyan)
             gLog(numFilesApplyingMsg)
 
-            performFlavorization(output)
+            performFlavorization(output, stampFlavor)
 
             Dim finishedMsg = "Flavorization completed successfully"
             output.AddBoxWithText(finishedMsg)
@@ -141,7 +147,10 @@ Public Module Flavorizer
     ''' </summary>
     '''
     ''' <param name="menuOutput">The <c> MenuSection </c> to which flavorization output lines are appended</param>
-    Private Sub performFlavorization(ByRef menuOutput As MenuSection)
+    '''
+    ''' <param name="stampFlavor">The flavor to name in the output's header, or <c> Nothing </c> to keep the base file's</param>
+    Private Sub performFlavorization(ByRef menuOutput As MenuSection,
+                                           stampFlavor As WinappFlavor?)
 
         Dim baseFile = iniFile.FromFile(FlavorizerFile1.Path())
         Dim saveFile = iniFile.Empty(FlavorizerFile2.Dir, FlavorizerFile2.Name)
@@ -159,7 +168,7 @@ Public Module Flavorizer
                       additionsFile,
                       sectionRemovalFile, keyNameRemovalFile, keyValueRemovalFile,
                       sectionReplacementFile, keyReplacementFile,
-                      FlavorizeAsWinapp)
+                      FlavorizeAsWinapp, stampFlavor)
 
         End Using
 

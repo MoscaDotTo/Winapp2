@@ -221,7 +221,7 @@ Public Module WinappDebug
 
         If cmdargs.Contains("UNIT_TESTING_HALT") Then Return
 
-        InitDebug()
+        InitDebug(FlavorFromCommandLine)
 
     End Sub
 
@@ -272,13 +272,20 @@ Public Module WinappDebug
     ''' <see cref="winappDebugFile3"/>. Returns without linting when the file is missing or
     ''' has no sections.
     ''' </summary>
-    Public Sub InitDebug()
+    '''
+    ''' <param name="stampFlavor">
+    ''' The flavor to name in the saved file's header, replacing whatever it named. When
+    ''' <c> Nothing </c>, the file keeps its own. Only the command line passes one. <br /><br />
+    ''' Optional, Default: <c> Nothing </c>
+    ''' </param>
+    Public Sub InitDebug(Optional stampFlavor As WinappFlavor? = Nothing)
 
         Dim inputFile = winappDebugFile1.Load(LintModuleSettingsChanged, NameOf(WinappDebug), NameOf(winappDebugFile1), NameOf(LintModuleSettingsChanged))
 
         If Not enforceFileHasContent(inputFile) Then Return
 
         Dim wa2 As New winapp2file(inputFile, UseCurrentDate)
+        If stampFlavor.HasValue Then wa2.Flavor = stampFlavor
 
         clrConsole()
         gLog("")
