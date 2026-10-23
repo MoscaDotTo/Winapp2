@@ -353,6 +353,8 @@ Public Class winapp2file
             builder.AppendLine($";   {LatestDownloadUrl}{info.AssetName}")
             builder.AppendLine("; Changelog for the latest release:")
             builder.AppendLine($";   {LatestDownloadUrl}{info.ChangelogAssetName}")
+            builder.AppendLine("; Each changelog compares one release with the one before it. To see what changed since your")
+            builder.AppendLine("; own copy, compare it with the latest using winapp2ool's Diff.")
 
         Else
 
@@ -363,7 +365,11 @@ Public Class winapp2file
         End If
 
         builder.AppendLine(";")
+        builder.AppendLine("; About winapp2.ini, and how to install it for your cleaner:")
+        builder.AppendLine($";   {RepoUrl}")
+        builder.AppendLine(";")
         builder.AppendLine("; Winapp2ool installs, updates and trims this file:")
+        builder.AppendLine($";   {RepoUrl}/tree/master/winapp2ool")
         builder.AppendLine($";   {LatestDownloadUrl}winapp2ool.exe")
         builder.AppendLine(";")
         builder.AppendLine("; winapp2.ini is licensed under CC BY-SA 4.0. You may share and adapt it if you credit the")
@@ -387,9 +393,7 @@ Public Class winapp2file
 
         builder.AppendLine()
 
-        If _categories.Last.Count > 0 Then
-            builder.Append(CategoriesToString(_categories.Last))
-        End If
+        If _categories.Last.Count > 0 Then builder.Append(CategoriesToString(_categories.Last))
 
         Return builder.ToString()
 
