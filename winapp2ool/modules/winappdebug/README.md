@@ -1309,9 +1309,6 @@ The second reports nothing at all:
 ###### **Output file (`no-flag.ini`) without the flag**
 
 ```ini
-;
-; Vivaldi (2)
-
 [Vivaldi Web Browsing Cookies *]
 LangSecRef=3033
 DetectFile=%LocalAppData%\Vivaldi\User Data
@@ -1321,16 +1318,11 @@ FileKey1=%LocalAppData%\Vivaldi\User Data\*\Network|Cookies;Cookies-journal
 LangSecRef=3033
 DetectFile=%LocalAppData%\Vivaldi\User Data
 FileKey1=%LocalAppData%\Vivaldi\User Data\*\Cache|*|RECURSE
-
-; End of Vivaldi
 ```
 
 ###### **Output file (`with-flag.ini`) with `-keepdefaults`**
 
 ```ini
-;
-; Vivaldi (2)
-
 [Vivaldi Web Browsing Cookies *]
 LangSecRef=3033
 DetectFile=%LocalAppData%\Vivaldi\User Data
@@ -1341,8 +1333,6 @@ FileKey1=%LocalAppData%\Vivaldi\User Data\*\Network|Cookies;Cookies-journal
 LangSecRef=3033
 DetectFile=%LocalAppData%\Vivaldi\User Data
 FileKey1=%LocalAppData%\Vivaldi\User Data\*\Cache|*|RECURSE
-
-; End of Vivaldi
 ```
 
 **Explanation**

@@ -26,32 +26,25 @@ Imports System.Text
 Public Class winapp2file
 
     ''' <summary>
-    ''' The 12 section header labels in winapp2.ini order.
+    ''' The section header labels in winapp2.ini order.
     ''' Empty string is the unlabeled main section (last).
     ''' </summary>
     Public Shared ReadOnly Property FileSectionHeaders As New List(Of String) From {
-        "Chrome/Chromium based browsers",
-        "Edge Chromium",
-        "Vivaldi", "Brave",
-        "Opera",
-        "Firefox/Mozilla based browsers",
-        "Thunderbird", "Internet Explorer",
         "Language entries",
         "Potentially very long scan time (and also dangerous) entries",
         "Dangerous entries",
         ""
     }
 
-    ' Category routing values, in the same order as FileSectionHeaders indices 0–10
+    ' Category routing values, in the same order as the labeled FileSectionHeaders
     Private Shared ReadOnly LeadingCategories As New List(Of String) From {
-        "3029", "3006", "3033", "3034", "3027", "3026", "3030", "3001",
         "Language Files", "Dangerous Long", "Dangerous"
     }
 
     Private Const RepoUrl As String = "https://github.com/MoscaDotTo/Winapp2"
     Private Const LatestDownloadUrl As String = RepoUrl & "/releases/latest/download/"
 
-    ' 12 category lists (index matches FileSectionHeaders)
+    ' One category list per FileSectionHeaders entry, at the same index
     Private ReadOnly _categories As New List(Of List(Of winapp2entry))
 
     ' Dirty-cache for flat Entries view
@@ -97,8 +90,8 @@ Public Class winapp2file
     End Property
 
     ''' <summary>
-    ''' The 12 per-category entry lists in <c> FileSectionHeaders </c> order.
-    ''' Each inner list corresponds to one winapp2.ini section (index 11 is the unlabeled main section).
+    ''' The per-category entry lists in <c> FileSectionHeaders </c> order.
+    ''' Each inner list corresponds to one winapp2.ini section (the last is the unlabeled main section).
     ''' </summary>
     Public ReadOnly Property Categories As IReadOnlyList(Of IReadOnlyList(Of winapp2entry))
         Get
