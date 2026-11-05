@@ -1,6 +1,6 @@
 # Trim
 
-**Trim** is a winapp2ool module that reduces the full database down to the set of entries that apply to the machine on which it runs.
+**Trim** is a winapp2ool module for end users that reduces the full winapp2.ini database down to the set of entries that apply to the machine on which it runs.
 
 ### What does Trim do?
 
