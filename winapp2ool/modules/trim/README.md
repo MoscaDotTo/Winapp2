@@ -1,15 +1,14 @@
 # Trim
 
-**Trim** is a winapp2ool module that strips winapp2.ini down to the entries that apply to the machine on which it runs. Every entry carries detection criteria (a registry key, a file path, a Windows version requirement) saying whether the software it targets is actually installed. Trim checks those criteria against the current system and drops the entries whose software isn't there.
+**Trim** is a winapp2ool module that reduces the full database down to the set of entries that apply to the machine on which it runs.
 
 ### What does Trim do?
 
-Trim reads a winapp2.ini (off disk, or downloaded from GitHub), tests every entry against the machine it is running on, and saves a copy with only the entries that passed. 
+Every entry in winapp2.ini has detection criteria (a registry key or a file path) used to determine whether the software it cleans is installed. Trim reads a winapp2.ini, from disk or straight from GitHub, checks those keys against the current machine, and saves a copy holding only the entries that passed.
 
 ### Why Trim?
 
-- Performance: CCleaner evaluates every entry in winapp2.ini when it starts, and it is slow about it. Trimming typically removes around 90% of the file, so CCleaner starts faster
-- Automation: `winapp2ool -trim -d` downloads the latest database and gives you a machine-specific copy in one command
+CCleaner evaluates every entry in winapp2.ini when it starts, and it is slow about it. Trimming typically removes around 90% of the file, so CCleaner starts faster. Trim can also fetch the latest database itself, eg. `winapp2ool -trim -d` gets you a copy fitted to your machine in one command.
 
 ---
 
@@ -37,7 +36,6 @@ Trim reads a winapp2.ini (off disk, or downloaded from GitHub), tests every entr
     - [Detect](#detect)
     - [DetectFile](#detectfile)
     - [SpecialDetect](#specialdetect)
-    - [Entries Without Detection Keys](#entries-without-detection-keys)
     - [Environment Variables](#environment-variables)
     - [VirtualStore Handling](#virtualstore-handling)
 
@@ -55,15 +53,15 @@ Trim reads a winapp2.ini (off disk, or downloaded from GitHub), tests every entr
 
 # Quick Start
 
-### Common Workflow (local file)
+### From a local file
 
-1. Place your `winapp2.ini` in the same directory as winapp2ool
+1. Put your `winapp2.ini` in the same folder as winapp2ool
 2. Open Trim from the winapp2ool main menu
-3. Run. Trim evaluates every entry and saves the result
+3. Run. Trim checks every entry and saves the result
 
-By default, the trimmed file overwrites the input `winapp2.ini`. Use **Choose save target** to save to a different path first.
+The trimmed file overwrites the input `winapp2.ini` unless you pick another path with **Choose save target** first.
 
-### Common Workflow (download and trim)
+### Downloading first
 
 1. Open Trim
 2. Enable **Toggle downloading** to use the latest winapp2.ini from GitHub
@@ -132,33 +130,31 @@ Command-line runs always start from Trim's defaults. Settings you saved from the
 
 # Includes and Excludes
 
-Two optional override files let you overrule detection. Trim consults both before it looks at any detection key.
+Two optional files let you overrule detection; Trim reads both before it looks at any detection key.
 
-**Include list** (`includes.ini` by default): Name an entry here and it is always kept, whether or not its detection criteria are satisfied. Turn it on with **Toggle include list** in the menu, or `-includes` on the command line.
+The include list (`includes.ini` by default) keeps every entry it names, whether or not the entry's detection keys pass. Turn it on with **Toggle include list** in the menu, or `-includes` on the command line.
 
-**Exclude list** (`excludes.ini` by default): Entries named here are always removed, even when their detection criteria pass. **Toggle exclude list** in the menu, `-excludes` on the command line.
+The exclude list (`excludes.ini` by default) removes every entry it names, even when the entry's detection keys pass. Turn it on with **Toggle exclude list** in the menu, or `-excludes` on the command line.
 
-Each file is a plain ini file where section names are the entry names to match:
+Both are plain ini files whose section names are the entries to match:
 
 ```ini
 [Some Application *]
 [Another Application *]
 ```
 
-Whatever keys those sections contain is ignored, so you can leave them empty. 
-
-See [Example 4](EXAMPLES.md#example-4-never-trim-and-always-trim-overrides) 
+Trim ignores any keys in those sections, so you can leave them empty. See [Example 4](EXAMPLES.md#example-4-never-trim-and-always-trim-overrides).
 
 ---
 
 # Output Formatting
 
-Trim always writes its output as a fully formatted winapp2.ini file:
+Trim always writes a fully formatted winapp2.ini:
 
-- Entries are sorted alphabetically and grouped into the winapp2.ini ordering for the selected flavor 
-- The winapp2.ini preamble comments are regenerated at the top of the file: the `; Version:` line is carried over from the input file (or written as `; Version: 000000` if the input had none), and the `; # of entries:` line is updated to the post-trim count
-- **Comments are not preserved.** Comments in the input file do not appear in the output. Since the default save target overwrites the input file, trimming an annotated custom file in place will lose your comments
-- Key order within entries is unchanged, except that entries receiving [VirtualStore keys](#virtualstore-handling) have their keys renumbered
+- Entries are sorted alphabetically and grouped with any winapp3.ini entries preceding all winapp2.ini entries
+- The header comments at the top of the file are rewritten. The `; Version:` line comes from the input file (`; Version: 000000` if it had none), and `; # of entries:` lists the count after trimming
+- **Comments are not preserved.** None of the input file's comments reach the output, and since the default save target is the input file, trimming an annotated file in place loses them
+- Keys keep their order within each entry, except in entries that gain [VirtualStore keys](#virtualstore-handling), which are renumbered
 
 ---
 
@@ -166,19 +162,15 @@ Trim always writes its output as a fully formatted winapp2.ini file:
 
 ### Save to a Different File First
 
-The default output overwrites the input `winapp2.ini`, and [comments are not preserved](#output-formatting). Save to a different file (e.g. `winapp2-trimmed.ini`) the first time so you can verify the results before replacing your working copy.
+By default, Trim overwrites the input `winapp2.ini`, and [comments are not preserved](#output-formatting). The first time, save to a different file (e.g. `winapp2-trimmed.ini`) and check the result before you replace your working copy.
 
 ### Re-trim After Changes
 
-A trimmed file only describes the winapp2.ini it came from and the software that was installed when it ran. Update winapp2.ini or install a new application and it is out of date, and an out of date trimmed file has no entries covering whatever you just installed. Re-trim after either kind of change.
+A trimmed file matches the winapp2.ini from which it came and the software installed when you ran Trim. Re-trim after winapp2.ini updates or installing new software.
 
-### Download and Trim 
+### CCleaner 7
 
-You can skip keeping a local copy of the database entirely. **Toggle downloading** in the menu, or `-d` on the command line, fetches the current winapp2.ini and trims it in one operation. 
-
-### Trimmed Files and CCleaner Performance
-
-CCleaner evaluates every entry in winapp2.ini when it starts, so a big file means a slow launch. If you are on CCleaner 7, CC7Patcher can trim the file for you before patching it in.
+[CC7Patcher](../cc7patcher/readme.md) can trim winapp2.ini itself before it patches the entries into CCleaner 7, so you don't need to run Trim first.
 
 ---
 
@@ -191,33 +183,34 @@ CCleaner evaluates every entry in winapp2.ini when it starts, so a big file mean
 | "winapp2.ini was empty or not found" (red menu header) | The input file exists but contains no entries |
 | "Failed to download winapp2.ini" (red menu header) | The download didn't complete; nothing is saved and the run exits 1 |
 | "winapp2.ini can't be downloaded in offline mode" | `-d` was given with `-offline`; nothing is saved and the run exits 1 |
-| "\<path\> contains a malformed environment variable and was ignored" (log only) | A `DetectFile` value has a broken `%Variable%`; the entry is retained |
+| "\<path\> contains a malformed environment variable and was ignored" (log only) | A `DetectFile` value has a broken `%Variable%`; the entry is kept |
 | "Your key seems to be malformatted (bad root? ...)" (log only) | A `Detect` key uses a registry root other than `HKCU`/`HKLM`/`HKU`/`HKCR` |
 
 | Symptom | Cause |
 |:-|:-|
 | An entry for installed software was removed | The `DetectFile`/`Detect` path doesn't match the actual installation location (e.g. a portable or non-standard install location). [How Trimming Works](#how-trimming-works) explains how each path is checked |
+| An entry for software that isn't installed was kept | The `DetectFile`/`Detect` path exists on the current machine. If you previously had the software installed, it may have left this folder or registry key behind when it was uninstalled. Otherwise, consider filing an issue against the entry if you believe the detection criteria is incorrect. | 
 | Download option is unavailable in the menu | winapp2ool is in offline mode |
 
 ---
 
 # How Trimming Works
 
-This section is for people writing or reviewing winapp2.ini entries, or trying to understand why Trim kept or removed an entry. It explains how Trim reads each detection criteria, which decide whether an entry survives the trim. You are not expected to understand this in order to use Trim.
+This section intended for people who write or review winapp2.ini entries, or who want to know why Trim kept or removed one. It covers technical details about how Trim reads each detection key. You do not need to understand this in order to trim winapp2.ini for your system.
 
 ## Evaluation Order
 
-Each entry is checked on its own, in this order, stopping at the first step that gives an answer.
+Trim checks each entry in this order, and stops at the first step that gives an answer.
 
-1. **Include list** (if enabled): entry name listed → **kept**
-2. **Exclude list** (if enabled): entry name listed → **removed**
-3. **DetectOS**: present, not satisfied → **removed**
-4. **Detect**: any Detect registry path exists → **kept**
-5. **DetectFile**: any DetectFile path exists → **kept**
-6. **SpecialDetect**: any matches → **kept**
-7. Entry has *only* a DetectOS key and it was satisfied in step 3 → **kept**
-8. Entry has no detection keys of any kind → **kept**
-9. Otherwise → **removed**
+1. Include list (if enabled): the entry is named → kept
+2. Exclude list (if enabled): the entry is named → removed
+3. `DetectOS`: present but not satisfied → removed
+4. `Detect`: any of its registry paths exists → kept
+5. `DetectFile`: any of its paths exists → kept
+6. `SpecialDetect`: any value matches → kept
+7. The entry's *only* detection key is a `DetectOS` that passed step 3 → kept
+8. The entry has no detection keys at all → kept
+9. Otherwise → removed
 
 [Anatomy of a Trim](EXAMPLES.md#example-1-anatomy-of-a-trim) runs six entries through these steps and says which step decided each one.
 
@@ -237,22 +230,22 @@ A failed version check removes the entry on the spot; Trim never looks at its ot
 
 `Detect` names a registry path that Trim checks for existence.
 
-- Paths under `HKLM\Software` are also checked under `HKLM\SOFTWARE\WOW6432Node`, so 32-bit applications on 64-bit Windows are found 
+- Trim also checks a path under `HKLM\Software` under `HKLM\SOFTWARE\WOW6432Node`, where 32-bit programs on 64-bit Windows write
 - If a key can't be read because of permissions, Trim assumes it exists and keeps the entry
 
 ## DetectFile
 
-`DetectFile` names a path that Trim checks for existence. It can point at either a file or a folder.
+`DetectFile` names a file or folder that Trim checks for existence.
 
-- Wildcards (`*`) work anywhere in the path. Trim expands each wildcard segment against the folders actually on disk (the last segment against files too, eg. `%ProgramFiles%\App\*.exe`), and keeps the entry if any expansion resolves to something that exists. 
-- Paths under `%ProgramFiles%` are checked in both the native Program Files directory and the 32-bit `Program Files (x86)` directory. See [Environment Variables](#environment-variables)
+- Wildcards (`*`) work anywhere in the path. Trim expands each wildcard segment against the folders on disk (the last segment against files too, eg. `%ProgramFiles%\App\*.exe`) and keeps the entry if any expansion exists
+- Trim checks a path under `%ProgramFiles%` in both `Program Files` and `Program Files (x86)`. See [Environment Variables](#environment-variables)
 - If a folder can't be read because of permissions, Trim assumes the target exists and keeps the entry
 
 ###### Note: Wildcards in DetectFiles are fully supported in winapp2ool, but applications consuming winapp2.ini have varying support. Avoid using them when possible.
 
 ## SpecialDetect
 
-`SpecialDetect` is a deprecated CCleaner variable. Trim still handles it so that very old winapp2.ini files work. Four values are recognized:
+`SpecialDetect` is a deprecated CCleaner key. Trim still reads it so that very old winapp2.ini files work, and recognizes four values:
 
 | Value | What is checked |
 |:-|:-|
@@ -261,13 +254,9 @@ A failed version check removes the entry on the spot; Trim never looks at its ot
 | `DET_THUNDERBIRD` | `%AppData%\Thunderbird` |
 | `DET_OPERA` | `%AppData%\Opera Software` |
 
-If any of the associated paths or keys exists on the system, the entry is kept.
+If any of a value's paths or keys exists, the entry is kept.
 
 ###### Note: Many of the `DET_CHROME` browser identities belong to browsers that are no longer under active development and are left in-place for backwards compatibility only.
-
-## Entries Without Detection Keys
-
-Entries with no detection keys of any type are always kept
 
 ## Environment Variables
 
@@ -284,9 +273,9 @@ Trim expands standard Windows environment variables in `DetectFile` paths, plus 
 
 ###### Note: These variables only work in CCleaner, and are no longer shipped in the official winapp2.ini. Support for them is left in-place for backwards compatibility only.
 
-On 64-bit systems, `%ProgramFiles%` covers both the native Program Files directory and `Program Files (x86)`. `HKLM\Software` registry paths get the same treatment through `WOW6432Node`.
+On 64-bit systems, `%ProgramFiles%` covers both `Program Files` and `Program Files (x86)`.
 
-**Malformed variables:** a `DetectFile` whose `%` has no closing `%` (e.g. `%AppData\App`) counts as present, so the entry is kept. Trim notes it in the log:
+A `DetectFile` with a `%` that never closes (e.g. `%AppData\App`) counts as present, so the entry is kept, and Trim logs:
 
 ```
 <path> contains a malformed environment variable and was ignored. The entry will be retained
@@ -294,7 +283,7 @@ On 64-bit systems, `%ProgramFiles%` covers both the native Program Files directo
 
 ## VirtualStore Handling
 
-Pre-UAC applications that wrote to protected locations had those writes quietly redirected into the user's VirtualStore, and machines upgraded from older Windows versions still carry the leftovers. So for every entry that survives detection, Trim reads the `FileKey`, `RegKey`, and `ExcludeKey` values and adds keys for the matching VirtualStore locations, but only where those locations exist:
+Windows quietly redirected pre-UAC programs' writes to protected locations from those locations and into the user's VirtualStore, and machines upgraded from older Windows versions still carry the leftovers. So for every entry that survives detection, Trim reads its `FileKey`, `RegKey` and `ExcludeKey` values and adds keys for the matching VirtualStore locations, but only where those locations exist:
 
 | Key type | Original location | VirtualStore counterpart |
 |:-|:-|:-|
@@ -303,4 +292,4 @@ Pre-UAC applications that wrote to protected locations had those writes quietly 
 | FileKey / ExcludeKey | `%CommonProgramFiles%` | `%LocalAppData%\VirtualStore\Program Files*\Common Files` |
 | FileKey / ExcludeKey / RegKey | `HKLM\Software` | `HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE` |
 
-The original location matches in any case (`HKLM\SOFTWARE` too). For a RegKey naming a value (`HKLM\Software\App|Setting`), Trim checks that the key holding the value exists in the VirtualStore. On most systems no VirtualStore keys are generated at all. When keys are added, the entry's keys are renumbered. See [Example 5](EXAMPLES.md#example-5-virtualstore-key-generation).
+The original location matches in any case (`HKLM\SOFTWARE` too). For a RegKey naming a value (`HKLM\Software\App|Setting`), Trim checks that the key holding the value exists in the VirtualStore. Most systems get no VirtualStore keys at all. When Trim adds some, it renumbers the entry's keys. See [Example 5](EXAMPLES.md#example-5-virtualstore-key-generation).
