@@ -28,7 +28,7 @@ The transcripts below are taken from real runs. The current directory is shown a
 
 **Context**
 
-You want the current winapp2.ini database in the directory from which winapp2ool is currently running.
+You want the current winapp2.ini database in the directory from which winapp2ool runs.
 
 **Intent**
 
@@ -54,7 +54,7 @@ C:\Tools\winapp2\
 ```
 
 **Explanation**
-- No flavor flag was given, so the default flavor (CCleaner) was downloaded 
+- No flavor flag was given, so you got the default flavor, CCleaner
 - The save directory defaults to the current directory
 - Winapp2ool does not exit afterwards; it opens its main menu. See [Example 5](#example-5-silent-scriptable-downloads) for silent mode
 
@@ -108,12 +108,12 @@ C:\Tools\winapp2\ex2\
 ```
 
 **Explanation**
-- `-cc7` and `-sn` override the active flavor (base) 
+- `-cc7` and `-sn` override the active flavor (base)
 - Command-line runs never write settings, so the saved flavor is still base afterwards
 
 **Notes**
 
-The System Ninja flavor is named `winapp2.rules` which is why both files can land in one directory without the second overwriting the first
+The System Ninja flavor is named `winapp2.rules`, so both files can share one directory without the second overwriting the first.
 
 ---
 
@@ -146,8 +146,8 @@ C:\Tools\winapp2\ex3\bleachbit\2026-07\
 ```
 
 **Explanation**
-- Neither `ex3`, `bleachbit`, nor `2026-07` existed beforehand; all three were created
-- The BleachBit flavor of winapp2.ini is downloaded and placed in the newly created `C:\Tools\winapp2\ex3\bleachbit\2026-07`
+- None of `ex3`, `bleachbit` or `2026-07` existed beforehand. Downloader created all three before saving the file
+
 ---
 
 ### Example 4: Renaming the download
@@ -180,12 +180,12 @@ C:\Tools\winapp2\
 ```
 
 **Explanation**
-- `-1f` overrides the default name that the file argument would otherwise choose
+- `-1f` replaces the name the file argument would otherwise pick
 
 **Notes**
 
 - `1` and `winapp2` are interchangeable
-`-1f` also accepts a leading subdirectory: `-1f "\archive\winapp3.ini"` saves into `archive\` beneath the save directory, creating it if needed. See [Example 9](#example-9-winapp3ini-and-archived-entriesini)
+- `-1f` also accepts a leading subdirectory: `-1f "\archive\winapp3.ini"` saves into `archive\` beneath the save directory, creating it if needed. See [Example 9](#example-9-winapp3ini-and-archived-entriesini)
 
 ---
 
@@ -195,11 +195,11 @@ C:\Tools\winapp2\
 
 **Context**
 
-You want a scheduled task to refresh winapp2.ini overnight. The interactive behavior, the overwrite prompt, and the main menu that opens when the download finishes, would both hang it.
+You want a scheduled task to refresh winapp2.ini overnight. Either the overwrite prompt or the main menu that opens after the download would leave it hanging.
 
 **Intent**
 
-Download with no console output or requests for input
+Download with no console output and nothing waiting on input.
 
 **Command**
 ```
@@ -302,14 +302,14 @@ C:\Tools\winapp2\
 ```
 
 **Explanation**
-- The save directory was the directory from which winapp2ool was running, so winapp2ool performs an automatic update
+- The save directory was winapp2ool's own directory, so it updated itself instead of saving a copy
 - The download's signature verified against a key built into winapp2ool, and its version was newer than the running one
 - The running executable was renamed to `winapp2ool v<version>.exe.bak` before the new one took its place
 - A new winapp2ool process was started and the old one exited
 
 **Notes**
 
-Self-updating is disabled when winapp2ool is running from the Windows temp folder, or when .NET is older than 4.6. 
+Self-updating is disabled when winapp2ool is running from the Windows temp folder, or when .NET is older than 4.8.
 
 With **Beta Participation** enabled, this same command installs the `Branch1` build instead of the `master` release.
 
@@ -346,7 +346,7 @@ C:\Tools\winapp2\
 ```
 
 **Explanation**
-- The save directory differs from the current directory, so no auto-update
+- The save directory isn't the one winapp2ool runs from, so the download is saved like any other file and nothing is replaced
 - From the menu, the equivalent is **Change Save Directory** before choosing **Winapp2ool**
 
 ---
@@ -392,5 +392,5 @@ C:\Tools\winapp2\
 ```
 
 **Explanation**
-- The `-1f "\subdir\name"` put both files in `archive\`, which was created by the first download if it didnt exist already 
+- `-1f "\subdir\name"` put both files in `archive\`. The first download created it, since it didn't exist yet
 - The Transmute step writes to `winapp2-extended.ini`, leaving the original winapp2.ini intact

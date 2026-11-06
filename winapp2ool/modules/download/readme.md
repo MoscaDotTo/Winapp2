@@ -1,6 +1,6 @@
 # Downloader
 
-**Downloader** is a winapp2ool module for end users that fetches files from the winapp2 GitHub repository (this one!). It provides both a  menu and a scriptable command line interface for acquiring any flavor of winapp2.ini, the latest winapp2ool executable, and the project's supplementary files.
+**Downloader** is a winapp2ool module for end users that fetches files from the winapp2 GitHub repository (this one!). It gets you any flavor of winapp2.ini, the latest winapp2ool, or one of the project's supplementary files, from the menu or from a script.
 
 ### What does Downloader do?
 
@@ -8,9 +8,7 @@ Downloader resolves a short name (`winapp2`, `readme`, `winapp3`, etc) to a URL 
 
 ### Why Downloader?
 
-- **Flavor targeting**: fetch the exact variant your cleaner expects without hunting through the repository
-- **Self-updating**: winapp2ool can replace itself, keeping a backup of the version it replaced
-- **Supplementary databases**: `winapp3.ini` and `Archived entries.ini`, ready to fold into a winapp2.ini with Transmute
+There are several flavors of winapp2.ini, and Downloader knows where each one lives, so you don't have to hunt through the repository for the right file. It is also how winapp2ool updates itself, keeping a backup of the version it replaced. And it fetches `winapp3.ini` and `Archived entries.ini`, which you can fold into a winapp2.ini with Transmute.
 
 ---
 
@@ -52,7 +50,7 @@ Downloader resolves a short name (`winapp2`, `readme`, `winapp3`, etc) to a URL 
 # Requirements
 
 - An active internet connection. Downloader is hidden from the main menu in offline mode
-- .NET Framework 4.6 or later to download `winapp2ool.exe` (every other file works on 4.5)
+- .NET Framework 4.8 to download `winapp2ool.exe`. Every other file downloads on any .NET that runs winapp2ool
 
 ---
 
@@ -103,13 +101,13 @@ In the menu, each file is its own option and **Change Save Directory** sets wher
 | FluentCleaner Winapp2.ini | Download the FluentCleaner flavor | |
 | System Ninja Winapp2.rules | Download the System Ninja flavor | Saved as `winapp2.rules` |
 | Tron | Download the Tron flavor | |
-| Winapp2ool | Download the latest winapp2ool.exe | Requires .NET 4.6+. Replaces the running executable when the save directory is the current directory — see [Updating Winapp2ool](#updating-winapp2ool) |
+| Winapp2ool | Download the latest winapp2ool.exe | Requires .NET 4.8. Replaces the running executable when the save directory is the current directory. See [Updating Winapp2ool](#updating-winapp2ool) |
 | ReadMe | Download the top-level winapp2ool readme | Saved as `readme.md` |
 | Advanced | Open the Advanced Downloads sub-menu | See [Advanced Downloads](#advanced-downloads) |
 | Change Save Directory | Select a new directory for all downloaded files | Default: current directory |
 | Reset Settings | Restore the save directory to its default | Only shown when the save directory has been changed |
 
-The seven winapp2.ini options are fixed to their flavors, they ignore the active flavor setting and always download what their label says. Only the command line resolves a download against the active flavor.
+The seven winapp2.ini options always download the flavor their label names and ignore the active flavor setting. Only the command line goes by the active flavor.
 
 ## Advanced Downloads
 
@@ -122,9 +120,9 @@ The seven winapp2.ini options are fixed to their flavors, they ignore the active
 
 # Command-Line Arguments
 
-Downloader is command-line module **8**; `winapp2ool -download` and `winapp2ool 8` calls both work.
+Downloader is command-line module **8**, so `winapp2ool -download` and `winapp2ool 8` both work.
 
-The module takes a single argument naming the file to download, plus optional path parameters. The file argument is required and must be valid, if it is in valid or missing, Downloader reports that no file was specified and exits with code 1.
+The module takes one argument naming the file to download, plus optional path parameters. The file argument is required. If it is missing or isn't one of the names below, Downloader lists the valid arguments and exits with code 1.
 
 One run downloads one file. To fetch several, run the command several times.
 
@@ -148,7 +146,7 @@ One run downloads one file. To fetch several, run the command several times.
 
 ## Flavor Flags
 
-Processed before the module runs, and applied to that invocation only.
+A flavor flag applies to the run it's on and never changes the saved flavor.
 
 | Flag | Alias | Flavor |
 |:-|:-|:-|
@@ -164,7 +162,7 @@ Processed before the module runs, and applied to that invocation only.
 
 | Flag | Effect |
 |:-|:-|
-| `-s` | Suppress all output, skip the overwrite prompt, and exit when finished. Functionally required for unattended scripts |
+| `-s` | Suppress all output, skip the overwrite prompt, and exit when finished. Any script that runs unattended needs it |
 | `-writelog` | Write `winapp2ool.log` to disk on exit |
 
 ###### Note: without `-s`, winapp2ool does not exit after the download.
@@ -175,7 +173,7 @@ Processed before the module runs, and applied to that invocation only.
 
 ## Flavor Selection
 
-The flavor only matters for `winapp2`
+The flavor only matters for `winapp2`.
 
 The active flavor comes from winapp2ool's global settings (**Settings → Change Flavor** on the main menu), but any command-line [flavor flag](#flavor-flags) overrides it for that run. Command-line runs never save settings.
 
@@ -205,7 +203,7 @@ System Ninja is the only flavor that changes the extension. `-1f` overrides any 
 
 ## The Save Directory
 
-The save directory defaults to the directory from which winapp2ool is running. If the download target directory does not exist, it is created, including any missing parent directories. 
+The save directory defaults to the directory from which winapp2ool runs. If the save directory doesn't exist, Downloader creates it, along with any missing parent directories.
 
 ## Existing Files
 
@@ -220,7 +218,7 @@ Entering a name saves under that name; leaving it blank overwrites. This prompt 
 
 ## Updating Winapp2ool
 
-Downloading `winapp2ool.exe` into the directory from which winapp2ool is currently running does not simply write a file. Instead, winapp2ool updates itself:
+Downloading `winapp2ool.exe` into the directory winapp2ool is running from doesn't just save a file. Winapp2ool updates itself instead:
 
 1. Downloads the new executable and its signature file, `winapp2ool.exe.sig`, without writing either to disk
 2. Checks the signature against the public keys built into winapp2ool, and discards the download if it doesn't match
@@ -229,7 +227,7 @@ Downloading `winapp2ool.exe` into the directory from which winapp2ool is current
 
 If any step fails, the running executable stays where it is and winapp2ool says why. In silent mode a failed update exits with code 1.
 
-An update never installs an older version, even one with a valid signature. Turning off **Beta Participation** therefore doesn't roll a beta build back to an older release as of winapp2ool version 1.8
+An update never installs an older version, even one with a valid signature. Since winapp2ool 1.8, that means turning off **Beta Participation** won't roll a beta build back to an older release.
 
 ---
 
@@ -244,17 +242,17 @@ An update never installs an older version, even one with a valid signature. Turn
 ### Self-Updating
 
 - Downloading `winapp2ool.exe` into winapp2ool's own directory replaces the running executable and restarts it, leaving a `winapp2ool v<version>.exe.bak` behind. It only does so when the download's signature verifies and its version is newer
-- The `.bak` files persist; one per version replaced.
+- The `.bak` files pile up, one per version replaced. Winapp2ool never deletes these.
 - To keep a copy of the executable without updating, set the save directory somewhere else first
 
 ### Flavor Selection
 
 - The menu always offers all seven flavors individually, regardless of the active flavor setting
-- If you are unsure which flavor your cleaner wants, use the base (non-CCleaner) version 
+- If you are unsure which flavor your cleaner wants, use the base (non-CCleaner) version
 
 ### Winapp3 and Archived Entries
 
- `winapp3.ini` and `Archived entries.ini` are not part of the standard winapp2.ini distribution. They may contain entries that are incomplete, actively dangerous for your system, or written for software that no longer exists. Review them before use.
+`winapp3.ini` and `Archived entries.ini` are not part of the standard winapp2.ini distribution. They may contain entries that are incomplete, actively dangerous for your system, or written for software that no longer exists. Review them before use.
 
 ---
 
@@ -267,12 +265,12 @@ An update never installs an older version, even one with a valid signature. Turn
 | `Valid arguments are: winapp2, winapp2ool, readme, winapp3, archived` | Printed alongside either message above |
 | `Download Failed.` / `Unable to download {name} to {dir}` | The download did not complete |
 | `Download incomplete: {name}` (red menu header) | The menu's report of the same failure |
-| `This option requires a newer version of the .NET Framework` | Downloading the executable needs .NET 4.6 or later |
+| `This option requires a newer version of the .NET Framework` | Downloading the executable needs .NET 4.8 |
 | `Unable to download winapp2ool to the current directory, choose another directory before trying again` | Winapp2ool is running from the Windows temp folder, or .NET is out of date. Self-updating is disabled in both cases |
 
 | Symptom | Cause |
 |:-|:-|
-| Downloader is missing from the main menu | Winapp2ool is in offline mode. |
+| Downloader is missing from the main menu | Winapp2ool is in offline mode |
 | A script hangs after starting a download | The target file already exists and the overwrite prompt is waiting on input. Add `-s` |
 | A script never returns, with no prompt | Without `-s`, winapp2ool opens its interactive menu after downloading. Add `-s` |
 
