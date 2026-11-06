@@ -1,6 +1,8 @@
 # WinappDebug Examples
 
-Worked examples for [WinappDebug](README.md). The [Common Uses](README.md#common-uses) table in the readme lists the commands; these show what each one does, with real input and output.
+Worked examples for [WinappDebug](README.md). The readme's [Common Uses](README.md#common-uses) table lists the commands, and these examples show what each one does with real input and output.
+
+Every file WinappDebug saves starts with winapp2.ini's header comment. The output files below leave it out, except in [Example 16](#example-16-scripted-in-place-repair).
 
 # Table of Contents
 
@@ -28,7 +30,7 @@ Worked examples for [WinappDebug](README.md). The [Common Uses](README.md#common
 
 ---
 
-Some examples below reuse scenarios from the [Transmute readme](../transmute/readme.md), which corrects Browser Builder output as part of the winapp2.ini build pipeline. 
+Some examples below reuse scenarios from the [Transmute examples](../transmute/EXAMPLES.md), where Transmute corrects BrowserBuilder output as part of the winapp2.ini build.
 
 ## Scanning
 
@@ -36,11 +38,11 @@ Some examples below reuse scenarios from the [Transmute readme](../transmute/rea
 
 **Context**
 
-We have a small winapp2.ini with a few common style mistakes: a forward slash in a path, a gap in FileKey numbering, and `Default` keys, which current winapp2.ini style omits.
+We have a small winapp2.ini with a few common style mistakes: a forward slash in a path, a gap in the FileKey numbering, and `Default` keys, which current winapp2.ini style leaves out.
 
 **Intent**
 
-We want to see every error WinappDebug detects without changing any file.
+We want to see every error WinappDebug finds, without changing any file.
 
 **Files**
 
@@ -99,13 +101,13 @@ The report is rendered to the console:
  ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 ```
 
-###### Note: The remaining examples show only the report lines, without the console frame.
+###### Note: The other examples show just the report lines, without the frame around them.
 
 **Explanation**
-- The input file is winapp2.ini (the default)
-- Both `Default` keys are flagged: `Default=False` and `Default=True` should not exist at all
-- The numbering error names both the expected and the found key
-- Saving is disabled, so nothing is written to disk
+- WinappDebug lints `winapp2.ini`, its default input
+- Both `Default` keys are flagged. Current style has no `Default` keys at all, so `Default=False` is as wrong as `Default=True`
+- The numbering error names the key it expected and the key it found
+- Saving is off, so nothing is written to disk
 
 ---
 
@@ -113,11 +115,11 @@ The report is rendered to the console:
 
 **Context**
 
-We want to know if a copy of winapp2.ini's file system and registry paths are well-formed.
+We want to know whether the file system and registry paths in a copy of winapp2.ini are well formed.
 
 **Intent**
 
-We want a report about path problems and nothing else, and we want the file left exactly as it is.
+We want a report on path problems and nothing else, with no changes made to the entries.
 
 **Files**
 
@@ -136,14 +138,14 @@ RegKey1=Software\HandBrake\Recent
 
 **Steps**
 
-`alloff` is a Scan Settings command, not a command-line flag:
+`alloff` is typed at the Scan Settings menu. It isn't a command-line flag:
 
 1. Open **WinappDebug** from the main menu
-2. Select **Toggle Saving** to enable saving
+2. Select **Toggle Saving** to turn saving on
 3. Select **Scan Settings**
-4. Type `alloff`: every scan and every repair is now disabled
-5. Select item **13** (*Path Validity*) under **Scan Options** to re-enable that scan alone
-6. Return to the WinappDebug menu with `0`, then select **Run**
+4. Type `alloff`. Every scan and every repair is now off
+5. Select item **13** (*Path Validity*) under **Scan Options** to turn that scan back on by itself
+6. Go back to the WinappDebug menu with `0`, then select **Run**
 
 **Output**
 
@@ -174,9 +176,10 @@ RegKey1=Software\HandBrake\Recent
 
 **Explanation**
 - `RegKey1` is the Path Validity finding
-- The nested wildcard is one of the *(always on)* checks and reports regardless.
-- The trailing backslash on `DetectFile1` (Slashes) and `FileKey3`'s numbering (Improper Numbering) are ignored, their categories being off
-- Both reported errors are report-only checks, so nothing would have been repaired here even with repairs enabled
+- The nested wildcard check is *(always on)*, so it reports anyway
+- The trailing backslash on `DetectFile1` (Slashes) and `FileKey3`'s numbering (Improper Numbering) go unreported, because their categories are off
+- Both findings are report-only, so turning Path Validity's repair on as well wouldn't have fixed either one
+- Saving was on only to show that the saved copy matches the input
 
 ---
 
@@ -184,23 +187,23 @@ RegKey1=Software\HandBrake\Recent
 
 **Context**
 
-We are reviewing a contribution and want WinappDebug's full report, but we do not trust its slash handling on this particular file. We want to inspect the paths ourselves before anything rewrites them.
+We're reviewing a contribution and want WinappDebug's full report, but we don't trust its slash handling on this particular file. We want to look at the paths ourselves before anything rewrites them.
 
 **Intent**
 
-We want every category to report as usual, with the Slashes repair alone switched off.
+We want every category to report as usual, with only the Slashes repair turned off.
 
 **Files**
 
-The input file is unchanged from [Example 1](#example-1-scanning-a-file-for-errors).
+The input file is the same as in [Example 1](#example-1-scanning-a-file-for-errors).
 
 **Steps**
 
 1. Open **WinappDebug** from the main menu
-2. Select **Toggle Saving** to enable saving
+2. Select **Toggle Saving** to turn saving on
 3. Select **Scan Settings**
-4. Select item **21** (*Slashes*) under **Repair Options** to disable that repair
-5. Return with `0`, then select **Run**
+4. Select item **21** (*Slashes*) under **Repair Options** to turn that repair off
+5. Go back with `0`, then select **Run**
 
 **Output**
 
@@ -243,13 +246,13 @@ FileKey2=%AppData%\Notepad++\backup|*.*
 ```
 
 **Explanation**
-- The forward slash is still reported, but not repaired.
-- Every other repair ran normally: both `Default` keys were removed and `FileKey3` was renumbered to `FileKey2`
-- The error count went up, from 4 to 5, compared to the same file in [Example 1](#example-1-scanning-a-file-for-errors)
+- The forward slash is still reported, but not repaired
+- Every other repair ran as usual: both `Default` keys are gone and `FileKey3` became `FileKey2`
+- The same file gives 5 errors here and 4 in [Example 1](#example-1-scanning-a-file-for-errors). The note below explains the extra one
 
 **Notes**
 
-`Missing backslash (\) after %EnvironmentVariable%.` never fires in Example 1 because the Slashes repair has already turned `%AppData%/` into `%AppData%\` by the time the check runs. 
+`Missing backslash (\) after %EnvironmentVariable%.` never fires in Example 1, because by the time that check runs, the Slashes repair has already turned `%AppData%/` into `%AppData%\`.
 
 ---
 
@@ -259,15 +262,15 @@ FileKey2=%AppData%\Notepad++\backup|*.*
 
 **Context**
 
-Continuing from [Example 1](#example-1-scanning-a-file-for-errors), we have reviewed the report and want the corrections written to disk.
+Picking up from [Example 1](#example-1-scanning-a-file-for-errors): we've read the report and want the corrections written to disk.
 
 **Intent**
 
-We want WinappDebug to repair all four errors and save the corrected file.
+We want WinappDebug to repair all four errors and save the result.
 
 **Files**
 
-The input file is unchanged from Example 1.
+The input file is the same as in Example 1.
 
 **Command**
 ```
@@ -276,7 +279,7 @@ winapp2ool -debug -c
 
 **Output**
 
-The console report is identical to Example 1 with one additional summary line:
+The console report matches Example 1, plus one more summary line:
 
 ```
 winapp2-debugged.ini saved with any corrections made
@@ -298,9 +301,9 @@ FileKey2=%AppData%\Notepad++\backup|*.*
 ```
 
 **Explanation**
-- The forward slash is corrected to a backslash
-- `FileKey3` is renumbered to `FileKey2`
-- Both `Default` keys are removed
+- The forward slash becomes a backslash
+- `FileKey3` becomes `FileKey2`
+- Both `Default` keys are gone
 
 ---
 
@@ -308,11 +311,11 @@ FileKey2=%AppData%\Notepad++\backup|*.*
 
 **Context**
 
-After hand-editing, an entry's FileKeys are listed out of order and the entries themselves are no longer alphabetical.
+After some hand editing, an entry's FileKeys are out of order and the entries themselves aren't alphabetical anymore.
 
 **Intent**
 
-We want WinappDebug to renumber the keys, sort them, and sort the entry list.
+We want WinappDebug to sort and renumber the keys, and sort the entries.
 
 **Files**
 
@@ -378,12 +381,12 @@ FileKey2=%LocalAppData%\Programs\Speccy|*.log
 ```
 
 **Explanation**
-- The two FileKeys are sorted alphabetically by value and renumbered to match their new positions
-- `[Speccy *]` is moved after `[CCleaner *]` in the output
+- WinappDebug sorts the two FileKeys by value and renumbers them to match their new positions
+- `[Speccy *]` moves after `[CCleaner *]`
 
 **Notes**
 
-Repairs are applied as the errors are found, so later messages may reference already-repaired keys. The alphabetization error names `FileKey1`, the key's name after renumbering.
+WinappDebug repairs errors as it finds them, so later messages can refer to keys it has already repaired. The alphabetization error calls the key `FileKey1`, the name the renumbering gave it.
 
 ---
 
@@ -391,11 +394,11 @@ Repairs are applied as the errors are found, so later messages may reference alr
 
 **Context**
 
-A hand-written entry has three broken keys: one with unwanted whitespace, one missing its `=` separator entirely, and one with a trailing semicolon.
+A hand-written entry has three broken keys: one with stray whitespace, one with no `=` at all, and one ending in a semicolon.
 
 **Intent**
 
-We want all three keys repaired mechanically.
+We want all three fixed.
 
 **Files**
 
@@ -460,9 +463,9 @@ FileKey3=%LocalAppData%\Greenshot|*.tmp
 ```
 
 **Explanation**
-- `FileKey2` (missing `=`) is inserted 
-- The whitespace and trailing semicolon are stripped
-- The keys are re-sorted and re-numbered
+- `FileKey2` gets its missing `=` back
+- The whitespace and the trailing semicolon are stripped
+- The keys are sorted and renumbered
 
 ---
 
@@ -470,11 +473,11 @@ FileKey3=%LocalAppData%\Greenshot|*.tmp
 
 **Context**
 
-An entry has accumulated four separate problems from hand-editing: a stray second `LangSecRef`, a `Detect1` in an entry with only one Detect, a lowercase environment variable, and a FileKey that duplicates another key's value.
+An entry has picked up four separate problems from hand editing: a stray second `LangSecRef`, a `Detect1` in an entry with only one Detect, a lowercase environment variable, and a FileKey that duplicates another key's value.
 
 **Intent**
 
-We want to see what the four data-deleting and normalizing repairs do to a single entry in one pass.
+We want to see what four of the repairs that delete or normalize keys do to one entry in a single pass.
 
 **Files**
 
@@ -530,10 +533,10 @@ FileKey2=%AppData%\foobar2000\cache|*.tmp
 ```
 
 **Explanation**
-- `LangSecRef=3024` is deleted: `LangSecRef` is a singleton key, and the repair keeps the first occurrence
-- `Detect1` becomes `Detect`, since the entry has only one detection key of that type
+- `LangSecRef=3024` is deleted. An entry can only have one `LangSecRef`, and the repair keeps the first
+- `Detect1` becomes `Detect`, since the entry has only one Detect
 - `%appdata%` becomes `%AppData%`
-- `FileKey3` is deleted as a duplicate of `FileKey1`. 
+- `FileKey3` is deleted because it duplicates `FileKey1`, once the casing repair has fixed `FileKey1`
 
 ---
 
@@ -541,11 +544,11 @@ FileKey2=%AppData%\foobar2000\cache|*.tmp
 
 **Context**
 
-A hand-written entry misuses flags in almost every way available: a `RECURSE` with no pipe before it, an ExcludeKey with no flag at all, one with the flag combined with the path, one missing the backslash before its pattern pipe, and one carrying an incorrect flag.
+A hand-written entry gets flags wrong in nearly every way it can: a `RECURSE` with no pipe before it, an ExcludeKey with no flag at all, one with its flag run into the path, one missing the backslash before its pattern pipe, and one with a flag it shouldn't have.
 
 **Intent**
 
-We want to see which of these the Flags and Path Validity repairs can fix and which need a human.
+We want to see which of these the Flags and Path Validity repairs can fix, and which need a person.
 
 **Files**
 
@@ -616,12 +619,12 @@ ExcludeKey4=PATH|%AppData%\FreeDownloadManager\plugins\|*.*|RECURSE
 ```
 
 **Explanation**
-- `FileKey1` gains its missing pipe: `*.logRECURSE` becomes `*.log|RECURSE`
-- `ExcludeKey1` has no flag and is not repaired
-- `ExcludeKey2` is repaired twice: first the flag gets its pipe (`FILE%AppData%` -> `FILE|%AppData%`), and then is found to be missing the backslash before its pattern pipe
-- `ExcludeKey4` carries both a `PATH` flag and a `RECURSE` flag; the extra flag is reported but not repaired
-- The repaired ExcludeKeys re-sort, so `queue` and `cache` swap places and are renumbered
-
+- `FileKey1` gets its missing pipe: `*.logRECURSE` becomes `*.log|RECURSE`
+- `ExcludeKey1` has no flag, and WinappDebug can't guess one, so it stays as it is
+- `ExcludeKey2` is repaired twice. First its flag gets a pipe (`FILE%AppData%` becomes `FILE|%AppData%`), and then it turns out to be missing the backslash before its pattern pipe as well
+- `ExcludeKey3` gets the same missing backslash
+- `ExcludeKey4` has both a `PATH` flag and a `RECURSE` flag. The extra flag is reported but left alone
+- After the repairs the ExcludeKeys are sorted again, so `queue` and `cache` swap places and get renumbered
 
 ---
 
@@ -629,11 +632,11 @@ ExcludeKey4=PATH|%AppData%\FreeDownloadManager\plugins\|*.*|RECURSE
 
 **Context**
 
-An entry mixes valid and invalid path forms: a lowercase registry root, a `DetectFile` with a trailing backslash, a `DetectFile` with a wildcard in the middle of the path, and a `RegKey` missing its hive.
+An entry mixes good and bad paths: a lowercase registry root, a `DetectFile` with a trailing backslash, a `DetectFile` with a wildcard in the middle of its path, and a `RegKey` with no hive.
 
 **Intent**
 
-We want to see which path problems are mechanical and which indicate a genuinely wrong path.
+We want to see which path problems are mechanical and which mean the path itself is wrong.
 
 **Files**
 
@@ -690,9 +693,9 @@ RegKey1=Software\HandBrake\Recent
 
 **Explanation**
 - `hkcu\` becomes `HKCU\`
-- `DetectFile1`'s trailing backslash is trimmed
-- `DetectFile2`'s nested wildcard is reported but not repaired
-- `RegKey1` has no registry hive; it is reported and not repaired
+- `DetectFile1` loses its trailing backslash
+- `DetectFile2`'s nested wildcard is reported but left alone
+- `RegKey1` has no registry hive. It's reported and left alone
 
 ---
 
@@ -702,11 +705,11 @@ RegKey1=Software\HandBrake\Recent
 
 **Context**
 
-An entry carries an invalid `LangSecRef` value and has no detection keys at all. WinappDebug cannot know the correct category or the correct detection path, so there is nothing it can safely repair.
+An entry has an invalid `LangSecRef` value and no detection keys at all. WinappDebug can't know the right category or the right detection path, so there's nothing it can safely repair.
 
 **Intent**
 
-We want to see how report-only errors behave when saving is enabled.
+We want to see what happens to report-only errors when saving is on.
 
 **Files**
 
@@ -745,8 +748,8 @@ FileKey1=%AppData%\Winamp|*.log
 ```
 
 **Explanation**
-- Both errors are reported, but the entry unchanged
-- Report-only errors always require manual correction
+- Both errors are reported, and the saved entry is unchanged
+- You have to fix report-only errors by hand
 
 ---
 
@@ -756,11 +759,11 @@ FileKey1=%AppData%\Winamp|*.log
 
 **Context**
 
-The System Ninja flavor of winapp2.ini cannot use wildcards in `DetectFile` keys, System Ninja does not support them. The same key is perfectly valid in the base and CCleaner flavors. 
+System Ninja doesn't support wildcards in `DetectFile` keys, so the System Ninja flavor of winapp2.ini can't use them. The same key is fine in the base and CCleaner flavors.
 
 **Intent**
 
-We want to validate a file against System Ninja's rules for a single run.
+We want to check a file against System Ninja's rules for one run.
 
 **Files**
 
@@ -789,9 +792,9 @@ Key: DetectFile=%LocalAppData%\BraveSoftware\Brave-Browser*
 ```
 
 **Explanation**
-- The `-sn` flag sets the flavor to System Ninja for this run, activating its DetectFile wildcard check
+- `-sn` sets the flavor to System Ninja for this run, which turns on its DetectFile wildcard check
 - The same command without `-sn` reports `0 possible errors detected.`
-- The check is report-only and cannot be repaired automatically 
+- The check is report-only, so you have to fix the key yourself
 
 ---
 
@@ -799,11 +802,11 @@ Key: DetectFile=%LocalAppData%\BraveSoftware\Brave-Browser*
 
 **Context**
 
-BleachBit does not implement registry exclusions. An `ExcludeKey` carrying the `REG` flag should report an error 
+BleachBit versions 5 and older didn't implement registry exclusions, so an `ExcludeKey` with the `REG` flag should be reported as an error.
 
 **Intent**
 
-We want to find registry ExcludeKeys before shipping a file to BleachBit users.
+We want to find registry ExcludeKeys before a file goes out to BleachBit users.
 
 **Files**
 
@@ -834,9 +837,9 @@ Key: ExcludeKey1=REG|HKCU\Software\WinRAR\DialogEditHistory\ArcName
 ```
 
 **Explanation**
-- The `-bb` flag activates the BleachBit check for this run only; your saved Flavor setting is untouched
-- The identical run without `-bb` reports `0 possible errors detected.`
-- Like the System Ninja check, this is report-only. 
+- `-bb` turns on the BleachBit check for this run only. Your saved Flavor setting doesn't change
+- The same run without `-bb` reports `0 possible errors detected.`
+- Like the System Ninja check, this one is report-only
 
 ---
 
@@ -844,11 +847,11 @@ Key: ExcludeKey1=REG|HKCU\Software\WinRAR\DialogEditHistory\ArcName
 
 **Context**
 
-We are preparing a file for a consumer that expects every entry to carry `Default=False` 
+We're preparing a file for a program that expects every entry to have `Default=False`.
 
 **Intent**
 
-We want every entry to end up with `Default=False`: inserted where missing, corrected where wrong.
+We want every entry to end up with `Default=False`, added where it's missing and corrected where it's wrong.
 
 **Files**
 
@@ -869,11 +872,11 @@ Default=True
 
 **Steps**
 
-The Default Value Audit has no command-line flag; it is enabled from the menu:
+The Default Value Audit has no command-line flag, so we turn it on from the menu:
 
 1. Open **WinappDebug** from the main menu
-2. Select **Toggle Saving** to enable saving
-3. Select **Toggle Default Value Audit** to enable the audit (the expected value defaults to `False`)
+2. Select **Toggle Saving** to turn saving on
+3. Select **Toggle Default Value Audit** to turn the audit on (the expected value starts out as `False`)
 4. Select **Run**
 
 **Output**
@@ -906,10 +909,10 @@ FileKey1=%AppData%\vlc|*.log
 ```
 
 **Explanation**
-- `[Audacity *]` had no Default key, so `Default=False` is inserted
-- `[VLC Media Player *]`'s `Default=True` is corrected to `Default=False`
-- **Toggle Expected Default** flips the enforced value to `True` for consumers that want everything enabled
-- Without the audit, the same run would instead *remove* `Default=True` and flag nothing on `[Audacity *]`. See [Example 1](#example-1-scanning-a-file-for-errors)
+- `[Audacity *]` had no Default key, so it gets `Default=False`
+- `[VLC Media Player *]`'s `Default=True` becomes `Default=False`
+- For a program that wants everything enabled, **Toggle Expected Default** switches the required value to `True`
+- Without the audit, the same run would *remove* `Default=True` instead, and say nothing about `[Audacity *]`. See [Example 1](#example-1-scanning-a-file-for-errors)
 
 ---
 
@@ -917,11 +920,11 @@ FileKey1=%AppData%\vlc|*.log
 
 **Context**
 
-The FluentCleaner flavor ships a default-*on* cleaner, so its build marks browser-privacy entries `Default=False` while leaving cache and telemetry entries enabled. Those `Default=` keys are a large point of the flavor. Linting that output with the default Defaults policy would delete every one of them, silently, and the file would still look fine.
+FluentCleaner turns entries on unless they say otherwise, so the FluentCleaner flavor's build marks browser-privacy entries `Default=False` and leaves cache and telemetry entries enabled. Those `Default=` keys are much of the point of the flavor. Linting that output under the usual Defaults policy would quietly delete every one of them, and the file would still look fine.
 
 **Intent**
 
-We want to lint the FluentCleaner output for real style errors without touching its `Default=` keys.
+We want to lint the FluentCleaner output for real style errors and leave its `Default=` keys alone.
 
 **Files**
 
@@ -942,7 +945,7 @@ FileKey1=%LocalAppData%\Vivaldi\User Data\*\Cache|*|RECURSE
 
 **Commands**
 
-The wrong way, then the right way:
+First without the flag, then with it:
 
 ```
 winapp2ool -debug -c -3f no-flag.ini
@@ -960,7 +963,7 @@ Entry has a Default key where there should be none
 1 possible errors detected.
 ```
 
-The second reports nothing at all:
+The second reports nothing:
 
 ```
 0 possible errors detected.
@@ -996,8 +999,8 @@ FileKey1=%LocalAppData%\Vivaldi\User Data\*\Cache|*|RECURSE
 ```
 
 **Explanation**
-- Without the flag, `Default=False` is reported as an error and deleted. 
-- With `-keepdefaults`, the key is neither reported nor touched, and the run reports zero errors
+- Without the flag, `Default=False` is reported as an error and deleted
+- With `-keepdefaults`, WinappDebug neither reports nor touches the key, and the run finds no errors
 
 ---
 
@@ -1007,11 +1010,11 @@ FileKey1=%LocalAppData%\Vivaldi\User Data\*\Cache|*|RECURSE
 
 **Context**
 
-[Transmute's Example 9](../transmute/readme.md) adds a `FileKey` to a generated entry, leaving it unnumbered and pointing at a path another FileKey already covers. The Optimizations category can fold such keys together.
+[Transmute's Example 9](../transmute/EXAMPLES.md#example-9-correcting-syntax) adds a `FileKey` to a generated entry. The new key has no number, and it points at a path another FileKey already covers. The Optimizations category can fold the two together.
 
 **Intent**
 
-We want the redundant FileKey merged into the existing key covering the same path, and the entry's syntax normalized.
+We want the extra FileKey merged into the existing key for the same path, and the rest of the entry's syntax cleaned up.
 
 **Files**
 
@@ -1031,7 +1034,7 @@ FileKey=%AppData%\360se6\User Data\*|360Bookmarks*
 winapp2ool -debug -c -opti
 ```
 
-###### Note: Optimizations can also be enabled for menu runs from **Scan Settings** 
+###### Note: For menu runs, you can turn Optimizations on in **Scan Settings** instead
 
 **Output**
 
@@ -1073,10 +1076,10 @@ FileKey2=%AppData%\360se6\User Data\*\power_bookmarks|*|REMOVESELF
 ```
 
 **Explanation**
-- The unnumbered `FileKey` targets `%AppData%\360se6\User Data\*` with no flag, matching `FileKey1`, so its `360Bookmarks*` parameter is merged into `FileKey1` and the redundant key is deleted
-- The merge is announced in its own report block naming the keys removed and the resulting key list, but is not counted in the error total; the numbering and ordering errors it triggers appear as usual
-- The merged parameter list is a straight concatenation in key order (`360Bookmarks*;BookmarkMergedSurfaceOrdering;bookmarks`). 
-- This is the same normalization [Transmute's Example 9](../transmute/readme.md) applies after adding a key to a generated entry
+- The unnumbered `FileKey` targets `%AppData%\360se6\User Data\*` with no flag, the same as `FileKey1`, so its `360Bookmarks*` parameter is merged into `FileKey1` and the extra key is deleted
+- The merge gets its own report block, listing the keys it removes and the key list that results. It doesn't count toward the error total, but the numbering and ordering errors in the same entry count as usual
+- The merged parameter list joins the parameters in key order (`360Bookmarks*;BookmarkMergedSurfaceOrdering;bookmarks`)
+- [Transmute's Example 9](../transmute/EXAMPLES.md#example-9-correcting-syntax) runs the same cleanup after adding a key to a generated entry
 
 ---
 
@@ -1084,11 +1087,11 @@ FileKey2=%AppData%\360se6\User Data\*\power_bookmarks|*|REMOVESELF
 
 **Context**
 
-The winapp2.ini build pipeline lints each flavor as its final stage. Nothing is interactive and nothing lands in a second file: the artifact is repaired where it sits and stamped with the build date.
+The winapp2.ini build lints each flavor as its last stage. Nothing is interactive and nothing goes to a second file: WinappDebug repairs the file where it sits and stamps it with the build date.
 
 **Intent**
 
-We want a single non-interactive command that repairs a file in place and records when it was built.
+We want one non-interactive command that repairs a file in place and records when it was built.
 
 **Files**
 
@@ -1104,7 +1107,7 @@ FileKey2=%AppData%\audacity\cache|*.tmp
 
 **Command**
 
-This is the build's own base-file lint stage, verbatim from `build winapp2.ps1`, with `-writelog` added so the run leaves evidence behind:
+This is the build's own lint stage for the base file, copied from `build winapp2.ps1`, plus `-writelog` so the run leaves a record:
 
 ```
 winapp2ool -s -offline -writelog -debug -usedate -c -opti -1f Winapp2.ini -3f Winapp2.ini
@@ -1112,7 +1115,7 @@ winapp2ool -s -offline -writelog -debug -usedate -c -opti -1f Winapp2.ini -3f Wi
 
 **Output**
 
-Nothing on the console: `-s` suppresses all of it. The report goes to `winapp2ool.log`, whose tail reads:
+Nothing appears on the console, since `-s` suppresses all of it. The report goes to `winapp2ool.log`, which ends with:
 
 ```
 Lint complete
@@ -1130,9 +1133,9 @@ Entry count: 1
 ```
 
 **Explanation**
-- `-3f Winapp2.ini` points the save target at the input, so the file is repaired in place. Without it the output would be saved to `winapp2-debugged.ini` and the input would be untouched
-- `-usedate` stamps the preamble's version line with today's date in `yymmdd` form. 
-- `-offline` skips the startup connection check
-- `-s` makes the run non-interactive. It also silences the report entirely, which is why `-writelog` is needed
-- `-opti` enables the FileKey merger, as every stage of the real build does
-- The run reports zero errors and still rewrites the file, the preamble comment is regenerated on every save regardless of whether any entry changed
+- `-3f Winapp2.ini` points the save target at the input, so the file is repaired in place. Without it, the result would go to `winapp2-debugged.ini` and the input would stay as it was
+- `-usedate` stamps the header's version line with today's date as `yymmdd`
+- `-offline` skips the connection check at startup
+- `-s` makes the run non-interactive. It also hides the whole report, which is why the command needs `-writelog`
+- `-opti` turns on the FileKey merger, as every lint stage of the real build does
+- The run finds no errors and still rewrites the file, because WinappDebug writes the header fresh on every save whether or not any entry changed
