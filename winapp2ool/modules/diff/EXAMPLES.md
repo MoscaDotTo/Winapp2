@@ -163,7 +163,7 @@ Diff complete
 
 **Explanation:**
 
-- `-base` selects the base flavor 
+- `-base` selects the base flavor
 - Diff downloaded the latest winapp2.ini and trimmed it for the current system before comparing
 - Only entries for software detected on this machine appear in the output
 - The header names the version that was current on GitHub at the time of the run, here 260915. The trimmed file keeps its version line
@@ -171,7 +171,7 @@ Diff complete
 - Many entries were consolidated: 205 of the 399 removed entries were mergers
 - All 35 moved keys landed in added entries, eg. `AVG *` gave 19 keys to the new `AVG AntiVirus *`
 
-**Notes:** The exact output and counts depend on what software is installed. Running with `-donttrim` shows the full database diff regardless of installed software; see Example 2. Diffs between Trimmed files may also display entries for newly installed software as "Added" even if the entries themselves are not newly added.
+**Notes:** The exact output and counts depend on what software is installed. Running with `-donttrim` shows the full database diff regardless of installed software; see Example 2. If you've installed something since your local copy was trimmed, its entry can show up as Added even though it's been in the database all along.
 
 ---
 
@@ -266,8 +266,8 @@ Diff complete
 
 **Explanation:**
 
-- This is a complete changelog for all changes to the database across three and a half years from May 2022 to November 2025
-- Diff can produce changelogs between any two versions of winapp2.ini 
+- This is the complete changelog for three and a half years of the database, May 2022 to November 2025
+- Diff can compare any two versions of winapp2.ini, however far apart
 
 ---
 
@@ -352,7 +352,7 @@ Diff complete
 
 - `-d` disables downloading; both files must exist locally
 - `-1d`/`-1f` set the "old" file's directory and name; `-2d`/`-2f` set the "new" file's. Here, both live in `C:\archive` rather than the working directory
-- The rename block omits a `- N removed keys` line entirely, because no renamed entry lost a key
+- The rename block has no `- N removed keys` line because no renamed entry lost a key
 
 ---
 
@@ -422,7 +422,7 @@ A modified entry prints its new full text beneath the header, followed by the ke
 **Explanation:**
 
 - `-verbose` (or the `Toggle verbose mode` menu option) prints the full text of each changed entry alongside its change line: removed entries show their old text, renamed and split/merged entries show both old and new text, and modified entries show their new text
-- Verbose output is substantially larger
+- Verbose output is a lot longer
 
 ---
 
@@ -436,13 +436,13 @@ A modified entry prints its new full text beneath the header, followed by the ke
 winapp2ool -diff -d -1f winapp2-220510.ini -2f winapp2-251109.ini -savelog
 ```
 
-**Output:** The same console output as Example 2. When the run completes, the output is written to `diff.txt` in the current directory, and the Diff menu header reports:
+**Output:** The same console output as Example 2. When the run finishes, Diff writes it to `diff.txt` in the current directory, and the Diff menu header says:
 
 ```
 diff.txt saved
 ```
 
-Opening `diff.txt`, the Source Entry Key Status Report appears between the Added entries section and the Diff Summary:
+In `diff.txt`, the Source Entry Key Status Report sits between the Added entries section and the Diff Summary:
 
 ```
  1215 novel entries added
@@ -472,8 +472,8 @@ Opening `diff.txt`, the Source Entry Key Status Report appears between the Added
 
 **Explanation:**
 
-- `-savelog` enables log saving; output is written to `diff.txt` in the current directory after the run completes
-- The saved file contains the full diff output including the Source Entry Key Status Report and the summary block
+- `-savelog` turns on log saving, and `diff.txt` in the current directory is the default target
+- The saved file holds the full diff output, including the Source Entry Key Status Report and the summary block
 - Use **Log Viewer** in the Diff menu to review the most recent run's output without re-running
 
 **Notes:**
@@ -512,7 +512,7 @@ winapp2ool -s -diff -base -donttrim -savelog -3f changelog.txt
 
 **Output:**
 
-Nothing. In silent mode (`-s`), nothing is output to the console.
+None on the console, since silent mode (`-s`) prints nothing.
 
 The full diff log, identical in structure to the saved log in Example 5, is written to `changelog.txt`.
 

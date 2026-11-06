@@ -1,6 +1,6 @@
 # Reading Diff's Output
 
-How to read the changelog Diff produces: what each change category means, with real samples, and a full sample of Diff's output. See the [Diff readme](readme.md) for running it.
+What each part of Diff's changelog means, with real samples, plus one full saved log at the end. See the [Diff readme](readme.md) for how to run it.
 
 # Table of Contents
 
@@ -18,7 +18,7 @@ How to read the changelog Diff produces: what each change category means, with r
 
 ## Added Entries
 
-An entry is **Added** if it exists in the new file and has no entry of the same name in the old file. Added entries render in two separate sections of the output: entries which consolidate content from removed entries appear first (under `Added entries containing merged content:`), followed by entirely novel entries (under `Added entries:`). Each section reports its own total count.
+An entry is **Added** if it's in the new file and the old file has no entry by that name. The output lists added entries in two sections. Entries that consolidate content from removed entries come first, under `Added entries containing merged content:`, then the entirely new ones under `Added entries:`. Each section has its own count.
 
 ### Novel entries
 
@@ -40,7 +40,7 @@ When a new entry contains keys from one or more removed entries, its header is f
 | **Moved in** | Added keys | `(from [Other *])` in an `N keys added:` block | key [moved](#cross-entry-key-movements) here from an entry that still exists |
 | **Carried over** | Carried-over keys | `(from [Source *])` in an `N keys carried over from merged entries:` block | key is carried over verbatim from the source entry |
 | **Dropped** | Removed keys | Appears in an `N keys from merged entries not in this entry:` block | the key existed in a source entry merged into this entry alone, and this entry doesn't have it, unchanged or captured. A split source's lost keys are listed under the split. |
-| **Captured** | Modified keys | `(from [Source *])` on the old key | the key does not appear verbatim but is replaced by another key that covers it — typically a wildcard path that absorbs one or more specific old paths |
+| **Captured** | Modified keys | `(from [Source *])` on the old key | the key doesn't appear verbatim, but another key covers it, usually a wildcard path or recursion standing in for one or more specific old paths |
 
 A key that several source entries share is credited to each of them in name order, eg. `(from [Source A *], [Source B *])`. Past three sources, Diff names the first three and counts the rest: `(from [Source A *], [Source B *], [Source C *] and 4 others)`.
 
@@ -88,9 +88,9 @@ FileKey2=%LocalAppData%\Abelssoft\PCFresh\Backup|*
 
 `FileKey1` is novel; no equivalent exists in `[Abelssoft PCFresh Backups *]`.
 
-`LangSecRef`, `DetectFile`, and `FileKey2` were carried over unchanged, so they're listed in their own group, with attribution to their source entry.
+`LangSecRef`, `DetectFile`, and `FileKey2` were carried over unchanged, so they get their own group, credited to their source entry.
 
-Note that `FileKey2`'s pattern changed from `*.*` to `*`, and that the old key is printed as `|*`. Diff rewrites deprecated values in the old file before comparing, so the key counts as carried over rather than modified. See [Value Normalization](readme.md#value-normalization).
+`FileKey2`'s pattern changed from `*.*` to `*`, yet the old key is printed as `|*`. That's because Diff rewrites deprecated values in both files before comparing, so the key counts as carried over rather than modified. See [Value Normalization](readme.md#value-normalization).
 
 **Example 2: Captured keys (EFSoftware):**
 
@@ -149,11 +149,11 @@ FileKey1=%AppData%\EFSoftware|*Cache
 
 `LangSecRef` is carried over and credited to both source entries.
 
-The `DetectFile` and `FileKey1` in the new entry each cover both old paths with a single pattern; `%AppData%\EFSoftware` is a parent path, and `*Cache` matches both old parameters. Both are reported as captured (modified) keys replacing 2 old keys each.
+The `DetectFile` and `FileKey1` in the new entry each cover both old paths with one key: `%AppData%\EFSoftware` is the parent of both old DetectFile paths, and `*Cache` matches both old patterns. Diff reports each as a captured (modified) key replacing 2 old keys.
 
 **Example 3: Dropped keys (Cook'n):**
 
-Three related Cook'n entries were consolidated into a single `Cook'n *` entry, but the `Warning=` key from `Cook'n Dups *` was not carried over or replaced.
+Three related Cook'n entries were consolidated into a single `Cook'n *` entry, but the `Warning=` key from `Cook'n Dups *` didn't make it across, verbatim or captured.
 
 **Old (v220510):**
 
@@ -221,7 +221,7 @@ Every `FileKey` from all three source entries was carried over, attributed to it
 
 Keys that all three source entries shared (`LangSecRef`, `Detect`) are credited to all three.
 
-The `Warning=` key from `Cook'n Dups *` was dropped, and is listed under the dropped heading with attribution to its originating entry.
+The `Warning=` key from `Cook'n Dups *` was dropped, so it's listed under the dropped heading, credited to `Cook'n Dups *`.
 
 The change from `%Documents%` to `%UserProfile%\Documents` is a deprecated-path rewrite, so `FileKey4` matches `Cook'n Logs *`'s `FileKey1` despite the textual difference. See [Value Normalization](readme.md#value-normalization).
 
@@ -229,7 +229,7 @@ The change from `%Documents%` to `%UserProfile%\Documents` is a deprecated-path 
 
 ## Modified Entries
 
-An entry is **Modified** if it exists in both files with the same name but has changed. Modifications include added keys, removed keys, and changed key values or parameters. Diff itemizes the specific key-level changes for each modified entry.
+An entry is **Modified** if it's in both files under the same name but has changed: keys were added or removed, or a key's value changed. Diff lists the key-level changes for each one.
 
 Keys annotated `(novel)` are new content with no detected equivalent in the old file. Keys annotated `(from [Entry Name *])` were sourced from a specific entry: the old version of the same entry, a removed entry that was merged in, or an entry the key [moved](#cross-entry-key-movements) from.
 
@@ -237,16 +237,16 @@ Modified output itemizes five kinds of key-level change:
 
 - **Added keys**: present in the new entry with no detected equivalent in the old entry
 - **Removed keys**: present in the old entry with no detected equivalent in the new entry or anywhere else
-- **Modified keys**: a key whose value changed, shown as `X has been modified, replacing N old keys`; in the simple case one old key was updated to a new value; in more complex cases a single new key uses a wildcard or semicolon-joined pattern to capture multiple old keys
+- **Modified keys**: a key whose value changed, shown as `X has been modified, replacing N old keys`. Usually one old key just got a new value. Sometimes a single new key uses recursion, a wildcard or a semicolon-joined pattern list to capture several old keys
 - **Moved keys**: keys that left this entry for another one, listed under `N keys moved to other entries:` as `FileKey2=... moved to [Other *]`. See [Cross-Entry Key Movements](#cross-entry-key-movements)
-- **Moved-in keys**: keys this entry took from another entry that still exists, listed under `N keys moved in from other entries:` as `FileKey2=... (from [Other *])`. An entry that also absorbed removed entries lists these among its added keys instead, with the same credit. 
- ###### Note: A moved-in key that the block shows as an update or capture of a merged source's key credits only the source, so the key is also listed under `N keys moved in from other entries:`
+- **Moved-in keys**: keys this entry took from another entry that still exists, listed under `N keys moved in from other entries:` as `FileKey2=... (from [Other *])`. An entry that also absorbed removed entries lists these among its added keys instead, with the same credit.
+ ###### Note: When the block shows a moved-in key as an update or capture of a merged source's key, the credit there goes only to the source, so the key is also listed under `N keys moved in from other entries:`
 
 Each kind has its own list, under a heading with its total (`13 keys added:`, `2 keys removed:`, `7 keys modified:`), followed by a count line for each key type (`Added 2 DetectFiles`). An entry whose only change is a moved key is still itemized.
 
 Changes to detection keys (`Detect`, `DetectFile`) are grouped and reported together as `Detection criteria`.
 
-Modified entries are displayed in two separate output sections: entries which absorbed content from removed entries appear first (each followed by a note itemizing the removed entries against which the changes are measured), and entries with ordinary modifications appear later under the `Modified entries:` header.
+Modified entries show up in two sections of the output. Entries that absorbed content from removed entries come first, each opening with a list of the removed entries from which it took content. Entries with ordinary modifications come later, under the `Modified entries:` header.
 
 ### Simple modification
 
@@ -298,17 +298,21 @@ FileKey1=%LocalAppData%\Packages\Facebook.Facebook_*\AC|*|RECURSE
 
 **Explanation:**
 
-The updated `LangSecRef` is identified as modified.
+The new `LangSecRef` shows up as modified.
 
-The updated `FileKey1` is identified as modified, replacing 3 old keys. The new `\AC|*|RECURSE` path captures the three separate subdirectory paths from the old entry.
+`FileKey1` is modified too, replacing 3 old keys: its new `\AC|*|RECURSE` path covers the old entry's three separate subfolder paths.
 
-The replacement of `Detect` with `DetectFile` is paired into a single `Detection criteria modified` notification.
+Swapping the `Detect` for a `DetectFile` is reported as a single `Detection criteria modified` change.
 
 ### Modification by merger
 
-When entries from the old file are merged into a modified entry, their absorbed keys appear alongside the entry's own changes. The `(from [Entry Name *])` annotation on each old key identifies the old entry or entries from which it came. Keys labeled with the entry's own name came from its prior version; keys labeled with a different name came from a removed entry that was consolidated. Keys the entry's prior version had and lost are listed as removed; keys that only a merged entry had and that didn't survive are listed separately, under `N keys from merged entries not in this entry:`, as in an added entry's merger block. When a removed entry was split across several entries, its keys aren't listed as dropped here. A key that went to one of the others is counted on a closing line that names where it went, eg. `2 other keys from merged entries went to [Windows Font Cache *]`. A key that no entry kept is listed once, in the removed entry's own section under [Merged](#merged), and counted on a second closing line, eg. `173 other keys that no entry kept are listed under [Browser Metrics *], [Crash Reports *], [Download History *] and 8 others`. Each such block opens with the same `This entry contains content originating from N removed entries:` list as an added entry's, right under its header.
+When entries from the old file are merged into a modified entry, the keys it took from them appear alongside its own changes. The block opens with the same `This entry contains content originating from N removed entries:` list as an added entry's, right under its header.
 
-In this example, two version-specific log path entries were merged into a single entry using a wildcard to cover both:
+The `(from [Entry Name *])` note on each old key says where it came from. The entry's own name means its prior version; any other name is a removed entry that was merged in. Keys the entry's prior version had and lost are listed as removed. Keys that only a merged entry had, and that didn't survive, get their own list under `N keys from merged entries not in this entry:`, as in an added entry's merger block.
+
+A removed entry that was split across several entries works differently: its keys aren't listed as dropped here. A key that went to one of the other entries is counted on a closing line that says where it went, eg. `2 other keys from merged entries went to [Windows Font Cache *]`. A key that no entry kept is listed once, in the removed entry's own section under [Merged](#merged), and counted on a second closing line, eg. `173 other keys that no entry kept are listed under [Browser Metrics *], [Crash Reports *], [Download History *] and 8 others`.
+
+In this example, two entries for related games, each with its own log path, became one entry with a wildcard covering both:
 
 **Old (v220510):**
 
@@ -364,9 +368,7 @@ FileKey3=%ProgramFiles%\Age of Wonders*|*Log.txt
 
 **Explanation:**
 
-The merger itself is reported in the merged-entries list
-
-The key-level detail appears in the modified-with-merged-content section.
+The merger itself shows up in the merged-entries list, and the key-level detail in the modified-with-merged-content section.
 
 Shadow Magic's `Resource\Maps` key survives unchanged as `FileKey2`, so it is listed as carried over and credited to the removed entry.
 
@@ -374,9 +376,9 @@ The `FileKey3` wildcard captures both games' log paths into a single key, one fr
 
 ### Renames with key changes
 
-When an entry is renamed and also has other key changes, it does not appear in the Renamed list (which contains only name-only renames). Instead, it appears in a dedicated `Minor changes to renamed entries:` section, displayed as `Old Name * has been renamed to New Name *` alongside its key changes.
+A renamed entry that also changed in other ways stays out of the Renamed list, which holds name-only renames. It goes in the `Minor changes to renamed entries:` section instead, as `Old Name * has been renamed to New Name *` followed by its key changes.
 
-In this example, `IDLE Recent Files *` was renamed to `IDLE *` and simultaneously recategorized from `3021` to `3024`:
+In this example, `IDLE Recent Files *` was renamed to `IDLE *` and moved from category `3021` to `3024` at the same time:
 
 **Old (v220510):**
 
@@ -412,15 +414,15 @@ FileKey1=%UserProfile%\.idlerc|recent-files.lst
 
 **Explanation:**
 
-The `FileKey` and `Detect` content of `[IDLE Recent Files *]` was found unchanged in `[IDLE *]`, so the entry is classified as renamed rather than removed.
+The `FileKey` and `Detect` content of `[IDLE Recent Files *]` turns up unchanged in `[IDLE *]`, so the entry counts as renamed rather than removed.
 
 `LangSecRef`'s value also changed, so the entry appears in the `Minor changes to renamed entries:` section with its key diffs, rather than in the name-only rename list.
 
 ### Cross-Entry Key Movements
 
-A key that leaves an entry present in both files and lands in any other entry has moved. Moves are reported in a dedicated `Cross-Entry key movements:` section, grouped by the entry the keys left, each group headed with its total, eg. `MP3Gain * moved 2 keys:`. The receiving entry can be modified, renamed, or added, so splitting part of an entry out into a new one shows up here. Unlike with a merger, the source entry still exists.
+A key that leaves an entry present in both files and lands in any other entry has moved. Diff reports moves in their own `Cross-Entry key movements:` section, grouped by the entry the keys left, each group headed with its total, eg. `MP3Gain * moved 2 keys:`. The receiving entry can be modified, renamed, or added, so splitting part of an entry out into a new one shows up here. Unlike with a merger, the source entry still exists.
 
-The section is omitted entirely when no movements are detected.
+The section is left out when nothing moved.
 
 **Diff output:**
 
@@ -472,8 +474,6 @@ The section is omitted entirely when no movements are detected.
 
 `[Windows Subsystems *]` gave keys to four entries. `[Microsoft PlayReady *]` is a renamed `[Media Play Ready Client *]`. The other three are new, and each also absorbed removed entries, so their merger output credits these keys `(from [Windows Subsystems *])`.
 
-Every source entry still exists in the new file, which is what distinguishes a movement from a merger.
-
 Each move also appears in the itemized output of both entries, under `Moved` in the source and `Moved in` in the receiving entry (see [Modified Entries](#modified-entries)):
 
 ```
@@ -487,7 +487,7 @@ Each move also appears in the itemized output of both entries, under `Moved` in 
 
 ## Removed Entries
 
-An entry is **Removed** if it exists in the old file but not in the new file. Removed entries fall into one of three sub-categories.
+An entry is **Removed** if it exists in the old file but not in the new file. Each removed entry falls into one of three kinds.
 
 ### Renamed
 
@@ -509,7 +509,7 @@ The list closes with a count: `N entries renamed (name-only changes)`.
 
 ### Merged
 
-The entry no longer exists, but its content was absorbed into another entry in the new file that is substantially different from the old version. Diff reports the name of the absorbing entry. Mergers are further categorized in the summary report:
+The entry no longer exists, but its content was absorbed into another entry in the new file that is substantially different from the old version. Diff reports the name of the absorbing entry. The summary splits mergers in two:
 
 - **Modified by merger**: the absorbing entry existed in the old file and was modified to include the removed entry's content
 - **Added with merger**: the absorbing entry is itself new and contains content from one or more removed entries
@@ -536,7 +536,7 @@ In the added-entries output, the entry's header is followed by `This entry conta
 
 **Example with before/after context:**
 
-Two companion entries (`Clover Bookmarks Backups *` and `Clover Session *`) were consolidated into the main `Clover *` entry. Each contributed a single FileKey, which the new entry combines into a single pattern.
+Two companion entries (`Clover Bookmarks Backups *` and `Clover Session *`) were folded into the main `Clover *` entry.
 
 **Old (v220510):**
 
@@ -606,7 +606,7 @@ Because `Clover *` is a *modified* entry rather than an added one, its source en
 
 A split/merged result means the old entry's content was distributed across more than one new entry, i.e. different keys matched in different places. The keys of a split entry that none of those entries kept, unchanged or captured, are listed once, here, under `N keys not kept by any of these entries:`. The merger blocks of the entries it went into don't list them as dropped; each ends with a line pointing back here instead (see [Modification by merger](#modification-by-merger)).
 
-**Example with before/after context (large split):** The following shows how `Alternate Services *`, a single legacy entry covering nine different Firefox-based browsers, was split into six browser-specific entries. Each browser that received a dedicated entry now appears as a separate absorbing target, and the keys for the three browsers that got no entry are listed under the split.
+**Example with before/after context (large split):** `Alternate Services *`, a single legacy entry covering nine different Firefox-based browsers, was split into six browser-specific entries. Each browser that received a dedicated entry now appears as a separate absorbing target, and the keys for the three browsers that got no entry are listed under the split.
 
 **Old (v220510):**
 
@@ -670,9 +670,7 @@ FileKey10=%LocalAppData%\Packages\Mozilla.Firefox_*\LocalCache\Roaming\Mozilla\F
 
 The new entries detect their browsers with other keys (`LibreWolf Caches *`, for one, uses `DetectFile1=%AppData%\librewolf\Profiles`), so none of the old Detects survive verbatim. They are categorized by `Section=` rather than `LangSecRef=3026`, so the old category key is lost too.
 
-Six of the nine browser FileKeys were matched in six new per-browser entries.
-
-The remaining three (IceDragon, SlimBrowser, Basilisk) were not matched in any new entry.
+Six of the nine browser FileKeys turned up in six new per-browser entries. The other three (IceDragon, SlimBrowser, Basilisk) didn't match any new entry.
 
 ### Removed Without Replacement
 
@@ -697,7 +695,7 @@ The entry is gone and its content does not appear in any other entry in the new 
 
 # Sample Output
 
-The following is a trimmed extract of the saved log for a real diff run comparing base-flavor winapp2.ini version 220510 (May 2022) against version 251109 (November 2025). `[...]` marks sections cut for brevity.
+This is a trimmed extract of the saved log from a real diff run comparing base-flavor winapp2.ini version 220510 (May 2022) against version 251109 (November 2025). `[...]` marks sections cut for brevity.
 
 ```
 Beginning Diff
