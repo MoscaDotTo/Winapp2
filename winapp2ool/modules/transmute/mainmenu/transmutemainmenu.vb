@@ -51,9 +51,9 @@ Public Module transmuteMainMenu
                 Sub() initModule("Flavorizer", AddressOf buildFlavorizerMenu)) _
             .AddBlank() _
             .AddLine("Preset source file names:") _
-            .AddDispatchedOption("Removed Entries", "Select 'Removed Entries.ini'", Sub() setSourceFileName("Removed Entries.ini")) _
             .AddDispatchedOption("custom", "Select 'custom.ini'", Sub() setSourceFileName("custom.ini")) _
             .AddDispatchedOption("winapp3.ini", "Select 'winapp3.ini'", Sub() setSourceFileName("winapp3.ini")) _
+            .AddDispatchedOption("Archived Entries", "Select 'Archived Entries.ini'", Sub() setSourceFileName("Archived Entries.ini")) _
             .AddDispatchedOption("browsers.ini", "Select 'browsers.ini'", Sub() setSourceFileName("browsers.ini")) _
             .AddDispatchedOption("uwp.ini", "Select 'uwp.ini'", Sub() setSourceFileName("uwp.ini")) _
             .AddBlank() _

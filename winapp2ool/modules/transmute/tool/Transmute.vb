@@ -241,7 +241,6 @@ Public Module Transmute
     '''
     ''' Preset source file choices <br />
     '''
-    ''' -r              : removed entries.ini  <br />
     ''' -c              : custom.ini  <br />
     ''' -w              : winapp3.ini <br />
     ''' -a              : archived entries.ini <br />
@@ -286,7 +285,6 @@ Public Module Transmute
             .WithFlag("-byvalue", Sub() RemoveByName = Not RemoveByName) _
             .WithFlag("-dontlint", Sub() isWinapp = Not isWinapp) _
             .WithFlag("-noglobal", Sub() recognizeGlobals = Not recognizeGlobals) _
-            .WithFileAlias("-r", TransmuteFile2, "Removed Entries.ini") _
             .WithFileAlias("-c", TransmuteFile2, "custom.ini") _
             .WithFileAlias("-w", TransmuteFile2, "winapp3.ini") _
             .WithFileAlias("-a", TransmuteFile2, "Archived Entries.ini") _
