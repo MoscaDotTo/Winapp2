@@ -64,8 +64,7 @@ Module CCiniDebug
     ''' <summary>
     ''' Loads and analyzes <c> ccleaner.ini </c>, pruning orphaned entries and sorting if enabled,
     ''' saves it if enabled, then displays the results and waits for a key press. We return early
-    ''' if ccleaner.ini, or winapp2.ini when pruning, is empty or missing. The completion line
-    ''' says the file was saved whenever saving is enabled, even if the write failed.
+    ''' if ccleaner.ini, or winapp2.ini when pruning, is empty or missing.
     ''' </summary>
     Public Sub initCCDebug()
 
@@ -82,12 +81,14 @@ Module CCiniDebug
         End If
 
         Dim orphans As List(Of String)
+        Dim saved As Boolean
 
         Using gLogScope($"Analyzing {CCDebugFile2.Name}")
             orphans = ccDebug(winapp2, ccIni)
+            saved = iniFile.Empty(CCDebugFile3.Dir, CCDebugFile3.Name).OverwriteToFile(ccIni.ToString(), SaveDebuggedFile)
         End Using
 
-        Dim completionText = $"Analysis complete{If(SaveDebuggedFile, $" — {CCDebugFile3.Name} saved", "")}."
+        Dim completionText = $"Analysis complete{If(saved, $" — {CCDebugFile3.Name} saved", "")}."
         gLog(completionText)
 
         Dim out As New MenuSection
@@ -98,7 +99,7 @@ Module CCiniDebug
         If orphans IsNot Nothing Then
 
             If orphans.Count > 0 Then orphans.ForEach(Sub(entry) out.AddColoredLine($"Orphaned: {entry}", ConsoleColor.Yellow))
-            out.AddLine($"{orphans.Count} orphaned setting{If(orphans.Count > 1, "s", "")} removed")
+            out.AddLine($"{orphans.Count} orphaned setting{If(orphans.Count = 1, "", "s")} {If(saved, "removed", "found")}")
 
         End If
 
@@ -114,8 +115,8 @@ Module CCiniDebug
     End Sub
 
     ''' <summary>
-    ''' Prunes, sorts, and saves ccleaner.ini using the given loaded files, each step only if its
-    ''' setting is on. We save to <c> CCDebugFile3 </c> and ignore whether the write succeeded.
+    ''' Prunes and sorts ccleaner.ini in memory using the given loaded files, each step only if
+    ''' its setting is on
     ''' </summary>
     '''
     ''' <param name="wa2file">
@@ -143,9 +144,6 @@ Module CCiniDebug
         End If
 
         If SortFileForOutput Then sortCC(ccinifile)
-
-        Dim outFile = iniFile.Empty(CCDebugFile3.Dir, CCDebugFile3.Name)
-        outFile.OverwriteToFile(ccinifile.ToString(), SaveDebuggedFile)
 
         Return orphans
 
@@ -195,7 +193,7 @@ Module CCiniDebug
 
         End Using
 
-        gLog($"  {tbTrimmed.Count} orphaned settings detected")
+        gLog($"  {tbTrimmed.Count} orphaned setting{If(tbTrimmed.Count = 1, "", "s")} detected")
 
         Return orphanNames
 

@@ -48,7 +48,7 @@ CCiniDebug does up to three things to `ccleaner.ini`, and you can turn each one 
 
 1. Find your `ccleaner.ini` (usually in `%ProgramFiles%\CCleaner\`) and a current `winapp2.ini`
 2. Use **Choose ccleaner.ini** and **Choose winapp2.ini** to select them
-3. Select **Run**. Pruning, sorting and saving are all on by default, and the result goes to `ccleaner-debugged.ini` in the current directory
+3. Select **Run**. Pruning, sorting and saving are all on by default, and the result is saved as `ccleaner.ini` in the current directory. To keep the original, use **Choose save target** first
 
 ---
 
@@ -59,7 +59,8 @@ CCiniDebug does up to three things to `ccleaner.ini`, and you can turn each one 
 | Prune, sort, and save using the default file names in the current directory | `winapp2ool -ccdebug` |
 | See which keys would be pruned without changing any file | `winapp2ool -ccdebug -nosave` |
 | Write `ccleaner.ini` to the save target with no changes | `winapp2ool -ccdebug -noprune -nosort` |
-| Clean up `ccleaner.ini` in place in its default CCleaner location | `winapp2ool -ccdebug -2d "%ProgramFiles%\CCleaner" -3d "%ProgramFiles%\CCleaner" -3f ccleaner.ini` |
+| Keep the original and save the result as `ccleaner-debugged.ini` | `winapp2ool -ccdebug -3f ccleaner-debugged.ini` |
+| Clean up `ccleaner.ini` in place in its default CCleaner location | `winapp2ool -ccdebug -2d "%ProgramFiles%\CCleaner" -3d "%ProgramFiles%\CCleaner"` |
 
 Program Files isn't writable without admin rights, so the last command brings up a UAC prompt if necessary before winapp2ool saves.
 
@@ -105,7 +106,7 @@ On the command line, CCiniDebug is `winapp2ool -ccdebug` (`ccdebug`, `5`, and `-
 | `-2d path` | Set ccleaner.ini directory | Current directory |
 | `-2f name` | Set ccleaner.ini file name | `ccleaner.ini` |
 | `-3d path` | Set save target directory | Current directory |
-| `-3f name` | Set save target file name | `ccleaner-debugged.ini` |
+| `-3f name` | Set save target file name | `ccleaner.ini` |
 
 ---
 
@@ -139,7 +140,7 @@ It drops the `(App)` prefix and any surrounding spaces to get the entry name, th
 ### What pruning reports
 
 - An `Orphaned: <entry name>` line for each orphan
-- The number of orphaned settings removed, at the end
+- The number of orphaned settings at the end, as "removed" once the save succeeds and "found" otherwise
 
 ### Requirement
 
@@ -157,7 +158,7 @@ Sorts the keys in the `[Options]` section of ccleaner.ini alphabetically, ignori
 
 Writes the result of the enabled operations to the save target. With saving off, CCiniDebug still prunes and sorts in memory and reports what it found, but doesn't change any file.
 
-The save target defaults to `ccleaner-debugged.ini` in the current directory. To overwrite your original file or save somewhere else, use **Choose save target** (or `-3d` and `-3f`).
+The save target defaults to `ccleaner.ini` in the current directory, so a run on the `ccleaner.ini` there overwrites it. To keep the original, use **Choose save target**, which offers `ccleaner-debugged.ini` as a one-step rename, or pass `-3f`.
 
 ---
 
@@ -173,7 +174,7 @@ Turn pruning off (`-noprune`) to sort ccleaner.ini without removing anything.
 
 ### Dry Run
 
-Turn saving off (`-nosave`, or **Toggle saving** in the menu) to see which keys would be pruned without touching any file. CCiniDebug still lists every orphan it finds. The count at the end still says "removed", but they were only removed from the copy in memory.
+Turn saving off (`-nosave`, or **Toggle saving** in the menu) to see which keys would be pruned without touching any file. CCiniDebug still lists every orphan it finds, and the count at the end says how many it found.
 
 ---
 
