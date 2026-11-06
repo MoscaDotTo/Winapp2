@@ -87,7 +87,7 @@ CCleaner 7 patching complete
 | Patch from a local CCleaner 7 flavor winapp2.ini, saving the result separately | `winapp2ool -cc7patcher -nodownload -3f ccleaner-patched.ini` | [Patching a ccleaner.ini](EXAMPLES.md#example-1-patching-a-ccleanerini) |
 | Download and patch into a separate file you can review before deploying it | `winapp2ool -cc7patcher -3f ccleaner-patched.ini` | [Review before deploying](EXAMPLES.md#example-4-review-before-deploying) |
 | Patch a `ccleaner.ini` that already has winapp2.ini entries in it | `winapp2ool -cc7patcher -nodownload -2f ccleaner-patched.ini -3f ccleaner-repatched.ini` | [Re-patching in place](EXAMPLES.md#example-5-re-patching-in-place) |
-| Download, trim, and patch `ccleaner.ini` in place in CCleaner's configuration directory | `winapp2ool -cc7patcher -trim -2d "%AppData%\CCleaner" -3d "%AppData%\CCleaner"` | |
+| Download, trim, and patch `ccleaner.ini` in place in CCleaner's configuration directory | `winapp2ool -cc7patcher -trim -2d "%ProgramFiles%\Piriform\CCleaner 7" -3d "%ProgramFiles%\Piriform\CCleaner 7"` | |
 | Trim before patching, but never remove the entries named in `keepers.ini` | `winapp2ool -cc7patcher -trim -includes -4f keepers.ini` | |
 
 In the menu, these are toggles and file pickers you set before **Run**. See [Menu Options](#menu-options).
@@ -142,7 +142,7 @@ On the command line, CC7Patcher is `winapp2ool -cc7patcher` (`cc7patcher`, `12`,
 | `-5d path` | Set excludes file directory | Current directory |
 | `-5f name` | Set excludes file name | `cc7-excludes.ini` |
 
-###### Note: Winapp2ool does not expand environment variables in path arguments. `%ProgramFiles%` and `%AppData%` in the commands on this page and in the [examples](EXAMPLES.md) work because the Command Prompt (cmd) expands them before winapp2ool sees them. From PowerShell, use `$env:ProgramFiles` and `$env:APPDATA` instead.
+###### Note: Winapp2ool does not expand environment variables in path arguments. `%ProgramFiles%` in the commands on this page and in the [examples](EXAMPLES.md) works because the Command Prompt (cmd) expands it before winapp2ool sees it. From PowerShell, use `$env:ProgramFiles` instead.
 
 ---
 
