@@ -361,13 +361,13 @@ You maintain a machine running software that winapp2.ini no longer covers, and y
 
 **Intent**
 
-Download both supplementary databases into an `archive\` subdirectory, then merge winapp3.ini into a local winapp2.ini.
+Download both supplementary databases into an `archive\` subdirectory, then merge Archived entries.ini into a local winapp2.ini.
 
 **Commands**
 ```
 winapp2ool -download winapp3  -1f "\archive\winapp3.ini"
 winapp2ool -download archived -1f "\archive\Archived entries.ini"
-winapp2ool -transmute -add -2d "C:\Tools\winapp2\archive" -2f winapp3.ini -3f winapp2-extended.ini
+winapp2ool -transmute -add -a -2d "C:\Tools\winapp2\archive" -3f winapp2-extended.ini
 ```
 
 **Output**
@@ -393,4 +393,5 @@ C:\Tools\winapp2\
 
 **Explanation**
 - `-1f "\subdir\name"` put both files in `archive\`. The first download created it, since it didn't exist yet
+- `-a` names `Archived Entries.ini` as Transmute's source file, and `-2d` points it at `archive\`. Use `-w` instead to merge winapp3.ini
 - The Transmute step writes to `winapp2-extended.ini`, leaving the original winapp2.ini intact
