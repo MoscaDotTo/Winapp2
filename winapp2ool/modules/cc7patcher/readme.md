@@ -1,24 +1,21 @@
 # CC7Patcher
 
-**CC7Patcher** is a winapp2ool module for end users that installs winapp2.ini entries into CCleaner 7's configuration file (`ccleaner.ini`). CCleaner 7 dropped support for loading a separate `winapp2.ini` file; instead, cleaning definitions are stored inside `ccleaner.ini` alongside CCleaner's own cleaning definitions, and requiring a modified entry format. CC7Patcher bridges this gap by patching the [CCleaner 7 flavor](#the-ccleaner-7-format) of winapp2.ini into `ccleaner.ini` using Transmute's Add mode.
+**CC7Patcher** is a winapp2ool module for end users that installs winapp2.ini entries into CCleaner 7's configuration file (`ccleaner.ini`). CCleaner 7 no longer loads a separate `winapp2.ini`. Its cleaning definitions live inside `ccleaner.ini` instead, in a modified entry format. CC7Patcher uses Transmute's Add mode to put the [CCleaner 7 flavor](#the-ccleaner-7-format) of winapp2.ini into `ccleaner.ini`.
 
 ### What does CC7Patcher do?
 
 CC7Patcher performs these steps in order:
 
-1. Downloads the CCleaner 7 flavor from GitHub (or accepts a local copy) 
+1. Downloads the CCleaner 7 flavor from GitHub (or accepts a local copy)
 2. Optionally trims winapp2.ini to keep only entries relevant to the current system
-3. Prunes any winapp2 entries already in `ccleaner.ini` 
+3. Prunes any winapp2 entries already in `ccleaner.ini`
 4. Adds the current winapp2.ini entries to `ccleaner.ini`
 
-The result is a `ccleaner.ini` that contains both CCleaner's own cleaning definitions and the winapp2.ini entries, which CCleaner 7 will then use when cleaning. 
+The patched `ccleaner.ini` holds CCleaner's own cleaning definitions and the winapp2.ini entries side by side, and CCleaner 7 cleans with both.
 
 ### Why CC7Patcher?
 
-- CCleaner 7 compatibility: winapp2.ini can no longer be dropped next to the CCleaner executable
-- One-step install: download and install in a single run
-- Trim integration: optionally trim the database down to just the software on your machine for performance reasons
-- Automation: fully scriptable from the command line 
+CCleaner 7 ignores a winapp2.ini dropped next to its executable, so without CC7Patcher you'd be merging entries into `ccleaner.ini` by hand. CC7Patcher downloads and installs in one run. It can also trim the database down to the software on your machine first, which leaves CCleaner fewer entries to load, and everything it does can be scripted from the command line.
 
 ---
 
@@ -47,27 +44,27 @@ The result is a `ccleaner.ini` that contains both CCleaner's own cleaning defini
 # Requirements
 
 - CCleaner 7 installed with a `ccleaner.ini` file (typically at `%ProgramFiles%\Piriform\CCleaner 7`)
-- An internet connection if downloading winapp2.ini, or a local **CCleaner 7 flavor** winapp2.ini file if not 
+- An internet connection if downloading winapp2.ini, or a local **CCleaner 7 flavor** winapp2.ini file if not
 
 ---
 
 # Quick Start
 
-It is suggested that you run winapp2ool from the same directory as the files on which you want to operate. 
+Run winapp2ool from the folder that holds the files you're working on. Every file setting defaults to the current directory.
 
 ### Default Workflow (download and patch)
 
 1. Open CC7Patcher from the winapp2ool main menu
-2. Use **Change ccleaner.ini** to point to your `ccleaner.ini` if necessary 
-3. Run. CC7Patcher downloads the latest CCleaner 7 flavor of winapp2.ini and appends it into `ccleaner.ini`
+2. Use **Change ccleaner.ini** to point to your `ccleaner.ini` if necessary
+3. Select **Run**. CC7Patcher downloads the latest CCleaner 7 flavor of winapp2.ini and adds it to `ccleaner.ini`
 
 ### Local winapp2.ini Workflow
 
 1. Open CC7Patcher
 2. Toggle off **Download**. The **Change winapp2.ini** option will appear
-3. Use **Change winapp2.ini** to select your local CCleaner 7 flavor winapp2.ini if necessary 
-4. Use **Change ccleaner.ini** to select your ccleaner.ini if necessary 
-5. Run, CC7Patcher appends your local CCleaner 7 flavor of winapp2.ini into `ccleaner.ini`
+3. Use **Change winapp2.ini** to select your local CCleaner 7 flavor winapp2.ini if necessary
+4. Use **Change ccleaner.ini** to select your ccleaner.ini if necessary
+5. Select **Run**. CC7Patcher adds your local copy to `ccleaner.ini`
 
 A successful run reports its progress with these lines (the trim lines appear only when Trim is enabled):
 
@@ -93,7 +90,7 @@ CCleaner 7 patching complete
 | Download, trim, and patch `ccleaner.ini` in place in CCleaner's configuration directory | `winapp2ool -cc7patcher -trim -2d "%AppData%\CCleaner" -3d "%AppData%\CCleaner"` | |
 | Trim before patching, but never remove the entries named in `keepers.ini` | `winapp2ool -cc7patcher -trim -includes -4f keepers.ini` | |
 
-In the menu, the same choices are toggles and file pickers set before **Run**; see [Menu Options](#menu-options).
+In the menu, these are toggles and file pickers you set before **Run**. See [Menu Options](#menu-options).
 
 ---
 
@@ -119,7 +116,7 @@ The menu also displays the currently selected winapp2.ini (shown as `Online` whi
 
 # Command-Line Arguments
 
-CC7Patcher supports command-line automation for scripting environments. The module is invoked as `winapp2ool -cc7patcher` (`cc7patcher`, `12`, and `-12` also work).
+On the command line, CC7Patcher is `winapp2ool -cc7patcher` (`cc7patcher`, `12`, and `-12` also work).
 
 ### Toggles
 
@@ -145,16 +142,16 @@ CC7Patcher supports command-line automation for scripting environments. The modu
 | `-5d path` | Set excludes file directory | Current directory |
 | `-5f name` | Set excludes file name | `cc7-excludes.ini` |
 
-###### Note: Winapp2ool does not expand environment variables in path arguments. `%AppData%` in the examples below works because the Command Prompt (cmd) expands it before winapp2ool sees it. From PowerShell, use `$env:APPDATA` instead.
+###### Note: Winapp2ool does not expand environment variables in path arguments. `%ProgramFiles%` and `%AppData%` in the commands on this page and in the [examples](EXAMPLES.md) work because the Command Prompt (cmd) expands them before winapp2ool sees them. From PowerShell, use `$env:ProgramFiles` and `$env:APPDATA` instead.
 
 ---
 
 # The CCleaner 7 Format
 
-CCleaner 7 entries are not the same as base winapp2.ini entries. Compared to the base format, each entry:
+A CCleaner 7 entry differs from a base winapp2.ini entry in two ways:
 
-- Carries three additional keys: `ID=` (the entry's name), `Author=`, and `Tags=`
-- Replaces the `LangSecRef=` / `Section=` categorization keys with a comma-delimited `Tags=` value (e.g. `Tags=Google,Chrome,Browser`)
+- It carries three extra keys: `ID=` (the entry's name), `Author=`, and `Tags=`
+- It has no `LangSecRef=` or `Section=`. A comma-delimited `Tags=` value (e.g. `Tags=Google,Chrome,Browser`) does their job
 
 ```ini
 [Windows System Assessment Tool *]
@@ -165,17 +162,17 @@ Author=Winapp2.ini Project
 Tags=ccwindows
 ```
 
-The winapp2.ini project publishes a ready-made [CCleaner 7 flavor](https://github.com/MoscaDotTo/Winapp2/tree/master/Non-CCleaner/CCleaner7) built in this format. If you provide a local file, it must be in this format, or entries will not be functional in CCleaner 7
+The winapp2.ini project publishes a ready-made [CCleaner 7 flavor](https://github.com/MoscaDotTo/Winapp2/tree/master/Non-CCleaner/CCleaner7) in this format. A local file has to be in this format too, or its entries won't work in CCleaner 7.
 
 ---
 
 # How Patching Works
 
-CC7Patcher first prunes the target `ccleaner.ini` by removing any entry with a `Author=Winapp2.ini Project` key. It then uses [Transmute's](../transmute/readme.md) **Add** mode to add the winapp2.ini entries into the pruned file. This makes patching idempotent: running it again, or running it to update to a newer winapp2.ini, produces the same result as patching a clean `ccleaner.ini`. See [Example 5](EXAMPLES.md#example-5-re-patching-in-place).
+CC7Patcher first prunes the target `ccleaner.ini`, removing every entry with an `Author=Winapp2.ini Project` key. Then it uses [Transmute's](../transmute/readme.md) **Add** mode to add the winapp2.ini entries to the pruned file. Because of the prune, patching an already patched `ccleaner.ini` gives the same result as patching a clean one, whether you're re-running the same winapp2.ini or updating to a newer one. See [Example 5](EXAMPLES.md#example-5-re-patching-in-place).
 
 ### Notes
 
-If you modify or create an entry for your system for use with CCleaner 7, remove the `Author=Winapp2.ini Project` key to prevent CC7Patcher from destroying it. 
+If you edit an entry or write your own for CCleaner 7, take out its `Author=Winapp2.ini Project` key. Otherwise the next patch deletes it, and an edited entry goes back to our original.
 
 ---
 
@@ -183,18 +180,19 @@ If you modify or create an entry for your system for use with CCleaner 7, remove
 
 ### Back Up ccleaner.ini First
 
-The default output overwrites your input `ccleaner.ini`, and the overwrite also reorders the file and strips its comments. Back it up before running, or use **Change output file** (`-3f`) to write the patched result to a separate location for review first. See [Example 4](EXAMPLES.md#example-4-review-before-deploying).
+By default the output overwrites your input `ccleaner.ini`, and the rewrite also sorts its sections and strips its comments. Back it up before running, or use **Change output file** (`-3f`) to write the patched result somewhere else and review it first. See [Example 4](EXAMPLES.md#example-4-review-before-deploying).
 
 ### Include and Exclude Lists
 
-The trim before patching works like [Trim's](../trim/README.md#includes-and-excludes) include and exclude lists, but CC7Patcher keeps its own: its own toggles, and its own files (`cc7-includes.ini` and `cc7-excludes.ini` by default).
+The trim before patching uses include and exclude lists the same way [Trim](../trim/README.md#includes-and-excludes) does, but CC7Patcher has its own toggles and its own files (`cc7-includes.ini` and `cc7-excludes.ini` by default).
 
 ### Re-patching After Updates
 
-When winapp2.ini is updated, just run CC7Patcher again over your existing `ccleaner.ini`. There is no need to restore a clean copy first.
+When winapp2.ini updates, run CC7Patcher again over your patched `ccleaner.ini`. You don't need to restore a clean copy first.
 
 ### CCleaner 7 updates overwrite ccleaner.ini
-When CCleaner 7 updates, it overwrites its cleaning definitions. This has the side effect of unpatching winapp2.ini from `ccleaner.ini`. You will need to reinstall winapp2.ini after every CCleaner 7 update.
+
+When CCleaner 7 updates, it rewrites its cleaning definitions in `ccleaner.ini`, and the winapp2.ini entries go with them. Run CC7Patcher again after every CCleaner 7 update.
 
 ---
 
@@ -204,7 +202,7 @@ When CCleaner 7 updates, it overwrites its cleaning definitions. This has the si
 |:-|:-|
 | "ccleaner.ini not found. Please select a valid file." | The target `ccleaner.ini` does not exist. The run aborts without writing anything |
 | "Internet connection required to download winapp2.ini. Please check your connection." | Downloading is enabled but there is no connection. Toggle Download off and provide a local file, or restore your connection |
-| "Failed to download winapp2.ini" | The download from GitHub failed. check your connection and try again |
+| "Failed to download winapp2.ini" | The download from GitHub failed. Check your connection and try again |
 | "winapp2.ini not found. Please select a valid file." | Downloading is disabled and the local winapp2.ini does not exist |
-| "CCleaner.ini not found" | Shown by the menu when Run is selected while the target `ccleaner.ini` does not exist |
+| "CCleaner.ini not found" | The menu shows this when you select Run and the target `ccleaner.ini` does not exist |
 | Entries not appearing in CCleaner 7 | The patched file was not saved to the correct `ccleaner.ini`, or a non-CCleaner 7 flavor winapp2.ini was patched |

@@ -12,7 +12,7 @@ Worked examples for [CC7Patcher](readme.md). The [Common Uses](readme.md#common-
 
 ---
 
-The outputs below are taken verbatim from real CC7Patcher runs. The `winapp2.ini` used in Examples 1, 2, and 5 is this four-entry excerpt of the real CCleaner 7 flavor:
+The outputs below come straight from real CC7Patcher runs. Examples 1, 2, and 5 use this four-entry excerpt of the real CCleaner 7 flavor as their `winapp2.ini`:
 
 ###### **Source file (`winapp2.ini`)**
 
@@ -47,7 +47,7 @@ Author=Winapp2.ini Project
 Tags=ccwindows
 ```
 
-The `ccleaner.ini` being patched is this minimal illustration:
+The `ccleaner.ini` they patch is a minimal stand-in for the real one:
 
 ###### **Base file (`ccleaner.ini`)**
 
@@ -66,11 +66,11 @@ Tags=ccapps
 
 **Context**
 
-We have a local CCleaner 7 format winapp2.ini and want to install its entries into `ccleaner.ini`. To keep the original file untouched for now, we direct the output to a separate file.
+We have a local CCleaner 7 format winapp2.ini and want to install its entries into `ccleaner.ini`. We'd like to leave the original file alone for now, so the output goes to a separate file.
 
 **Intent**
 
-We want to append every entry from winapp2.ini into `ccleaner.ini`, saving the result as `ccleaner-patched.ini`.
+We want to add every entry from winapp2.ini to `ccleaner.ini`, saving the result as `ccleaner-patched.ini`.
 
 **Command**
 
@@ -78,7 +78,7 @@ We want to append every entry from winapp2.ini into `ccleaner.ini`, saving the r
 winapp2ool -cc7patcher -nodownload -3f ccleaner-patched.ini
 ```
 
-###### Note: Without `-3f`, the output would overwrite `ccleaner.ini` in place
+###### Note: Without `-3f`, CC7Patcher overwrites `ccleaner.ini`
 
 **Output**
 
@@ -122,10 +122,10 @@ Tags=ccwindows
 
 **Explanation**
 
-- All four winapp2.ini entries are appended into the file, exactly as written in the source
+- All four winapp2.ini entries are added exactly as written in the source
 - The `[CCleaner Entry 1]` section and every key in it are untouched
-- The output is sorted alphabetically by section name 
-- The CCleaner 7 header comments are incidentally stripped from `ccleaner.ini`
+- The output is sorted alphabetically by section name
+- The `; CCleaner - Cleaning rules` comment is gone. Winapp2ool doesn't keep comments when it rewrites an ini file
 
 ---
 
@@ -133,7 +133,7 @@ Tags=ccwindows
 
 **Context**
 
-Most of the 3,700+ entries in winapp2.ini target software we don't have. There is no reason to make CCleaner 7 parse all of them at every startup. 
+Most of winapp2.ini targets software we don't have, and there's no reason to make CCleaner 7 parse all of it at every startup.
 
 **Intent**
 
@@ -174,9 +174,9 @@ Tags=ccwindows
 
 **Explanation**
 
-- Trim evaluated each entry in winapp2.ini's detection criteria against the demo machine before patching
-- `[Google Chrome Autoplay Preferences *]` and `[Opera GX Autoplay Preferences *]` were dropped because their `DetectFile` paths do not exist on the demo machine
-- `[Windows System Assessment Tool *]` and `[Windows Task Scheduler *]` detection criteria was found on the dmeo machine. These entries are retained and then appended into `ccleaner.ini`
+- Before patching, Trim checked each entry's detection criteria against the demo machine
+- `[Google Chrome Autoplay Preferences *]` and `[Opera GX Autoplay Preferences *]` were dropped because their `DetectFile` paths don't exist there
+- The WinSAT folder and the `HKCU\Software\Microsoft\Windows` key both exist, so `[Windows System Assessment Tool *]` and `[Windows Task Scheduler *]` were kept and added to `ccleaner.ini`
 
 ---
 
@@ -184,11 +184,11 @@ Tags=ccwindows
 
 **Context**
 
-Download the current CCleaner 7 flavor and install it directly into CCleaner's live configuration.
+We want the current CCleaner 7 flavor, installed straight into CCleaner's live configuration.
 
 **Intent**
 
-We want to patch the real `ccleaner.ini` in `%ProgramFiles%\Piriform\CCleaner 7`
+We want to download the flavor and patch the real `ccleaner.ini` in `%ProgramFiles%\Piriform\CCleaner 7`.
 
 **Command**
 
@@ -198,9 +198,7 @@ winapp2ool -cc7patcher -2d "%ProgramFiles%\Piriform\CCleaner 7" -3d "%ProgramFil
 
 **Output**
 
-The run appends all entries from the current CCleaner 7 flavor into `ccleaner.ini`.
-
-###### Note: The full `ccleaner.ini` produced by this command is too large to display here. The console output has been provided instead. 
+The run adds every entry in the current CCleaner 7 flavor to `ccleaner.ini`. The patched file is far too large to show here, so this is the console output instead:
 
 ```
 Patching ccleaner.ini with entries from winapp2.ini
@@ -211,6 +209,7 @@ CCleaner 7 patching complete
 **Explanation**
 
 - `-2d`/`-3d` point the input and output at CCleaner's configuration directory
+- Program Files isn't writable without admin rights, so winapp2ool asks for elevation through a UAC prompt before it patches
 - After the run, the winapp2.ini entries appear in CCleaner 7's cleaning options alongside its built-in definitions
 
 ---
@@ -219,11 +218,11 @@ CCleaner 7 patching complete
 
 **Context**
 
-We are cautious about a tool rewriting CCleaner's live configuration and want to inspect the result before committing to it.
+We'd rather not let a tool rewrite CCleaner's live configuration sight unseen, so we want to look at the result first.
 
 **Intent**
 
-We want to produce the patched file in the working directory so that we can review it. 
+We want the patched file in the working directory, where we can review it before it goes anywhere.
 
 **Commands**
 
@@ -241,21 +240,23 @@ copy ccleaner-patched.ini "%ProgramFiles%\Piriform\CCleaner 7\ccleaner.ini"
 
 **Explanation**
 
-- `ccleaner.ini` is copied into the into the working directory from the CCleaner 7 directory
-- `-3f ccleaner-patched.ini` writes the patched result to a separate file from the input for review 
-- CCleaner 7's current unpatched `ccleaner.ini` is renamed to `ccleaner.ini.bak` as a backup 
-- The newly patched `ccleaner-patched.ini` is copied into the CCleaner 7 directory and renamed to `ccleaner.ini`
+- The first `copy` brings `ccleaner.ini` from the CCleaner 7 directory into the working directory
+- `-3f ccleaner-patched.ini` writes the patched result to its own file, leaving the copied input alone
+- The unpatched `ccleaner.ini` in the CCleaner 7 directory is backed up as `ccleaner.ini.bak`
+- `ccleaner-patched.ini` then replaces CCleaner 7's `ccleaner.ini`
+- The two `copy` commands that write into Program Files need a Command Prompt run as administrator
+
 ---
 
 ### Example 5: Re-patching in place
 
 **Context**
 
-A new winapp2.ini version has been released, and we want to update our already-patched `ccleaner.ini` 
+A new winapp2.ini has been released, and we want to update the `ccleaner.ini` we patched in Example 1.
 
 **Intent**
 
-Show that re-patching is idempotent: CC7Patcher prunes the winapp2 entries the previous patch added, then re-adds the current set, so nothing is duplicated.
+We want the update without any duplicated entries. CC7Patcher prunes the winapp2 entries the previous patch added, then adds the current set.
 
 **Command**
 
@@ -265,7 +266,7 @@ winapp2ool -cc7patcher -nodownload -2f ccleaner-patched.ini -3f ccleaner-repatch
 
 **Output**
 
-###### **Output file (`ccleaner-repatched.ini`)**
+###### **Output file (`ccleaner-repatched.ini`, excerpt)**
 
 ```ini
 [Google Chrome Autoplay Preferences *]
@@ -278,8 +279,9 @@ Tags=Google,Chrome,Browser
 
 **Explanation**
 
-- This entry was already in `ccleaner-patched.ini` 
+- This entry was already in `ccleaner-patched.ini`
 - The prune pass removes it because it has an `Author=Winapp2.ini Project` key
-- The Add pass put it back 
-- If this version of winapp2.ini had dropped an entry, the old copy would have been deleted without being readded
-- Any entry not written by the Winapp2.ini Project is left unmodified
+- The Add pass puts it back
+- Our run used the same four-entry winapp2.ini as Example 1, and the whole output file came out byte for byte the same as Example 1's
+- If the new winapp2.ini had dropped an entry, the prune would delete the old copy and nothing would add it back
+- Entries without that `Author=` key, like `[CCleaner Entry 1]`, are left alone
