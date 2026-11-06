@@ -1,17 +1,17 @@
-# Transmute 
+# Transmute
 
-**Transmute** is a winapp2ool module for anyone customizing winapp2.ini (or another ini file). It provides precise control over modifying ini files through three primary operations: Add, Replace, and Remove, with concise sub-modes where relevant. It enables users to apply targeted changes to configuration files at their chosen granularity (whole sections or individual keys) akin to "patching" winapp2.ini. 
+**Transmute** is a winapp2ool module for anyone customizing winapp2.ini (or another ini file). It changes one ini file using instructions from another, through three operations: Add, Replace and Remove. Each works on whole sections or on individual keys, so you can patch winapp2.ini as broadly or as narrowly as you need.
 
-Transmute is the successor to the Merge module. If you have an existing Merge workflow, see [Migrating from Merge](#migrating-from-merge) at the bottom of this page.
+Transmute replaced the Merge module. If you have an existing Merge workflow, see [Migrating from Merge](#migrating-from-merge) at the bottom of this page.
+
+Transmute is both an end user module and also a winapp2.ini build tool. If you only want to use winapp2.ini with a cleaner, you likely do not need to read this page or use Transmute.
 
 ### What does Transmute do?
-Transmute allows you to modify one ini file (the "base" file) using instructions from another ini file (the "source" file). Think of it as a merge tool that can add new content, replace existing content, or remove unwanted content with precision.
+Transmute modifies one ini file (the *base* file) using the contents of another (the *source* file). It can add new content, replace what's there, or remove what you don't want, down to a single key.
 
 ### Why Transmute?
-- Batch Operations: Apply complex modifications across entire files automatically
-- Flavorization: Create specialized variants of winapp2.ini for different use cases 
-- Automation: Perfect for scripting and maintaining configuration variants
-- Concise modifications: Straightforward single operation modifications with clear sub-modes 
+Keep your own changes to winapp2.ini in a file of their own and apply them again whenever winapp2.ini updates, instead of editing the file by hand each time. Transmute runs from the command line as easily as from the menu, so it fits in scripts. It's also how the winapp2.ini build makes each flavor (CCleaner, BleachBit and the rest), through [Flavorizer](Flavorizer/readme.md).
+
 ---
 
 # Table of Contents
@@ -58,21 +58,21 @@ Transmute allows you to modify one ini file (the "base" file) using instructions
 ---
 
 # Requirements
-- A base ini file you wish to modify 
-- A source ini file providing the modifications
+- A base ini file you want to modify
+- A source ini file holding the changes
 
 ---
 
 # Quick Start
 
 ### Common Workflow
-1.	Create your base file 
-2.	Create your source file(s) with your desired changes
-3.	Choose your transmutation mode and options
-4.	Run Transmute to apply the changes
-5.  Reconfigure and run as many times as necessary to achieve your desired output 
+1. Put your base file (usually `winapp2.ini`) in the same folder as winapp2ool
+2. Write a source file holding the changes you want
+3. Open Transmute, choose your source file, and pick a mode
+4. Select **Run**. Transmute saves the result to `winapp2-transmuted.ini`
+5. Adjust and run again until the output is what you want
 
-*If you are applying multiple transmutations in succession, you may wish to investigate the Flavorizer*
+*If you're applying several transmutations in a row, look at [Flavorizer](Flavorizer/readme.md), which runs them all in one go.*
 
 ---
 
@@ -87,7 +87,7 @@ Transmute allows you to modify one ini file (the "base" file) using instructions
 | Remove keys by name from `winapp2.ini`, overwriting it | `winapp2ool -transmute -remove -bykey -byname -2f key_name_removals.ini -3f winapp2.ini` | [Remove Keys By Name](EXAMPLES.md#example-5-remove-keys-by-name) |
 | Remove keys by value from `winapp2.ini`, saving to `winapp2-transmuted.ini` | `winapp2ool -transmute -remove -bykey -byvalue -2f key_value_removals.ini` | [Removing Keys By Value](EXAMPLES.md#example-6-removing-keys-by-value) |
 
-In the menu, the same choices are the mode options and file pickers set before **Run**; see [Menu Options](#menu-options). `-c` is one of the [preset source files](#preset-source-files).
+In the menu, you make the same choices with the mode options and file choosers before you select **Run**. See [Menu Options](#menu-options). `-c` is one of the [preset source files](#preset-source-files).
 
 ---
 
@@ -96,36 +96,36 @@ In the menu, the same choices are the mode options and file pickers set before *
 
 | Option | Effect | Notes |
 |:-|:-|:-|
-| Run (default) | Apply the current transmutation settings | |
-| Open Flavorizer | Open the Flavorizer sub-module | Provides a UI for chain operations |
-| Removed Entries | Set the source file name to `Removed Entries.ini` | Preset shortcut |
-| custom | Set the source file name to `custom.ini` | Preset shortcut |
-| winapp3.ini | Set the source file name to `winapp3.ini` | Preset shortcut |
-| browsers.ini | Set the source file name to `browsers.ini` | Preset shortcut |
-| uwp.ini | Set the source file name to `uwp.ini` | Preset shortcut |
-| Change base file | Select the file to be modified | Default: `winapp2.ini` |
-| Change source file | Select the file containing modifications | |
-| Change save target | Select the output location | Default: `winapp2-transmuted.ini` |
-| Toggle Syntax | Toggle formatting the output as winapp2.ini \* | Default: `True` |
-| Toggle Global sections | Toggle treating `[*]`, `[*Map:]`, and `[*Name:]` source sections as [global operations](#global-operations) | Default: `True` |
+| Run (default) | Apply the transmutation with the current settings | Pressing Enter on an empty line also runs it. Refused until you've chosen a source file |
+| Open Flavorizer | Open the Flavorizer sub-module | Runs a series of transmutations in a fixed order |
+| custom | Set the source file name to `custom.ini` | Preset |
+| winapp3.ini | Set the source file name to `winapp3.ini` | Preset |
+| Archived Entries | Set the source file name to `Archived Entries.ini` | Preset |
+| browsers.ini | Set the source file name to `browsers.ini` | Preset |
+| uwp.ini | Set the source file name to `uwp.ini` | Preset |
+| Change base file | Choose the file to modify | Default: `winapp2.ini` |
+| Change source file | Choose the file holding the changes | |
+| Change save target | Choose where the output is saved | Default: `winapp2-transmuted.ini` |
+| Toggle Syntax | Turn winapp2.ini formatting of the output on or off \* | Default: `On` |
+| Toggle Global sections | Turn on or off treating `[*]`, `[*Map:]` and `[*Name:]` source sections as [global operations](#global-operations) | Default: `On` |
 | Change Transmute mode | Cycle through Add → Replace → Remove | Default: `Add` |
-| Change Replace mode | Switch the Replace mode between BySection ↔ ByKey | Only visible in `Replace` mode |
-| Change Remove mode | Switch the Remove mode between BySection ↔ ByKey | Only visible in `Remove` mode |
-| Change Key Removal Mode | Switch between ByName ↔ ByValue | Only visible in `Remove` ByKey mode |
+| Change Replace mode | Switch Replace between BySection and ByKey | Only shown in `Replace` mode |
+| Change Remove mode | Switch Remove between BySection and ByKey | Only shown in `Remove` mode |
+| Change Key Removal Mode | Switch between ByName and ByValue | Only shown in `Remove` ByKey mode |
 | Reset Settings | Restore all settings to their defaults | Only shown when settings have been changed |
 
-\* See [Output Formatting](#output-formatting) for exactly what winapp2.ini formatting entails. Transmute does **not** run WinappDebug on its output. If you are working with winapp2.ini, you should separately run your transmute output through WinappDebug to ensure style/syntax correctness.  
+\* [Output Formatting](#output-formatting) describes what winapp2.ini formatting does. Transmute does **not** run WinappDebug on its output, so if you're working with winapp2.ini, run the output through WinappDebug yourself to fix its style and syntax.
 
 ---
 
 # Command-Line Arguments
-Transmute supports command-line automation for scripting environments.
+On the command line, Transmute is `winapp2ool -transmute` (`transmute`, `-3` and `3` also work).
 
-**A source file is required.** If no source file is provided via `-2f` or a preset flag, Transmute prints an error and exits without doing anything.
+**A source file is required.** If you don't name one with `-2f` or a preset flag, Transmute prints an error and exits without changing anything.
 
-Arguments labeled "Default" are assumed by default and can be optionally omitted when invoking, though this is not recommended. 
+You can leave out the arguments marked Default, since Transmute assumes them anyway, though we recommend including them so your scripts say what they do.
 
-Arguments affecting default settings are ignored. Eg. If you specify `-bykey`, the default sub mode, it is ignored. If you specify both `-bykey` and also `-bysection`, the `-bykey` will be ignored and the resulting sub mode will be `By Section`
+Passing a default argument does nothing, so when two arguments conflict, the one that isn't the default wins. For example, `-bykey -bysection` gives you By Section.
 
 ### Primary Mode
 
@@ -149,39 +149,38 @@ Arguments affecting default settings are ignored. Eg. If you specify `-bykey`, t
 | -byvalue | Remove keys by type and value match |
 
 ### Preset Source Files
-Sets the source file name to one of the pre-defined defaults, most of which are available from GitHub
+Each of these sets the source file name to a predefined file. Most of them can be downloaded from GitHub.
 
 |Arg|Effect|Description
 |:-|:-|:-
-| -r | Use "Removed Entries.ini"  | Contains winapp2.ini entries removed because CCleaner incorporated their coverage natively
-| -c | Use "custom.ini"           | Suggested name for user additions files
-| -w | Use "winapp3.ini"          | Contains winapp2.ini entries which may potentially break applications, use at your own  risk!
-| -a | Use "Archived Entries.ini" | Contains winapp2.ini entries removed because the applications they target are no longer available 
-| -b | Use "browsers.ini"         | The default output file from Browser Builder
-| -u | Use "uwp.ini"              | The default output file from UWP Builder
+| -c | Use "custom.ini"           | The suggested name for a file of your own additions
+| -w | Use "winapp3.ini"          | winapp2.ini entries that may break applications. Use at your own risk!
+| -a | Use "Archived Entries.ini" | winapp2.ini entries removed because the applications they target are no longer available
+| -b | Use "browsers.ini"         | BrowserBuilder's default output file
+| -u | Use "uwp.ini"              | UWPBuilder's default output file
 
-###### Note: Source files *must* be local. Transmute does not directly download any files.
+###### Note: Source files *must* be local. Transmute doesn't download anything.
 
 ### Toggles
 |Arg|Effect|
 |:-|:-
-| -dontlint | Save the output without winapp2.ini formatting. Sections are written in alphabetical order with no preamble (see [Output Formatting](#output-formatting))
-| -noglobal | Treat `[*]`, `[*Map:]`, and `[*Name:]` source sections as ordinary section names instead of [global operations](#global-operations)
+| -dontlint | Save the output without winapp2.ini formatting: sections in alphabetical order, with no header (see [Output Formatting](#output-formatting))
+| -noglobal | Treat `[*]`, `[*Map:]` and `[*Name:]` source sections as ordinary section names instead of [global operations](#global-operations)
 
 ### File Selection
 | Arg | Effect | Default Value
 |:-|:-|:-
-| -1d path        | Set base file path                                      | Current Directory
-| -1f name        | Set base file name                                      | winapp2.ini
-| -1f subdir\name | Set base file name within a subfolder of its path       |
-| -2d path        | Set source file path                                    | Current Directory            
-| -2f name        | Set source file name                                    | None 
-| -2f subdir\name | Set the source file name within a subfolder of its path | 
-| -3d path        | Set output file path                                    | Current Directory  
-| -3f name        | Set output file name                                    | winapp2-transmuted.ini
-| -3f subdir\name | Set the output file name within a subfolder of its path |
+| -1d path        | Set the base file directory         | Current directory
+| -1f name        | Set the base file name              | winapp2.ini
+| -1f subdir\name | Use a file in a subfolder of the base file directory |
+| -2d path        | Set the source file directory       | Current directory
+| -2f name        | Set the source file name            | None
+| -2f subdir\name | Use a file in a subfolder of the source file directory |
+| -3d path        | Set the output directory            | Current directory
+| -3f name        | Set the output file name            | winapp2-transmuted.ini
+| -3f subdir\name | Save to a subfolder of the output directory |
 
-###### Note: By default the output is saved to `winapp2-transmuted.ini` and the base file is left untouched. To modify the base file in place, pass the base file's name to `-3f` explicitly.
+###### Note: The output goes to `winapp2-transmuted.ini` unless you name another file, so your base file stays as it was. To modify the base file in place, pass its name to `-3f`.
 
 ---
 
@@ -189,146 +188,146 @@ Sets the source file name to one of the pre-defined defaults, most of which are 
 
 ## How Matching Works
 
-**All matching in Transmute is case-insensitive** — section names, key names, key types, and key values alike.
+**All matching in Transmute ignores case**: section names, key names, key types and key values alike.
 
-| Operation | Source file provides | Matched on | When no match exists in the base file |
+| Operation | Source file provides | Matched on | When the base file has no match |
 |:-|:-|:-|:-|
-| Add | Sections and keys | Section name | Section is added as new |
+| Add | Sections and keys | Section name | The section is added as new |
 | Replace BySection | Entire replacement sections | Section name | Ignored with a warning |
 | Replace ByKey | Keys carrying replacement values | Section name, then key Name | Ignored with a warning |
-| Remove BySection | Section headers (keys unnecessary) | Section name | Ignored with a warning |
+| Remove BySection | Section headers (no keys needed) | Section name | Ignored with a warning |
 | Remove ByKey (ByName) | Key names (values are ignored) | Section name, then key Name | Ignored with a warning |
-| Remove ByKey (ByValue) | Key values | Section name, then KeyType (name without numbers) + Value | Ignored with a warning |
+| Remove ByKey (ByValue) | Key values | Section name, then KeyType (the name without its number) and Value | Ignored with a warning |
 
-A criterion from the source file applies to **every** matching key in the base section: if the base section contains multiple keys sharing the same name (ByName) or the same KeyType and Value pair (ByValue), all of them are removed or replaced.
+Each criterion in the source file applies to **every** matching key in the base section. If the base section has several keys with the same name (ByName), or the same KeyType and Value (ByValue), all of them are removed or replaced.
 
 ## Add Mode
 
 Adds content from the source file to the base file.
 
-### Sub-modes 
+### Sub-modes
 None
 
 ### Behavior
 
-- Sections from the source file not found in the base file are added to the base file as written
-- Sections from the source file which are found in the base file have the keys from the source file added to the base file as written 
-- Does not avoid creating duplicate keys
-- No existing keys are modified or removed
-- Keys are *not* renumbered; normalize later with WinappDebug if needed (winapp2.ini only)
-- Keys are appended to the end of the matched section; when Syntax is enabled (the default), keys are then regrouped by type on save (see [Output Formatting](#output-formatting))
+- A source section the base file doesn't have is added as written
+- A source section the base file already has gets the source's keys added to it as written
+- Add doesn't check for duplicate keys
+- No existing key is changed or removed
+- Keys are *not* renumbered. For winapp2.ini, WinappDebug fixes the numbering afterwards
+- Keys go on the end of the matched section. With Syntax on (the default), they're then regrouped by type when the file is saved (see [Output Formatting](#output-formatting))
 
 ### When to use
-- Maintaining a set of customizations to winapp2.ini while also keeping it up to date 
-- Merging multiple configuration files into one
-- Adding keys to existing entries (eg. a FileKey covering a location the entry misses)
-- Adding entirely new entries which exist only in your configuration
+- Keeping your own customizations to winapp2.ini while still taking its updates
+- Merging several configuration files into one
+- Adding keys to existing entries (eg. a FileKey for a location the entry misses)
+- Adding whole new entries that only exist in your configuration
 
 ---
 
 ## Replace Mode
 
-Overwrites existing content in the base file with content from the source file.
+Overwrites content in the base file with content from the source file.
 
 ### Sub-modes
 
 |Sub Mode|Effect|Notes
 |:-|:-|:-|
-| BySection | Replaces entire sections by their name       | Section name matches are case-insensitive |
-| By Key    | Replaces individual key values by their name | Default                                   |
+| BySection | Replaces entire sections by their name       | Section names are matched ignoring case |
+| By Key    | Replaces individual key values by their name | Default                                 |
 
-### Behavior 
+### Behavior
 
 #### By Section
-- Sections from the source file which are found in the base file replace entirely the section in the base file as they are written  
-- Sections from the source file not found in the base file are ignored 
+- A source section the base file has replaces the base file's section entirely, as written
+- A source section the base file doesn't have is ignored
 
 ##### When to use
-- Providing a substantially revised version of an entry that is easier to rewrite than to patch key by key
-- Maintaining a local version of an entry (eg. one adapted to your installation) while keeping the rest of the file up to date
+- Swapping in a heavily revised entry that's easier to rewrite than to patch key by key
+- Keeping a local version of an entry (eg. one adapted to your install) while taking updates to the rest of the file
 
 #### By Key
-- Keys from sections in the source file which are found in the base file provide replacement *values* for keys of the same name in the base file
-- Only the key's Value is replaced — the base file's key name (including its casing) is untouched
-- Sections and keys from the source file not found in the base file are ignored 
+- Each key in a source section gives a new *value* for the key of the same name in the matching base section
+- Only the Value changes. The base file's key name, casing included, stays as it was
+- Source sections and keys the base file doesn't have are ignored
 
 ##### When to use
-- Correcting specific key values in generated entries without rewriting the entire section
+- Correcting specific values in generated entries without rewriting the whole section
 - Updating a known key to a new value as part of keeping a configuration current
-- For numbered keys whose numbering may shift as entries are updated, it can be more reliable to Remove the old value (ByValue) and Add the new one instead
+- For numbered keys whose numbers may shift as entries change, removing the old value (ByValue) and adding the new one is often more reliable
 
 ---
 
 ## Remove Mode
-Removes content from the base file based on matches in the source file.
+Removes content from the base file wherever it matches the source file.
 
 ### Sub-modes
 
 |Sub Mode|Effect|Notes
 |:-|:-|:-
-|By Section | Removes entire sections from the base file by their name | Section name matches are case-insensitive
-|By Key     | Removes individual keys from sections in the base file   | Default 
+|By Section | Removes entire sections from the base file by name | Section names are matched ignoring case
+|By Key     | Removes individual keys from sections in the base file | Default
 
 ### Key Removal Sub Modes
 |Sub Mode|Effect|Notes
 |:-|:-|:-
-|By Name  | Removes keys from the base file by their Name                 | Default. Values provided in the source file are ignored
-|By Value | Removes keys from the base file based on their Name and Value | Value matches ignore numbers in the key name
+|By Name  | Removes keys from the base file by their Name                 | Default. Values in the source file are ignored
+|By Value | Removes keys from the base file by their Name and Value | The number in the key name is ignored
 
 ### Behavior
 
 #### By Section
-- Sections from the source file which are found in the base file are removed 
-- Sections from the source file not found in the base file are ignored 
-- Key values are ignored in this mode 
+- A source section the base file has is removed from it
+- A source section the base file doesn't have is ignored
+- Any keys in the source section are ignored
 
 ##### When to use
-- Removing entries which are entirely unsupported in the target context while keeping the rest of the file up to date
-- Pruning incomplete or non-viable generated entries
+- Removing entries that don't apply at all in your target, while taking updates to the rest of the file
+- Pruning generated entries that are incomplete or can't work
 
 #### By Key - By Name
-- Keys from sections in the source file which are found in the base file are removed if they have the same name 
-- The values provided for keys in the source file are ignored — matching is by name alone
-- Keys from the source file not found in the base file are ignored
+- A key in a source section removes every key with the same name from the matching base section
+- Values in the source file are ignored. Only the name matters
+- Source keys the base file doesn't have are ignored
 
 ##### When to use
 - Removing unnumbered keys (eg. `Section`, `LangSecRef`) when you know their exact names
 - Removing a numbered key when you know its exact number
 
 #### By Key - By Value
-- Keys from sections in the source file which are found in the base file are removed if they have the same name (ignoring numbers) and value 
-- Keys from the source file not found in the base file are ignored 
+- A key in a source section removes every key in the matching base section with the same name (numbers ignored) and the same value
+- Source keys the base file doesn't have are ignored
 
 ##### When to use
-- Removing numbered keys (eg. `FileKey`, `DetectFile`) whose exact numbers may differ between files or change as entries are updated
-- Removing a specific known value without needing to track its current key number
+- Removing numbered keys (eg. `FileKey`, `DetectFile`) whose numbers may differ between files or change as entries are updated
+- Removing a value you know without having to track which number its key has today
 
 ---
 
 # Global Operations
 
-Transmute is capable of performing operations over every section in the base file rather than to a single section matched by name. These operations are processed before any named sections in the same source file, in the order `[*Map:]` → `[*]` → `[*Name:]`. This ordering means specific per-section operations can refine the result of global ones.  
+A global operation works across every section of the base file, instead of on one section matched by name. Transmute applies them before any named sections in the same source file, in the order `[*Map:]` → `[*]` → `[*Name:]`, so a named section can refine what a global one did.
 
-All three are controlled by the Global sections toggle (`-noglobal` via the command line). When disabled, `[*]`, `[*Map: ...]`, and `[*Name: ...]` are treated as ordinary named sections. 
+The Global sections toggle (`-noglobal` on the command line) controls all three. With it off, `[*]`, `[*Map: ...]` and `[*Name: ...]` are treated as ordinary named sections.
 
 ## The [*] Section
 
-A source section literally named `[*]` applies its keys to every section of the base file under the current mode:
+A source section named exactly `[*]` applies its keys to every section of the base file under the current mode:
 
-| Mode | Global meaning |
+| Mode | What `[*]` does |
 |:-|:-|
-| Add | Add each key to every base section |
-| Replace ByKey | Set the value of keys matching Name in every section that has them |
-| Remove ByKey (ByName) | Remove keys matching Name from every section |
-| Remove ByKey (ByValue) | Remove keys matching KeyType + Value from every section |
-| Remove BySection | **Refused** with a warning: this would remove every section |
-| Replace BySection | **Refused** with a warning: a global section replacement is incoherent |
+| Add | Add each key to every base section that doesn't already have a key of that name |
+| Replace ByKey | Set the value of the key with that Name in every section that has one |
+| Remove ByKey (ByName) | Remove keys with that Name from every section |
+| Remove ByKey (ByValue) | Remove keys with that KeyType and Value from every section |
+| Remove BySection | **Refused** with a warning, since it would remove every section |
+| Replace BySection | **Refused** with a warning, since there's no sensible way to replace every section with one |
 
-###### Note: Numbered keys will be rejected in Add mode. 
+###### Note: Add mode refuses numbered keys in `[*]`.
 
 ### The %EntryName% token
 
-A key value in a `[*]` section may contain the token `%EntryName%` (case-insensitive). As the key is applied, the token is replaced with each receiving section's name (including the trailing ` *` of winapp2.ini entries) so a single global key produces a distinct value per section. The token is only interpreted inside `[*]` sections; named-section operations leave it as a literal value.
+A key value in a `[*]` section can contain the token `%EntryName%` (case doesn't matter). As each key is applied, Transmute replaces the token with the receiving section's name, trailing ` *` included, so one global key gives every section its own value. The token only works inside `[*]` sections. Named sections keep it as literal text.
 
 ##### Example
 
@@ -348,16 +347,16 @@ Author=Winapp2.ini Project
 
 ## Key Mapping Rules ([*Map:])
 
-`[*Map: <label>]` sections define key mapping rules: match a key anywhere in the base file by its KeyType and Value, and replace the whole key *including its Name*. This is the only Transmute operation that can change a key's Name.
+A `[*Map: <label>]` section is a key mapping rule. It finds keys anywhere in the base file by their KeyType and Value and replaces the whole key, *Name included*. No other Transmute operation can change a key's Name.
 
-Key mapping rules are recognized **only in Replace ByKey mode**. Under any other mode they are skipped with a warning
+Key mapping rules only work in **Replace ByKey** mode. In any other mode Transmute skips them with a warning.
 
-Each rule section contains:
+Each rule section holds:
 
 | Key | Meaning | Notes |
 |:-|:-|:-|
-| `Match=<Name>=<Value>` | A match criteria | Repeatable as `Match1=`, `Match2=`, ... for many-to-one mappings. KeyTypes are compared with numbers stripped from both sides, so `Match=FileKey=...` matches any `FileKeyN` with that value. A Value of exactly `*` is a wildcard matching any value of that KeyType |
-| `Replace=<Name>=<Value>` | The full replacement key line | Repeatable as `Replace1=`, `Replace2=`, ... for one-to-many mappings. The first replacement takes the matched key's ordinal position; any remaining replacements are inserted immediately after it in file order |
+| `Match=<Name>=<Value>` | What to match | Repeatable as `Match1=`, `Match2=`, ... to map many keys to one. KeyTypes are compared with their numbers stripped, so `Match=FileKey=...` matches any `FileKeyN` with that value. A Value of exactly `*` matches any value of that KeyType |
+| `Replace=<Name>=<Value>` | The full replacement key line | Repeatable as `Replace1=`, `Replace2=`, ... to map one key to many. The first replacement takes the matched key's place, and the rest go right after it |
 
 ##### Example
 
@@ -395,39 +394,39 @@ Replace=Tags=ccapps
 
 ### Rule behavior
 
-- Rules are applied in a single pass in file order with first-match-wins semantics: each base key is evaluated against its *original* value only, so a key replaced by an earlier rule is never re-matched by a later rule in the same run, and keys inserted by a one-to-many rule are never evaluated at all
-- Replacement key numbering is the rule author's responsibility — replacement keys are written exactly as given, consistent with Add mode. Note that the [default output formatting](#output-formatting) renumbers keys anyway
-- A rule which matches nothing anywhere in the base file emits a warning. This can be a sign that the rule has gone stale and the values it targets no longer exist in the base file
-- A malformed rule is skipped with a warning while the remaining rules still apply. A rule is malformed if it has no `Match=` keys, no `Replace=` keys, an unrecognized key, or a `Match=`/`Replace=` value which is not itself a `Name=Value` pair
+- Rules run in one pass, in file order, and the first rule to match a key wins. Each base key is checked against its *original* value only, so a key an earlier rule replaced is never matched again by a later rule in the same run, and keys a one-to-many rule inserts aren't checked at all
+- Numbering the replacement keys is up to you. They're written exactly as given, as in Add mode, though the [default output formatting](#output-formatting) renumbers keys anyway
+- A rule that matches nothing anywhere in the base file gets a warning. That often means the rule is stale and the values it targets are gone
+- A malformed rule is skipped with a warning and the other rules still run. A rule is malformed if it has no `Match=` keys, no `Replace=` keys, a key that isn't `Match` or `Replace`, or a `Match=`/`Replace=` value that isn't itself a `Name=Value` pair
 
 ### Example use cases
-- Maintaining the browser category mapping (`Section=` → `LangSecRef=`) for the CCleaner flavor as ~14 rules instead of hundreds of per-entry cohort sections that must be kept in lockstep across two files
-- De-abstracting wildcard `DetectFile` paths into hardcoded variants for the System Ninja flavor (which does not support wildcards in detection) as one rule per wildcard, instead of a remove + add lockstep spanning two files and one section per affected entry. New entries carrying the same wildcards are covered automatically
-- Converting every entry's `LangSecRef`/`Section` category key into its CCleaner 7 `Tags=` value: specific rules map each known category and a wildcard fallback rule (placed last) funnels every remaining category into `Tags=ccapps`. Combined with a `[*]` section adding `ID=%EntryName%` and `Author=`, this expresses the entire CCleaner 7 format conversion as data
+- The CCleaner flavor keeps its browser category mapping (`Section=` → `LangSecRef=`) as about 14 rules, where it used to need hundreds of per-entry sections kept in step across two files
+- The System Ninja flavor, whose cleaner doesn't support wildcards in detection, turns wildcard `DetectFile` paths into hardcoded variants with one rule per wildcard. That replaced a remove file and an add file with a section per affected entry, and new entries with the same wildcards are covered automatically
+- The CCleaner 7 flavor turns every entry's `LangSecRef`/`Section` category key into its `Tags=` value: specific rules map each known category, and a wildcard fallback rule (placed last) sends everything else to `Tags=ccapps`. With a `[*]` section adding `ID=%EntryName%` and `Author=`, the whole CCleaner 7 format conversion is written as data
 
 ## Name-Filtered Rules ([*Name:])
 
-A `[*Name: <scaffold>]` section applies its keys under the current mode like `[*]`, but only to the base sections it selects instead of every section. Where `[*]` is unconditional and `[*Map:]` matches by key content alone, `[*Name:]` selects by the entry name plus optional key content. 
+A `[*Name: <scaffold>]` section applies its keys under the current mode like `[*]` does, but only to the base sections it selects. `[*]` applies everywhere and `[*Map:]` matches on key content alone, while `[*Name:]` selects by the entry's name, plus key content if you ask for it.
 
-A base section is selected when both conditions hold:
+A base section is selected when both of these hold:
 
-1. **Anchored name suffix**: the section name ends with `" <scaffold> *"` (case-insensitive), where `<scaffold>` is the label after `*Name:`. The engine appends the ` *` for winapp2.ini entries to prevent entry name substring collision: `[*Name: Web Browsing Session]` selects `[Firefox Web Browsing Session *]` but **not** `[Firefox Web Browsing Session Backups *]`.
-2. **Key Content**: an optional set of `Match=` keys. With none, the name suffix alone decides. Otherwise the section must contain at least one key satisfying any a `Match=` criteria. 
+1. **Name suffix**: the section name ends with `" <scaffold> *"` (ignoring case), where `<scaffold>` is the label after `*Name:`. Transmute adds the ` *` that ends every winapp2.ini entry name, so a label can't match partway through a longer name: `[*Name: Web Browsing Session]` selects `[Firefox Web Browsing Session *]` but **not** `[Firefox Web Browsing Session Backups *]`.
+2. **Key content**: an optional set of `Match=` keys. With none, the name alone decides. Otherwise the section needs at least one key that satisfies any one of the `Match=` criteria.
 
-Each rule section contains:
+Each rule section holds:
 
 | Key | Meaning | Notes |
 |:-|:-|:-|
-| `Match=<Name>=<Value>` | Key content matching criteria | Optional, repeatable as `Match1=`, `Match2=`, ..., KeyTypes compared with numbers stripped. The value supports wildcards; eg. `Section=* Web Browser` matches `AVG Secure Web Browser`.  |
-| *(any other key)* | Content applied to each selected section | In `Add` mode, duplicate keys will not be re-added |
+| `Match=<Name>=<Value>` | Key content to match | Optional, repeatable as `Match1=`, `Match2=`, .... KeyTypes are compared with their numbers stripped. The value can contain wildcards: `Section=* Web Browser` matches `AVG Secure Web Browser` |
+| *(any other key)* | Content applied to each selected section | In `Add` mode, a key the section already has isn't added again |
 
 ##### Value-glob vs `[*Map:]`
 
-`[*Map:]` only understands a whole-value `*` (the entire value is a wildcard or nothing is). `[*Name:]` predicates understand a **partial** glob anywhere in the value (`* Web Browser`, `Brave*`), which is why it can match the messy real Section values (`.360 Secure Browser Web Browser`, `AVG Secure Web Browser`). A bare `*` still reduces to "match anything", so the two are compatible.
+`[*Map:]` only understands a `*` that is the whole value: either the value is a wildcard or it has none. `[*Name:]` understands a `*` **anywhere** in the value (`* Web Browser`, `Brave*`), which is what lets it match messy real Section values like `.360 Secure Browser Web Browser` and `AVG Secure Web Browser`. A bare `*` still matches anything in both.
 
 ##### Refusals
 
-Mirroring `[*]`: **Remove BySection** and **Replace BySection** do not support this mapping and numbered keys are not permitted in `Add` mode 
+As with `[*]`, **Remove BySection** and **Replace BySection** refuse `[*Name:]` sections, and `Add` mode refuses numbered keys in them.
 
 ##### Example
 
@@ -441,60 +440,60 @@ Match2=Section=* Email Client
 Default=False
 ```
 
-A rule which selects no sections emits a warning. 
+A rule that selects no sections gets a warning.
 
 ---
 
 # Output Formatting
 
-Transmute writes its output in one of two formats, controlled by the Syntax toggle (`-dontlint` via the command line):
+Transmute writes its output in one of two formats, set by the Syntax toggle (`-dontlint` on the command line):
 
 ### Syntax enabled (default)
 
 The output is written as a winapp2.ini file:
 
-- Entries are sorted alphabetically and grouped into the standard winapp2.ini category sections
-- Keys within each entry are regrouped into winapp2.ini key order (categorization → detection → deletion routines), preserving their order within each group
-- The standard winapp2.ini preamble comments (version line, entry count, license and project links) are regenerated at the top of the file
+- Entries are sorted alphabetically. Only winapp3.ini's sections (`Language Files`, `Dangerous Long`, `Dangerous`) appear in labeled groups
+- The keys in each entry are regrouped into winapp2.ini key order (categorization, then detection, then the cleaning keys), keeping their order within each group
+- The winapp2.ini header comments (version line, entry count, the flavor if the base file names one, and the project and license links) are written fresh at the top of the file
 
-Because of the key regrouping, a key added by Add mode may not appear at the end of its entry in the output. See [Example 7](EXAMPLES.md#example-7-chaining-operations-together-1) for this in action.
+Because of the regrouping, a key that Add mode put at the end of an entry may not be at the end in the output. [Example 7](EXAMPLES.md#example-7-chaining-operations-together-1) shows this happening.
 
-If your base file is not a winapp2.ini file, disable Syntax.
+If your base file isn't a winapp2.ini file, turn Syntax off.
 
 ### Syntax disabled (`-dontlint`)
 
-The output is written as a plain ini file with sections in **alphabetical order** by name. The original section order of the base file is not preserved in either format.
+The output is written as a plain ini file with its sections in **alphabetical order** by name. Neither format keeps the base file's original section order.
 
 ### Comments are not preserved
 
-Comments from both the base file and the source file will *not* be carried over into the output file. If you are overwriting your base file, you will lose any comments in it. 
+Comments from the base file and the source file are *not* carried into the output. If you overwrite your base file, you lose its comments.
 
 ---
 
 # Flavorization
 
-Flavorization applies a set of transformations to create specialized variants of ini files. Operations are applied in this order:
+Flavorization applies a set of transformations to make a specialized variant of an ini file. The operations run in this order:
 
-1.	Section Removal
-2.	Key Name Removal
-3.	Key Value Removal
-4.	Section Replacement
-5.	Key Replacement
-6.	Section and Key Additions
+1. Section Removal
+2. Key Name Removal
+3. Key Value Removal
+4. Section Replacement
+5. Key Replacement
+6. Section and Key Additions
 
-See the [Flavorizer readme](Flavorizer/readme.md) for the dedicated sub-module which orchestrates this process.
+The [Flavorizer readme](Flavorizer/readme.md) covers the sub-module that runs this process.
 
 ### Example use cases
 
--	Creating winapp2.ini variants (eg. a CCleaner or BleachBit flavor)
--	Generating platform-specific configurations (eg. a Windows XP flavor)
--	Automated quality control corrections (eg. Correcting entries generated by winapp2ool)
+- Making variants of winapp2.ini (eg. a CCleaner or BleachBit flavor)
+- Making platform-specific configurations (eg. a Windows XP flavor)
+- Fixing entries the generators get wrong (eg. BrowserBuilder output)
 
 ---
 
 # Source Files
 
-Your source file must follow standard ini format:
+Your source file must be a standard ini file:
 
 ```ini
 [Section Name]
@@ -503,47 +502,51 @@ Key2=Value2
 
 [Another Section]
 Key1=Value1
-``` 
+```
 
-Comments are welcome in your source files for your own reference, but they will not appear in the output — see [Output Formatting](#output-formatting).
+Comments in your source files are fine for your own reference, but they won't appear in the output. See [Output Formatting](#output-formatting).
 
 # Tips & Best Practices
 
 ### Safety First
 
-- Always test on copies of important files
-- By default, output is saved to `winapp2-transmuted.ini` and your base file is untouched. If you point the save target at the base file, overwriting it is non-reversible without a backup. Winapp2ool does not create one
-- Comments from either file do not get carried into the output
+- Test on copies of important files
+- The output goes to `winapp2-transmuted.ini` and your base file is left alone unless you point the save target at it. If you do, you can't undo the overwrite without a backup, and winapp2ool doesn't make one
+- Comments from either file don't make it into the output
 
 ### Effective Source Files
 
-- Keep source files focused on specific changes
-- Comment your source files for future reference
-- Matching is case-insensitive for both section and key names
-- Disable the Syntax toggle (`-dontlint`) when working with files other than winapp2.ini
+- Keep each source file to one focused set of changes
+- Comment your source files so you remember why each change is there
+- Section and key names are matched ignoring case
+- Turn Syntax off (`-dontlint`) for files that aren't winapp2.ini
 
 ### Mode Selection
 
-- Use Add for supplements and extensions
-- Use Replace for updates and corrections
-- Use Remove for cleanup and simplification
-- Each sub-mode's "When to use" list under [Transmute (Primary) Modes](#transmute-primary-modes) gives finer-grained guidance for choosing within a mode
+- Add is for supplements and extensions
+- Replace is for updates and corrections
+- Remove is for cleanup
+- Each sub-mode's "When to use" list under [Transmute (Primary) Modes](#transmute-primary-modes) helps you choose within a mode
 
 ---
 
 # Troubleshooting
 |Error Message|Cause
 |:-|:-
-|"Target section not found in base file: [section] - no changes applied"|Source file references a section not in base file (only affects Replace/Remove)
-|"Replacement target not found: {key} not found in {section}"|Source key doesn't exist in the base section (Replace ByKey mode)
-|"Removal target not found: {key} not found in {section}"|Source key doesn't exist in the base section (Remove ByKey mode). {key} is the key name in ByName mode, or the KeyType=Value pair in ByValue mode
-|"Transmute requires a source file..."|No `-2f` or preset flag was provided via the command line
-|"[\*] cannot be used with Remove BySection (this would remove every section) - skipping"|A `[*]` section was provided while in Remove BySection mode
-|"[\*] cannot be used with Replace BySection (a global section replacement is incoherent) - skipping"|A `[*]` section was provided while in Replace BySection mode
-|"[\*] Refusing to add numbered key {key} to every section - global adds must be unnumbered"|A `[*]` section contains a numbered key (eg. `FileKey1`) in Add mode
-|"[\*Map:] rules are only applied in Replace ByKey mode - skipping..."|`[*Map:]` sections were provided outside Replace ByKey mode
-|"[Map: {label}] is malformed and will be skipped: {reason}"|The rule is missing `Match=` or `Replace=`, has more than one `Replace=`, contains an unrecognized key, or a value isn't a `Name=Value` pair
-|"[Map: {label}] matched nothing in {file} - the rule may be stale"|No key in the base file matched any of the rule's criteria — check whether the values the rule targets still exist
+|"You must select a valid source file"|You selected **Run** in the menu without choosing a source file
+|"Transmute requires a source file..."|No `-2f` or preset flag was given on the command line
+|"{file} was not saved"|Transmute couldn't write the save target. Check that the folder exists and that you can write to it
+|"Target section not found in base file: [section] - no changes applied"|The source file names a section the base file doesn't have (Replace and Remove only)
+|"Replacement target not found: {key} not found in {section}"|The source key doesn't exist in the base section (Replace ByKey)
+|"Removal target not found: {key} not found in {section}"|The source key doesn't exist in the base section (Remove ByKey). {key} is the key name in ByName mode, or the KeyType=Value pair in ByValue mode
+|"[\*] cannot be used with Remove BySection (this would remove every section) - skipping"|The source file has a `[*]` section and the mode is Remove BySection
+|"[\*] cannot be used with Replace BySection (a global section replacement is incoherent) - skipping"|The source file has a `[*]` section and the mode is Replace BySection
+|"[\*] Refusing to add numbered key {key} to every section - global adds must be unnumbered"|A `[*]` section has a numbered key (eg. `FileKey1`) in Add mode
+|"[\*Map:] rules are only applied in Replace ByKey mode - skipping..."|The source file has `[*Map:]` sections and the mode isn't Replace ByKey
+|"[Map: {label}] is malformed and will be skipped: {reason}"|The rule has no `Match=` or no `Replace=` key, has a key that isn't `Match` or `Replace`, or has a value that isn't a `Name=Value` pair
+|"[Map: {label}] matched nothing in {file} - the rule may be stale"|No key in the base file matched any of the rule's criteria. Check whether the values the rule targets still exist
+|"[\*Name:] cannot be used with Remove BySection ..." / "... Replace BySection ..."|The source file has `[*Name:]` sections and the mode is Remove or Replace BySection
+|"[\*Name: {label}] selected no sections in {file} - the rule may be stale"|No base section ended with the rule's label or passed its `Match=` criteria
 
 ---
 
@@ -551,19 +554,19 @@ Comments are welcome in your source files for your own reference, but they will 
 
 ### What happened to Merge?
 
-As the functionality of Merge evolved, it no longer felt appropriate to refer to its output as the result of a "merger" necessarily. We now consider the resulting output a Transmutation. Nevertheless, this is still spiritually the Merge module. However, there are some important technical differences in how Transmute completes its task.
+As Merge grew, calling its output the result of a "merger" stopped making sense, so we now call it a Transmutation. In spirit this is still the Merge module, but there are some important technical differences in how Transmute does its job.
 
-Merge fundamentally differed from Transmute in that Merge *always* applied additions, but with a much more limited capacity for conflict resolution between its "Add & Remove" and "Add & Replace" modes. Transmute makes much more granular changes to the files but can achieve the same output. 
+Merge *always* applied additions, and its "Add & Remove" and "Add & Replace" modes gave it only limited ways to resolve conflicts. Transmute makes much more granular changes, and can still produce the same output.
 
-To migrate to Transmute, you'll need to reconfigure your set of changes into categories by their effects under the new Transmute modes 
+To migrate, sort your changes into groups by what they do under Transmute's modes.
 
 ### New content
- This is the most common use case. Content you are adding (eg. custom entries or keys you wrote for your system) can all be placed together in one file. This functions mostly similarly to the way additions worked in Merge, with the new feature of being able to add individual keys to existing entries rather than requiring you to provide an entire section replacement. Apply additions by setting the Transmute mode to Add. 
+This is the most common case. Content you're adding (eg. custom entries, or keys you wrote for your system) can all go in one file. It works much like additions did in Merge, except you can now add individual keys to existing entries instead of providing a whole replacement section. Apply additions with the Transmute mode set to Add.
 
 ### Replacement content
- Place any sections you want to have replace entries in winapp2.ini in a separate file from keys you want to replace within individual sections. Apply replacements by first setting the Transmute mode to Replace. The default Replace mode is By Key. Set the Replace mode to By Section to replace entire sections. 
+Put sections you want to replace in winapp2.ini in one file, and keys you want to replace within individual sections in another. Apply replacements with the Transmute mode set to Replace. Replace defaults to By Key, so set it to By Section to replace whole sections.
 
 ### Removals
- Place any sections you want to remove entirely from winapp2.ini into a separate file from keys you want to remove from within individual sections. Likewise, place any keys you want to remove by their value in a separate file from keys you want to remove by their name. When removing entire sections, you need not provide any keys. Apply removals by first setting the Transmute mode to Remove. The default Remove mode is By Key. Set the Remove mode to By Section to remove entire sections. The default Key Removal mode is By Name. Set the Key Removal mode to By Value to remove keys by their value. 
+Put sections you want to remove from winapp2.ini entirely in one file, and keys you want to remove from individual sections in another. Likewise, keep keys you want to remove by value in a different file from keys you want to remove by name. When removing whole sections, you don't need to include any keys. Apply removals with the Transmute mode set to Remove. Remove defaults to By Key, so set it to By Section to remove whole sections. Key removal defaults to By Name, so set it to By Value to remove keys by their value.
 
-##### This guide is provided as a general framework for decision making. For technical guidance on the commands required to migrate to Transmute from Merge, see the [Usage Examples](EXAMPLES.md) above
+##### This guide is a general framework for deciding where each change goes. For the commands themselves, see the [Examples](EXAMPLES.md).

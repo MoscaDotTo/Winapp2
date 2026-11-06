@@ -1,6 +1,6 @@
 # Transmute Examples
 
-Worked examples for [Transmute](readme.md). The [Common Uses](readme.md#common-uses) table in the readme lists the commands; these show what each one does, with real input and output.
+Worked examples for [Transmute](readme.md). The [Common Uses](readme.md#common-uses) table in the readme lists the commands. These show what each one does, with real input and output.
 
 # Table of Contents
 
@@ -20,21 +20,21 @@ Worked examples for [Transmute](readme.md). The [Common Uses](readme.md#common-u
 
 ---
 
-To drive some of our examples, we'll take a look at some of the work done by winapp2ool to apply corrections to the output of the Browser Builder. These files can be found [here](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/BrowserBuilder), but relevant lines of code will be provided on this page.  
+Several of these examples come from the corrections winapp2ool applies to BrowserBuilder's output. Those files live in [Assembler/BrowserBuilder](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/BrowserBuilder), but each example shows the lines it needs.
 
-###### Note: When Syntax is enabled (the default), Transmute regenerates the standard winapp2.ini preamble comments at the top of the output file. The example outputs below omit this preamble for brevity.
+###### Note: With Syntax on (the default), Transmute writes the winapp2.ini header comments at the top of the output file. The outputs below leave the header out to save space.
 
 ## Adding Content
 
 ### Example 1: Adding New Sections and Keys
 
-**Context** 
+**Context**
 
-Browser Builder creates the browser entries using a scaffold framework. While this simplifies the overwhelming amount of work involved in maintaining web browser entries, it fails to cover some of the nuances of individual browsers. 
+BrowserBuilder builds every browser entry from a shared set of scaffolds. That saves an enormous amount of work, but the scaffolds can't know every browser's quirks.
 
 **Intent**
 
-We want to increase the coverage of 360 Secure Browser by adding a `FileKey` to the generated `[360 Secure Browser Bookmarked Websites *]` entry. Likewise, we want to add an entry, `[360 Secure Browser Web Browsing History Backups *]`, to provide additional coverage for a feature unique to this browser alongside the standard Browser Builder output. 
+We want better coverage for 360 Secure Browser. That means adding a `FileKey` to the generated `[360 Secure Browser Bookmarked Websites *]` entry, and adding a new entry, `[360 Secure Browser Web Browsing History Backups *]`, for a feature only this browser has.
 
 **Files**
 ###### **Base file (`browsers.ini`)**
@@ -60,13 +60,13 @@ DetectFile=%AppData%\360se6\User Data
 FileKey1=%AppData%\360se6\User Data\*\HisDailyBackup|*|REMOVESELF
 ```
 
-###### Note: *Unlike* replacements and removals, entry and key additions can be provided in just a single file 
+###### Note: *Unlike* replacements and removals, new entries and new keys can share one file
 
 **Command**
 ```
 winapp2ool -transmute -add -1f browsers.ini -2f browser_additions.ini -3f browsers.ini 
 ```
-###### Note: `Add` is the default transmute mode and technically the `-add` argument could be omitted here but is provided for the utmost clarity
+###### Note: `Add` is the default mode, so you could leave out `-add`. It's here so the command says what it does
 
 **Output**
 
@@ -90,13 +90,13 @@ FileKey1=%AppData%\360se6\User Data\*\HisDailyBackup|*|REMOVESELF
 - The base file is browsers.ini
 - The source file is browser_additions.ini
 - The output file is browsers.ini (overwriting the base file)
-- `[360 Secure Browser Web Browsing History Backups *]` is added to the base file as defined in the source file 
+- `[360 Secure Browser Web Browsing History Backups *]` is added to the base file as the source file defines it
 - `[360 Secure Browser Bookmarked Websites *]` in the base file has `FileKey` added with value `%AppData%\360se6\User Data\*|360Bookmarks*` from the source file
-- Sections in the base file not defined in the source file remain unchanged  
+- Sections in the base file not defined in the source file remain unchanged
 
 **Notes**
 
-Transmute does not do any work to ensure correct key numbering on its own, it adds keys as written (eg. `FileKey` above ). Winapp2.ini files should be run through WinappDebug to correct their syntax.  
+Transmute doesn't fix key numbering. It adds keys exactly as written, like the unnumbered `FileKey` above. Run winapp2.ini files through WinappDebug afterwards to fix their syntax ([Example 9](#example-9-correcting-syntax) does this).
 
 ---
 
@@ -104,13 +104,13 @@ Transmute does not do any work to ensure correct key numbering on its own, it ad
 
 ### Example 2: Replacing Key Values
 
-**Context** 
+**Context**
 
-Browser Builder produces some `DetectFile` keys which are compatible with winapp2ool but *not* with CCleaner because CCleaner does not support wildcards in parent paths to the `DetectFile`. This means that a key such as `DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_*\LocalCache\Roaming\Mozilla\Firefox\Profiles` will not be correctly interpreted by CCleaner. We know that our generated Mozilla Firefox entries always contain this `DetectFile2` and want to replace it with a value compatible with CCleaner.
+BrowserBuilder produces some `DetectFile` keys that work in winapp2ool but *not* in CCleaner, because CCleaner doesn't support a wildcard in the folders above the one a `DetectFile` points to. CCleaner misreads a key like `DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_*\LocalCache\Roaming\Mozilla\Firefox\Profiles`. Our generated Firefox entries always contain this `DetectFile2`, so we want to replace it with a value CCleaner can read.
 
 **Intent**
 
-We want to replace the value of `DetectFile2` in `[Mozilla Firefox Autocomplete History *] ` after it is generated with `%LocalAppData%\Packages\Mozilla.Firefox_*` which will be correctly interpreted by CCleaner 
+We want to replace the generated value of `DetectFile2` in `[Mozilla Firefox Autocomplete History *]` with `%LocalAppData%\Packages\Mozilla.Firefox_*`, which CCleaner reads correctly.
 
 **Files**
 
@@ -134,7 +134,7 @@ DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_*
 ```
 winapp2ool -transmute -replace -bykey -1f browsers.ini -2f browser_key_replacements.ini -3f browsers.ini
 ```
-###### Note: `By Key` is the default replace mode and technically the `-bykey` argument could be omitted here but is provided for the utmost clarity
+###### Note: `By Key` is the default Replace mode, so you could leave out `-bykey`. It's here so the command says what it does
 
 **Output**
 
@@ -153,12 +153,12 @@ FileKey2=%LocalAppData%\Packages\Mozilla.Firefox_*\LocalCache\Roaming\Mozilla\Fi
 - The base file is browsers.ini
 - The source file is browser_key_replacements.ini
 - The output file is browsers.ini (overwriting the base file)
-- `DetectFile2` in `[Mozilla Firefox Autocomplete History *]` in the base file has its value replaced with the value of `DetectFile2` from `[Mozilla Firefox Autocomplete History *]` in the source file 
-- Sections in the base file not defined in the source file remain unchanged  
+- `DetectFile2` in the base file's `[Mozilla Firefox Autocomplete History *]` takes the value of `DetectFile2` from the same section in the source file
+- Sections in the base file not defined in the source file remain unchanged
 
 **Notes**
 
- This mode replaces key *values* by matching the key's `Name`, which is the entire text to the left of the `=`. The base file's key name itself is untouched. It may produce more consistent results for numbered keys to replace a key's value by first removing it and then adding a new key with the desired value. 
+This mode replaces key *values* by matching the key's `Name`, which is everything to the left of the `=`. The base file's key name stays as it was. For numbered keys, removing the old key and adding a new one with the value you want often gives more consistent results ([Example 7](#example-7-chaining-operations-together-1)).
 
 ---
 
@@ -166,11 +166,11 @@ FileKey2=%LocalAppData%\Packages\Mozilla.Firefox_*\LocalCache\Roaming\Mozilla\Fi
 
 **Context**
 
-You have installed a game, *And Yet It Moves*, from GOG. The winapp2.ini entry only targets the Steam version. You have written a suitable replacement. 
+You installed the game *And Yet It Moves* from GOG, but the winapp2.ini entry only covers the Steam version. You've written a replacement that covers yours.
 
 **Intent**
 
-We want to replace the winapp2.ini version of `[And Yet It Moves *]` with our custom copy we maintain separately
+We want to replace winapp2.ini's `[And Yet It Moves *]` with the copy we keep separately.
 
 **Files**
 
@@ -193,7 +193,7 @@ FileKey1=%SystemDrive%\GOG\Broken Rules\And Yet It Moves|console.log
 ```
 winapp2ool -transmute -replace -bysection -2f section_replacements.ini -3f winapp2.ini
 ```
-###### Note: Without `-3f winapp2.ini`, the output would be saved to `winapp2-transmuted.ini` and the base file would be left untouched
+###### Note: Without `-3f winapp2.ini`, the output would go to `winapp2-transmuted.ini` and the base file would stay as it was
 
 **Output**
 
@@ -210,8 +210,8 @@ FileKey1=%SystemDrive%\GOG\Broken Rules\And Yet It Moves|console.log
 - The base file is winapp2.ini (default)
 - The source file is section_replacements.ini
 - The output file is winapp2.ini (overwriting the base file)
-- `[And Yet It Moves *]` in the base file is entirely replaced by `[And Yet It Moves *]` from the source file 
-- Sections in the base file not defined in the source file remain unchanged  
+- The base file's `[And Yet It Moves *]` is replaced entirely by the source file's
+- Sections in the base file not defined in the source file remain unchanged
 
 ---
 
@@ -221,17 +221,17 @@ FileKey1=%SystemDrive%\GOG\Broken Rules\And Yet It Moves|console.log
 
 **Context**
 
-In the first version, entries generated by Browser Builder could be incomplete or target features not implemented in a particular browser. Rather than ship them targeting nothing, we chose to prune them from the set of generated entries before combining them into winapp2.ini. Arc implements its pinned tabs storage as a part of a JSON file shared with persistent configuration which winapp2.ini doesn't support cleaning non-destructively.   
+In BrowserBuilder's first version, a generated entry could be incomplete, or target a feature a particular browser doesn't have. Rather than ship entries that clean nothing, we pruned them from the generated set before combining it into winapp2.ini. Arc keeps its pinned tabs in a JSON file that also holds its settings, and winapp2.ini can't clean part of a file without deleting the rest.
 
-###### Note: In the current version of winapp2ool, this entry is no longer generated because it lacks the full corpus of data required for it. This example is left here for its use in the readme, but no longer reflects the current state of the browser builder output.
+###### Note: BrowserBuilder no longer generates this entry, since it never had the data the entry needs. We kept the example because it still shows how the mode works, but it doesn't match BrowserBuilder's current output.
 
 **Intent**
 
-We want to remove `[Arc Pinned Tabs *]` from browsers.ini because there is nothing we can do to make it viable. 
+We want to remove `[Arc Pinned Tabs *]` from browsers.ini, because nothing we could add would make it work.
 
 **Files**
 
-###### **Base file (browsers.ini)**
+###### **Base file (`browsers.ini`)**
 ```ini
 ; This entry is generated without a working RegKey because Arc's pinned tabs live in a shared JSON file
 [Arc Pinned Tabs *]
@@ -259,14 +259,14 @@ FileKey8=%LocalAppData%\Packages\TheBrowserCompany.Arc_ttt1ap7aakyb4\LocalCache\
 [Arc Pinned Tabs *]
 ```
 
-###### Note: There is no need to include keys when removing entire sections.  
+###### Note: You don't need to include any keys when removing whole sections.
 
 **Command**
 ```
 winapp2ool -transmute -remove -bysection -1f browsers.ini -2f browser_section_removals.ini -3f browsers.ini
 ```
 
-**Output** 
+**Output**
 
 ###### **Output file (`browsers.ini`) after transmutation**
 
@@ -289,8 +289,8 @@ FileKey8=%LocalAppData%\Packages\TheBrowserCompany.Arc_ttt1ap7aakyb4\LocalCache\
 - The base file is browsers.ini
 - The source file is browser_section_removals.ini
 - The output file is browsers.ini (overwriting the base file)
-- `[Arc Pinned Tabs *]` is removed from the base file 
-- Sections in the base file not defined in the source file remain unchanged  
+- `[Arc Pinned Tabs *]` is removed from the base file
+- Sections in the base file not defined in the source file remain unchanged
 
 ---
 
@@ -298,11 +298,11 @@ FileKey8=%LocalAppData%\Packages\TheBrowserCompany.Arc_ttt1ap7aakyb4\LocalCache\
 
 **Context**
 
-You are developing a tool which implements winapp2.ini. You are aware that `Section` is a categorizer, but your tool doesn't use these categories. As such, you want to remove the Section key from a particular entry, `[And Yet It Moves *]`, before passing it into your tool. 
+You're writing a tool that reads winapp2.ini. `Section` only sorts entries into categories, and your tool doesn't use categories, so you want to remove the `Section` key from `[And Yet It Moves *]` before your tool reads it.
 
 **Intent**
 
-We want to remove the `Section` key from `[And Yet It Moves *]`
+We want to remove the `Section` key from `[And Yet It Moves *]`.
 
 **Files**
 
@@ -314,13 +314,13 @@ Detect=HKCU\Software\Valve\Steam\Apps\18700
 FileKey1=%AppData%\Broken Rules\And Yet It Moves Steam|console.log
 ```
 
-##### **Source file (`key_name_removals.ini`)**
+###### **Source file (`key_name_removals.ini`)**
 ```ini
 [And Yet It Moves *]
 Section=Games
 ```
 
-###### Note: In ByName mode the value provided in the source file is ignored. `Section=` would remove the key just the same. Providing the value anyway keeps the source file self-documenting.
+###### Note: ByName mode ignores the value in the source file, so `Section=` would remove the key just the same. Writing the value anyway makes the source file easier to read later.
 
 **Command**
 ```
@@ -341,8 +341,8 @@ FileKey1=%AppData%\Broken Rules\And Yet It Moves Steam|console.log
 - The base file is winapp2.ini
 - The source file is key_name_removals.ini
 - The output file is winapp2.ini (overwriting the base file)
-- `Section=Games` is removed from `[And Yet It Moves *]` in the base file 
-- Sections in the base file not defined in the source file remain unchanged 
+- `Section=Games` is removed from `[And Yet It Moves *]` in the base file
+- Sections in the base file not defined in the source file remain unchanged
 
 ---
 
@@ -350,11 +350,11 @@ FileKey1=%AppData%\Broken Rules\And Yet It Moves Steam|console.log
 
 **Context**
 
-When Browser Builder generates entries for DuckDuckGo Browser, it produces two `DetectFile` keys, neither of which are compatible with CCleaner due to containing wildcards in a parent path, eg. `DetectFile=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView`. Rather than remove one and replace the value of the other, we choose to address this by adding a value which captures both paths. The first step of this process is removing the incompatible keys.
+BrowserBuilder's DuckDuckGo Browser entries each get two `DetectFile` keys, and neither works in CCleaner, because each has a wildcard in a parent folder (eg. `DetectFile=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView`). Rather than remove one and replace the other's value, we'll remove both and add one value that covers both paths. This example is the first half: removing the keys CCleaner can't read.
 
 **Intent**
 
-We want to remove the incompatible `DetectFile` values without having to know which key number (eg. the **1** in `DetectFile1`) is associated with the value.
+We want to remove the two `DetectFile` values without having to know which number (eg. the **1** in `DetectFile1`) each key has.
 
 **Files**
 
@@ -404,8 +404,8 @@ FileKey6=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnviron
 - The base file is browsers.ini
 - The source file is browser_value_removals.ini
 - The output file is browsers.ini (overwriting the base file)
-- Any `DetectFile` key with a value provided from `[DuckDuckGo Autofill Data *]` in the source file is removed from `[DuckDuckGo Autofill Data *]` in the base file
-- Sections in the base file not defined in the source file remain unchanged 
+- Every `DetectFile` in the base file's `[DuckDuckGo Autofill Data *]` whose value appears in the same section of the source file is removed
+- Sections in the base file not defined in the source file remain unchanged
 
 ---
 
@@ -415,11 +415,11 @@ FileKey6=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnviron
 
 **Context**
 
-Continuing from **Example 6**, lets complete the task of both removing an unwanted value and replacing it with a new one. The entry as it is at the end of the last example possesses no detection criteria, we want to add one. 
+[Example 6](#example-6-removing-keys-by-value) left the entry with no detection at all. This example does the whole job, removing the two old values and adding the new one.
 
 **Intent**
 
-We want to add a functional `DetectFile` to replace the two `DetectFile` keys we remove in **Example 6.**
+We want one working `DetectFile` in place of the two that Example 6 removes.
 
 **Files**
 
@@ -446,7 +446,7 @@ DetectFile=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView
 DetectFile=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnvironment\EBWebView
 ```
 
-###### **Source file(`browser_additions.ini`)**
+###### **Source file (`browser_additions.ini`)**
 ```ini
 ; This one value replaces the two we remove in browser_value_removals.ini in our final output 
 [DuckDuckGo Autofill Data *]
@@ -476,18 +476,18 @@ FileKey6=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnviron
 
 **Explanation**
 
-Two separate transmutations are conducted, each overwriting browsers.ini so that the second builds on the first:
+This runs two transmutations, each overwriting browsers.ini, so the second builds on the first:
 
 | Step | Mode | Source file | Effect |
 |:-|:-|:-|:-|
 | 1 | Remove ByKey ByValue | browser_value_removals.ini | Both incompatible `DetectFile` keys are removed from `[DuckDuckGo Autofill Data *]` |
 | 2 | Add | browser_additions.ini | `DetectFile=%LocalAppData%\Packages\*DuckDuckGo*Browser*` is added to `[DuckDuckGo Autofill Data *]` |
 
-- Sections in the base file not defined in the source files remain unchanged 
+- Sections in the base file not defined in the source files remain unchanged
 
 **Notes**
 
-The added `DetectFile` appears alongside the entry's other detection keys rather than at the end of the entry: Add mode appends keys to the end of the section, but saving with Syntax enabled regroups keys by type (see [Output Formatting](readme.md#output-formatting)).
+The new `DetectFile` sits with the entry's other detection keys instead of at the end. Add mode puts keys at the end of the section, but saving with Syntax on regroups keys by type (see [Output Formatting](readme.md#output-formatting)).
 
 ---
 
@@ -495,15 +495,15 @@ The added `DetectFile` appears alongside the entry's other detection keys rather
 
 **Context**
 
-As part of the switch to non-ccleaner as default, winapp2.ini recently declared separate sections for each of the web browsers. This conflicts with the old configuration which placed them, at least for CCleaner, together with the CCleaner entries for the same browser. We want to undo this as part of creating a CCleaner flavor of winapp2.ini 
+When winapp2.ini made its non-CCleaner format the default, each web browser got a `Section` of its own. CCleaner used to show those entries alongside its own entries for the same browser, so the CCleaner flavor of winapp2.ini needs to put them back there.
 
 **Intent**
 
-We want to remove the `Section` keys from a particular web browser and add a `LangSecRef` pointing to the appropriate CCleaner section. 
+We want to remove one browser's `Section` keys and give each entry a `LangSecRef` pointing at that browser's CCleaner section.
 
 **Files**
 
-There are 22 generated Vivaldi entries in the base file; three are shown here. The remaining entries follow the same pattern and receive the same treatment.
+The base file has 22 generated Vivaldi entries. Three are shown here, and the rest follow the same pattern and get the same treatment.
 
 ###### **Base file (`browsers.ini`)**
 ```ini
@@ -541,7 +541,7 @@ Section=Vivaldi Web Browser
 ; one section per remaining Vivaldi entry, each listing the same Section key to remove 
 ```
 
-###### **Source file(`browser_additions.ini`)**
+###### **Source file (`browser_additions.ini`)**
 ```ini
 [Vivaldi Autofill Data *]
 LangSecRef=3033
@@ -561,7 +561,7 @@ winapp2ool -transmute -remove -bykey -byvalue -1f browsers.ini -2f browser_value
 winapp2ool -transmute -add -1f browsers.ini -2f browser_additions.ini -3f browsers.ini 
 ```
 
-###### Note: `By Key` is the default remove mode and technically the `-bykey` argument could be omitted here but is provided for the utmost clarity
+###### Note: `By Key` is the default Remove mode, so you could leave out `-bykey`. It's here so the command says what it does
 
 **Output**
 
@@ -589,27 +589,30 @@ FileKey1=%LocalAppData%\Vivaldi\User Data\*|Bookmarks.bak
 
 **Explanation**
 
-Two separate transmutations are conducted, each overwriting browsers.ini so that the second builds on the first:
+This runs two transmutations, each overwriting browsers.ini, so the second builds on the first:
 
 | Step | Mode | Source file | Effect |
 |:-|:-|:-|:-|
 | 1 | Remove ByKey ByValue | browser_value_removals.ini | The `Section=Vivaldi Web Browser` key is removed from each listed entry |
 | 2 | Add | browser_additions.ini | `LangSecRef=3033` is added to each listed entry |
 
-- Sections in the base file not defined in the source files remain unchanged 
+- Sections in the base file not defined in the source files remain unchanged
+
+**Notes**
+
+The two files need a section for every Vivaldi entry, and they have to be kept in step whenever an entry is added or renamed. The CCleaner flavor now does this with one [key mapping rule](readme.md#key-mapping-rules-map) per browser instead, which covers new entries automatically. This example is retained for demonstration purposes.
 
 ---
 
 ### Example 9: Correcting syntax
 
-**Context** 
+**Context**
 
-Lets revisit [Example 1](#example-1-adding-new-sections-and-keys), specifically the malformatted winapp2.ini formatting produced by the Add operation. We want to ensure that any changes we make to a winapp2.ini file produce a new winapp2.ini with valid formatting. 
-
+[Example 1](#example-1-adding-new-sections-and-keys) left an unnumbered `FileKey` at the end of `[360 Secure Browser Bookmarked Websites *]`. Any change we make to a winapp2.ini file should leave it valid winapp2.ini, so this time we lint the result.
 
 **Intent**
 
-We want to increase the coverage of 360 Secure Browser by adding a `FileKey` to the generated `[360 Secure Browser Bookmarked Websites *]` entry. We then want to correct the syntax such that it is correctly interpreted 
+We want to add a `FileKey` to the generated `[360 Secure Browser Bookmarked Websites *]` entry, then fix the syntax so cleaners read the entry correctly.
 
 **Files**
 ###### **Base file (`browsers.ini`)**
@@ -628,12 +631,12 @@ FileKey2=%AppData%\360se6\User Data\*\power_bookmarks|*|REMOVESELF
 FileKey=%AppData%\360se6\User Data\*|360Bookmarks*
 ``` 
 
-**Command**
+**Commands**
 ```
 winapp2ool -transmute -add -1f browsers.ini -2f browser_additions.ini -3f browsers.ini 
 winapp2ool -debug -c -opti -1f browsers.ini -3f browsers.ini
 ```
-###### Note: WinappDebug does not perform the optimization shown below by default. The `-opti` flag enables its experimental Optimizations rule (FileKey merger) for this run. See the [WinappDebug readme](../winappdebug/README.md) for details
+###### Note: WinappDebug doesn't merge FileKeys unless you ask. `-opti` turns on its experimental Optimizations rule (the FileKey merger) for this run. See the [WinappDebug readme](../winappdebug/README.md) for details
 
 **Output**
 
@@ -652,10 +655,8 @@ FileKey2=%AppData%\360se6\User Data\*\power_bookmarks|*|REMOVESELF
 - The source file is browser_additions.ini
 - The output file is browsers.ini (overwriting the base file)
 - `[360 Secure Browser Bookmarked Websites *]` in the base file has `FileKey` added with value `%AppData%\360se6\User Data\*|360Bookmarks*` from the source file
-- Sections in the base file not defined in the source file remain unchanged  
-- WinappDebug is invoked
-- The input file is browsers.ini 
-- The output file is browsers.ini (overwriting the input file)
-- WinappDebug detects that the added `FileKey` points to the same location as the existing `FileKey1` and merges its parameters into the existing key and removes the now-unneeded `FileKey` which was just added
-- The merged parameter list is sorted alphabetically, like any other FileKey parameter repair
-- The style and syntax of the entry is corrected if there are any additional issues
+- Sections in the base file not defined in the source file remain unchanged
+- WinappDebug then runs on browsers.ini, overwriting it with the repaired file
+- It sees that the new `FileKey` points at the same folder as `FileKey1`, merges the new key's patterns into `FileKey1`, and removes the new key
+- The merged pattern list is sorted alphabetically, as in any other FileKey pattern repair
+- Any other style or syntax problems in the entry are fixed too
