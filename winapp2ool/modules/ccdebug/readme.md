@@ -1,6 +1,6 @@
 # CCiniDebug
 
-**CCiniDebug** is a winapp2ool module that performs housekeeping on CCleaner Classic's configuration file, `ccleaner.ini`. When winapp2.ini is used with CCleaner 1-6 (classic), CCleaner stores the enabled/disabled state of each winapp2.ini entry as a key in `ccleaner.ini`'s `[Options]` section. As entries are renamed or removed from winapp2.ini over time, their corresponding configuration keys are left behind as orphans in this section. CCiniDebug finds and removes these orphans, and can also sort the keys in the section alphabetically.
+**CCiniDebug** is a winapp2ool module for end users that performs housekeeping on CCleaner Classic's configuration file, `ccleaner.ini`. When winapp2.ini is used with CCleaner 1-6 (classic), CCleaner stores the enabled/disabled state of each winapp2.ini entry as a key in `ccleaner.ini`'s `[Options]` section. As entries are renamed or removed from winapp2.ini over time, their corresponding configuration keys are left behind as orphans in this section. CCiniDebug finds and removes these orphans, and can also sort the keys in the section alphabetically.
 
 ### Should I use CCiniDebug with CCleaner 7?
 No. Although CCleaner 7 has a `ccleaner.ini` file, it holds cleaning definitions instead of CCleaner's configuration. Running CCiniDebug on CCleaner 7's `ccleaner.ini` will, at best, do nothing. 
@@ -17,19 +17,21 @@ CCiniDebug can perform up to three operations on `ccleaner.ini`, each independen
 
 # Table of Contents
 
+**Using CCiniDebug**
+
 1. [Requirements](#requirements)
 2. [Quick Start](#quick-start)
-3. [Menu Options](#menu-options)
-4. [Operations](#operations)
-   - [Pruning](#pruning)
-   - [Sorting](#sorting)
-   - [Saving](#saving)
+3. [Common Uses](#common-uses)
+4. [Menu Options](#menu-options)
 5. [Command-Line Arguments](#command-line-arguments)
    - [Toggles](#toggles)
    - [File Selection](#file-selection)
-   - [Examples](#examples)
-6. [Tips & Best Practices](#tips--best-practices)
-7. [Troubleshooting](#troubleshooting)
+6. [Operations](#operations)
+   - [Pruning](#pruning)
+   - [Sorting](#sorting)
+   - [Saving](#saving)
+7. [Tips & Best Practices](#tips--best-practices)
+8. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -50,6 +52,19 @@ CCiniDebug can perform up to three operations on `ccleaner.ini`, each independen
 
 ---
 
+# Common Uses
+
+| To | Run |
+|:-|:-|
+| Prune, sort, and save using the default file names in the current directory | `winapp2ool -ccdebug` |
+| See which keys would be pruned without changing any file | `winapp2ool -ccdebug -nosave` |
+| Write `ccleaner.ini` to the save target with no changes | `winapp2ool -ccdebug -noprune -nosort` |
+| Clean up `ccleaner.ini` in place in its default CCleaner location | `winapp2ool -ccdebug -2d "%ProgramFiles%\CCleaner" -3d "%ProgramFiles%\CCleaner" -3f ccleaner.ini` |
+
+In the menu, the same choices are toggles and file pickers set before **Run**; see [Menu Options](#menu-options).
+
+---
+
 # Menu Options
 
 | Option | Effect | Notes |
@@ -63,6 +78,31 @@ CCiniDebug can perform up to three operations on `ccleaner.ini`, each independen
 | Choose save target | Select the output location | Only visible when Saving is enabled |
 
 At least one operation must be enabled before Run is available.
+
+---
+
+# Command-Line Arguments
+
+CCiniDebug supports command-line automation. All three operations are enabled by default; the command-line flags disable them selectively.
+
+### Toggles
+
+| Arg | Effect |
+|:-|:-|
+| `-noprune` | Disable pruning of stale winapp2.ini entries |
+| `-nosort` | Disable alphabetical sorting of `[Options]` |
+| `-nosave` | Disable saving the result to disk |
+
+### File Selection
+
+| Arg | Effect | Default |
+|:-|:-|:-|
+| `-1d path` | Set winapp2.ini directory | Current directory |
+| `-1f name` | Set winapp2.ini file name | `winapp2.ini` |
+| `-2d path` | Set ccleaner.ini directory | Current directory |
+| `-2f name` | Set ccleaner.ini file name | `ccleaner.ini` |
+| `-3d path` | Set save target directory | Current directory |
+| `-3f name` | Set save target file name | `ccleaner-debugged.ini` |
 
 ---
 
@@ -115,40 +155,6 @@ Sorts the keys within the `[Options]` section of ccleaner.ini alphabetically. So
 Writes the result of all enabled operations back to disk. When saving is disabled, CCiniDebug still performs pruning and sorting in memory and reports what it found, but makes no changes to any file.
 
 The save target defaults to `ccleaner-debugged.ini` in the current directory. Change it with **Choose save target** if you want to overwrite your original file directly or save to a different location.
-
----
-
-# Command-Line Arguments
-
-CCiniDebug supports command-line automation. All three operations are enabled by default; the command-line flags disable them selectively.
-
-### Toggles
-
-| Arg | Effect |
-|:-|:-|
-| `-noprune` | Disable pruning of stale winapp2.ini entries |
-| `-nosort` | Disable alphabetical sorting of `[Options]` |
-| `-nosave` | Disable saving the result to disk |
-
-### File Selection
-
-| Arg | Effect | Default |
-|:-|:-|:-|
-| `-1d path` | Set winapp2.ini directory | Current directory |
-| `-1f name` | Set winapp2.ini file name | `winapp2.ini` |
-| `-2d path` | Set ccleaner.ini directory | Current directory |
-| `-2f name` | Set ccleaner.ini file name | `ccleaner.ini` |
-| `-3d path` | Set save target directory | Current directory |
-| `-3f name` | Set save target file name | `ccleaner-debugged.ini` |
-
-### Examples
-
-| Command | Effect |
-|:-|:-|
-| `winapp2ool -ccdebug` | Prune, sort, and save using default file names in the current directory |
-| `winapp2ool -ccdebug -nosave` | Prune and sort, report results but make no changes to disk |
-| `winapp2ool -ccdebug -noprune -nosort` | Save only — write ccleaner.ini to the save target with no modifications |
-| `winapp2ool -ccdebug -2d "%ProgramFiles%\CCleaner" -3d "%ProgramFiles%\CCleaner" -3f ccleaner.ini` | Debug ccleaner.ini in place from its default CCleaner location |
 
 ---
 
