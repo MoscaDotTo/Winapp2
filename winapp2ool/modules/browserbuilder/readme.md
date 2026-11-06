@@ -226,7 +226,7 @@ The flavor files are read from the source directory. The names are not configura
 
 All flavor files are optional; missing files are silently skipped.
 
-For additional context, see the [Flavorizer README](../transmute/Flavorizer/readme.md) and the [Transmute README's Usage Examples](../transmute/readme.md#usage-examples).
+For additional context, see the [Flavorizer README](../transmute/Flavorizer/readme.md) and the [Transmute README's Usage Examples](../transmute/EXAMPLES.md).
 
 ---
 
