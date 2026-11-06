@@ -1,17 +1,17 @@
 # CCiniDebug
 
-**CCiniDebug** is a winapp2ool module for end users that performs housekeeping on CCleaner Classic's configuration file, `ccleaner.ini`. When winapp2.ini is used with CCleaner 1-6 (classic), CCleaner stores the enabled/disabled state of each winapp2.ini entry as a key in `ccleaner.ini`'s `[Options]` section. As entries are renamed or removed from winapp2.ini over time, their corresponding configuration keys are left behind as orphans in this section. CCiniDebug finds and removes these orphans, and can also sort the keys in the section alphabetically.
+**CCiniDebug** is a winapp2ool module for end users that tidies up CCleaner Classic's configuration file, `ccleaner.ini`. When you use winapp2.ini with CCleaner 1-6 (Classic), CCleaner records whether each winapp2.ini entry is enabled as a key in the `[Options]` section of `ccleaner.ini`. Entries get renamed or removed from winapp2.ini over time, but their keys stay behind. CCiniDebug finds these orphaned keys and removes them, and it can sort the section alphabetically too.
 
 ### Should I use CCiniDebug with CCleaner 7?
-No. Although CCleaner 7 has a `ccleaner.ini` file, it holds cleaning definitions instead of CCleaner's configuration. Running CCiniDebug on CCleaner 7's `ccleaner.ini` will, at best, do nothing. 
+No. CCleaner 7 has a `ccleaner.ini` too, but it holds cleaning definitions, not CCleaner's settings. Running CCiniDebug on it will, at best, do nothing. To get winapp2.ini into CCleaner 7, use [CC7Patcher](../cc7patcher/readme.md).
 
 ### What does CCiniDebug do?
 
-CCiniDebug can perform up to three operations on `ccleaner.ini`, each independently toggleable:
+CCiniDebug does up to three things to `ccleaner.ini`, and you can turn each one on or off:
 
-- **Prune**: Scan the `[Options]` section for winapp2.ini configuration keys that no longer have a matching entry in winapp2.ini and remove them
-- **Sort**: Sort the keys in the `[Options]` section alphabetically
-- **Save**: Write the result back to disk
+- **Prune**: remove the `[Options]` keys whose winapp2.ini entry no longer exists
+- **Sort**: sort the keys in `[Options]` alphabetically
+- **Save**: write the result to the save target
 
 ---
 
@@ -37,8 +37,8 @@ CCiniDebug can perform up to three operations on `ccleaner.ini`, each independen
 
 # Requirements
 
-- A `ccleaner.ini` file to be debugged 
-- A `winapp2.ini` file to check against *(only required when Pruning is enabled)*
+- The `ccleaner.ini` you want to debug
+- A `winapp2.ini` to check it against *(only needed when pruning is on)*
 
 ---
 
@@ -46,9 +46,9 @@ CCiniDebug can perform up to three operations on `ccleaner.ini`, each independen
 
 ### Common Workflow
 
-1. Locate your `ccleaner.ini` (typically in `%ProgramFiles%\CCleaner\`) and your current `winapp2.ini`
-2. Select both files in CCiniDebug
-3. Run — pruning, sorting, and saving are all enabled by default
+1. Find your `ccleaner.ini` (usually in `%ProgramFiles%\CCleaner\`) and a current `winapp2.ini`
+2. Use **Choose ccleaner.ini** and **Choose winapp2.ini** to select them
+3. Select **Run**. Pruning, sorting and saving are all on by default, and the result goes to `ccleaner-debugged.ini` in the current directory
 
 ---
 
@@ -61,7 +61,11 @@ CCiniDebug can perform up to three operations on `ccleaner.ini`, each independen
 | Write `ccleaner.ini` to the save target with no changes | `winapp2ool -ccdebug -noprune -nosort` |
 | Clean up `ccleaner.ini` in place in its default CCleaner location | `winapp2ool -ccdebug -2d "%ProgramFiles%\CCleaner" -3d "%ProgramFiles%\CCleaner" -3f ccleaner.ini` |
 
-In the menu, the same choices are toggles and file pickers set before **Run**; see [Menu Options](#menu-options).
+Program Files isn't writable without admin rights, so the last command brings up a UAC prompt if necessary before winapp2ool saves.
+
+In the menu, these are toggles and file pickers you set before **Run**. See [Menu Options](#menu-options).
+
+###### Note: Winapp2ool does not expand environment variables in path arguments. `%ProgramFiles%` works above because the Command Prompt (cmd) expands it before winapp2ool sees it. From PowerShell, use `$env:ProgramFiles` instead.
 
 ---
 
@@ -69,29 +73,28 @@ In the menu, the same choices are toggles and file pickers set before **Run**; s
 
 | Option | Effect | Notes |
 |:-|:-|:-|
-| Run (default) | Execute the enabled operations | Requires at least one operation to be enabled |
-| Toggle pruning | Enable or disable removal of orphaned winapp2.ini settings | Default: `True` |
-| Toggle saving | Enable or disable writing the result to disk | Default: `True` |
-| Toggle sorting | Enable or disable alphabetical sorting of `[Options]` | Default: `True` |
-| Choose winapp2.ini | Select the reference winapp2.ini file | Only visible when Pruning is enabled |
-| Choose ccleaner.ini | Select the ccleaner.ini file to debug | |
-| Choose save target | Select the output location | Only visible when Saving is enabled |
-
-At least one operation must be enabled before Run is available.
+| Run (default) | Run the enabled operations | Turns red and won't run while every operation is off |
+| Toggle pruning | Turn removal of orphaned winapp2.ini settings on or off | Default: `On` |
+| Toggle saving | Turn writing the result to disk on or off | Default: `On` |
+| Toggle sorting | Turn alphabetical sorting of `[Options]` on or off | Default: `On` |
+| Choose winapp2.ini | Select the winapp2.ini to check against | Only shown while pruning is on |
+| Choose ccleaner.ini | Select the ccleaner.ini to debug | |
+| Choose save target | Select where the result is saved | Only shown while saving is on |
+| Reset Settings | Restore all settings to their defaults | Only shown when settings have been changed |
 
 ---
 
 # Command-Line Arguments
 
-CCiniDebug supports command-line automation. All three operations are enabled by default; the command-line flags disable them selectively.
+On the command line, CCiniDebug is `winapp2ool -ccdebug` (`ccdebug`, `5`, and `-5` also work). All three operations are on by default, and each flag below turns one off.
 
 ### Toggles
 
 | Arg | Effect |
 |:-|:-|
-| `-noprune` | Disable pruning of stale winapp2.ini entries |
-| `-nosort` | Disable alphabetical sorting of `[Options]` |
-| `-nosave` | Disable saving the result to disk |
+| `-noprune` | Don't prune orphaned winapp2.ini settings |
+| `-nosort` | Don't sort `[Options]` |
+| `-nosave` | Don't save the result |
 
 ### File Selection
 
@@ -110,11 +113,11 @@ CCiniDebug supports command-line automation. All three operations are enabled by
 
 ## Pruning
 
-Scans the `[Options]` section of ccleaner.ini for stale winapp2.ini entry settings and removes them.
+Removes the `[Options]` keys left behind by winapp2.ini entries that no longer exist.
 
 ### How CCleaner stores winapp2.ini settings
 
-When CCleaner 6 loads winapp2.ini, it creates a key in the `[Options]` section for each entry, recording whether it is enabled or disabled:
+When CCleaner Classic loads winapp2.ini, it adds a key to `[Options]` for each entry, recording whether that entry is enabled:
 
 ```ini
 [Options]
@@ -122,39 +125,39 @@ When CCleaner 6 loads winapp2.ini, it creates a key in the `[Options]` section f
 (App)Another Application *=False
 ```
 
-When entries are later renamed or removed from winapp2.ini, these keys remain in ccleaner.ini indefinitely. Over time, a large number of orphaned keys can accumulate.
+Rename or remove an entry in winapp2.ini and its key stays in ccleaner.ini forever. After enough winapp2.ini updates, they pile up.
 
 ### How pruning works
 
-CCiniDebug scans every key in the `[Options]` section and identifies candidates by checking that the key:
+CCiniDebug looks at every key in `[Options]` and treats it as a winapp2.ini setting if its name:
 
 1. Starts with `(App)`
-2. Contains `*` (the winapp2.ini entry name indicator)
+2. Contains `*`, which marks a winapp2.ini entry name
 
-For each candidate, it strips `(App)` from the key name to recover the raw entry name, then checks whether a section of that name exists in the provided winapp2.ini. If no matching section is found, the key is flagged as orphaned and removed. The lookup is case-insensitive.
+It drops the `(App)` prefix and any surrounding spaces to get the entry name, then looks for a section with that name in your winapp2.ini, ignoring case. If there isn't one, the key is an orphan and CCiniDebug removes it.
 
 ### What pruning reports
 
-- Each orphaned key found is listed by name
-- A count of total orphaned settings removed is shown at the end
+- An `Orphaned: <entry name>` line for each orphan
+- The number of orphaned settings removed, at the end
 
 ### Requirement
 
-Pruning requires a winapp2.ini file to compare against. The winapp2.ini selector in the menu is only available when pruning is enabled.
+Pruning needs a winapp2.ini to compare against, so the menu only shows **Choose winapp2.ini** while pruning is on.
 
 ---
 
 ## Sorting
 
-Sorts the keys within the `[Options]` section of ccleaner.ini alphabetically. Sorting is applied after pruning (if both are enabled), so the output reflects the pruned state.
+Sorts the keys in the `[Options]` section of ccleaner.ini alphabetically, ignoring case. When pruning is on too, sorting runs after it, so you get the pruned section sorted.
 
 ---
 
 ## Saving
 
-Writes the result of all enabled operations back to disk. When saving is disabled, CCiniDebug still performs pruning and sorting in memory and reports what it found, but makes no changes to any file.
+Writes the result of the enabled operations to the save target. With saving off, CCiniDebug still prunes and sorts in memory and reports what it found, but doesn't change any file.
 
-The save target defaults to `ccleaner-debugged.ini` in the current directory. Change it with **Choose save target** if you want to overwrite your original file directly or save to a different location.
+The save target defaults to `ccleaner-debugged.ini` in the current directory. To overwrite your original file or save somewhere else, use **Choose save target** (or `-3d` and `-3f`).
 
 ---
 
@@ -162,15 +165,15 @@ The save target defaults to `ccleaner-debugged.ini` in the current directory. Ch
 
 ### Keep winapp2.ini Current
 
-Always use the most recent version of winapp2.ini when pruning.
+Prune against the winapp2.ini CCleaner actually loads, which should be the newest one. CCiniDebug calls a key orphaned whenever its entry is missing from the file you give it, so pruning against a different version gets some keys wrong.
 
 ### Sorting Without Pruning
 
-You can run CCiniDebug with pruning disabled (`-noprune`) to sort ccleaner.ini alphabetically without making any entry-level changes.
+Turn pruning off (`-noprune`) to sort ccleaner.ini without removing anything.
 
 ### Dry Run
 
-Disable saving (`-nosave` or toggle it off in the menu) to see exactly which entries would be pruned without modifying any file. The output will still list every orphaned key detected.
+Turn saving off (`-nosave`, or **Toggle saving** in the menu) to see which keys would be pruned without touching any file. CCiniDebug still lists every orphan it finds. The count at the end still says "removed", but they were only removed from the copy in memory.
 
 ---
 
@@ -178,7 +181,7 @@ Disable saving (`-nosave` or toggle it off in the menu) to see exactly which ent
 
 | Symptom | Cause |
 |:-|:-|
-| Run is red and prompts an error | All three operations are disabled — enable at least one |
-| No orphaned entries detected despite expecting some | Your winapp2.ini may be outdated; the entries may still exist in it. Use the current version. |
-| A valid entry was pruned | Its name in ccleaner.ini may not exactly match the section name in winapp2.ini (e.g., extra spaces or punctuation differences) |
-| The save target is not being updated | Saving is disabled — toggle it on or check the save target path |
+| Run is red and says "Please enable at least one option" | All three operations are off. Turn at least one on |
+| No orphans found when you expected some | Your winapp2.ini may be out of date and still have those entries. Use the current version |
+| A valid entry was pruned | Its name in ccleaner.ini differs from the section name in winapp2.ini (punctuation, or a doubled space inside the name; case doesn't matter), or you pruned against a different winapp2.ini than the one CCleaner loads |
+| The save target isn't being updated | Saving is off, or the save target points somewhere else. Turn saving on and check the path |
