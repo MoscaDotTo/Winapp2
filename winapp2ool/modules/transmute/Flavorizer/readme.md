@@ -346,12 +346,13 @@ Key1=Value1
 | Message | Cause |
 |:-|:-|
 | "You must select a base file" | Run was selected from the menu without a base file assigned |
+| "{file} was not found" | The base file isn't on disk, and you left the File Chooser without picking one. Nothing is written |
 | "No correction files specified - output will be identical to input" | None of the six correction slots holds a file that exists on disk. The run still finishes, and the output matches the input |
 | "Applying N correction file(s)" shows fewer files than you assigned | One or more assigned files aren't on disk. Check the spelling and the directory. Those stages change nothing |
 | "Target section not found in base file: [section] - no changes applied" | A correction file names a section the base file doesn't have (Stages 1–5) |
 | "Removal target not found: {key} not found in {section}" | A key listed for removal isn't in that base section (Stages 2 and 3) |
 | "Replacement target not found: {key} not found in {section}" | A key listed for replacement isn't in that base section (Stage 5) |
-| "{file} was not saved" | Flavorizer couldn't write the save target. The run still ends with *"Flavorization completed successfully"*, so look for this line above it |
+| "{file} was not saved", then "Flavorization failed" | Flavorizer couldn't write the save target. Check that the folder exists and that you can write to it. The run exits with code 1 |
 
 During a run, every stage prints its progress line in order, whether or not it has a file: *"Removing sections"*, *"Removing keys by name"*, *"Removing keys by value"*, *"Replacing sections"*, *"Replacing keys by name"*, *"Adding keys and sections"*. A heading with nothing under it is normal for a stage with no file.
 

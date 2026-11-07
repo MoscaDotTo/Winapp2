@@ -1303,7 +1303,11 @@ Public Module Transmute
     ''' Optional, Default: <c> Nothing </c>
     ''' </param>
     '''
-    Public Sub Flavorize(ByRef baseFile As iniFile,
+    ''' <returns>
+    ''' <c> True </c> if <paramref name="outputFile"/> was written, <br />
+    ''' <c> False </c> otherwise
+    ''' </returns>
+    Public Function Flavorize(ByRef baseFile As iniFile,
                                outputFile As iniFile,
                          ByRef menuOutput As MenuSection,
                       Optional additionsFile As iniFile = Nothing,
@@ -1313,7 +1317,7 @@ Public Module Transmute
                       Optional sectionReplacementFile As iniFile = Nothing,
                       Optional keyReplacementFile As iniFile = Nothing,
                       Optional isWinapp As Boolean = True,
-                      Optional stampFlavor As WinappFlavor? = Nothing)
+                      Optional stampFlavor As WinappFlavor? = Nothing) As Boolean
 
         Dim flavorizingMsg = $"Flavorizing {baseFile.Name}"
         menuOutput.AddColoredLine(flavorizingMsg, ConsoleColor.Magenta)
@@ -1358,7 +1362,7 @@ Public Module Transmute
         If Not saved Then
 
             menuOutput.AddWarning($"{outputFile.Name} was not saved")
-            Return
+            Return False
 
         End If
 
@@ -1366,6 +1370,8 @@ Public Module Transmute
         menuOutput.AddColoredLine(flavorizedMsg, ConsoleColor.Magenta)
         gLog(flavorizedMsg)
 
-    End Sub
+        Return True
+
+    End Function
 
 End Module

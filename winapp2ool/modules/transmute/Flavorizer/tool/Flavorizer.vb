@@ -88,8 +88,8 @@ Public Module Flavorizer
 
     ''' <summary>
     ''' Runs the flavorization with the current settings and displays the output unless output
-    ''' is suppressed. We don't check the base file for content, and we report completion even
-    ''' when <see cref="Flavorize"/> couldn't save the output.
+    ''' is suppressed. An empty base file is flavorized like any other. If the base file is
+    ''' missing and the user leaves the File Chooser without one, we return to the menu.
     ''' </summary>
     '''
     ''' <param name="stampFlavor">
@@ -103,8 +103,15 @@ Public Module Flavorizer
 
         Dim baseFile = FlavorizerFile1.Load(FlavorizerModuleSettingsChanged, NameOf(Flavorizer), NameOf(FlavorizerFile1), NameOf(FlavorizerModuleSettingsChanged))
 
-        ' Ordinarily, we would gate this but it's actually probably fine if the base file is empty 
-        ' If Not enforceFileHasContent(baseFile) Then Return
+        ' An empty base file is fine to flavorize, but a missing one is not
+        If baseFile Is Nothing Then
+
+            Dim notFoundMsg = $"{FlavorizerFile1.Name} was not found"
+            setNextMenuHeaderText(notFoundMsg, printColor:=ConsoleColor.DarkRed)
+            gLog(notFoundMsg)
+            Return
+
+        End If
 
         Dim applyingTxt = $"Applying flavor to {FlavorizerFile1.Name}"
         Dim output As New MenuSection
@@ -125,9 +132,9 @@ Public Module Flavorizer
             output.AddColoredLine(numFilesApplyingMsg, ConsoleColor.Cyan)
             gLog(numFilesApplyingMsg)
 
-            performFlavorization(output, stampFlavor)
+            Dim saved = performFlavorization(baseFile, output, stampFlavor)
 
-            Dim finishedMsg = "Flavorization completed successfully"
+            Dim finishedMsg = If(saved, "Flavorization completed successfully", "Flavorization failed")
             output.AddBoxWithText(finishedMsg)
             output.AddAnyKeyPrompt()
             gLog(finishedMsg)
@@ -142,17 +149,24 @@ Public Module Flavorizer
     End Sub
 
     ''' <summary>
-    ''' Reads the base file and every correction file that is set and exists, then runs
-    ''' <see cref="Flavorize"/> with them
+    ''' Reads every correction file that is set and exists, then runs <see cref="Flavorize"/>
+    ''' with them on <paramref name="baseFile"/>
     ''' </summary>
+    '''
+    ''' <param name="baseFile">The loaded base file</param>
     '''
     ''' <param name="menuOutput">The <c> MenuSection </c> to which flavorization output lines are appended</param>
     '''
     ''' <param name="stampFlavor">The flavor to name in the output's header, or <c> Nothing </c> to keep the base file's</param>
-    Private Sub performFlavorization(ByRef menuOutput As MenuSection,
-                                           stampFlavor As WinappFlavor?)
+    '''
+    ''' <returns>
+    ''' <c> True </c> if the output was saved, <br />
+    ''' <c> False </c> otherwise
+    ''' </returns>
+    Private Function performFlavorization(baseFile As iniFile,
+                                          ByRef menuOutput As MenuSection,
+                                                stampFlavor As WinappFlavor?) As Boolean
 
-        Dim baseFile = iniFile.FromFile(FlavorizerFile1.Path())
         Dim saveFile = iniFile.Empty(FlavorizerFile2.Dir, FlavorizerFile2.Name)
 
         Dim additionsFile = FlavorizerFile8.ReadIfSet()
@@ -164,17 +178,15 @@ Public Module Flavorizer
 
         Using gLogScope("Flavorizing")
 
-            Flavorize(baseFile, saveFile, menuOutput,
-                      additionsFile,
-                      sectionRemovalFile, keyNameRemovalFile, keyValueRemovalFile,
-                      sectionReplacementFile, keyReplacementFile,
-                      FlavorizeAsWinapp, stampFlavor)
+            Return Flavorize(baseFile, saveFile, menuOutput,
+                             additionsFile,
+                             sectionRemovalFile, keyNameRemovalFile, keyValueRemovalFile,
+                             sectionReplacementFile, keyReplacementFile,
+                             FlavorizeAsWinapp, stampFlavor)
 
         End Using
 
-        gLog("Flavorization complete!")
-
-    End Sub
+    End Function
 
     ''' <summary>
     ''' Assigns each correction file slot the first top-level file in
