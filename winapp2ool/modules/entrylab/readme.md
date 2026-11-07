@@ -1,6 +1,6 @@
 # Entry Lab
 
-**Entry Lab** is a menu grouping the winapp2ool modules that generate winapp2.ini entries from templates. It is reached as the Entry Lab option on the main winapp2ool menu.
+**Entry Lab** is a winapp2ool menu for the three generators that build winapp2.ini entries from templates. They're mostly for winapp2.ini maintainers, since the build runs all three, but they're handy if you write entries for your own use too. Open it from the Entry Lab option on the main menu.
 
 # Menu Options
 
@@ -15,7 +15,7 @@ Pressing Enter without a selection opens BrowserBuilder.
 
 # Command-line arguments
 
-Entry Lab itself has no command-line argument. The generators it groups are launched directly as modules:
+Entry Lab has no command-line argument of its own. To run a generator from the command line, name it directly:
 
 | Arg                      | Effect                 |
 | :-                       | :-                     |
@@ -23,4 +23,4 @@ Entry Lab itself has no command-line argument. The generators it groups are laun
 | `10` or `uwpbuilder`     | Launches UWPBuilder     |
 | `11` or `entrybuilder`   | Launches EntryBuilder   |
 
-Refer to each generator's readme for its module-specific arguments, and to the [main readme](../../Readme.md) for global arguments.
+Each generator's readme lists its own arguments, and the [main readme](../../Readme.md) covers the global ones.
