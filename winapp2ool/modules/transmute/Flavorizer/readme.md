@@ -1,19 +1,18 @@
 # Flavorizer
 
-**Flavorizer** is a [Transmute](../readme.md) sub-module for anyone building their own flavor of winapp2.ini. It applies a complete set of transformations to an ini file in a single operation. Rather than running multiple individual Transmute passes, you provide up to six correction files (one per operation type) and Flavorizer applies them in a fixed, deterministic order. Think of it as a batch orchestrator for Transmute.
+**Flavorizer** is a [Transmute](../readme.md) sub-module for anyone building their own flavor of winapp2.ini. It applies a whole set of changes to an ini file in one run. You give it up to six correction files, one for each kind of change, and it applies them in a fixed order. It does the work of several Transmute passes in a single command.
 
-Interactively, Flavorizer is opened from the Transmute menu. On the command line it is its own module, invoked with `winapp2ool -flavorize`. See [Command-Line Arguments](#command-line-arguments).
+In the menu, you open Flavorizer from Transmute's menu. On the command line it's a module of its own, `winapp2ool -flavorize`. See [Command-Line Arguments](#command-line-arguments).
+
+Flavorizer is both an end-user module for people maintaining their own set of patches while keeping winapp2.ini up to date, and an important build tool for winapp2.ini. If you just want to use winapp2.ini with a cleaner, you do not need to use Flavorizer or read this page.
 
 ### What is a flavor?
 
-A "flavor" is a collection of modifications that adapts a base ini file for a specific use case. In the context of winapp2.ini, flavors are used to produce variants of the database for different cleaning tools. Flavors are intended as drop-in replacements for the winapp2.ini shipped with their target application. 
+A flavor is a set of changes that adapts the base ini file for a more specific use. For winapp2.ini, each flavor is a version of the database for a particular cleaning tool, meant to drop in where that tool's own copy of winapp2.ini goes.
 
 ### Why Flavorizer?
 
-- **Single operation**: Apply up to six classes of transformation in one run instead of six separate Transmute invocations
-- **Deterministic order**: Operations are always applied in the same sequence, so results are predictable and repeatable
-- **Selective**: Any correction file can be omitted; stages without a file make no changes
-- **Auto-detection**: Flavorizer can automatically discover a set of correction files in a directory by name convention, reducing manual configuration
+One Flavorizer run does what would otherwise take up to six Transmute runs, and it always applies them in the same order, so the same files give the same output every time. Every correction file is optional, and a stage with no file changes nothing. If you name your files by its conventions, Flavorizer can also find them in a folder for you (see [Auto-Detection](#auto-detection)).
 
 ---
 
@@ -51,10 +50,10 @@ A "flavor" is a collection of modifications that adapts a base ini file for a sp
 
 # Requirements
 
-- A base ini file to be transformed
-- At least one correction file providing the modifications
+- A base ini file to change
+- At least one correction file
 
-All correction files are optional. If none are provided (or none of the provided files exist on disk), Flavorizer warns (*"No correction files specified - output will be identical to input"*) and the run completes with output identical to the input.
+Strictly speaking, every correction file is optional. If you assign none, or none of the ones you assign exist, Flavorizer warns *"No correction files specified - output will be identical to input"* and the run finishes with output that matches the input.
 
 ---
 
@@ -62,13 +61,13 @@ All correction files are optional. If none are provided (or none of the provided
 
 ### Common Workflow
 
-1. Identify the transformations you want to apply and group them by type (removals, replacements, additions)
-2. Create a correction file for each type you need
-3. Select your base file and save target
-4. Assign your correction files to their appropriate slots
+1. Work out the changes you want and sort them by kind (removals, replacements, additions)
+2. Write a correction file for each kind you need
+3. Pick your base file and save target
+4. Assign each correction file to its slot
 5. Run Flavorizer
 
-*To apply a single isolated transformation, use Transmute directly instead.*
+*For a single change, Transmute on its own is simpler.*
 
 ---
 
@@ -84,7 +83,7 @@ All correction files are optional. If none are provided (or none of the provided
 | Auto-detect correction files in the current directory and save without winapp2.ini formatting | `winapp2ool -flavorize -autodetect -nowinapp` | |
 | Build a flavor from a script, with no output or prompts | `winapp2ool -s -offline -flavorize -autodetect -2f winapp2-ccleaner-flavor.ini -9d \CCleaner` | [Auto-Detecting a Flavor](EXAMPLES.md#example-3-auto-detecting-a-flavor) |
 
-In the menu, each correction file is assigned with its own option, such as **Change additions file**, or filled from the target directory by **Auto detect Flavor**; see [Menu Options](#menu-options). `-s` and `-offline` are winapp2ool [global args](../../../Readme.md#global-args).
+In the menu, each correction file has its own option, such as **Change additions file**, or **Auto detect Flavor** fills them all from the target directory; see [Menu Options](#menu-options). `-s` and `-offline` are winapp2ool [global args](../../../Readme.md#global-args).
 
 ---
 
@@ -106,15 +105,15 @@ In the menu, each correction file is assigned with its own option, such as **Cha
 | Change key replacement file | Assign the Stage 5 correction file | |
 | Change additions file | Assign the Stage 6 correction file | |
 
-\* winapp2.ini formatting means respecting the winapp2.ini ordering of sections and leading comments/information in the output file. Flavorizer does **not** run WinappDebug on its output. If you are working with winapp2.ini, you should separately run your output through WinappDebug to ensure style/syntax correctness.
+\* With winapp2.ini formatting on, the output gets the winapp2.ini header comments and its entries are sorted the way winapp2.ini sorts them. With it off, Flavorizer writes a plain ini with its sections in alphabetical order. Either way, Flavorizer does **not** run WinappDebug on its output, so if you're working on winapp2.ini, lint the result with WinappDebug afterward.
 
-Below the options, the menu lists each assigned correction file, colored green when the file exists on disk and red otherwise. A red entry means that stage will make no changes when you Run, check the name and directory.
+Below the options, the menu lists each assigned correction file, green when the file exists and red when it doesn't. A red file's stage will change nothing when you Run, so check its name and directory.
 
 ---
 
 # Command-Line Arguments
 
-Flavorizer supports command-line automation for scripting environments. On the command line, Flavorizer is invoked directly as its own module (not through Transmute):
+On the command line, Flavorizer is its own module rather than a Transmute mode:
 
 ```
 winapp2ool -flavorize [options]
@@ -127,9 +126,11 @@ winapp2ool -flavorize [options]
 | `-nowinapp` | Save output without winapp2.ini formatting | Formatting is enabled by default |
 | `-autodetect` | Automatically detect correction files in the target directory | See [Auto-Detection](#auto-detection) |
 
+A [flavor flag](../../../Readme.md#flavor-args) such as `-cc` names that flavor in the output's `; Flavor:` header line, replacing whatever flavor the base file named. Without one, and in every menu run, the output keeps the base file's flavor. This only applies with winapp2.ini formatting on.
+
 ### File Selection
 
-Each file slot has a corresponding index for use with the `-Nd` (directory) and `-Nf` (file name) argument pattern:
+Each file slot has a number for the `-Nd` (directory) and `-Nf` (file name) arguments:
 
 | Slot | Stage | File | Default |
 |:-|:-|:-|:-|
@@ -149,7 +150,7 @@ Each file slot has a corresponding index for use with the `-Nd` (directory) and 
 | `-Nf name` | Set file name for file slot N |
 | `-Nf subdir\name` | Set file name within a subdirectory of its path |
 
-When using `-autodetect`, only slots 1, 2, and 9 are read from the command line; the remaining slots are filled by auto-detection.
+With `-autodetect`, Flavorizer reads only slots 1, 2 and 9 from the command line. Auto-detection fills the rest.
 
 ---
 
@@ -157,7 +158,7 @@ When using `-autodetect`, only slots 1, 2, and 9 are read from the command line;
 
 ## Operation Order
 
-Flavorizer always applies its correction files in the following fixed order, regardless of which files are provided:
+Flavorizer always applies correction files in this order, whichever ones you provide:
 
 | Stage | Operation | CLI slot | What it does |
 |:-|:-|:-|:-|
@@ -168,117 +169,111 @@ Flavorizer always applies its correction files in the following fixed order, reg
 | 5 | Key Replacement | `-7f` | Replaces individual key values within sections |
 | 6 | Additions | `-8f` | Adds new sections and keys to the base file |
 
-Stages for which no file has been provided make no changes (each stage still prints its progress line, see [Troubleshooting](#troubleshooting)). The order is significant: for example, removing a key before adding its replacement ensures the result contains exactly one copy of the new value.
+A stage with no file changes nothing, though it still prints its progress line (see [Troubleshooting](#troubleshooting)). The order matters. Removals run before additions, for example, so removing a key and adding its replacement leaves exactly one copy of the new value.
 
-Every stage also honors Transmute's [global operations](../readme.md#global-operations): a `[*]` section in a correction file applies its keys to every section of the base file under that stage's mode, the Key Replacement stage additionally recognizes `[*Map: label]` key mapping rules, and every stage recognizes `[*Name: scaffold]` name-filtered rules that apply their changes to only the base sections whose name and content match. Global sections are processed before the named sections in the same file. See [Example 4](EXAMPLES.md#example-4-global-operations-in-flavor-files).
+Every stage also understands Transmute's [global operations](../readme.md#global-operations). A `[*]` section applies its keys to every section of the base file under that stage's mode, and a `[*Name: scaffold]` section does the same for only the base sections whose name and content match. Stages 1 and 4 work on whole sections and refuse both with a warning. The Key Replacement stage also reads `[*Map: label]` key mapping rules. In each file, global sections run before named ones. See [Example 4](EXAMPLES.md#example-4-global-operations-in-flavor-files).
 
 ## How Matching Works
 
-**All matching is case-insensitive**: section names, key names, key types, and key values alike, exactly as in Transmute. Each stage matches sections in its correction file to sections in the base file by name; content the base file doesn't contain is ignored with a warning. See [How Matching Works](../readme.md#how-matching-works) in the Transmute readme for the full matching table, including the rule that a criterion applies to *every* matching key in a base section.
+All matching ignores case: section names, key names, key types and key values, the same as in Transmute. Each stage pairs the sections in its correction file with base sections by name, and warns about anything the base file doesn't have. Transmute's [How Matching Works](../readme.md#how-matching-works) has the full matching table, including the rule that a criterion applies to *every* matching key in a base section.
 
 ---
 
 ## Stage 1: Section Removal
 
-Removes entire sections from the base file. This uses Transmute's **Remove BySection** mode. CLI slot: `-3f`.
+Removes whole sections from the base file, using Transmute's **Remove BySection** mode. CLI slot: `-3f`.
 
 ### Behavior
-- Sections present in the correction file that are also present in the base file are removed entirely
-- Sections in the correction file not found in the base file are ignored with a warning
-- Key values in this file are ignored; only section names matter
+- A section in both the correction file and the base file is removed from the base file
+- Sections the base file doesn't have are ignored with a warning
+- Only section names matter. Any keys under them are ignored
 
 ### When to use
-- Removing entries that are entirely unsupported in the target context
-- Pruning incomplete or non-viable generated entries
+- Removing entries that don't work at all in the target tool
+- Pruning generated entries that are incomplete or don't apply
 
 ---
 
 ## Stage 2: Key Name Removal
 
-Removes individual keys from sections in the base file, matched by key name. This uses Transmute's **Remove ByKey ByName** mode. CLI slot: `-4f`.
+Removes single keys from base sections, matched by key name, using Transmute's **Remove ByKey ByName** mode. CLI slot: `-4f`.
 
 ### Behavior
-- Keys in the correction file whose name matches a key in the corresponding base section are removed
-- Section and key name matching is case-insensitive
-- Key values in this file are ignored; only names matter (providing values anyway keeps the file self-documenting)
-- Keys in the correction file not found in the base section are ignored with a warning
+- A key whose name matches a key in the same base section is removed
+- Values are ignored and only names count, though writing the values anyway makes the file easier to read later
+- Keys the base section doesn't have are ignored with a warning
 
 ### When to use
-- Removing unnumbered keys (e.g. `Section`, `LangSecRef`) from many entries at once
+- Removing unnumbered keys (eg. `Section`, `LangSecRef`) from many entries at once
 - Removing a numbered key when you know its exact number
 
 ---
 
 ## Stage 3: Key Value Removal
 
-Removes individual keys from sections in the base file, matched by key type (name without numbers) and value. This uses Transmute's **Remove ByKey ByValue** mode. CLI slot: `-5f`.
+Removes single keys from base sections, matched by key type (the name without its number) and value, using Transmute's **Remove ByKey ByValue** mode. CLI slot: `-5f`.
 
 ### Behavior
-- Keys in the correction file are matched against base keys by comparing their KeyType (name stripped of trailing digits) and value
-- Section name, key type, and value matching is case-insensitive
-- Numbers in key names are ignored for matching purposes; you can write `FileKey=` or `FileKey1=` and both will match any `FileKey` with the given value
-- Keys in the correction file not found in the base section are ignored with a warning
+- Each key is compared with the base keys by KeyType (its name with the trailing digits stripped) and value
+- The number doesn't count, so `FileKey=` and `FileKey1=` both match any `FileKey` with that value
+- Keys the base section doesn't have are ignored with a warning
 
 ### When to use
-- Removing numbered keys (e.g. `FileKey`, `DetectFile`) whose exact numbers may differ between files or may change as entries are updated
-- Removing a specific known value without needing to track its current number
+- Removing numbered keys (eg. `FileKey`, `DetectFile`) whose numbers differ between files or shift as entries change
+- Removing a known value without tracking its current number
 
 ---
 
 ## Stage 4: Section Replacement
 
-Replaces entire sections in the base file with the versions provided in the correction file. This uses Transmute's **Replace BySection** mode. CLI slot: `-6f`.
+Replaces whole sections in the base file with the correction file's versions, using Transmute's **Replace BySection** mode. CLI slot: `-6f`.
 
 ### Behavior
-- Sections in the correction file that are also found in the base file replace the base section entirely
-- Sections in the correction file not found in the base file are ignored with a warning
-- No content from the original base section is preserved
+- A section in both files replaces the base section entirely. Nothing of the old section is kept
+- Sections the base file doesn't have are ignored with a warning
 
 ### When to use
-- Providing a substantially revised version of an entry that is easier to rewrite than to patch incrementally
-- Correcting entries that require a large number of changes
+- Fixing an entry that needs so many changes it's easier to rewrite than to patch
 
 ---
 
 ## Stage 5: Key Replacement
 
-Replaces individual key values within sections. This uses Transmute's **Replace ByKey** mode. CLI slot: `-7f`.
+Replaces single key values inside sections, using Transmute's **Replace ByKey** mode. CLI slot: `-7f`.
 
 ### Behavior
-- Keys in the correction file whose name matches a key in the corresponding base section have their value replaced
-- Only the key's Value is replaced, the base file's key name (including its casing) is untouched
-- Section and key name matching is case-insensitive
-- Keys in the correction file not found in the base section are ignored with a warning
+- A key whose name matches a key in the same base section gets the correction file's value
+- Only the value changes. The base key's name, casing included, stays as it was
+- Keys the base section doesn't have are ignored with a warning
 
 ### When to use
-- Correcting specific key values that are incompatible with the target context without rewriting the entire section
-- Updating a known key to a new value as part of a flavor
+- Fixing specific values that don't work in the target tool, without rewriting the whole section
 
 ### Key mapping rules
 
-This stage is the one that recognizes `[*Map: label]` sections: global rules that match keys anywhere in the base file by KeyType and Value and replace the whole key, *including its Name*. The CCleaner flavor uses these to convert generated browser categories (`Section=Google Chrome Web Browser` → `LangSecRef=3029`) across every entry with ~14 rules instead of hundreds of per-entry cohort sections. See [Key Mapping Rules](../readme.md#key-mapping-rules-map) in the Transmute readme for the full semantics, and [Example 4](EXAMPLES.md#example-4-global-operations-in-flavor-files) below.
+This is the only stage that reads `[*Map: label]` sections. These are global rules that match keys anywhere in the base file by KeyType and Value and replace the whole key, *Name included*. The CCleaner flavor has one per browser, turning each generated browser category into CCleaner's (`Section=Google Chrome Web Browser` → `LangSecRef=3029`) in place of hundreds of per-entry sections. Transmute's [Key Mapping Rules](../readme.md#key-mapping-rules-map) has the details, and [Example 4](EXAMPLES.md#example-4-global-operations-in-flavor-files) shows them in a flavor.
 
 ---
 
 ## Stage 6: Additions
 
-Adds new sections and keys to the base file. This uses Transmute's **Add** mode. CLI slot: `-8f`.
+Adds sections and keys to the base file, using Transmute's **Add** mode. CLI slot: `-8f`.
 
 ### Behavior
-- Sections in the correction file not found in the base file are added to the base file as written
-- Sections in the correction file that already exist in the base file have the provided keys added to them
-- No existing keys are modified or removed
-- Keys are not renumbered; use WinappDebug afterward to normalize numbering (winapp2.ini only)
+- A section the base file doesn't have is added as written
+- A section the base file does have gets the correction file's keys added to it
+- Existing keys are never changed or removed
+- Keys aren't renumbered. For winapp2.ini, run WinappDebug afterward to fix the numbering
 
 ### When to use
-- Adding context-specific keys missing from the base file (e.g. adding `LangSecRef` to entries that use `Section`)
-- Adding entirely new entries that exist only in the target flavor
+- Adding keys the target tool needs that the base file lacks (eg. `LangSecRef` on entries that use `Section`)
+- Adding entries that only the flavor has
 
 ---
 
 # Auto-Detection
 
-Flavorizer can automatically discover and assign correction files from a directory by looking for files whose names contain these standard substrings:
+Flavorizer can find and assign correction files from a directory by looking for these names inside each file's name:
 
 | File name contains | Assigned to |
 |:-|:-|
@@ -289,19 +284,19 @@ Flavorizer can automatically discover and assign correction files from a directo
 | `key_replacements.ini` | Key replacement file (Stage 5) |
 | `additions.ini` | Additions file (Stage 6) |
 
-Auto-detection uses a substring match, so files like `cc_section_removals.ini` will also be found: this is how the winapp2.ini project's flavor directories are named. The first match found for each slot is used.
+It's a substring match, so `cc_section_removals.ini` counts too. That's how the winapp2.ini project names the files in its flavor directories. Flavorizer looks only at the directory itself, not its subfolders, and if more than one file matches a slot it takes the first.
 
-The target directory for auto-detection defaults to the current directory. Use **Change target directory** from the menu or `-9d` on the command line to point it elsewhere.
+The target directory defaults to the current directory. Point it elsewhere with **Change target directory** in the menu or `-9d` on the command line.
 
-Auto-detection does **not** assign the base file or save target, those must still be configured separately.
+Auto-detection doesn't assign the base file or the save target. You set those yourself.
 
-###### Note: When run from the menu, the assignments made by Auto detect Flavor are saved with your module settings and persist across sessions. Command-line runs never save settings, so `-autodetect` binds the files for that run only.
+###### Note: In the menu, the files Auto detect Flavor assigns are saved with your module settings and stay assigned in later sessions. Command-line runs never save settings, so `-autodetect` assigns them for that run only.
 
 ---
 
 # Source File Format
 
-All correction files use standard ini format:
+Correction files are ordinary ini files:
 
 ```ini
 [Section Name]
@@ -312,10 +307,10 @@ Key2=Value2
 Key1=Value1
 ```
 
-- Comments in your correction files will **not** appear in the output
-- For Stage 1 (Section Removal), keys within sections are ignored, only the section header is required
-- For Stage 2 (Key Name Removal), values are ignored, only key names are used for matching
-- For Stage 3 (Key Value Removal), numbers in key names are ignored, `FileKey=value` and `FileKey99=value` are equivalent
+- Comments in correction files don't carry into the output
+- Stage 1 (Section Removal) reads only the section headers. Keys under them are ignored
+- Stage 2 (Key Name Removal) reads only key names. Values are ignored
+- Stage 3 (Key Value Removal) ignores the numbers in key names, so `FileKey=value` and `FileKey99=value` mean the same thing
 
 ---
 
@@ -323,26 +318,26 @@ Key1=Value1
 
 ### Safety First
 
-- Always test on copies of important files
-- Saving to the base file is non-reversible without a backup; Flavorizer does not create one
-- Check the *"Applying N correction file(s)"* line at the start of each run: if N is lower than the number of files you assigned, one of them doesn't exist on disk (a typo or a moved directory) and its stage will make no changes
-- Review the detailed output log to verify each stage applied correctly
+- Work on copies of files you care about
+- Flavorizer makes no backup, so saving over the base file can't be undone unless you made one yourself
+- Check the *"Applying N correction file(s)"* line at the start of each run. If N is lower than the number of files you assigned, one of them isn't on disk (a typo, or a folder that moved) and its stage will change nothing
+- Read the log to confirm each stage did what you expected
 
 ### Organize Your Flavor Files
 
-- Keep one file per stage. Mixing operation types in a single file is not supported
-- Name your files using the [Auto-Detection](#auto-detection) conventions so you can use `-autodetect` without manual configuration
-- Store all correction files for a flavor together in a dedicated directory
+- Keep one file per stage. A file can't mix kinds of operation
+- Name your files by the [Auto-Detection](#auto-detection) conventions and `-autodetect` will find them for you
+- Keep each flavor's files together in a directory of their own
 
 ### Stage Ordering Matters
 
-- If you need to replace a key with a different value, consider removing it first (Stage 2 or 3) and then adding the new value (Stage 6) rather than replacing it directly (Stage 5). This avoids numbering conflicts for numbered keys
-- Additions are always applied last, so keys added in Stage 6 will not be affected by earlier removal or replacement stages
+- To change a key's value, you can remove the key (Stage 2 or 3) and add the new one (Stage 6) instead of replacing it (Stage 5). That sidesteps numbering conflicts for numbered keys
+- Additions run last, so nothing in an earlier stage can touch the keys Stage 6 adds
 
 ### When to Use Flavorizer vs Transmute Directly
 
-- Use Flavorizer when you need more than one type of transformation in a single operation
-- Use Transmute directly when you need only one transformation, or when you need fine-grained control over the order of multiple passes
+- Use Flavorizer when you need more than one kind of change in one run
+- Use Transmute on its own for a single change, or when you want to control the order of several passes yourself
 
 ---
 
@@ -351,12 +346,13 @@ Key1=Value1
 | Message | Cause |
 |:-|:-|
 | "You must select a base file" | Run was selected from the menu without a base file assigned |
-| "No correction files specified - output will be identical to input" | None of the six correction slots holds a file that exists on disk. The run still completes; the output matches the input |
-| "Applying N correction file(s)" shows fewer files than you assigned | One or more assigned files don't exist on disk - check the spelling and directory. The affected stages make no changes |
-| "Target section not found in base file: [section] - no changes applied" | A correction file references a section not present in the base file (Stages 1–5) |
-| "Removal target not found: {key} not found in {section}" | A key listed for removal doesn't exist in the base section (Stages 2 and 3) |
-| "Replacement target not found: {key} not found in {section}" | A key listed for replacement doesn't exist in the base section (Stage 5) |
+| "No correction files specified - output will be identical to input" | None of the six correction slots holds a file that exists on disk. The run still finishes, and the output matches the input |
+| "Applying N correction file(s)" shows fewer files than you assigned | One or more assigned files aren't on disk. Check the spelling and the directory. Those stages change nothing |
+| "Target section not found in base file: [section] - no changes applied" | A correction file names a section the base file doesn't have (Stages 1–5) |
+| "Removal target not found: {key} not found in {section}" | A key listed for removal isn't in that base section (Stages 2 and 3) |
+| "Replacement target not found: {key} not found in {section}" | A key listed for replacement isn't in that base section (Stage 5) |
+| "{file} was not saved" | Flavorizer couldn't write the save target. The run still ends with *"Flavorization completed successfully"*, so look for this line above it |
 
-During a run, every stage prints its progress line in order: *"Removing sections"*, *"Removing keys by name"*, *"Removing keys by value"*, *"Replacing sections"*, *"Replacing keys by name"*, *"Adding keys and sections"*  whether or not a file is assigned to it. A stage header with no changes beneath it is normal for unassigned stages.
+During a run, every stage prints its progress line in order, whether or not it has a file: *"Removing sections"*, *"Removing keys by name"*, *"Removing keys by value"*, *"Replacing sections"*, *"Replacing keys by name"*, *"Adding keys and sections"*. A heading with nothing under it is normal for a stage with no file.
 
-Warnings produced by `[*]` and `[*Map:]` sections (refusals, malformed rules, stale rules) are Transmute's. See its [Troubleshooting](../readme.md#troubleshooting) table for the full list.
+Warnings from `[*]`, `[*Map:]` and `[*Name:]` sections (refusals, malformed rules, stale rules) come from Transmute. Its [Troubleshooting](../readme.md#troubleshooting) table lists them all.

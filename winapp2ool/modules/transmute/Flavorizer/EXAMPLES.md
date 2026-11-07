@@ -1,6 +1,6 @@
 # Flavorizer Examples
 
-Worked examples for [Flavorizer](readme.md). The [Common Uses](readme.md#common-uses) table in the readme lists the commands; these show what each one does, with real input and output.
+Worked examples for [Flavorizer](readme.md). The readme's [Common Uses](readme.md#common-uses) table lists the commands. These show what each one does, with real input and output.
 
 # Table of Contents
 
@@ -11,15 +11,15 @@ Worked examples for [Flavorizer](readme.md). The [Common Uses](readme.md#common-
 
 ---
 
-###### Note: When winapp2.ini formatting is enabled (the default), the output file begins with the regenerated standard winapp2.ini preamble comments. The example outputs below omit this preamble for brevity.
+###### Note: With winapp2.ini formatting on (the default), the output file starts with the winapp2.ini header comments. The outputs below leave the header out to save space.
 
 ## Example 1: A Single-Stage Flavor
 
 **Context**
 
-You maintain a local variant of winapp2.ini and there is an entry you never want, in this case `[Arc Pinned Tabs *]`, which targets data your cleaning setup cannot handle safely. Deleting it by hand after every update doesn't scale; a section removal file does it in one step, every time.
+You keep your own version of winapp2.ini, and there's an entry you never want: here `[Arc Pinned Tabs *]`, which targets data your cleaning setup can't handle safely. Deleting it by hand after every update gets old fast. A section removal file does it in one step, every time.
 
-###### Note: This entry is no longer generated in the current version of winapp2ool, however this example is left here for the purpose of this readme. 
+###### Note: winapp2ool no longer generates this entry. We kept the example because it still shows how the stage works.
 
 **Intent**
 
@@ -46,7 +46,7 @@ RegKey1=
 [Arc Pinned Tabs *]
 ```
 
-###### Note: There is no need to include keys when removing entire sections.
+###### Note: You don't need to include any keys when removing whole sections.
 
 **Command**
 ```
@@ -64,13 +64,13 @@ FileKey1=%AppData%\Broken Rules\And Yet It Moves Steam|console.log
 ```
 
 **Explanation**
-- The base file defaults to winapp2.ini and the save target to winapp2-flavorized.ini; only `-3f` needed to be provided
-- Stage 1 removes `[Arc Pinned Tabs *]`; the other five stages have no files and make no changes
-- Sections in the base file not named in the correction file remain unchanged
+- The base file defaults to winapp2.ini and the save target to winapp2-flavorized.ini, so `-3f` is the only argument we need
+- Stage 1 removes `[Arc Pinned Tabs *]`. The other five stages have no files and change nothing
+- Every section the correction file doesn't name stays as it was
 
 **Notes**
 
-A single transformation like this can equally be done with Transmute directly (`winapp2ool -transmute -remove -bysection -2f section_removals.ini`). Flavorizer becomes more useful as more stages join in. see Example 2.
+Transmute can make a single change like this by itself (`winapp2ool -transmute -remove -bysection -2f section_removals.ini`), though it saves to `winapp2-transmuted.ini` instead. Flavorizer is worth reaching for once a second stage joins in, as in [Example 2](#example-2-a-multi-stage-flavor).
 
 ---
 
@@ -78,9 +78,9 @@ A single transformation like this can equally be done with Transmute directly (`
 
 **Context**
 
-The base winapp2.ini categorizes generated browser entries with `Section=<browser name> Web Browser`. CCleaner instead groups browser entries under its built-in `LangSecRef` categories. Adapting the Vivaldi entries for CCleaner means removing the `Section` key from every Vivaldi entry and adding `LangSecRef=3033` (Vivaldi's CCleaner category) in its place. In the Transmute readme this takes two chained invocations ([Example 8](../EXAMPLES.md#example-8-chaining-operations-together-2)); Flavorizer does it in one.
+The base winapp2.ini puts generated browser entries under `Section=<browser name> Web Browser`. CCleaner groups browser entries under its own built-in `LangSecRef` categories instead. To adapt the Vivaldi entries for CCleaner, we remove the `Section` key from each one and add `LangSecRef=3033` (CCleaner's Vivaldi category) in its place. Transmute alone needs two commands for this ([Example 8](../EXAMPLES.md#example-8-chaining-operations-together-2)). Flavorizer needs one.
 
-###### This is actually best achieved with a [global operation](../readme.md#global-operations), but this example was written before global operations were implemented. It is left here for the purposes of the readme. 
+###### Note: A [global operation](../readme.md#global-operations) is the better way to do this now (see [Example 4](#example-4-global-operations-in-flavor-files)). We wrote this example before global operations existed, and kept it because it still shows two stages working together.
 
 **Intent**
 
@@ -88,7 +88,7 @@ We want to remove `Section=Vivaldi Web Browser` from each Vivaldi entry and add 
 
 **Files**
 
-There are 22 generated Vivaldi entries in the base file; three are shown here. The remaining entries follow the same pattern and receive the same treatment.
+When we captured this, the base file had 22 generated Vivaldi entries. Three are shown here, and the rest follow the same pattern and get the same treatment.
 
 ###### **Base file (`browsers.ini`)**
 ```ini
@@ -176,13 +176,13 @@ FileKey1=%LocalAppData%\Vivaldi\User Data\*|Bookmarks.bak
 | 3 (`-5f`) | value_removals.ini | The `Section=Vivaldi Web Browser` key is removed from each listed entry |
 | 6 (`-8f`) | additions.ini | `LangSecRef=3033` is added to each listed entry |
 
-- Removals run before additions (Stage 3 before Stage 6), so every entry ends the run with exactly one categorization key
-- This produces the same output as the two chained Transmute commands in Transmute's Example 8, in a single invocation
-- Sections in the base file not named in the correction files remain unchanged
+- Stage 3 runs before Stage 6, so each entry finishes the run with exactly one category key
+- The output matches what the two chained commands in Transmute's Example 8 produce, from one command
+- Sections the correction files don't name stay as they were
 
 **Notes**
 
-The winapp2.ini project's actual CCleaner flavor no longer maintains these per-entry cohorts: a single `[*Map:]` rule per browser achieves the same conversion for every entry at once, including entries that don't exist yet. See Example 4.
+The winapp2.ini project's CCleaner flavor doesn't keep these per-entry lists anymore. One `[*Map:]` rule per browser does the same conversion for every entry at once, including entries that don't exist yet. See [Example 4](#example-4-global-operations-in-flavor-files).
 
 ---
 
@@ -190,7 +190,7 @@ The winapp2.ini project's actual CCleaner flavor no longer maintains these per-e
 
 **Context**
 
-The winapp2.ini project stores each flavor's correction files in a dedicated directory, named with the auto-detection conventions plus a flavor prefix. The [CCleaner flavor directory](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/CCleaner) contains:
+The winapp2.ini project keeps each flavor's correction files in a directory of their own, named by the auto-detection conventions with a flavor prefix added. The [CCleaner flavor directory](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/CCleaner) has:
 
 ```
 cc_additions.ini
@@ -201,18 +201,18 @@ cc_section_replacements.ini
 cc_value_removals.ini
 ```
 
-Because detection is a substring match, the `cc_` prefixes don't interfere.
+Detection is a substring match, so the `cc_` prefixes don't get in the way.
 
 **Intent**
 
-We want to apply the complete CCleaner flavor without assigning six file slots by hand.
+We want to apply the whole CCleaner flavor without assigning six file slots by hand.
 
 **Command**
 ```
 winapp2ool -flavorize -autodetect -2f winapp2-ccleaner-flavor.ini -9d C:\path\to\Assembler\CCleaner
 ```
 
-This mirrors the build pipeline's real invocation, which runs from the Assembler directory and additionally passes the global flags `-s` (silent) and `-offline` (skip the network check):
+The build pipeline runs the same command from the Assembler directory, where `\CCleaner` resolves, and adds the global flags `-s` (silent) and `-offline` (skip the network check):
 
 ```
 winapp2ool -s -offline -flavorize -autodetect -2f winapp2-ccleaner-flavor.ini -9d \CCleaner
@@ -230,9 +230,9 @@ winapp2ool -s -offline -flavorize -autodetect -2f winapp2-ccleaner-flavor.ini -9
 | cc_additions.ini | Additions file (Stage 6) |
 
 **Explanation**
-- `-9d` sets the directory that auto-detection scans; the base file (slot 1) and save target (slot 2) are not auto-detected and come from their defaults or the command line
-- With `-autodetect`, slots 3–8 are not read from the command line at all
-- The base file here is the default `winapp2.ini` in the current directory; the flavorized result is saved to `winapp2-ccleaner-flavor.ini`
+- `-9d` sets the directory auto-detection scans. Auto-detection doesn't fill the base file (slot 1) or the save target (slot 2); those come from their defaults or the command line
+- With `-autodetect`, Flavorizer doesn't read slots 3–8 from the command line at all
+- Here the base file is the default, `winapp2.ini` in the current directory, and the result goes to `winapp2-ccleaner-flavor.ini`
 
 ---
 
@@ -240,7 +240,7 @@ winapp2ool -s -offline -flavorize -autodetect -2f winapp2-ccleaner-flavor.ini -9
 
 **Context**
 
-Correction files normally match base sections by name, so covering the 22 Vivaldi entries in Example 2 takes 22 sections in *each* correction file — and every new browser entry generated by BrowserBuilder needs the cohorts extended in lockstep. Transmute's [global operations](../readme.md#global-operations) remove that maintenance burden, and flavor files inherit them: the CCleaner flavor's Stage 5 file carries one `[*Map:]` rule per browser, and the System Ninja flavor's Stage 5 file carries one-to-many `[*Map:]` rules that de-abstract each wildcard `DetectFile` into its hardcoded variants (System Ninja does not support wildcards in detection).
+Correction files normally match base sections by name, so covering the 22 Vivaldi entries in Example 2 takes 22 sections in *each* correction file, and every new browser entry BrowserBuilder generates means extending those lists in step. Transmute's [global operations](../readme.md#global-operations) do away with that upkeep, and flavor files get them too. The CCleaner flavor's Stage 5 file has one `[*Map:]` rule per browser. The System Ninja flavor's Stage 5 file has one-to-many `[*Map:]` rules that turn each wildcard `DetectFile` into its hardcoded variants, because System Ninja doesn't support wildcards in detection.
 
 **Files**
 
@@ -280,7 +280,7 @@ winapp2ool -flavorize -1f browsers.ini -2f browsers-cc.ini -7f cc_key_replacemen
 
 **Output**
 
-Every entry in browsers.ini whose `Section` value matches a rule has the whole key replaced, name included. The Example 2 output for all 22 Vivaldi entries, plus every Brave and Chrome entry, from three rules and no per-entry cohorts:
+Every entry in browsers.ini whose `Section` value matches a rule has that whole key replaced, name included. Three rules give Example 2's output for all 22 Vivaldi entries, and convert every Brave and Chrome entry too, with no per-entry lists:
 
 ```ini
 [Brave Autofill Data *]
@@ -297,9 +297,9 @@ FileKey1=%LocalAppData%\Vivaldi\User Data\*|*Web Data
 ```
 
 **Explanation**
-- `[*Map:]` rules are only recognized in the Key Replacement stage (Stage 5), because it is the only stage running Transmute's Replace ByKey mode. In any other stage's file they are skipped with a warning
-- The System Ninja rules above are one-to-many: `Replace1` takes the matched key's position and the remaining `ReplaceN` keys are inserted immediately after it, replacing the wildcard with every hardcoded variant in one operation. These rules retired a remove + add lockstep formerly split between `sn_value_removals.ini` and `sn_additions.ini`
-- A `[*]` section works in any stage whose underlying mode supports it, applying its keys to *every* entry under that stage's mode (eg. removing a key value everywhere during Stage 3). Stages 1 and 4 (the BySection stages) refuse `[*]` with a warning
-- Global sections are processed before the named sections in the same file, so per-entry corrections can refine the result of global ones
-- New entries generated for these browsers are covered automatically, no flavor file edits needed
-- A rule that matches nothing in the base file emits a warning; that usually means the rule has gone stale
+- Flavorizer only reads `[*Map:]` rules in the Key Replacement stage (Stage 5), the one stage that runs Transmute's Replace ByKey mode. Any other stage skips them with a warning
+- The System Ninja rules are one-to-many. `Replace1` takes the matched key's place and the other `ReplaceN` keys go in right after it, so one rule swaps the wildcard for every hardcoded variant. These rules replaced a remove-and-add pair that used to be split between `sn_value_removals.ini` and `sn_additions.ini`
+- A `[*]` section works in any stage whose mode supports it, applying its keys to *every* entry (eg. removing a key value everywhere in Stage 3). Stages 1 and 4, which work on whole sections, refuse `[*]` with a warning
+- Global sections run before the named sections in the same file, so per-entry corrections can adjust what the global ones did
+- New entries for these browsers are covered automatically, without editing any flavor file
+- A rule that matches nothing in the base file warns, which usually means the rule has gone stale
