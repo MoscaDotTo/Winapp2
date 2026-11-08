@@ -281,6 +281,19 @@ Imports System.Text
 
     End Sub
 
+    ''' <summary> The Opera GX layout applies to the browser name in any case </summary>
+    <TestMethod()> Public Sub OperaGX_NameIgnoresCase()
+
+        Dim output = GenerateClean(OperaGX.Replace("[BrowserInfo: Opera GX]", "[BrowserInfo: opera gx]") &
+                                   "[EntryScaffold: Caches]" & vbCrLf & "FileKeyBase=<UserDataPath>\*\Cache|*|REMOVESELF" & vbCrLf, False)
+
+        CollectionAssert.AreEqual(New List(Of String) From {
+            $"FileKey1={GXPath}\Cache|*|REMOVESELF",
+            $"FileKey2={GXPath}\_side_profiles\*\Cache|*|REMOVESELF"
+        }, PathKeysOf(output, "opera gx Caches *"))
+
+    End Sub
+
     ''' <summary>
     ''' <c> &lt;RegistryRoot&gt; </c> gives one RegKey per root, numbered on across templates
     ''' </summary>
@@ -419,11 +432,18 @@ Imports System.Text
     ''' Optional, Default: <c> False </c>
     ''' </param>
     '''
+    ''' <param name="declarations">
+    ''' Variable declaration lines, each ending in a line break, put ahead of the template <br /><br />
+    ''' Optional, Default: none
+    ''' </param>
+    '''
     ''' <returns>The drop message</returns>
-    Private Shared Function AssertRefused(badTemplate As String, expected As String, Optional isGecko As Boolean = False) As String
+    Private Shared Function AssertRefused(badTemplate As String, expected As String, Optional isGecko As Boolean = False,
+                                          Optional declarations As String = "") As String
 
         Dim browsers = If(isGecko, Firefox & Firefox.Replace("[BrowserInfo: Firefox]", "[BrowserInfo: Waterfox]"), Chrome & Brave)
         Dim scaffold = "[EntryScaffold: Mixed]" & vbCrLf &
+                       declarations &
                        badTemplate & vbCrLf &
                        "FileKeyBase=<UserDataPath>\*|History*" & vbCrLf
 
@@ -578,13 +598,21 @@ Imports System.Text
     ' ----- BrowserInfo values -----
 
     ''' <summary>
-    ''' Builds a scaffold for a browser carrying one extra <paramref name="badKey"/>, asserting
-    ''' that the run failed, that exactly one log line skips that value and says BrowserInfo
-    ''' values are literal paths, and returns the generated keys
+    ''' Builds a scaffold for a browser carrying the extra key lines <paramref name="extra"/>,
+    ''' asserting that the run failed, that exactly one log line skips <paramref name="badKey"/>
+    ''' and contains <paramref name="expected"/>, and returns the generated keys
     ''' </summary>
     '''
     ''' <param name="badKey">The refused BrowserInfo key line</param>
-    Private Shared Function AssertBrowserValueRefused(badKey As String) As List(Of String)
+    '''
+    ''' <param name="expected">Text the skip message must contain</param>
+    '''
+    ''' <param name="extra">
+    ''' Other key lines for the browser, each ending in a line break <br /><br />
+    ''' Optional, Default: none
+    ''' </param>
+    Private Shared Function AssertBrowserValueRefused(badKey As String, expected As String,
+                                                      Optional extra As String = "") As List(Of String)
 
         Dim scaffold = "[EntryScaffold: Mixed]" & vbCrLf &
                        "FileKeyBase=<UserDataPath>\*|History*" & vbCrLf &
@@ -593,40 +621,343 @@ Imports System.Text
         Dim output As winapp2ool.iniFile = Nothing
         Dim log As List(Of String) = Nothing
 
-        Assert.AreEqual(1, ExitCodeAfter(Sub() output = Generate(Chrome & badKey & vbCrLf & scaffold, False, log)))
+        Assert.AreEqual(1, ExitCodeAfter(Sub() output = Generate(Chrome & extra & badKey & vbCrLf & scaffold, False, log)))
 
         Dim skips = log.Where(Function(l) l.Contains("; skipping `")).ToList()
         Assert.AreEqual(1, skips.Count, String.Join("; ", log))
-        StringAssert.Contains(skips(0), "BrowserInfo values are literal paths")
+        StringAssert.Contains(skips(0), expected)
         StringAssert.Contains(skips(0), $"; skipping `{badKey}`")
 
         Return PathKeysOf(output, "Chrome Mixed *")
 
     End Function
 
-    ''' <summary>
-    ''' A <c> UserDataPath= </c> holding a token is skipped, and the browser's other path still builds
-    ''' </summary>
-    <TestMethod()> Public Sub UserDataPath_WithToken_IsSkipped()
+    ''' <summary> Chrome's keys under <c> [EntryScaffold: Mixed] </c> when every extra value was skipped </summary>
+    Private Shared ReadOnly ChromeMixedKeys As New List(Of String) From {
+        "FileKey1=%LocalAppData%\Google\Chrome\User Data\*|History*",
+        "RegKey1=HKCU\Software\Google\Chrome\Installer",
+        "RegKey2=HKCU\Software\Chromium\Installer"
+    }
 
-        CollectionAssert.AreEqual(New List(Of String) From {
-            "FileKey1=%LocalAppData%\Google\Chrome\User Data\*|History*",
-            "RegKey1=HKCU\Software\Google\Chrome\Installer",
-            "RegKey2=HKCU\Software\Chromium\Installer"
-        }, AssertBrowserValueRefused("UserDataPath=%LocalAppData%\<Foo>\User Data"))
+    ''' <summary>
+    ''' A <c> UserDataPath= </c> holding a token the browser doesn't declare is skipped, and the
+    ''' browser's other path still builds
+    ''' </summary>
+    <TestMethod()> Public Sub UserDataPath_WithUndeclaredVariable_IsSkipped()
+
+        CollectionAssert.AreEqual(ChromeMixedKeys, AssertBrowserValueRefused("UserDataPath=%LocalAppData%\<Foo>\User Data", "Unknown variable `<Foo>`"))
+
+    End Sub
+
+    ''' <summary> A BrowserInfo value can't use one of the four scaffold tokens </summary>
+    <TestMethod()> Public Sub BrowserValue_WithScaffoldToken_IsSkipped()
+
+        CollectionAssert.AreEqual(ChromeMixedKeys, AssertBrowserValueRefused("RegistryRoot=<RegistryRoot>\Beta", "which only a scaffold takes"))
+
+    End Sub
+
+    ''' <summary> A BrowserInfo value with a malformed bracket is skipped </summary>
+    <TestMethod()> Public Sub BrowserValue_Malformed_IsSkipped()
+
+        CollectionAssert.AreEqual(ChromeMixedKeys, AssertBrowserValueRefused("UserDataPath=%LocalAppData%\Foo>\User Data", "Malformed `<...>` token"))
+
+    End Sub
+
+    ''' <summary> A BrowserInfo value using a variable with no values is skipped </summary>
+    <TestMethod()> Public Sub BrowserValue_EmptyVariable_IsSkipped()
+
+        CollectionAssert.AreEqual(ChromeMixedKeys, AssertBrowserValueRefused("RegistryRoot=HKCU\Software\<Channel>", "has no values", extra:="Channel=" & vbCrLf))
 
     End Sub
 
     ''' <summary>
-    ''' A <c> RegistryRoot= </c> holding an inline list is skipped rather than fanned out
+    ''' A BrowserInfo variable that holds a token nothing declares leaves a bracket in the value,
+    ''' which is skipped
     ''' </summary>
-    <TestMethod()> Public Sub RegistryRoot_WithInlineList_IsSkipped()
+    <TestMethod()> Public Sub BrowserValue_VariableHoldingUnknownToken_IsSkipped()
+
+        CollectionAssert.AreEqual(ChromeMixedKeys, AssertBrowserValueRefused("RegistryRoot=HKCU\Software\<Channel>", "still holds a `<...>` token", extra:="Channel=<Nope>" & vbCrLf))
+
+    End Sub
+
+    ''' <summary> An inline list in a <c> RegistryRoot= </c> gives one root per value </summary>
+    <TestMethod()> Public Sub RegistryRoot_WithInlineList_FansOut()
+
+        Dim browser = "[BrowserInfo: Edge]" & vbCrLf &
+                      "Section=Edge" & vbCrLf &
+                      "UserDataPath=%LocalAppData%\Microsoft\Edge\User Data" & vbCrLf &
+                      "RegistryRoot=HKCU\Software\Microsoft\<Edge,Edge Beta>" & vbCrLf
+        Dim output = GenerateClean(browser & "[EntryScaffold: Installer]" & vbCrLf & "RegKeyBase=<RegistryRoot>\Installer" & vbCrLf, False)
 
         CollectionAssert.AreEqual(New List(Of String) From {
-            "FileKey1=%LocalAppData%\Google\Chrome\User Data\*|History*",
-            "RegKey1=HKCU\Software\Google\Chrome\Installer",
-            "RegKey2=HKCU\Software\Chromium\Installer"
-        }, AssertBrowserValueRefused("RegistryRoot=HKCU\Software\<a,b>"))
+            "RegKey1=HKCU\Software\Microsoft\Edge\Installer",
+            "RegKey2=HKCU\Software\Microsoft\Edge Beta\Installer"
+        }, PathKeysOf(output, "Edge Installer *"))
+
+    End Sub
+
+    ''' <summary>
+    ''' A browser variable in a <c> UserDataPath= </c> gives one path per value, each with its
+    ''' own DetectFile and FileKeys, exactly as separate keys would
+    ''' </summary>
+    <TestMethod()> Public Sub BrowserVariable_FansOutUserDataPaths()
+
+        Dim browser = "[BrowserInfo: Thunderbird]" & vbCrLf &
+                      "Section=Thunderbird" & vbCrLf &
+                      "Packages=MZLA,ThunderbirdBeta" & vbCrLf &
+                      "UserDataPath=%LocalAppData%\Packages\<Packages>\Profiles" & vbCrLf
+        Dim output = GenerateClean(browser & "[EntryScaffold: History]" & vbCrLf & "FileKeyBase=<UserDataPath>\*|places*" & vbCrLf, True)
+
+        CollectionAssert.AreEqual(New List(Of String) From {
+            "Section=Thunderbird",
+            "DetectFile1=%LocalAppData%\Packages\MZLA\Profiles",
+            "FileKey1=%LocalAppData%\Packages\MZLA\Profiles\*|places*",
+            "DetectFile2=%LocalAppData%\Packages\ThunderbirdBeta\Profiles",
+            "FileKey2=%LocalAppData%\Packages\ThunderbirdBeta\Profiles\*|places*"
+        }, KeysOf(output, "Thunderbird History *"))
+
+    End Sub
+
+    ''' <summary>
+    ''' Browser variables resolve against each other, and the same variable can feed both a
+    ''' path and a registry root
+    ''' </summary>
+    <TestMethod()> Public Sub BrowserVariable_NestedAndShared()
+
+        Dim browser = "[BrowserInfo: Edge]" & vbCrLf &
+                      "Section=Edge" & vbCrLf &
+                      "Channel=<Product>,<Product> Beta" & vbCrLf &
+                      "Product=Edge" & vbCrLf &
+                      "UserDataPath=%LocalAppData%\Microsoft\<Channel>\User Data" & vbCrLf &
+                      "RegistryRoot=HKCU\Software\Microsoft\<Channel>" & vbCrLf
+        Dim output = GenerateClean(browser & "[EntryScaffold: Mixed]" & vbCrLf &
+                                   "FileKeyBase=<UserDataPath>|*.log" & vbCrLf &
+                                   "RegKeyBase=<RegistryRoot>\Installer" & vbCrLf, False)
+
+        CollectionAssert.AreEqual(New List(Of String) From {
+            "FileKey1=%LocalAppData%\Microsoft\Edge\User Data|*.log",
+            "FileKey2=%LocalAppData%\Microsoft\Edge Beta\User Data|*.log",
+            "RegKey1=HKCU\Software\Microsoft\Edge\Installer",
+            "RegKey2=HKCU\Software\Microsoft\Edge Beta\Installer"
+        }, PathKeysOf(output, "Edge Mixed *"))
+
+    End Sub
+
+    ''' <summary>
+    ''' A misspelled reserved key becomes a variable nothing uses, which warns without failing
+    ''' the run
+    ''' </summary>
+    <TestMethod()> Public Sub BrowserVariable_Unreferenced_Warns()
+
+        Dim output As winapp2ool.iniFile = Nothing
+        Dim log As List(Of String) = Nothing
+        Dim browser = Chrome & "RegistyRoot=HKCU\Software\Typo" & vbCrLf
+
+        Assert.AreEqual(0, ExitCodeAfter(Sub() output = Generate(browser & "[EntryScaffold: Logs]" & vbCrLf & "FileKeyBase=<UserDataPath>|*.log" & vbCrLf, False, log)))
+        Assert.AreEqual(1, log.Where(Function(l) l.Contains("Variable 'RegistyRoot=' declared in [BrowserInfo: Chrome] but never referenced")).Count(), String.Join("; ", log))
+
+    End Sub
+
+    ''' <summary> A bare <c> Skip </c> line, with no value, skips the browser </summary>
+    <TestMethod()> Public Sub BareSkip_SkipsTheBrowser()
+
+        Dim output As String = Nothing
+
+        Assert.AreEqual(0, RunBuild(Chrome & "Skip" & vbCrLf & Brave & "[EntryScaffold: Logs]" & vbCrLf & "FileKeyBase=<UserDataPath>|*.log" & vbCrLf, Nothing, output))
+        Assert.IsFalse(output.Contains("[Chrome Logs *]"), output)
+        StringAssert.Contains(output, "[Brave Logs *]")
+
+    End Sub
+
+    ''' <summary>
+    ''' An empty <c> UserDataPath= </c> warns and is skipped without failing the run or
+    ''' stopping the other browsers
+    ''' </summary>
+    <TestMethod()> Public Sub EmptyUserDataPath_IsSkipped()
+
+        Dim output As String = Nothing
+        Dim empty = "[BrowserInfo: Blank]" & vbCrLf & "Section=Blank" & vbCrLf & "UserDataPath=" & vbCrLf
+
+        Assert.AreEqual(0, RunBuild(empty & Brave & Backups, Nothing, output))
+        StringAssert.Contains(output, "[Brave Bookmark Backups *]")
+
+    End Sub
+
+    ''' <summary>
+    ''' An empty <c> RegistryRoot= </c> gives the browser no root, so a scaffold that requires
+    ''' one skips it rather than writing a RegKey with no root
+    ''' </summary>
+    <TestMethod()> Public Sub EmptyRegistryRoot_GivesNoRoot()
+
+        Dim browser = Brave & "RegistryRoot=" & vbCrLf
+        Dim output = GenerateClean(browser & "[EntryScaffold: Prefs]" & vbCrLf & "RequiresRegistryRoot" & vbCrLf & "RegKeyBase=<RegistryRoot>\Prefs" & vbCrLf, False)
+
+        Assert.AreEqual(0, output.Count)
+
+    End Sub
+
+    ''' <summary> A user data path with no parent folder is skipped and fails the run </summary>
+    <TestMethod()> Public Sub UserDataPath_WithNoParent_IsSkipped()
+
+        Dim output As winapp2ool.iniFile = Nothing
+        Dim log As List(Of String) = Nothing
+        Dim browser = "[BrowserInfo: Flat]" & vbCrLf & "Section=Flat" & vbCrLf & "UserDataPath=NoFolders" & vbCrLf
+
+        Assert.AreEqual(1, ExitCodeAfter(Sub() output = Generate(browser & Backups, False, log)))
+        Assert.AreEqual(1, log.Where(Function(l) l.Contains("gives `NoFolders`, which has no parent folder")).Count(), String.Join("; ", log))
+
+    End Sub
+
+    ''' <summary> An empty <c> RegKeyBase= </c> is refused as a RegKeyBase, not a FileKeyBase </summary>
+    <TestMethod()> Public Sub EmptyRegKeyBase_IsRefusedAsRegKeyBase()
+
+        AssertRefused("RegKeyBase=", "RegKeyBase has no <RegistryRoot> token")
+
+    End Sub
+
+    ''' <summary>
+    ''' Numbered keys declare one variable, since the name drops its digits, and the second
+    ''' declaration replaces the first with a warning that doesn't fail the run
+    ''' </summary>
+    <TestMethod()> Public Sub RedeclaredVariable_WarnsAndLastWins()
+
+        Dim output As winapp2ool.iniFile = Nothing
+        Dim log As List(Of String) = Nothing
+
+        Assert.AreEqual(0, ExitCodeAfter(Sub() output = Generate(Chrome & "[EntryScaffold: Caches]" & vbCrLf &
+                                                                 "Dirs1=Cache" & vbCrLf &
+                                                                 "Dirs2=Code Cache" & vbCrLf &
+                                                                 "FileKeyBase=<UserDataPath>\*\<Dirs>|*" & vbCrLf, False, log)))
+        Assert.AreEqual(1, log.Where(Function(l) l.Contains("declares `Dirs` more than once")).Count(), String.Join("; ", log))
+        CollectionAssert.AreEqual(New List(Of String) From {
+            "FileKey1=%LocalAppData%\Google\Chrome\User Data\*\Code Cache|*"
+        }, PathKeysOf(output, "Chrome Caches *"))
+
+    End Sub
+
+    ' ----- Scaffold variables -----
+
+    ''' <summary>
+    ''' A scaffold variable fans a template out, and may be declared after the template that
+    ''' uses it
+    ''' </summary>
+    <TestMethod()> Public Sub ScaffoldVariable_FansOutTemplate()
+
+        Dim output = GenerateClean(Chrome & "[EntryScaffold: Caches]" & vbCrLf &
+                                   "FileKeyBase=<UserDataPath>\*\<Dirs>|*|REMOVESELF" & vbCrLf &
+                                   "Dirs=Cache,Code Cache" & vbCrLf, False)
+
+        CollectionAssert.AreEqual(New List(Of String) From {
+            "FileKey1=%LocalAppData%\Google\Chrome\User Data\*\Cache|*|REMOVESELF",
+            "FileKey2=%LocalAppData%\Google\Chrome\User Data\*\Code Cache|*|REMOVESELF"
+        }, PathKeysOf(output, "Chrome Caches *"))
+
+    End Sub
+
+    ''' <summary> One scaffold variable can feed several templates, including a RegKeyBase </summary>
+    <TestMethod()> Public Sub ScaffoldVariable_SharedAcrossTemplates()
+
+        Dim output = GenerateClean(Chrome & "[EntryScaffold: Beacon]" & vbCrLf &
+                                   "Names=BlBeacon" & vbCrLf &
+                                   "FileKeyBase=<UserDataPath>\<Names>|*" & vbCrLf &
+                                   "RegKeyBase=<RegistryRoot>\<Names>|state" & vbCrLf, False)
+
+        CollectionAssert.AreEqual(New List(Of String) From {
+            "FileKey1=%LocalAppData%\Google\Chrome\User Data\BlBeacon|*",
+            "RegKey1=HKCU\Software\Google\Chrome\BlBeacon|state",
+            "RegKey2=HKCU\Software\Chromium\BlBeacon|state"
+        }, PathKeysOf(output, "Chrome Beacon *"))
+
+    End Sub
+
+    ''' <summary> Scaffold variables nest, and <c> &lt;Name[N]&gt; </c> picks one value </summary>
+    <TestMethod()> Public Sub ScaffoldVariable_NestedAndIndexed()
+
+        Dim output = GenerateClean(Chrome & "[EntryScaffold: Caches]" & vbCrLf &
+                                   "Base=Cache" & vbCrLf &
+                                   "Dirs=<Base>,Code <Base>,GPU<Base>" & vbCrLf &
+                                   "FileKeyBase=<UserDataPath>\*\<Dirs[2]>|*|REMOVESELF" & vbCrLf, False)
+
+        CollectionAssert.AreEqual(New List(Of String) From {
+            "FileKey1=%LocalAppData%\Google\Chrome\User Data\*\Code Cache|*|REMOVESELF"
+        }, PathKeysOf(output, "Chrome Caches *"))
+
+    End Sub
+
+    ''' <summary> A scaffold variable works inside the Opera GX rewrite </summary>
+    <TestMethod()> Public Sub ScaffoldVariable_InOperaGX()
+
+        Dim output = GenerateClean(OperaGX & "[EntryScaffold: Caches]" & vbCrLf &
+                                   "Dirs=Cache,Code Cache" & vbCrLf &
+                                   "FileKeyBase=<UserDataPath>\*\<Dirs>|*|REMOVESELF" & vbCrLf, False)
+
+        CollectionAssert.AreEqual(New List(Of String) From {
+            $"FileKey1={GXPath}\Cache|*|REMOVESELF",
+            $"FileKey2={GXPath}\Code Cache|*|REMOVESELF",
+            $"FileKey3={GXPath}\_side_profiles\*\Cache|*|REMOVESELF",
+            $"FileKey4={GXPath}\_side_profiles\*\Code Cache|*|REMOVESELF"
+        }, PathKeysOf(output, "Opera GX Caches *"))
+
+    End Sub
+
+    ''' <summary> An index past the end of a scaffold variable's list refuses the template once </summary>
+    <TestMethod()> Public Sub ScaffoldVariable_IndexPastEnd_IsRefused()
+
+        Dim drop = AssertRefused("FileKeyBase=<UserDataPath>\*\<Dirs[3]>|*", "<Dirs[3]> is out of range", declarations:="Dirs=Cache,Code Cache" & vbCrLf)
+        Assert.IsFalse(drop.Contains("dropping key;"), drop)
+
+    End Sub
+
+    ''' <summary> A scaffold variable with no values refuses the template that uses it </summary>
+    <TestMethod()> Public Sub ScaffoldVariable_Empty_IsRefused()
+
+        AssertRefused("FileKeyBase=<UserDataPath>\*\<Dirs>|*", "has no values", declarations:="Dirs=" & vbCrLf)
+
+    End Sub
+
+    ''' <summary> A scaffold variable holding a token nothing declares refuses the template </summary>
+    <TestMethod()> Public Sub ScaffoldVariable_HoldingUnknownToken_IsRefused()
+
+        AssertRefused("FileKeyBase=<UserDataPath>\*\<Dirs>|*", "still holds a `<...>` token", declarations:="Dirs=<Nope>" & vbCrLf)
+
+    End Sub
+
+    ''' <summary> A scaffold can't use a variable a browser declares </summary>
+    <TestMethod()> Public Sub BrowserVariable_IsNotVisibleToScaffolds()
+
+        Dim output As winapp2ool.iniFile = Nothing
+        Dim log As List(Of String) = Nothing
+        Dim browser = Chrome & "Channel=Beta" & vbCrLf
+
+        Assert.AreEqual(1, ExitCodeAfter(Sub() output = Generate(browser & "[EntryScaffold: Logs]" & vbCrLf & "FileKeyBase=<UserDataPath>\<Channel>|*.log" & vbCrLf, False, log)))
+        Assert.AreEqual(1, log.Where(Function(l) l.Contains("Unknown token `<Channel>`")).Count(), String.Join("; ", log))
+
+    End Sub
+
+    ''' <summary> Declaring a variable named after one of the four tokens fails the run </summary>
+    <TestMethod()> Public Sub TokenNamedVariable_IsRefused()
+
+        Dim output As winapp2ool.iniFile = Nothing
+        Dim log As List(Of String) = Nothing
+
+        Assert.AreEqual(1, ExitCodeAfter(Sub() output = Generate(Chrome & "[EntryScaffold: Logs]" & vbCrLf &
+                                                                 "userdataparent=x" & vbCrLf &
+                                                                 "FileKeyBase=<UserDataPath>|*.log" & vbCrLf, False, log)))
+        Assert.AreEqual(1, log.Where(Function(l) l.Contains("declares `userdataparent`, which is a token, not a variable")).Count(), String.Join("; ", log))
+        Assert.AreEqual(1, PathKeysOf(output, "Chrome Logs *").Count)
+
+    End Sub
+
+    ''' <summary> A scaffold variable nothing uses warns without failing the run </summary>
+    <TestMethod()> Public Sub ScaffoldVariable_Unreferenced_Warns()
+
+        Dim output As winapp2ool.iniFile = Nothing
+        Dim log As List(Of String) = Nothing
+
+        Assert.AreEqual(0, ExitCodeAfter(Sub() output = Generate(Chrome & "[EntryScaffold: Logs]" & vbCrLf &
+                                                                 "RequiresRegistyRoot=True" & vbCrLf &
+                                                                 "FileKeyBase=<UserDataPath>|*.log" & vbCrLf, False, log)))
+        Assert.AreEqual(1, log.Where(Function(l) l.Contains("Variable 'RequiresRegistyRoot=' declared in [EntryScaffold: Logs]")).Count(), String.Join("; ", log))
 
     End Sub
 
@@ -684,6 +1015,157 @@ Imports System.Text
     <TestMethod()> Public Sub RetiredRegistryRoot_IsRefused()
 
         AssertRefused("RegKeyBase=%RegistryRoot%\BlBeacon|state", "`%RegistryRoot%` in [EntryScaffold: Mixed].RegKeyBase is now spelled `<RegistryRoot>`")
+
+    End Sub
+
+    ''' <summary>
+    ''' A section prefix matches in any case, with or without a space after its colon, and the
+    ''' name after it is trimmed. A prefix with no name after it names nothing.
+    ''' </summary>
+    <TestMethod()> Public Sub NameAfterPrefix_IgnoresCaseAndSpacing()
+
+        Assert.AreEqual("Chrome", winapp2ool.BrowserBuilder.nameAfterPrefix("BrowserInfo: Chrome", "BrowserInfo:"))
+        Assert.AreEqual("Chrome", winapp2ool.BrowserBuilder.nameAfterPrefix("BrowserInfo:Chrome", "BrowserInfo:"))
+        Assert.AreEqual("Chrome", winapp2ool.BrowserBuilder.nameAfterPrefix("browserinfo: Chrome", "BrowserInfo:"))
+        Assert.AreEqual("Chrome", winapp2ool.BrowserBuilder.nameAfterPrefix("BROWSERINFO:   Chrome ", "BrowserInfo:"))
+        Assert.AreEqual("", winapp2ool.BrowserBuilder.nameAfterPrefix("BrowserInfo: ", "BrowserInfo:"))
+        Assert.AreEqual("", winapp2ool.BrowserBuilder.nameAfterPrefix("BrowserInfo:", "BrowserInfo:"))
+        Assert.AreEqual("", winapp2ool.BrowserBuilder.nameAfterPrefix("BrowserInf: Chrome", "BrowserInfo:"))
+
+    End Sub
+
+    ''' <summary> A scaffold every test ruleset below shares </summary>
+    Private Const Backups As String =
+        "[EntryScaffold: Bookmark Backups]" & vbCrLf &
+        "FileKeyBase=<UserDataPath>\*|Bookmarks.bak" & vbCrLf
+
+    ''' <summary>
+    ''' Runs a whole BrowserBuilder build over a scratch source directory holding the given
+    ''' rulesets, and returns the exit code it leaves and the output file's text, or
+    ''' <c> Nothing </c> when no output was written
+    ''' </summary>
+    '''
+    ''' <param name="chromium">The text of <c> chromium.ini </c>, or <c> Nothing </c> to leave it out</param>
+    '''
+    ''' <param name="gecko">The text of <c> gecko.ini </c>, or <c> Nothing </c> to leave it out</param>
+    '''
+    ''' <param name="output">Set to the text of <c> browsers.ini </c>, or <c> Nothing </c></param>
+    '''
+    ''' <param name="makeDir">Indicates whether the source directory exists at all</param>
+    Private Shared Function RunBuild(chromium As String, gecko As String, ByRef output As String,
+                                     Optional makeDir As Boolean = True) As Integer
+
+        Dim dir = IO.Path.Combine(IO.Path.GetTempPath(), $"winapp2ool-browserbuilder-{Guid.NewGuid():N}")
+        Dim savedSource = winapp2ool.BuilderFile1
+        Dim savedTarget = winapp2ool.BuilderFile2
+        Dim savedSuppress = winapp2ool.SuppressOutput
+        Dim savedExitCode = Environment.ExitCode
+
+        Try
+
+            If makeDir Then IO.Directory.CreateDirectory(dir)
+            If chromium IsNot Nothing Then IO.File.WriteAllText(IO.Path.Combine(dir, "chromium.ini"), chromium)
+            If gecko IsNot Nothing Then IO.File.WriteAllText(IO.Path.Combine(dir, "gecko.ini"), gecko)
+
+            Dim outDir = IO.Path.Combine(IO.Path.GetTempPath(), $"winapp2ool-browserbuilder-out-{Guid.NewGuid():N}")
+            IO.Directory.CreateDirectory(outDir)
+
+            Try
+
+                winapp2ool.BuilderFile1 = New winapp2ool.iniFileChooser(dir, "", "")
+                winapp2ool.BuilderFile2 = New winapp2ool.iniFileChooser(outDir, "browsers.ini", mustExist:=False)
+                winapp2ool.SuppressOutput = True
+                Environment.ExitCode = 0
+
+                winapp2ool.BrowserBuilder.initBrowserBuilder()
+
+                Dim outPath = IO.Path.Combine(outDir, "browsers.ini")
+                output = If(IO.File.Exists(outPath), IO.File.ReadAllText(outPath), Nothing)
+                Return Environment.ExitCode
+
+            Finally
+
+                IO.Directory.Delete(outDir, recursive:=True)
+
+            End Try
+
+        Finally
+
+            winapp2ool.BuilderFile1 = savedSource
+            winapp2ool.BuilderFile2 = savedTarget
+            winapp2ool.SuppressOutput = savedSuppress
+            Environment.ExitCode = savedExitCode
+            If IO.Directory.Exists(dir) Then IO.Directory.Delete(dir, recursive:=True)
+
+        End Try
+
+    End Function
+
+    ''' <summary> A source directory with only <c> chromium.ini </c> builds and leaves the exit code at 0 </summary>
+    <TestMethod()> Public Sub OnlyChromium_BuildsWithoutFailing()
+
+        Dim output As String = Nothing
+        Assert.AreEqual(0, RunBuild(Chrome & Backups, Nothing, output))
+        Assert.IsNotNull(output)
+        StringAssert.Contains(output, "[Chrome Bookmark Backups *]")
+
+    End Sub
+
+    ''' <summary> A source directory with only <c> gecko.ini </c> builds and leaves the exit code at 0 </summary>
+    <TestMethod()> Public Sub OnlyGecko_BuildsWithoutFailing()
+
+        Dim output As String = Nothing
+        Assert.AreEqual(0, RunBuild(Nothing, Firefox & Backups, output))
+        Assert.IsNotNull(output)
+        StringAssert.Contains(output, "[Firefox Bookmark Backups *]")
+
+    End Sub
+
+    ''' <summary> A source directory with neither ruleset writes nothing and fails the run </summary>
+    <TestMethod()> Public Sub NoRulesets_WritesNothingAndFails()
+
+        Dim output As String = Nothing
+        Assert.AreEqual(1, RunBuild(Nothing, Nothing, output))
+        Assert.IsNull(output)
+
+    End Sub
+
+    ''' <summary> A source directory that doesn't exist writes nothing and fails the run </summary>
+    <TestMethod()> Public Sub MissingSourceDirectory_WritesNothingAndFails()
+
+        Dim output As String = Nothing
+        Assert.AreEqual(1, RunBuild(Nothing, Nothing, output, makeDir:=False))
+        Assert.IsNull(output)
+
+    End Sub
+
+    ''' <summary>
+    ''' Section headers with no space after the colon, or in another case, build with the name
+    ''' intact and leave the exit code at 0
+    ''' </summary>
+    <TestMethod()> Public Sub LooseSectionHeaders_Build()
+
+        Dim loose = Chrome.Replace("[BrowserInfo: Chrome]", "[BrowserInfo:Chrome]") &
+                    Brave.Replace("[BrowserInfo: Brave]", "[browserinfo: Brave]") &
+                    Backups.Replace("[EntryScaffold: Bookmark Backups]", "[ENTRYSCAFFOLD:Bookmark Backups]")
+        Dim output As String = Nothing
+        Assert.AreEqual(0, RunBuild(loose, Nothing, output))
+        StringAssert.Contains(output, "[Chrome Bookmark Backups *]")
+        StringAssert.Contains(output, "[Brave Bookmark Backups *]")
+
+    End Sub
+
+    ''' <summary>
+    ''' A misspelled prefix, and a prefix with no name after it, are ignored as invalid and fail
+    ''' the run, and the valid browser beside them still builds
+    ''' </summary>
+    <TestMethod()> Public Sub InvalidSections_AreIgnoredAndFail()
+
+        Dim misspelled = Chrome.Replace("[BrowserInfo: Chrome]", "[BrowserInf: Chrome]")
+        Dim output As String = Nothing
+        Assert.AreEqual(1, RunBuild(misspelled & "[BrowserInfo: ]" & vbCrLf & Brave & Backups, Nothing, output))
+        StringAssert.Contains(output, "[Brave Bookmark Backups *]")
+        Assert.IsFalse(output.Contains("[Chrome "), output)
 
     End Sub
 

@@ -27,8 +27,7 @@ Imports System.Text
 '''
 ''' All input files are read from a single configurable source directory. At minimum, that
 ''' directory must contain at least one of <c> chromium.ini </c> or <c> gecko.ini </c>: the
-''' specially formatted ruleset files that drive entry generation. A missing one still fails
-''' the run, even when the other builds. BrowserBuilder is primarily
+''' specially formatted ruleset files that drive entry generation. BrowserBuilder is primarily
 ''' intended as a small devops tool but end users might find it useful as it enables them to
 ''' generate entries for non-standard installation paths or portable applications while keeping
 ''' winapp2.ini up to date separately <br /><br />
@@ -52,6 +51,16 @@ Public Module BrowserBuilder
     ''' The total number of entries generated for gecko-based browsers
     ''' </summary>
     Private Property totalGeckoCount As Integer = 0
+
+    ''' <summary>
+    ''' The start of a BrowserInfo section's name
+    ''' </summary>
+    Private Const BrowserInfoPrefix As String = "BrowserInfo:"
+
+    ''' <summary>
+    ''' The start of an EntryScaffold section's name
+    ''' </summary>
+    Private Const EntryScaffoldPrefix As String = "EntryScaffold:"
 
     ''' <summary>
     ''' Binds the command-line file arguments to <see cref="BuilderFile1"/> and
@@ -83,9 +92,9 @@ Public Module BrowserBuilder
     ''' <summary>
     ''' Reads <c> chromium.ini </c> and <c> gecko.ini </c> from <see cref="BuilderFile1"/>'s
     ''' directory, builds and writes the output file, and displays the results unless
-    ''' <c> SuppressOutput </c> is set. When neither ruleset has any sections we set a header
-    ''' message and return without writing. A missing source directory throws from
-    ''' <see cref="iniFile.FromFile"/>.
+    ''' <c> SuppressOutput </c> is set. A missing ruleset counts as an empty one. When neither
+    ''' has any sections, which includes a missing source directory, we set a header message,
+    ''' fail the run and return without writing.
     ''' </summary>
     Public Sub initBrowserBuilder()
 
@@ -93,13 +102,16 @@ Public Module BrowserBuilder
 
         Dim sourceDir = BuilderFile1.Dir
 
-        Dim chromiumIni = iniFile.FromFile($"{sourceDir}\chromium.ini")
-        Dim geckoIni = iniFile.FromFile($"{sourceDir}\gecko.ini")
+        Dim chromiumIni = If(loadIfPresent(sourceDir, "chromium.ini"), iniFile.Empty(sourceDir, "chromium.ini"))
+        Dim geckoIni = If(loadIfPresent(sourceDir, "gecko.ini"), iniFile.Empty(sourceDir, "gecko.ini"))
         Dim noRules = chromiumIni.Count + geckoIni.Count = 0
 
         If noRules Then
 
-            setNextMenuHeaderText("No valid generative rulesets found", printColor:=ConsoleColor.Red)
+            Dim noRulesMsg = "No valid generative rulesets found"
+            gLog($"{noRulesMsg} in {sourceDir}")
+            setNextMenuHeaderText(noRulesMsg, printColor:=ConsoleColor.Red)
+            markRunFailed()
             Return
 
         End If
@@ -160,12 +172,12 @@ Public Module BrowserBuilder
 
             Dim sourceDir = BuilderFile1.Dir
 
-            Dim flavorAdd = loadFlavorFile(sourceDir, "browser_additions.ini")
-            Dim flavorSecRem = loadFlavorFile(sourceDir, "browser_section_removals.ini")
-            Dim flavorNameRem = loadFlavorFile(sourceDir, "browser_name_removals.ini")
-            Dim flavorValRem = loadFlavorFile(sourceDir, "browser_value_removals.ini")
-            Dim flavorSecRep = loadFlavorFile(sourceDir, "browser_section_replacements.ini")
-            Dim flavorKeyRep = loadFlavorFile(sourceDir, "browser_key_replacements.ini")
+            Dim flavorAdd = loadIfPresent(sourceDir, "browser_additions.ini")
+            Dim flavorSecRem = loadIfPresent(sourceDir, "browser_section_removals.ini")
+            Dim flavorNameRem = loadIfPresent(sourceDir, "browser_name_removals.ini")
+            Dim flavorValRem = loadIfPresent(sourceDir, "browser_value_removals.ini")
+            Dim flavorSecRep = loadIfPresent(sourceDir, "browser_section_replacements.ini")
+            Dim flavorKeyRep = loadIfPresent(sourceDir, "browser_key_replacements.ini")
 
             Flavorize(outputFile, outputFile, output, flavorAdd, flavorSecRem, flavorNameRem, flavorValRem, flavorSecRep, flavorKeyRep)
 
@@ -200,7 +212,8 @@ Public Module BrowserBuilder
     ''' Sorts the sections of <paramref name="rulesetFile"/> into <c> BrowserInfo: </c> and
     ''' <c> EntryScaffold: </c> sections, then generates one entry per scaffold for each
     ''' browser that isn't skipped. We parse every browser before any scaffold, so their order
-    ''' in the file doesn't matter. Any other section warns and is ignored.
+    ''' in the file doesn't matter. Any other section, including one with no name after its
+    ''' prefix, is ignored with a warning and fails the run.
     ''' </summary>
     '''
     ''' <param name="rulesetFile">
@@ -231,19 +244,20 @@ Public Module BrowserBuilder
 
             Select Case True
 
-                Case section.Name.StartsWith("BrowserInfo:", StringComparison.InvariantCulture)
+                Case nameAfterPrefix(section.Name, BrowserInfoPrefix).Length > 0
 
                     Dim browserInfo As BrowserInfo = parseBrowserInfo(section, menuOutput)
                     If browserInfo.ShouldSkip Then Continue For
                     browsers.Add(browserInfo)
 
-                Case section.Name.StartsWith("EntryScaffold:", StringComparison.InvariantCulture) : scaffoldSections.Add(section)
+                Case nameAfterPrefix(section.Name, EntryScaffoldPrefix).Length > 0 : scaffoldSections.Add(section)
 
                 Case Else
 
-                    Dim logMsg = $"Invalid section found and ignored: [{section.Name}]"
+                    Dim logMsg = $"Invalid section found and ignored: [{section.Name}]; a section is named `{BrowserInfoPrefix} <name>` or `{EntryScaffoldPrefix} <name>`"
                     gLog(logMsg)
                     menuOutput.AddWarning(logMsg)
+                    markRunFailed()
 
             End Select
 
@@ -263,12 +277,15 @@ Public Module BrowserBuilder
 
     ''' <summary>
     ''' Parses a BrowserInfo section into a <see cref="BrowserInfo"/>. The browser's name is
-    ''' the header after <c> BrowserInfo: </c> and its trailing space. A missing
-    ''' <c> UserDataPath= </c> or <c> Section= </c> warns but doesn't skip the browser, and an
-    ''' unknown key type warns. <c> TruncateDetect= </c> and <c> Skip= </c> take effect by being
-    ''' present, whatever their value. A <c> UserDataPath= </c> value with no backslash throws.
-    ''' A <c> UserDataPath= </c> or <c> RegistryRoot= </c> value holding <c> &lt; </c> or
-    ''' <c> &gt; </c> is skipped and fails the run (see <see cref="holdsBracket"/>).
+    ''' the header after <c> BrowserInfo: </c>, trimmed. A missing <c> UserDataPath= </c> or
+    ''' <c> Section= </c> warns but doesn't skip the browser. <c> TruncateDetect </c> and
+    ''' <c> Skip </c> take effect by being present, whatever their value. Any other key
+    ''' declares one of the browser's variables (see <see cref="declareVariable"/>). Once
+    ''' every key is read we resolve the variables, then expand each <c> UserDataPath= </c> and
+    ''' <c> RegistryRoot= </c> value into plain paths (see <see cref="expandBrowserValue"/>),
+    ''' so nothing after this sees a variable. An empty value warns and is skipped. A path with
+    ''' no parent folder for <c> &lt;UserDataParent&gt; </c> is skipped with a warning and fails
+    ''' the run.
     ''' </summary>
     '''
     ''' <param name="browserSection">
@@ -285,19 +302,19 @@ Public Module BrowserBuilder
     Friend Function parseBrowserInfo(browserSection As iniSection,
                                ByRef menuOutput As MenuSection) As BrowserInfo
 
-        Dim browserName As String = browserSection.Name.Substring("BrowserInfo: ".Length)
+        Dim browserName As String = nameAfterPrefix(browserSection.Name, BrowserInfoPrefix)
         Dim browserInfo As New BrowserInfo(browserName)
+        Dim variables As New VariableSet
+        Dim pathKeys As New List(Of iniKey)
+        Dim rootKeys As New List(Of iniKey)
 
         For Each key In browserSection.Keys
 
-            Select Case key.KeyType.ToUpperInvariant()
+            Select Case keyKind(key).ToUpperInvariant()
 
-                Case "USERDATAPATH"
+                Case "USERDATAPATH" : pathKeys.Add(key)
 
-                    If holdsBracket(key, browserSection.Name, menuOutput) Then Continue For
-
-                    browserInfo.UserDataPaths.Add(key.Value)
-                    browserInfo.UserDataParentPaths.Add(key.Value.Substring(0, key.Value.LastIndexOf("\"c)))
+                Case "REGISTRYROOT" : rootKeys.Add(key)
 
                 Case "SECTION" : browserInfo.SectionName = key.Value
 
@@ -305,21 +322,44 @@ Public Module BrowserBuilder
 
                 Case "SKIP" : browserInfo.ShouldSkip = True
 
-                Case "REGISTRYROOT"
-
-                    If holdsBracket(key, browserSection.Name, menuOutput) Then Continue For
-
-                    browserInfo.RegistryRoots.Add(key.Value)
-
-                Case Else
-
-                    Dim logMsg = $"Unexpected KeyType in {browserSection.Name}: {key.KeyType}"
-                    menuOutput.AddWarning(logMsg)
-                    gLog(logMsg)
+                Case Else : declareVariable(key, browserSection.Name, variables, menuOutput)
 
             End Select
 
         Next
+
+        reportResolveDiagnostics(VariableExpander.ResolveAll(variables), browserSection.Name, menuOutput)
+
+        For Each key In pathKeys
+
+            For Each path In expandBrowserValue(key, browserSection.Name, variables, ExpansionDomain.Filesystem, menuOutput)
+
+                Dim lastSlash = path.LastIndexOf("\"c)
+
+                If lastSlash <= 0 Then
+
+                    Dim noParentMsg = $"[{browserSection.Name}].{key.Name} gives `{path}`, which has no parent folder for <UserDataParent>; skipping it"
+                    gLog(noParentMsg)
+                    menuOutput.AddWarning(noParentMsg)
+                    markRunFailed()
+                    Continue For
+
+                End If
+
+                browserInfo.UserDataPaths.Add(path)
+                browserInfo.UserDataParentPaths.Add(path.Substring(0, lastSlash))
+
+            Next
+
+        Next
+
+        For Each key In rootKeys
+
+            browserInfo.RegistryRoots.AddRange(expandBrowserValue(key, browserSection.Name, variables, ExpansionDomain.Registry, menuOutput))
+
+        Next
+
+        warnUnreferenced(variables, browserSection.Name, menuOutput)
 
         Dim noUserData = browserInfo.UserDataPaths.Count = 0
         Dim noSection = browserInfo.SectionName = ""
@@ -336,11 +376,11 @@ Public Module BrowserBuilder
     End Function
 
     ''' <summary>
-    ''' Returns whether a BrowserInfo path value holds <c> &lt; </c> or <c> &gt; </c>. Its
-    ''' value is a literal path, but it lands in a template before
-    ''' <see cref="VariableExpander.Expand"/> runs, where a <c> &lt;a,b&gt; </c> would fan the
-    ''' root out and any other token would drop every FileKey. When it does, we log and show
-    ''' why and fail the run, and the caller skips that one value.
+    ''' Returns the plain values a BrowserInfo <c> UserDataPath= </c> or
+    ''' <c> RegistryRoot= </c> key expands to over the browser's variables and inline lists,
+    ''' one per combination. A value <see cref="findBrowserValueError"/> or
+    ''' <see cref="expansionError"/> refuses is skipped with a warning and fails the run, and
+    ''' we return nothing for it.
     ''' </summary>
     '''
     ''' <param name="key">
@@ -348,30 +388,201 @@ Public Module BrowserBuilder
     ''' </param>
     '''
     ''' <param name="browserSectionName">
-    ''' The full name of the BrowserInfo section, used in the message
+    ''' The full name of the BrowserInfo section, used in messages
+    ''' </param>
+    '''
+    ''' <param name="variables">
+    ''' The browser's declared variables, already resolved
+    ''' </param>
+    '''
+    ''' <param name="domain">
+    ''' <c> Filesystem </c> for a user data path, <c> Registry </c> for a registry root
     ''' </param>
     '''
     ''' <param name="menuOutput">
     ''' The <c> MenuSection </c> accumulating user-visible output for this run
     ''' </param>
-    Private Function holdsBracket(key As iniKey,
-                                  browserSectionName As String,
-                                  menuOutput As MenuSection) As Boolean
+    Private Function expandBrowserValue(key As iniKey,
+                                        browserSectionName As String,
+                                        variables As VariableSet,
+                                        domain As ExpansionDomain,
+                                        menuOutput As MenuSection) As List(Of String)
 
-        If key.Value.IndexOfAny({"<"c, ">"c}) < 0 Then Return False
+        Dim context = $"[{browserSectionName}].{key.Name}"
 
-        Dim skipMsg = $"[{browserSectionName}].{key.Name} holds `<` or `>`, but BrowserInfo values are literal paths and take no tokens; skipping `{key.Name}={key.Value}`"
-        gLog(skipMsg)
-        menuOutput.AddWarning(skipMsg)
-        markRunFailed()
+        If key.Value.Trim().Length = 0 Then
 
-        Return True
+            Dim emptyMsg = $"{context} has no value; skipping it"
+            gLog(emptyMsg)
+            menuOutput.AddWarning(emptyMsg)
+            Return New List(Of String)
+
+        End If
+
+        Dim valueError = findBrowserValueError(key.Value, variables, context)
+        Dim result As ExpansionResult = Nothing
+
+        If valueError.Length = 0 Then
+
+            result = VariableExpander.Expand(key.Value, variables, domain, context)
+            valueError = expansionError(result, context)
+
+        End If
+
+        If valueError.Length > 0 Then
+
+            Dim skipMsg = $"{valueError}; skipping `{key.Name}={key.Value}`"
+            gLog(skipMsg)
+            menuOutput.AddWarning(skipMsg)
+            markRunFailed()
+            Return New List(Of String)
+
+        End If
+
+        For Each diag In result.Diagnostics
+
+            gLog(diag.Message)
+
+        Next
+
+        Return result.Values
 
     End Function
 
     ''' <summary>
+    ''' Returns the kind of <paramref name="key"/> for matching against the reserved key names.
+    ''' A key with no value, such as a bare <c> Skip </c>, has the type <c> DeleteMe </c>, so
+    ''' we go by its name instead.
+    ''' </summary>
+    '''
+    ''' <param name="key">
+    ''' A key from a ruleset section
+    ''' </param>
+    Private Function keyKind(key As iniKey) As String
+
+        Return If(key.KeyType = "DeleteMe", key.Name.Trim(), key.KeyType)
+
+    End Function
+
+    ''' <summary>
+    ''' Declares <paramref name="key"/> as a variable named after its key type, with its
+    ''' comma-separated value as the list. The key type drops trailing digits, so <c> Dirs1= </c>
+    ''' and <c> Dirs2= </c> both declare <c> Dirs </c>. A second declaration replaces the first
+    ''' with a warning. A key named after one of the four scaffold tokens is dropped with a
+    ''' warning and fails the run.
+    ''' </summary>
+    '''
+    ''' <param name="key">
+    ''' A key that isn't one of the section's reserved keys
+    ''' </param>
+    '''
+    ''' <param name="sectionName">
+    ''' The full name of the section, used in the message
+    ''' </param>
+    '''
+    ''' <param name="variables">
+    ''' The section's variables
+    ''' </param>
+    '''
+    ''' <param name="menuOutput">
+    ''' The <c> MenuSection </c> accumulating user-visible output for this run
+    ''' </param>
+    Private Sub declareVariable(key As iniKey,
+                                sectionName As String,
+                                variables As VariableSet,
+                                menuOutput As MenuSection)
+
+        Dim name = keyKind(key)
+
+        If isTokenName(name) Then
+
+            Dim dropMsg = $"[{sectionName}] declares `{name}`, which is a token, not a variable; dropping `{key.Name}={key.Value}`"
+            gLog(dropMsg)
+            menuOutput.AddWarning(dropMsg)
+            markRunFailed()
+            Return
+
+        End If
+
+        If variables.IsDeclared(name) Then
+
+            Dim redeclaredMsg = $"[{sectionName}] declares `{name}` more than once; `{key.Name}={key.Value}` replaces the earlier values"
+            gLog(redeclaredMsg)
+            menuOutput.AddWarning(redeclaredMsg)
+
+        End If
+
+        variables.Add(name, key.Value)
+
+    End Sub
+
+    ''' <summary>
+    ''' Logs the diagnostics from resolving a section's variables against each other. A
+    ''' warning, such as a cycle, is shown and fails the run.
+    ''' </summary>
+    '''
+    ''' <param name="diagnostics">
+    ''' What <see cref="VariableExpander.ResolveAll"/> returned
+    ''' </param>
+    '''
+    ''' <param name="sectionName">
+    ''' The full name of the section, added to each message
+    ''' </param>
+    '''
+    ''' <param name="menuOutput">
+    ''' The <c> MenuSection </c> accumulating user-visible output for this run
+    ''' </param>
+    Private Sub reportResolveDiagnostics(diagnostics As List(Of ExpansionDiagnostic),
+                                         sectionName As String,
+                                         menuOutput As MenuSection)
+
+        For Each diag In diagnostics
+
+            Dim msg = $"[{sectionName}] {diag.Message}"
+            gLog(msg)
+            If diag.Severity <> DiagnosticSeverity.Warning Then Continue For
+
+            menuOutput.AddWarning(msg)
+            markRunFailed()
+
+        Next
+
+    End Sub
+
+    ''' <summary>
+    ''' Warns about each variable declared in a section that nothing references, which is
+    ''' how a misspelled reserved key shows up
+    ''' </summary>
+    '''
+    ''' <param name="variables">
+    ''' The section's variables, after every value or template that could use them has
+    ''' </param>
+    '''
+    ''' <param name="sectionName">
+    ''' The full name of the section, used in the message
+    ''' </param>
+    '''
+    ''' <param name="menuOutput">
+    ''' The <c> MenuSection </c> accumulating user-visible output for this run
+    ''' </param>
+    Private Sub warnUnreferenced(variables As VariableSet,
+                                 sectionName As String,
+                                 menuOutput As MenuSection)
+
+        For Each unused In variables.UnreferencedNames()
+
+            Dim unusedMsg = $"Variable '{unused}=' declared in [{sectionName}] but never referenced by any <{unused}> token; possible typo"
+            gLog(unusedMsg)
+            menuOutput.AddWarning(unusedMsg)
+
+        Next
+
+    End Sub
+
+    ''' <summary>
     ''' Returns an <c> iniFile </c> loaded from the given directory and filename,
-    ''' or <c> Nothing </c> if the file does not exist
+    ''' or <c> Nothing </c> if the file does not exist. We check first because
+    ''' <see cref="iniFile.FromFile"/> fails the run on a missing file.
     ''' </summary>
     '''
     ''' <param name="dir">The directory containing the file</param>
@@ -381,7 +592,7 @@ Public Module BrowserBuilder
     ''' <returns>
     ''' A loaded <c> iniFile </c>, or <c> Nothing </c> if the file is absent
     ''' </returns>
-    Private Function loadFlavorFile(dir As String, name As String) As iniFile
+    Private Function loadIfPresent(dir As String, name As String) As iniFile
 
         Dim path = $"{dir}\{name}"
         Return If(IO.File.Exists(path), iniFile.FromFile(path), Nothing)
@@ -389,10 +600,34 @@ Public Module BrowserBuilder
     End Function
 
     ''' <summary>
+    ''' Returns the trimmed name that follows <paramref name="prefix"/> in
+    ''' <paramref name="sectionName"/>, or an empty string when the section doesn't start with
+    ''' the prefix or names nothing after it. The prefix matches in any case, and a space after
+    ''' its colon is optional.
+    ''' </summary>
+    '''
+    ''' <param name="sectionName">
+    ''' The name of a ruleset section
+    ''' </param>
+    '''
+    ''' <param name="prefix">
+    ''' <see cref="BrowserInfoPrefix"/> or <see cref="EntryScaffoldPrefix"/>
+    ''' </param>
+    Friend Function nameAfterPrefix(sectionName As String, prefix As String) As String
+
+        If Not sectionName.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) Then Return ""
+
+        Return sectionName.Substring(prefix.Length).Trim()
+
+    End Function
+
+    ''' <summary>
     ''' Processes an EntryScaffold section and generates entries for each browser.
     ''' Browsers with no <c> RegistryRoot </c> are skipped, with a warning, when the scaffold
-    ''' contains a <c> RequiresRegistryRoot </c> key. Key types other than
-    ''' <c> FileKeyBase </c>, <c> RegKeyBase </c> and <c> RequiresRegistryRoot </c> warn.
+    ''' contains a <c> RequiresRegistryRoot </c> key. Any key other than
+    ''' <c> FileKeyBase </c>, <c> RegKeyBase </c> and <c> RequiresRegistryRoot </c> declares
+    ''' one of the scaffold's variables (see <see cref="declareVariable"/>), wherever it sits
+    ''' in the section, and we resolve them before checking any template.
     ''' <br /><br />
     '''
     ''' We check each template once here, before any browser sees it, with
@@ -427,7 +662,7 @@ Public Module BrowserBuilder
                               ByRef outputFile As iniFile,
                               ByRef menuOutput As MenuSection)
 
-        Dim scaffoldName As String = scaffoldSection.Name.Substring("EntryScaffold: ".Length)
+        Dim scaffoldName As String = nameAfterPrefix(scaffoldSection.Name, EntryScaffoldPrefix)
 
         Dim processingMsg = $"Processing EntryScaffold: {scaffoldName}"
         menuOutput.AddColoredLine(processingMsg, ConsoleColor.Magenta)
@@ -436,32 +671,45 @@ Public Module BrowserBuilder
 
             Dim fileKeyBases As New List(Of String)
             Dim regKeyBases As New List(Of String)
+            Dim templates As New List(Of iniKey)
+            Dim variables As New VariableSet
 
             Dim requiresRegistryRoot As Boolean = False
 
             For Each key In scaffoldSection.Keys
 
-                Select Case key.KeyType.ToUpperInvariant()
+                Select Case keyKind(key).ToUpperInvariant()
 
-                    Case "FILEKEYBASE"
-
-                        If templateIsUsable(key, False, isGecko, scaffoldSection.Name, menuOutput) Then fileKeyBases.Add(key.Value)
-
-                    Case "REGKEYBASE"
-
-                        If templateIsUsable(key, True, isGecko, scaffoldSection.Name, menuOutput) Then regKeyBases.Add(key.Value)
+                    Case "FILEKEYBASE", "REGKEYBASE" : templates.Add(key)
 
                     Case "REQUIRESREGISTRYROOT" : requiresRegistryRoot = True
 
-                    Case Else
-
-                        Dim errMsg = $"Unexpected KeyType in {scaffoldSection.Name}: {key.KeyType}"
-                        gLog(errMsg)
-                        menuOutput.AddWarning(errMsg)
+                    Case Else : declareVariable(key, scaffoldSection.Name, variables, menuOutput)
 
                 End Select
 
             Next
+
+            reportResolveDiagnostics(VariableExpander.ResolveAll(variables), scaffoldSection.Name, menuOutput)
+
+            For Each template In templates
+
+                Dim isRegKey = keyKind(template).Equals("RegKeyBase", StringComparison.OrdinalIgnoreCase)
+                If Not templateIsUsable(template, isRegKey, isGecko, scaffoldSection.Name, variables, menuOutput) Then Continue For
+
+                If isRegKey Then
+
+                    regKeyBases.Add(template.Value)
+
+                Else
+
+                    fileKeyBases.Add(template.Value)
+
+                End If
+
+            Next
+
+            warnUnreferenced(variables, scaffoldSection.Name, menuOutput)
 
             For Each browser In browsers
 
@@ -474,7 +722,7 @@ Public Module BrowserBuilder
 
                 End If
 
-                generateBrowserEntry(browser, scaffoldName, fileKeyBases, regKeyBases, outputFile, isGecko, menuOutput)
+                generateBrowserEntry(browser, scaffoldName, fileKeyBases, regKeyBases, variables, outputFile, isGecko, menuOutput)
 
             Next
 
@@ -508,6 +756,10 @@ Public Module BrowserBuilder
     ''' The full name of the scaffold's section, used in the message
     ''' </param>
     '''
+    ''' <param name="variables">
+    ''' The scaffold's declared variables, already resolved
+    ''' </param>
+    '''
     ''' <param name="menuOutput">
     ''' The <c> MenuSection </c> accumulating user-visible output for this run
     ''' </param>
@@ -515,9 +767,10 @@ Public Module BrowserBuilder
                                       isRegKey As Boolean,
                                       isGecko As Boolean,
                                       scaffoldSectionName As String,
+                                      variables As VariableSet,
                                       menuOutput As MenuSection) As Boolean
 
-        Dim templateError = findTemplateError(key.Value, isRegKey, isGecko, $"[{scaffoldSectionName}].{key.Name}")
+        Dim templateError = findTemplateError(key.Value, isRegKey, isGecko, variables, $"[{scaffoldSectionName}].{key.Name}")
         If templateError.Length = 0 Then Return True
 
         Dim dropMsg = $"{templateError}; dropping `{key.Name}={key.Value}`"

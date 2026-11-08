@@ -83,10 +83,10 @@ Friend Module BrowserEntryGenerator
     '''
     ''' <item> holds an empty, stray or nested <c> &lt; </c> or <c> &gt; </c> </item>
     '''
-    ''' <item> holds a <c> &lt;name&gt; </c> token that isn't one of the four and isn't an
-    ''' inline list, or an inline list with no non-empty value (<c> &lt;,&gt; </c>). A list
-    ''' with at least one value, such as <c> &lt;a,&gt; </c>, passes, and the expander drops
-    ''' its empty value. </item>
+    ''' <item> holds a <c> &lt;name&gt; </c> token that isn't one of the four, an inline list
+    ''' or one of the scaffold's own variables, or an inline list with no non-empty value
+    ''' (<c> &lt;,&gt; </c>). A list with at least one value, such as <c> &lt;a,&gt; </c>,
+    ''' passes, and the expander drops its empty value. </item>
     '''
     ''' <item> is a <c> RegKeyBase= </c> with a file token, or without <c> &lt;RegistryRoot&gt; </c> </item>
     '''
@@ -94,6 +94,10 @@ Friend Module BrowserEntryGenerator
     ''' token, or with two kinds of file token </item>
     '''
     ''' <item> is a Chromium <c> FileKeyBase= </c> with <c> &lt;LocalUserDataPath&gt; </c> </item>
+    '''
+    ''' <item> fails to expand once, with each of the four tokens standing in as plain text
+    ''' (see <see cref="expansionError"/>), such as a variable with no values or an index past
+    ''' the end of its list </item>
     '''
     ''' </list>
     ''' Each of these would otherwise produce nothing, or ship a token as literal text.
@@ -111,6 +115,10 @@ Friend Module BrowserEntryGenerator
     ''' Indicates whether the template's scaffold belongs to the Gecko ruleset
     ''' </param>
     '''
+    ''' <param name="variables">
+    ''' The scaffold's declared variables, already resolved
+    ''' </param>
+    '''
     ''' <param name="context">
     ''' Where the template came from (e.g. <c> [EntryScaffold: Caches].FileKeyBase </c>),
     ''' embedded in the message
@@ -122,6 +130,7 @@ Friend Module BrowserEntryGenerator
     Friend Function findTemplateError(template As String,
                                       isRegKey As Boolean,
                                       isGecko As Boolean,
+                                      variables As VariableSet,
                                       context As String) As String
 
         Dim retiredMsg = RetiredTokens.FindRetiredToken(template, RetiredBrowserTokens, context, indexable:=False)
@@ -155,7 +164,12 @@ Friend Module BrowserEntryGenerator
 
             Dim fileToken = FileTokenNames.FirstOrDefault(Function(name) name.Equals(body, StringComparison.OrdinalIgnoreCase))
 
-            If fileToken Is Nothing Then Return $"Unknown token `<{body}>` in {context}; BrowserBuilder recognizes {UserDataPathToken}, {UserDataParentToken}, {LocalUserDataPathToken} and {RegistryRootToken}"
+            If fileToken Is Nothing Then
+
+                If VariableExpander.DeclaredReferences(m.Value, variables).Count > 0 Then Continue For
+                Return $"Unknown token `<{body}>` in {context}; BrowserBuilder recognizes {UserDataPathToken}, {UserDataParentToken}, {LocalUserDataPathToken}, {RegistryRootToken} and the scaffold's own variables"
+
+            End If
 
             If Not fileTokens.Contains(fileToken) Then fileTokens.Add(fileToken)
 
@@ -165,7 +179,7 @@ Friend Module BrowserEntryGenerator
 
             If fileTokens.Count > 0 Then Return $"{context} uses the file token `<{fileTokens(0)}>`; a RegKeyBase takes only {RegistryRootToken}"
             If Not hasRegistryRoot Then Return $"{context} has no {RegistryRootToken} token"
-            Return ""
+            Return trialExpansionError(template, ExpansionDomain.Registry, variables, context)
 
         End If
 
@@ -174,7 +188,132 @@ Friend Module BrowserEntryGenerator
         If fileTokens.Count > 1 Then Return $"{context} mixes `<{fileTokens(0)}>` and `<{fileTokens(1)}>`; a FileKeyBase takes one kind of file token"
         If Not isGecko AndAlso fileTokens(0) = LocalUserDataPathName Then Return $"{context} uses {LocalUserDataPathToken}, which only Gecko browsers have"
 
+        Return trialExpansionError(template, ExpansionDomain.Filesystem, variables, context)
+
+    End Function
+
+    ''' <summary>
+    ''' Expands <paramref name="template"/> once with each of the four tokens standing in as
+    ''' plain text and returns <see cref="expansionError"/>'s verdict, so a template its
+    ''' variables can't fill is refused before any browser sees it
+    ''' </summary>
+    '''
+    ''' <param name="template">
+    ''' The <c> FileKeyBase= </c> or <c> RegKeyBase= </c> value
+    ''' </param>
+    '''
+    ''' <param name="domain">
+    ''' The template's expansion domain
+    ''' </param>
+    '''
+    ''' <param name="variables">
+    ''' The scaffold's declared variables, already resolved
+    ''' </param>
+    '''
+    ''' <param name="context">
+    ''' Where the template came from, embedded in the message
+    ''' </param>
+    Private Function trialExpansionError(template As String,
+                                         domain As ExpansionDomain,
+                                         variables As VariableSet,
+                                         context As String) As String
+
+        Dim trial = TokenPattern.Replace(template, Function(m) If(isTokenName(m.Groups(1).Value), "x", m.Value))
+        Return expansionError(VariableExpander.Expand(trial, variables, domain, context), context)
+
+    End Function
+
+    ''' <summary>
+    ''' Returns why an expansion can't be used, or an empty string when it can: the first
+    ''' warning the expander raised, such as a variable with no values or an index past the end
+    ''' of its list, or a value still holding <c> &lt; </c> or <c> &gt; </c>. A value only
+    ''' holds one when a variable's own value held a token nothing declares, since the expander
+    ''' doesn't look inside a value it has substituted.
+    ''' </summary>
+    '''
+    ''' <param name="result">
+    ''' The expansion to judge
+    ''' </param>
+    '''
+    ''' <param name="context">
+    ''' Where the expanded value came from, embedded in the message
+    ''' </param>
+    Friend Function expansionError(result As ExpansionResult, context As String) As String
+
+        For Each diag In result.Diagnostics
+
+            If diag.Severity <> DiagnosticSeverity.Warning Then Continue For
+
+            ' Our callers name what they drop, so the expander's own closing clause would repeat it
+            Const droppingKey = "; dropping key"
+            Return If(diag.Message.EndsWith(droppingKey, StringComparison.Ordinal), diag.Message.Substring(0, diag.Message.Length - droppingKey.Length), diag.Message)
+
+        Next
+
+        If result.Values.Any(Function(value) value.IndexOfAny({"<"c, ">"c}) >= 0) Then Return $"{context} still holds a `<...>` token once its variables are filled in; a variable's value can't hold a token nothing declares"
+
         Return ""
+
+    End Function
+
+    ''' <summary>
+    ''' Returns why a BrowserInfo <c> UserDataPath= </c> or <c> RegistryRoot= </c> value
+    ''' can't be expanded, or an empty string when it can. The value may hold the browser's own
+    ''' variables and inline lists, but not one of the four scaffold tokens, an undeclared
+    ''' token, an inline list with no values, or an empty, stray or nested bracket.
+    ''' </summary>
+    '''
+    ''' <param name="value">
+    ''' The BrowserInfo value
+    ''' </param>
+    '''
+    ''' <param name="variables">
+    ''' The browser's declared variables, already resolved
+    ''' </param>
+    '''
+    ''' <param name="context">
+    ''' Where the value came from (e.g. <c> [BrowserInfo: Edge].RegistryRoot </c>), embedded
+    ''' in the message
+    ''' </param>
+    Friend Function findBrowserValueError(value As String,
+                                          variables As VariableSet,
+                                          context As String) As String
+
+        Dim residue = TokenPattern.Replace(value, "")
+        If residue.IndexOfAny({"<"c, ">"c}) >= 0 Then Return $"Malformed `<...>` token in {context}; a token is one <Name> or one <a,b> list, not empty or nested"
+
+        For Each m As Match In TokenPattern.Matches(value)
+
+            Dim body = m.Groups(1).Value
+
+            If body.IndexOf(","c) >= 0 Then
+
+                If body.Split(","c).All(Function(item) item.Trim().Length = 0) Then Return $"Inline list `<{body}>` in {context} has no values"
+                Continue For
+
+            End If
+
+            If isTokenName(body) Then Return $"{context} uses `<{body}>`, which only a scaffold takes; a BrowserInfo value takes the browser's own variables and inline lists"
+            If VariableExpander.DeclaredReferences(m.Value, variables).Count = 0 Then Return $"Unknown variable `<{body}>` in {context}"
+
+        Next
+
+        Return ""
+
+    End Function
+
+    ''' <summary>
+    ''' Returns whether <paramref name="name"/> is one of the four scaffold token names, in
+    ''' any case. These can't be declared as variables.
+    ''' </summary>
+    '''
+    ''' <param name="name">
+    ''' A token body or key name
+    ''' </param>
+    Friend Function isTokenName(name As String) As Boolean
+
+        Return FileTokenNames.Any(Function(token) token.Equals(name, StringComparison.OrdinalIgnoreCase)) OrElse
+               RegistryRootName.Equals(name, StringComparison.OrdinalIgnoreCase)
 
     End Function
 
@@ -223,8 +362,8 @@ Friend Module BrowserEntryGenerator
     ''' template in accordance with the non-standard way Opera GX stores itself on the disk by
     ''' default. Each supported template gives two values: one for the user data folder itself
     ''' and one for its <c> _side_profiles\* </c> folders. Applies only when
-    ''' <paramref name="browserName"/> is exactly <c> Opera GX </c>. The prefixes match in any
-    ''' case. A template that doesn't start with <c> &lt;UserDataPath&gt;\ </c> or
+    ''' <paramref name="browserName"/> is <c> Opera GX </c>, in any case. The prefixes match in
+    ''' any case too. A template that doesn't start with <c> &lt;UserDataPath&gt;\ </c> or
     ''' <c> &lt;UserDataPath&gt;| </c> is logged as unsupported, without a menu warning.
     ''' </summary>
     '''
@@ -249,7 +388,7 @@ Friend Module BrowserEntryGenerator
                                    fileKeyBase As String,
                                    userDataPath As String) As List(Of String)
 
-        If Not browserName.Equals("Opera GX") Then Return Nothing
+        If Not browserName.Equals("Opera GX", StringComparison.OrdinalIgnoreCase) Then Return Nothing
 
         Dim baseKeyValue As String
         Dim sideProfileKeyValue As String
@@ -333,6 +472,10 @@ Friend Module BrowserEntryGenerator
     ''' A set of RegKey templates that will be personalized for the current browser
     ''' </param>
     '''
+    ''' <param name="variables">
+    ''' The scaffold's declared variables, already resolved
+    ''' </param>
+    '''
     ''' <param name="outputFile">
     ''' The <c> iniFile </c> containing all the entries being generated by Browser Builder
     ''' </param>
@@ -348,6 +491,7 @@ Friend Module BrowserEntryGenerator
                                     scaffoldName As String,
                                     fileKeyBases As List(Of String),
                                     regKeyBases As List(Of String),
+                                    variables As VariableSet,
                               ByRef outputFile As iniFile,
                                     isGecko As Boolean,
                               ByRef menuOutput As MenuSection)
@@ -360,9 +504,9 @@ Friend Module BrowserEntryGenerator
         Dim newSection As New iniSection(entryName)
         newSection.AddKey(New iniKey($"Section={browserInfo.SectionName}"))
 
-        processUserDataPaths(newSection, browserInfo.UserDataPaths, browserInfo.UserDataParentPaths, browserInfo.TruncateDetect, fileKeyBases, browserInfo.Name, isGecko, menuOutput)
+        processUserDataPaths(newSection, browserInfo.UserDataPaths, browserInfo.UserDataParentPaths, browserInfo.TruncateDetect, fileKeyBases, variables, browserInfo.Name, isGecko, menuOutput)
 
-        processRegKeyBases(regKeyBases, newSection, browserInfo.RegistryRoots, menuOutput)
+        processRegKeyBases(regKeyBases, newSection, browserInfo.RegistryRoots, variables, menuOutput)
 
         outputFile.AddSection(newSection)
 
@@ -390,12 +534,17 @@ Friend Module BrowserEntryGenerator
     ''' The set of root paths in the registry for the current browser's RegKeys
     ''' </param>
     '''
+    ''' <param name="variables">
+    ''' The scaffold's declared variables, already resolved
+    ''' </param>
+    '''
     ''' <param name="menuOutput">
     ''' The <c> MenuSection </c> receiving any expansion warnings
     ''' </param>
     Private Sub processRegKeyBases(regKeyBases As List(Of String),
                              ByRef newSection As iniSection,
                                    RegistryRoots As List(Of String),
+                                   variables As VariableSet,
                                    menuOutput As MenuSection)
 
         Dim regKeyNum As Integer = 1
@@ -404,7 +553,7 @@ Friend Module BrowserEntryGenerator
 
             For Each root In RegistryRoots
 
-                addExpandedKeys(newSection, "RegKey", regKeyNum, replaceToken(regKeyBase, RegistryRootToken, root), ExpansionDomain.Registry, menuOutput)
+                addExpandedKeys(newSection, "RegKey", regKeyNum, replaceToken(regKeyBase, RegistryRootToken, root), ExpansionDomain.Registry, variables, menuOutput)
 
             Next
 
@@ -413,8 +562,8 @@ Friend Module BrowserEntryGenerator
     End Sub
 
     ''' <summary>
-    ''' Runs <paramref name="keyValue"/> through <see cref="VariableExpander.Expand"/> with no
-    ''' declared variables and adds one numbered key per value it returns, logging its
+    ''' Runs <paramref name="keyValue"/> through <see cref="VariableExpander.Expand"/> with the
+    ''' scaffold's variables and adds one numbered key per value it returns, logging its
     ''' diagnostics and showing its warnings
     ''' </summary>
     '''
@@ -438,6 +587,10 @@ Friend Module BrowserEntryGenerator
     ''' The expansion domain of the key
     ''' </param>
     '''
+    ''' <param name="variables">
+    ''' The scaffold's declared variables, already resolved
+    ''' </param>
+    '''
     ''' <param name="menuOutput">
     ''' The <c> MenuSection </c> receiving any expansion warnings
     ''' </param>
@@ -446,9 +599,10 @@ Friend Module BrowserEntryGenerator
                           ByRef keyNum As Integer,
                                 keyValue As String,
                                 domain As ExpansionDomain,
+                                variables As VariableSet,
                                 menuOutput As MenuSection)
 
-        Dim result = VariableExpander.Expand(keyValue, New VariableSet, domain, $"[{section.Name}].{keyName}")
+        Dim result = VariableExpander.Expand(keyValue, variables, domain, $"[{section.Name}].{keyName}")
 
         For Each diag In result.Diagnostics
 
@@ -523,8 +677,8 @@ Friend Module BrowserEntryGenerator
     '''
     ''' </list>
     '''
-    ''' Each substituted value then goes through <see cref="addExpandedKeys"/>, so an inline
-    ''' list fans it out.
+    ''' Each substituted value then goes through <see cref="addExpandedKeys"/>, so the
+    ''' scaffold's variables and inline lists fan it out.
     ''' </summary>
     '''
     ''' <param name="newSection">
@@ -547,6 +701,10 @@ Friend Module BrowserEntryGenerator
     ''' The set of FileKey templates provided by the current <c> EntryScaffold </c>
     ''' </param>
     '''
+    ''' <param name="variables">
+    ''' The scaffold's declared variables, already resolved
+    ''' </param>
+    '''
     ''' <param name="BrowserName">
     ''' The name of the browser for which the current entry is being built
     ''' </param>
@@ -563,6 +721,7 @@ Friend Module BrowserEntryGenerator
                                      ByRef userDataParentPaths As List(Of String),
                                            truncate As Boolean,
                                      ByRef fileKeyBases As List(Of String),
+                                           variables As VariableSet,
                                            BrowserName As String,
                                            isGecko As Boolean,
                                            menuOutput As MenuSection)
@@ -617,7 +776,7 @@ Friend Module BrowserEntryGenerator
 
                 For Each fileKeyValue In fileKeyValues
 
-                    addExpandedKeys(newSection, "FileKey", fileKeyNum, fileKeyValue, ExpansionDomain.Filesystem, menuOutput)
+                    addExpandedKeys(newSection, "FileKey", fileKeyNum, fileKeyValue, ExpansionDomain.Filesystem, variables, menuOutput)
 
                 Next
 
