@@ -1,19 +1,18 @@
 # BrowserBuilder
 
-**BrowserBuilder** is a winapp2ool build-chain module for winapp2.ini maintainers that generates winapp2.ini entries for web browsers using a small scripting interface. Rather than writing individual entries for every browser and every entry type by hand, you define browser metadata and entry templates once. BrowserBuilder then cross-applies them to produce a consistent set of entries for every supported browser automatically.
+**BrowserBuilder** is a winapp2ool build-chain module for winapp2.ini maintainers that generates winapp2.ini entries for web browsers from a small set of rules. You describe each browser once and each kind of entry once, and BrowserBuilder writes out every combination of the two.
 
-BrowserBuilder is primarily an internal devops tool used to maintain the browser sections of the winapp2.ini distribution. End users with browsers installed in non-standard locations or using portable installations can also use it to generate entries for those scenarios (see [Example 8](EXAMPLES.md#example-8-generating-entries-for-a-portable-browser)).
+Its main job is building the browser entries in the published winapp2.ini, and most people will never need to run it. The exception is a browser the published file can't find, like a portable copy or one installed somewhere unusual. BrowserBuilder can generate entries for that install from your own path (see [Example 8](EXAMPLES.md#example-8-generating-entries-for-a-portable-browser)).
 
 ### What does BrowserBuilder do?
 
-BrowserBuilder reads two DSL files (`chromium.ini` and `gecko.ini`) from a single configurable source directory, each containing **BrowserInfo** sections describing individual browsers and **EntryScaffold** sections describing entry templates. It cross-applies every scaffold against every browser to produce a complete set of generated entries, applies Flavorizer corrections from the same directory to correct over- and under-coverage, normalizes the result with WinappDebug, and saves it to `browsers.ini`.
+BrowserBuilder reads two rulesets, `chromium.ini` and `gecko.ini`, from one source directory. Each holds `BrowserInfo` sections, which say where a browser keeps its data, and `EntryScaffold` sections, which are entry templates. Every scaffold is applied to every browser in the same ruleset. BrowserBuilder then applies any Flavorizer correction files it finds in that directory, normalizes the result with WinappDebug, and saves it to `browsers.ini`.
 
 ### Why BrowserBuilder?
 
-- Consistency: every browser receives the same baseline coverage, generated from the same templates. No browser lags behind when a template location is discovered
-- Scale: at the time of writing, 62 `BrowserInfo` sections × 35 `EntryScaffold` templates generate over 1,100 entries from two small ruleset files
-- Low-cost maintenance: adding support for a new browser means writing one 3-5 line `BrowserInfo` section, no code changes; fixing a scaffold once fixes it for every browser
-- Custom coverage: end users can generate entries for portable or non-standard installations that the distributed winapp2.ini cannot cover
+Every browser gets the same coverage because every browser's entries come from the same templates. When we find another place Chromium browsers keep a cache, we add one line to one scaffold and every Chromium browser picks it up. Adding a browser takes a short `BrowserInfo` section and no code changes. The rulesets stay small while the output grows, since each new browser multiplies against every scaffold and each new scaffold against every browser.
+
+The same rules let an end user cover a portable or relocated install that the published winapp2.ini can't.
 
 ---
 
@@ -31,6 +30,7 @@ BrowserBuilder reads two DSL files (`chromium.ini` and `gecko.ini`) from a singl
    - [BrowserInfo Sections](#browserinfo-sections)
    - [EntryScaffold Sections](#entryscaffold-sections)
    - [Template Tokens](#template-tokens)
+   - [Variables](#variables)
    - [Special Case: Opera GX](#special-case-opera-gx)
 7. [Post-Generation Flavorizing](#post-generation-flavorizing)
 8. [Output Format](#output-format)
@@ -39,16 +39,16 @@ BrowserBuilder reads two DSL files (`chromium.ini` and `gecko.ini`) from a singl
 
 **Examples**
 
-11. **[Examples](EXAMPLES.md)**: eight worked examples with captured input and output
+11. **[Examples](EXAMPLES.md)**: eight worked examples with real input and output
 
 ---
 
 # Requirements
 
-- A source directory containing at least one of `chromium.ini` or `gecko.ini` with valid `BrowserInfo` and `EntryScaffold` sections
-- Optionally, [flavor correction files](#post-generation-flavorizing) in the same directory, resolved by their fixed names
+- A source directory holding `chromium.ini`, `gecko.ini`, or both, with `BrowserInfo` and `EntryScaffold` sections in them
+- Optionally, [flavor correction files](#post-generation-flavorizing) in the same directory
 
-All input files are read from the single source directory. The individual files are not separately configurable; pointing BrowserBuilder at a directory is the entire configuration.
+Every input file comes from that one directory, under a fixed name. Choosing the directory is the whole configuration.
 
 ---
 
@@ -56,10 +56,10 @@ All input files are read from the single source directory. The individual files 
 
 ### Common Workflow
 
-1. Place `chromium.ini` and/or `gecko.ini` (and any flavor correction files) in one directory
-2. From the winapp2ool main menu, select Entry Lab, and then select BrowserBuilder 
-3. Set the source directory to that location (or launch winapp2ool from it; the default is the current directory)
-4. Run: BrowserBuilder generates entries for all browsers defined in the rulesets, applies any flavor corrections found next to them, and saves the result to `browsers.ini`
+1. Put `chromium.ini` and/or `gecko.ini`, plus any flavor correction files, in one directory
+2. From the winapp2ool main menu, select Entry Lab, then BrowserBuilder
+3. Set the source directory to that directory, or launch winapp2ool from it (the default is the current directory)
+4. Choose **Run**. BrowserBuilder generates entries for every browser in the rulesets, applies any flavor files beside them, and saves the result to `browsers.ini`
 
 ---
 
@@ -73,7 +73,7 @@ All input files are read from the single source directory. The individual files 
 | Generate entries for a portable or relocated browser from your own ruleset | `winapp2ool -browserbuilder -1d C:\myrules -2d C:\myrules` | [Generating Entries for a Portable Browser](EXAMPLES.md#example-8-generating-entries-for-a-portable-browser) |
 | Add those generated entries to your winapp2.ini | `winapp2ool -transmute -add -1f winapp2.ini -2d C:\myrules -2f browsers.ini -3f winapp2.ini` | [Generating Entries for a Portable Browser](EXAMPLES.md#example-8-generating-entries-for-a-portable-browser) |
 
-In the menu, the same choices are **Choose source directory** and **Choose save target**, set before **Run**; see [Menu Options](#menu-options). The last row is a [Transmute](../transmute/readme.md) command.
+In the menu, set **Choose source directory** and **Choose save target**, then choose **Run**; see [Menu Options](#menu-options). The last row is a [Transmute](../transmute/readme.md) command.
 
 ---
 
@@ -81,32 +81,32 @@ In the menu, the same choices are **Choose source directory** and **Choose save 
 
 | Option | Effect | Notes |
 |:-|:-|:-|
-| Run (default) | Generate browser entries from the configured source directory | Requires at least one of `chromium.ini` or `gecko.ini` in the source directory |
-| Choose source directory | Select the directory containing `chromium.ini`, `gecko.ini`, and flavor correction files | Default: current directory |
-| Choose save target | Select the output file path | Default: `browsers.ini` in the current directory |
+| Run (default) | Generate browser entries from the configured source directory | Needs `chromium.ini` or `gecko.ini` in the source directory |
+| Choose source directory | Select the directory holding `chromium.ini`, `gecko.ini`, and the flavor correction files | Default: current directory |
+| Choose save target | Select the output file | Default: `browsers.ini` in the current directory |
 | Reset Settings | Restore all settings to their defaults | Only shown when settings have been changed |
 
-The menu also displays the current source directory and save target below the options.
+Below the options, the menu shows the current source directory and save target.
 
 ---
 
 # Command-Line Arguments
 
-BrowserBuilder accepts two file parameters: the source directory and the output file. There are no toggle arguments. The ruleset and flavor file names within the source directory are fixed and cannot be overridden from the command line.
+BrowserBuilder takes two file arguments, the source directory and the output file, and no toggles. The rulesets and flavor files inside the source directory always go by their fixed names.
 
 ## File Selection
 
 | Arg | Effect | Default |
 |:-|:-|:-|
-| `-1d path` | Set the source directory containing `chromium.ini`, `gecko.ini`, and flavor correction files | Current directory |
-| `-2d path` | Set the output file path | Current directory |
+| `-1d path` | Set the source directory holding `chromium.ini`, `gecko.ini`, and the flavor correction files | Current directory |
+| `-2d path` | Set the directory the output is saved to | Current directory |
 | `-2f name` | Set the output file name | `browsers.ini` |
 
 ---
 
 # Source File Format
 
-BrowserBuilder reads standard ini files containing two types of sections: `BrowserInfo` sections and `EntryScaffold` sections. Sections of any other type are ignored with a warning.
+BrowserBuilder reads ordinary ini files with two kinds of section, `BrowserInfo` and `EntryScaffold`. Any other section is ignored with a warning, and the build fails (exit code 1).
 
 ```ini
 [BrowserInfo: Browser Name]
@@ -118,19 +118,19 @@ RegistryRoot=HKCU\Software\BrowserName
 FileKeyBase=<UserDataPath>\*\Cache|*|REMOVESELF
 ```
 
-The section type prefixes are **case-sensitive** and must include the space after the colon: exactly `[BrowserInfo: ...]` and `[EntryScaffold: ...]`. A section named `[browserinfo: ...]` or `[BrowserInfo:...]` is ignored as invalid. Key names *within* sections are case-insensitive.
+Neither the section prefixes nor the key names are case-sensitive, and the space after the colon is optional, so `[browserinfo:Chrome]` works the same as `[BrowserInfo: Chrome]`. A section needs a name after its prefix.
 
 ## BrowserInfo Sections
 
-Each `BrowserInfo` section describes a single browser. The browser name from the section header is prepended to the entry name in every generated entry.
+Each `BrowserInfo` section describes one browser. The name in its header starts the name of every entry generated for that browser.
 
 | Key | Effect | Notes |
 |:-|:-|:-|
-| `Section=<value>` | The `Section=` value for all entries generated for this browser | Required |
-| `UserDataPath=<path>` | The browser's user data directory | Required; multiple keys allowed for browsers with more than one possible path |
-| `RegistryRoot=<path>` | A registry path root for the browser | Optional; multiple keys allowed; used as `<RegistryRoot>` in `RegKeyBase` templates |
-| `TruncateDetect` | Use the parent of `UserDataPath` for the `DetectFile` instead | No value needed; useful when the path's parent directory contains a version wildcard |
-| `Skip` | Exclude this browser from generation | No value needed; the section is read but no entries are produced |
+| `Section=<value>` | The `Section=` value for every entry generated for this browser | Required |
+| `UserDataPath=<path>` | The browser's user data directory | Required. Repeat it for a browser that can keep its data in more than one place |
+| `RegistryRoot=<path>` | A registry root for the browser | Optional, and can repeat. Fills `<RegistryRoot>` in `RegKeyBase` templates |
+| `TruncateDetect` | Detect on the parent of `UserDataPath` instead | No value needed. For a `UserDataPath` whose parent folder has a wildcard in its name; see [TruncateDetect](#truncatedetect) |
+| `Skip` | Leave this browser out | No value needed. The section is read but produces no entries |
 
 ### Example
 
@@ -141,19 +141,19 @@ UserDataPath=%LocalAppData%\Google\Chrome\User Data
 RegistryRoot=HKCU\Software\Google\Chrome
 ```
 
-`Skip` and `TruncateDetect` are presence-based: providing the key at all (regardless of value) activates the behavior. `Skip=False` **will** cause the browser to be skipped.
+`Skip` and `TruncateDetect` take effect whenever the key is there, whatever its value. `Skip=False` **still skips** the browser.
 
-Any other key in a `BrowserInfo` section produces a warning and is otherwise ignored.
+Any other key declares one of the browser's [variables](#variables).
 
 ## EntryScaffold Sections
 
-Each `EntryScaffold` section is a template for one winapp2.ini entry type. The description from the section header is appended to the browser name in every generated entry.
+Each `EntryScaffold` section is the template for one kind of entry. The name in its header follows the browser name in every entry it generates.
 
 | Key | Effect | Notes |
 |:-|:-|:-|
-| `FileKeyBase=<template>` | A FileKey template to generate for each browser | Multiple keys allowed; must contain exactly one kind of [file token](#template-tokens), or the build fails |
-| `RegKeyBase=<template>` | A RegKey template to generate for each browser | Multiple keys allowed; must contain `<RegistryRoot>`, or the build fails |
-| `RequiresRegistryRoot` | Skip this scaffold for any browser without a `RegistryRoot` | No value needed; prevents generating entries with no working keys |
+| `FileKeyBase=<template>` | A FileKey template to generate for each browser | Can repeat. Must use exactly one kind of [file token](#template-tokens), or the build fails |
+| `RegKeyBase=<template>` | A RegKey template to generate for each browser | Can repeat. Must use `<RegistryRoot>`, or the build fails |
+| `RequiresRegistryRoot` | Skip this scaffold for any browser without a `RegistryRoot` | No value needed. Without it, a browser with no root still gets the entry, minus its RegKeys |
 
 ### Example
 
@@ -162,9 +162,9 @@ Each `EntryScaffold` section is a template for one winapp2.ini entry type. The d
 FileKeyBase=<UserDataPath>\*\Network|Cookies*;Device Bound Sessions*
 ```
 
-For every `BrowserInfo` section, this scaffold produces an entry named `<browser name> Web Browsing Cookies *` with the corresponding `FileKey` values substituted in.
+Every browser gets an entry from this scaffold named `<browser name> Web Browsing Cookies *`, with its own path filled into the `FileKey`.
 
-Any other key in an `EntryScaffold` section produces a warning and is otherwise ignored.
+Any other key declares one of the scaffold's [variables](#variables).
 
 ## Template Tokens
 
@@ -175,70 +175,97 @@ Any other key in an `EntryScaffold` section produces a warning and is otherwise 
 | `<LocalUserDataPath>` | `UserDataPath` with `%AppData%` swapped for `%LocalAppData%` | `FileKeyBase` (Gecko only) |
 | `<RegistryRoot>` | A registry root path from `BrowserInfo` | `RegKeyBase` |
 
-Tokens match in any case, so `<userdatapath>` works too. These four are the whole vocabulary: unlike EntryBuilder and UWPBuilder, BrowserBuilder has no variable declarations.
+Tokens match in any case, so `<userdatapath>` works too.
 
-After the tokens are substituted, each value goes through the same `<>` expander the other builders use, with nothing declared. That makes inline lists work: `FileKeyBase=<UserDataPath>\*\<Cache,Code Cache>|*|REMOVESELF` produces one FileKey per value, and a `RegKeyBase` can hold one too.
+Once the tokens are filled in, each value goes through the same `<>` expander the other builders use, with the scaffold's [variables](#variables). Inline lists work there too: `FileKeyBase=<UserDataPath>\*\<Cache,Code Cache>|*|REMOVESELF` produces one FileKey per value, and a `RegKeyBase` can hold a list as well.
 
 ### Refused templates
 
-BrowserBuilder checks each template once, before any browser sees it. A template that breaks one of these rules is dropped with a warning naming it, and the build fails (exit code 1). The scaffold's other templates still build.
+BrowserBuilder checks each template once, before generating anything from it. A template that breaks one of these rules is dropped with a warning naming it, and the build fails (exit code 1). The scaffold's other templates still build.
 
 | Template | Warning | Before these checks |
 |:-|:-|:-|
 | A `FileKeyBase` with no file token | `[EntryScaffold: X].FileKeyBase has no file token; a FileKeyBase needs one of <UserDataPath>, <UserDataParent> or <LocalUserDataPath>` | Silently skipped for every browser |
-| A `FileKeyBase` with two kinds of file token | ``[EntryScaffold: X].FileKeyBase mixes `<UserDataParent>` and `<UserDataPath>`; a FileKeyBase takes one kind of file token`` | One token was substituted (the user data path ahead of the parent, the parent ahead of the local path) and the other shipped as literal text |
+| A `FileKeyBase` with two kinds of file token | ``[EntryScaffold: X].FileKeyBase mixes `<UserDataParent>` and `<UserDataPath>`; a FileKeyBase takes one kind of file token`` | One token was filled in (the user data path ahead of the parent, the parent ahead of the local path) and the other shipped as literal text |
 | `<LocalUserDataPath>` in `chromium.ini` | `[EntryScaffold: X].FileKeyBase uses <LocalUserDataPath>, which only Gecko browsers have` | Silently skipped for every browser |
 | `<RegistryRoot>` in a `FileKeyBase` | `[EntryScaffold: X].FileKeyBase uses <RegistryRoot>, which only a RegKeyBase takes` | Shipped as literal text beside a file token, or skipped without one |
 | A file token in a `RegKeyBase` | ``[EntryScaffold: X].RegKeyBase uses the file token `<UserDataPath>`; a RegKeyBase takes only <RegistryRoot>`` | Shipped as literal text, once per root |
-| A `RegKeyBase` without `<RegistryRoot>` | `[EntryScaffold: X].RegKeyBase has no <RegistryRoot> token` | Emitted unchanged, once per root |
-| Any other `<Name>` token, such as a misspelling | ``Unknown token `<Typo>` in [EntryScaffold: X].FileKeyBase; BrowserBuilder recognizes <UserDataPath>, <UserDataParent>, <LocalUserDataPath> and <RegistryRoot>`` | A misspelled `%...%` token shipped as literal text, except in a `FileKeyBase` with no other token, which was skipped |
-| An inline list with no values, such as `<,>` | ``Inline list `<,>` in [EntryScaffold: X].FileKeyBase has no values`` | New with inline lists. Without the check it drops for every browser and the run still succeeds. A list with at least one value (`<Cache,>`) is fine: the empty one is dropped |
+| A `RegKeyBase` without `<RegistryRoot>` | `[EntryScaffold: X].RegKeyBase has no <RegistryRoot> token` | Written out unchanged, once per root |
+| Any other `<Name>` token, such as a misspelling | ``Unknown token `<Typo>` in [EntryScaffold: X].FileKeyBase; BrowserBuilder recognizes <UserDataPath>, <UserDataParent>, <LocalUserDataPath>, <RegistryRoot> and the scaffold's own variables`` | A misspelled `%...%` token shipped as literal text, except in a `FileKeyBase` with no other token, which was skipped |
+| An inline list with no values, such as `<,>` | ``Inline list `<,>` in [EntryScaffold: X].FileKeyBase has no values`` | New with inline lists. Without the check the template disappears for every browser and the run still succeeds. A list with at least one value (`<Cache,>`) is fine, and the empty value is dropped |
 | An empty, stray or nested bracket: `<>`, `<UserDataPath>>`, `<<UserDataPath>,z>` | ``Malformed `<...>` token in [EntryScaffold: X].FileKeyBase; a token is one <Name> or one <a,b> list, not empty or nested`` | New with the `<Name>` grammar. Without the check the bracket ships as text, and a nested list ships its other value as the path |
+| A variable with no values, or an index past the end of its list | ``Axis <Dirs> has no values, referenced by [EntryScaffold: X].FileKeyBase`` or ``[EntryScaffold: X].FileKeyBase: <Dirs[3]> is out of range (2 values)`` | New with variables |
+| A variable whose value holds a token nothing declares | ``[EntryScaffold: X].FileKeyBase still holds a `<...>` token once its variables are filled in; a variable's value can't hold a token nothing declares`` | New with variables |
 
 Each warning ends with ``; dropping `FileKeyBase=...` `` or ``; dropping `RegKeyBase=...` ``, naming the whole key.
 
 ### BrowserInfo values
 
-`UserDataPath=` and `RegistryRoot=` values are literal paths and take no tokens. A value holding `<` or `>` is skipped with a warning, and the build fails; the browser's other values still build:
+`UserDataPath=` and `RegistryRoot=` values can use the browser's own [variables](#variables) and inline lists. Each value becomes one plain path per combination before anything else reads it, so `RegistryRoot=HKCU\Software\Microsoft\<Edge,Edge Beta>` is exactly the same as two `RegistryRoot` lines.
+
+A value that can't be expanded is skipped with a warning, and the build fails. The browser's other values still build:
 
 ```
-[BrowserInfo: Chrome].UserDataPath holds `<` or `>`, but BrowserInfo values are literal paths and take no tokens; skipping `UserDataPath=%LocalAppData%\<Foo>\User Data`
+Unknown variable `<Foo>` in [BrowserInfo: Chrome].UserDataPath; skipping `UserDataPath=%LocalAppData%\<Foo>\User Data`
 ```
 
-Without the check such a value would land in each template ahead of the inline-list pass, so `RegistryRoot=HKCU\Software\<a,b>` would fan out into two roots and `<Foo>` in a `UserDataPath` would drop every FileKey.
-
-### Retired spelling
-
-Older versions of winapp2ool spelled these tokens `%UserDataPath%`, `%BrowserPath%`, `%LocalDataPath%` and `%RegistryRoot%`. `%X%` is how winapp2.ini writes environment variables, so a mistyped token looked like a real path. The old spelling is now refused like the templates above, with a warning naming the new one. Two tokens were renamed, not only respelled: `%BrowserPath%` is the folder above the user data folder, not the install folder, so it is now `<UserDataParent>`, and `%LocalDataPath%` is now `<LocalUserDataPath>`. A token with its closing `%` missing is caught too:
-
-```
-`%BrowserPath%` in [EntryScaffold: Logs].FileKeyBase is now spelled `<UserDataParent>`; dropping `FileKeyBase=%BrowserPath%\Application|debug.log`
-`%BrowserPath` in [EntryScaffold: Logs].FileKeyBase looks like the retired `%BrowserPath%` token, which is now spelled `<UserDataParent>`; dropping `FileKeyBase=%BrowserPath\Application|debug.log`
-```
-
-`BrowserInfo` values aren't checked for the retired spellings: they are literal paths, and one holding `<` or `>` is refused [on its own](#browserinfo-values).
+The rules are the same as for templates: no malformed brackets, no empty inline lists, no variables without values, and no variables holding a token nothing declares. The four scaffold tokens are refused here too, since only scaffolds take them.
 
 ### Token behavior details
 
-**`<UserDataPath>`** is substituted directly with the `UserDataPath` value. For browsers with multiple `UserDataPath` keys, one `DetectFile` and one set of FileKeys is generated per path. See [Example 3](EXAMPLES.md#example-3-multiple-userdatapaths).
+**`<UserDataPath>`** is replaced with the `UserDataPath` value. A browser with several `UserDataPath` keys gets a `DetectFile` and a set of FileKeys for each path. See [Example 3](EXAMPLES.md#example-3-multiple-userdatapaths).
 
-**`<UserDataParent>`** resolves to the parent directory of `UserDataPath`. For Chromium browsers, each `<UserDataParent>` template generates a *second* FileKey with `%LocalAppData%` or `%AppData%` replaced by `%ProgramFiles%`, covering system-wide (All Users) installations. See [Example 6](EXAMPLES.md#example-6-userdataparent-and-the-programfiles-mirror). Gecko browsers do not receive the `%ProgramFiles%` mirror.
+**`<UserDataParent>`** is the parent directory of `UserDataPath`. For Chromium browsers, each `<UserDataParent>` template also produces a *second* FileKey with `%LocalAppData%` or `%AppData%` changed to `%ProgramFiles%`, which covers installs made for all users. The swap only touches text written in the template itself, not text a scaffold variable fills in later. Gecko browsers don't get the `%ProgramFiles%` copy. See [Example 6](EXAMPLES.md#example-6-userdataparent-and-the-programfiles-mirror).
 
-**`<LocalUserDataPath>`** is a Gecko-only token that takes `UserDataPath` and replaces `%AppData%` with `%LocalAppData%`, targeting the local (non-roaming) profile data directory. See [Example 7](EXAMPLES.md#example-7-localuserdatapath-gecko).
+**`<LocalUserDataPath>`** is Gecko only. It's `UserDataPath` with `%AppData%` changed to `%LocalAppData%`, which is where Gecko keeps its local, non-roaming profile data. See [Example 7](EXAMPLES.md#example-7-localuserdatapath-gecko).
 
-**`<RegistryRoot>`** is substituted in `RegKeyBase` templates. One `RegKey` is generated per `RegistryRoot` key per `RegKeyBase` template. See [Example 5](EXAMPLES.md#example-5-registry-scaffolds-and-requiresregistryroot).
+**`<RegistryRoot>`** is filled in `RegKeyBase` templates. Each `RegKeyBase` produces one RegKey per `RegistryRoot`. See [Example 5](EXAMPLES.md#example-5-registry-scaffolds-and-requiresregistryroot).
+
+## Variables
+
+Any key a section doesn't reserve declares a variable, named after the key without any trailing digits, whose values are its comma-separated list. `Dirs1=` and `Dirs2=` both declare `Dirs`, so the second replaces the first, with a warning. You use it as `<Name>`, and each value produces its own copy of the line. Variables work the way they do in [EntryBuilder](../entrybuilder/readme.md) and [UWPBuilder](../uwpbuilder/readme.md): names match in any case, one variable can use another, and `<Name[N]>` picks the Nth value, counting from 1.
+
+Each section's variables are its own. A browser's variables fill only its `UserDataPath=` and `RegistryRoot=` values, and a scaffold's fill only its own templates. A scaffold can't use a browser's variable, so a mistyped token in a scaffold is still caught once, before anything is generated.
+
+```ini
+[BrowserInfo: Thunderbird]
+Section=Thunderbird Email Client
+Channels=MZLA,ThunderbirdBeta
+UserDataPath=%LocalAppData%\Packages\MozillaThunderbird.<Channels>_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles
+
+[EntryScaffold: Caches]
+Dirs=cache2,thumbnails
+FileKeyBase=<UserDataPath>\*\<Dirs>|*|REMOVESELF
+```
+
+`Channels` turns the one `UserDataPath` into two, and `Dirs` turns the one template into two FileKeys per path:
+
+```ini
+[Thunderbird Caches *]
+Section=Thunderbird Email Client
+DetectFile1=%LocalAppData%\Packages\MozillaThunderbird.MZLA_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles
+DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.ThunderbirdBeta_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles
+FileKey1=%LocalAppData%\Packages\MozillaThunderbird.MZLA_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*\cache2|*|REMOVESELF
+FileKey2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*\thumbnails|*|REMOVESELF
+FileKey3=%LocalAppData%\Packages\MozillaThunderbird.ThunderbirdBeta_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*\cache2|*|REMOVESELF
+FileKey4=%LocalAppData%\Packages\MozillaThunderbird.ThunderbirdBeta_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*\thumbnails|*|REMOVESELF
+```
+
+A section's reserved keys can't be variables, and neither can the four token names: a key called `UserDataParent=` is dropped with a warning, and the build fails. A variable nothing uses gets a warning but doesn't fail the build. That's how a misspelled key such as `RegistyRoot=` shows up, since it reads as a variable.
+
+List values are trimmed and empty ones dropped, so `Edge<, Beta>` gives only `EdgeBeta`. Write each value out instead: `<Edge,Edge Beta>`.
 
 ## Special Case: Opera GX
 
-Opera GX stores profile data directly in its user data directory and keeps additional profiles under `_side_profiles\*` rather than the usual `Default`/`Profile 1` folders. BrowserBuilder recognizes the browser name `Opera GX` and rewrites every `<UserDataPath>` template into two FileKeys: one against the user data directory itself and one against `_side_profiles\*`. If you diff the generated output, Opera GX entries will structurally differ from every other Chromium browser's; this is intentional.
+Opera GX keeps its main profile directly in its user data directory, with any other profiles under `_side_profiles\*`, rather than in the usual `Default` and `Profile 1` folders. When a browser is named `Opera GX`, in any case, BrowserBuilder turns each `<UserDataPath>` template into two FileKeys: one against the user data directory itself, dropping the template's `\*` profile wildcard if it has one, and one against `_side_profiles\*`. That's why Opera GX's entries look different from every other Chromium browser's.
 
 ---
 
 # Post-Generation Flavorizing
 
-After generating entries, BrowserBuilder applies Flavorizer to the output before saving. This corrects coverage issues that arise from the template-based generation approach. For example: removing entries for features a particular browser does not support, or adding vendor-specific keys that cannot be templated.
+Templates can't know everything about every browser. Some browsers lack a feature a scaffold covers, and some write vendor-specific files that no template describes. Before saving, BrowserBuilder runs Flavorizer over the generated entries to remove the ones that shouldn't exist and add the keys that can't be templated.
 
-The flavor files are read from the source directory. The names are not configurable:
+The flavor files come from the source directory, under fixed names:
 
 | Stage | Operation | File name (fixed) |
 |:-|:-|:-|
@@ -249,27 +276,26 @@ The flavor files are read from the source directory. The names are not configura
 | 5 | Key replacements | `browser_key_replacements.ini` |
 | 6 | Additions | `browser_additions.ini` |
 
-All flavor files are optional; missing files are silently skipped.
+Every flavor file is optional, and a missing one is skipped without a warning.
 
-For additional context, see the [Flavorizer README](../transmute/Flavorizer/readme.md) and the [Transmute README's Usage Examples](../transmute/EXAMPLES.md).
+For what each stage does, see the [Flavorizer README](../transmute/Flavorizer/readme.md) and the [Transmute examples](../transmute/EXAMPLES.md).
 
 ---
 
 # Output Format
 
-The output file (`browsers.ini` by default) contains standard winapp2.ini format entries. Each generated entry has:
+The output file (`browsers.ini` by default) is ordinary winapp2.ini. Each generated entry has:
 
 - A section header in the form `[<browser name> <scaffold name> *]`
 - A `Section=` key from the browser's `BrowserInfo`
-- `DetectFile=` (or numbered `DetectFile1=`, `DetectFile2=` for multiple paths) pointing to the `UserDataPath` (or its parent, if `TruncateDetect` is set)
-- Numbered `FileKey` and `RegKey` entries from the scaffold templates with tokens substituted
+- A `DetectFile=` pointing at the `UserDataPath`, or at its parent if `TruncateDetect` is set. A browser with several paths gets numbered `DetectFile1=`, `DetectFile2=` and so on
+- Numbered `FileKey` and `RegKey` keys from the scaffold's templates, with the tokens filled in
 
-Before saving, the entire output is run through **WinappDebug** with full optimizations forced: entries are alphabetized, keys are placed in standard winapp2.ini order, key numbering is normalized, and parameter lists are alphabetized. 
+Before saving, BrowserBuilder runs the whole output through **WinappDebug** with optimizations on. That sorts the entries, puts each entry's keys in standard winapp2.ini order and renumbers them, alphabetizes FileKey patterns, and merges FileKeys that share a path. If the lint would change what an entry means rather than just how it's written, the [reconciliation guard](../winappdebug/README.md#the-reconciliation-guard) fails the build instead.
 
-The saved file begins with a generated comment header:
+The saved file starts with this header:
 
 ```ini
-; Version <yyMMdd>
 ; # of entries: #,###
 ; browsers.ini is generated by the Winapp2ool Browser Builder
 ; Entries in this file may be incomplete and are not intended to be used directly with any cleaning software
@@ -285,19 +311,19 @@ The saved file begins with a generated comment header:
 
 ### Always Use Flavor Files
 
-Raw generated output will have coverage issues: entries for features not supported by certain browsers, or missing browser-specific keys and entries. Flavor files are how these are corrected. They must sit in the source directory under their exact fixed names to be picked up.
+Generated output on its own has extras and gaps: entries for features some browsers don't have, and nothing for files only one vendor writes. The flavor files fix both. BrowserBuilder only finds them in the source directory, under their exact names.
 
 ### Skipping Discontinued Browsers
 
-Use `Skip` in a `BrowserInfo` section to exclude a browser without deleting its data. This preserves the section for potential future re-activation.
+Add `Skip` to a browser's `BrowserInfo` section to stop generating its entries without deleting the section. If the browser comes back, delete the `Skip` line.
 
 ### Multiple UserDataPaths
 
-Provide multiple `UserDataPath` keys in a `BrowserInfo` section to support browsers with more than one possible profile location (e.g., a standalone install and a Microsoft Store package). BrowserBuilder generates a `DetectFile` and a full set of FileKeys for each path.
+Give a browser one `UserDataPath` key for each place it can keep its profiles, such as a standalone install and a Microsoft Store package. Each path gets its own `DetectFile` and its own set of FileKeys.
 
 ### TruncateDetect
 
-Use `TruncateDetect` when `UserDataPath` contains a wildcard in its direct parent directory name (e.g., `%LocalAppData%\BraveSoftware\Brave-Browser*\User Data`). Some cleaning tools (notably CCleaner) do not support wildcards in `DetectFile` parent paths; truncating moves the detection up to the wildcarded directory itself. See [Example 4](EXAMPLES.md#example-4-truncatedetect).
+Use `TruncateDetect` when the folder above `UserDataPath` has a wildcard in its name, as in `%LocalAppData%\BraveSoftware\Brave-Browser*\User Data`. CCleaner only accepts a wildcard in the last part of a `DetectFile` path, so we detect on the wildcarded folder itself. See [Example 4](EXAMPLES.md#example-4-truncatedetect).
 
 ---
 
@@ -305,15 +331,18 @@ Use `TruncateDetect` when `UserDataPath` contains a wildcard in its direct paren
 
 | Symptom | Cause |
 |:-|:-|
-| "No valid generative rulesets found" | Neither `chromium.ini` nor `gecko.ini` in the source directory contains any parseable sections; check the source directory setting |
-| Warning: "Invalid section found and ignored: [section]" | A section's name does not start with exactly `BrowserInfo:` or `EntryScaffold:`; the prefixes are case-sensitive |
-| Warning: "Unexpected KeyType in [section]: [key]" | A `BrowserInfo` or `EntryScaffold` section contains a key name the module doesn't recognize; the key is ignored |
-| Warning: "No valid UserDataPath key found in [browser]" | The `BrowserInfo` section is missing its `UserDataPath` key; the browser's entries will have no `DetectFile` and no FileKeys |
-| Warning: "No valid Section key found in [browser]" | The `BrowserInfo` section is missing its `Section` key; generated entries will carry an empty `Section=` |
-| Warning: "Skipping [browser] for [scaffold]: scaffold requires RegistryRoot" | The scaffold declares `RequiresRegistryRoot` and the browser has no `RegistryRoot` key; no entry is generated for that pairing |
-| A browser is missing from the output entirely | It may have `Skip` set; check its `BrowserInfo` section |
-| One entry is missing for one browser | Likely a `RequiresRegistryRoot` scaffold and a browser without a `RegistryRoot` |
-| A scaffold key is missing from every entry, and the build failed | The template was [refused](#refused-templates); the warning names it and the reason |
-| A browser lost a path or registry root, and the build failed | The `BrowserInfo` value held `<` or `>` and was [skipped](#browserinfo-values) |
-| Flavor corrections aren't being applied | The flavor file's name doesn't exactly match its fixed name, or it isn't in the source directory. Missing files are skipped silently |
-| Generated entries are incomplete or wrong | Flavor files correct coverage issues; ensure the appropriate flavor files are present in the source directory |
+| "No valid generative rulesets found", and the build failed | The source directory has no `chromium.ini` or `gecko.ini`, they have no sections, or the directory doesn't exist. Check the source directory setting |
+| Warning: "Invalid section found and ignored: [section]", and the build failed | The section's name doesn't start with `BrowserInfo:` or `EntryScaffold:` followed by a name. Check the prefix's spelling |
+| Warning: "Variable 'X=' declared in [section] but never referenced by any \<X> token; possible typo" | A key the section doesn't reserve declares a [variable](#variables), and nothing uses it. Usually a misspelled key, such as `RegistyRoot=` |
+| Warning: "[section] declares `X`, which is a token, not a variable", and the build failed | A key is named after one of the four [template tokens](#template-tokens). Those names can't be variables |
+| Warning: "No valid UserDataPath key found in [browser]" | The `BrowserInfo` section has no `UserDataPath` key, so the browser's entries get no `DetectFile` and no FileKeys |
+| Warning: "No valid Section key found in [browser]" | The `BrowserInfo` section has no `Section` key, so its entries get an empty `Section=` |
+| Warning: "Skipping [browser] for [scaffold]: scaffold requires RegistryRoot" | The scaffold has `RequiresRegistryRoot` and the browser has no `RegistryRoot`, so that pair produces no entry |
+| A browser is missing from the output entirely | Check its `BrowserInfo` section for `Skip` |
+| One entry is missing for one browser | Most likely a `RequiresRegistryRoot` scaffold and a browser with no `RegistryRoot` |
+| A scaffold key is missing from every entry, and the build failed | The template was [refused](#refused-templates). The warning names it and says why |
+| Warning: "[BrowserInfo: X].UserDataPath has no value; skipping it" | An empty `UserDataPath=` or `RegistryRoot=` line. It's ignored, and the build carries on |
+| A browser lost a path or registry root, and the build failed | The `BrowserInfo` value couldn't be expanded and was [skipped](#browserinfo-values). The warning says why |
+| The build failed and left a `browsers.prelint.ini` beside the output | The WinappDebug pass would have changed what an entry means. That's a bug in the rulesets or the generator; the log lists each change. See the [reconciliation guard](../winappdebug/README.md#the-reconciliation-guard) |
+| Flavor corrections aren't being applied | The flavor file isn't in the source directory, or its name doesn't exactly match the fixed name. A missing file is skipped without a warning |
+| Generated entries are incomplete or wrong | Without flavor files the output keeps the templates' gaps. Check that the flavor files are in the source directory |

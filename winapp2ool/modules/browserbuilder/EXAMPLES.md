@@ -15,13 +15,13 @@ Worked examples for [BrowserBuilder](readme.md). The [Common Uses](readme.md#com
 
 ---
 
-The examples below use the real rulesets from the winapp2.ini project, found [here](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/BrowserBuilder). Relevant excerpts are provided on this page, and every output shown is the module's real output. Unless stated otherwise, the source directory contains only the rulesets (no flavor files), and the [generated comment header](readme.md#output-format) is omitted from outputs for brevity.
+The examples use excerpts from the project's real [rulesets](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/BrowserBuilder), and every output is what BrowserBuilder actually wrote. Unless an example says otherwise, the source directory holds only the rulesets, with no flavor files, and the outputs leave out the [generated comment header](readme.md#output-format).
 
 ## Example 1: Generating an Entry
 
 **Context**
 
-The simplest possible case: one browser crossed with one scaffold. Chromium keeps backup copies of the bookmarks file in each profile, and we want an entry that cleans them.
+One browser and one scaffold. Chromium keeps backup copies of the bookmarks file in each profile, and we want an entry that cleans them.
 
 **Intent**
 
@@ -63,8 +63,8 @@ FileKey1=%LocalAppData%\Chromium\User Data\*|Bookmarks.bak
 - The entry name is the browser name + the scaffold name + ` *`: `Chromium` + `Bookmark Backups` → `[Chromium Bookmark Backups *]`
 - `Section=` is copied from the `BrowserInfo`
 - `DetectFile=` is the browser's `UserDataPath`
-- The `FileKeyBase` template becomes `FileKey1` with `<UserDataPath>` substituted
-- The `RegistryRoot` key goes unused here. This scaffold has no `RegKeyBase` templates
+- The `FileKeyBase` template becomes `FileKey1`, with the path in place of `<UserDataPath>`
+- The `RegistryRoot` key goes unused, since this scaffold has no `RegKeyBase` templates
 
 ---
 
@@ -72,7 +72,7 @@ FileKey1=%LocalAppData%\Chromium\User Data\*|Bookmarks.bak
 
 **Context**
 
-The point of BrowserBuilder is that browsers and templates multiply: every scaffold is applied to every browser in the same ruleset. Adding one browser adds a full family of entries; adding one scaffold extends every browser at once.
+Browsers and scaffolds multiply: every scaffold is applied to every browser in the same ruleset. One more browser gets a whole set of entries, and one more scaffold adds an entry to every browser.
 
 **Intent**
 
@@ -134,7 +134,7 @@ FileKey1=%LocalAppData%\Chromium\User Data\*|Bookmarks.bak
 
 **Explanation**
 
-- 2 browsers × 2 scaffolds = 4 entries, each personalized with its browser's paths and category
+- 2 browsers × 2 scaffolds = 4 entries, each with its own browser's paths and `Section=`
 
 ---
 
@@ -184,7 +184,7 @@ FileKey2=%LocalAppData%\Packages\Mozilla.Firefox_n80bbvh6b1yt2\LocalCache\Roamin
 **Explanation**
 
 - With multiple `UserDataPath` keys, the `DetectFile`s become numbered: `DetectFile1`, `DetectFile2`, one per path
-- Every `FileKeyBase` template is expanded once per path, so one template line produced two FileKeys
+- Every `FileKeyBase` template is filled in once per path, so one template line produced two FileKeys
 
 ---
 
@@ -192,7 +192,7 @@ FileKey2=%LocalAppData%\Packages\Mozilla.Firefox_n80bbvh6b1yt2\LocalCache\Roamin
 
 **Context**
 
-Brave's stable, beta, and nightly channels store data under `Brave-Browser`, `Brave-Browser-Beta`, and `Brave-Browser-Nightly` respectively, which the ruleset covers with a single wildcard: `%LocalAppData%\BraveSoftware\Brave-Browser*\User Data`. But some cleaning tools reject a wildcard in a `DetectFile`'s parent path, so detecting on the full `UserDataPath` would break.
+Brave's stable, beta, and nightly channels store data under `Brave-Browser`, `Brave-Browser-Beta`, and `Brave-Browser-Nightly` respectively, and the ruleset covers all three with one wildcard: `%LocalAppData%\BraveSoftware\Brave-Browser*\User Data`. CCleaner only accepts a wildcard in the last part of a `DetectFile` path, so detecting on the full `UserDataPath` would break there.
 
 **Intent**
 
@@ -234,7 +234,8 @@ FileKey1=%LocalAppData%\BraveSoftware\Brave-Browser*\User Data\*|Bookmarks.bak
 
 **Explanation**
 
-- The `DetectFile` now points at the parent path, `Brave-Browser*`, rather than `Brave-Browser*\User Data`
+- The `DetectFile` points at the parent path, `Brave-Browser*`, instead of `Brave-Browser*\User Data`
+- The FileKeys still use the full `UserDataPath`
 
 ---
 
@@ -242,7 +243,7 @@ FileKey1=%LocalAppData%\BraveSoftware\Brave-Browser*\User Data\*|Bookmarks.bak
 
 **Context**
 
-Chromium browsers record pinned-tab state in the registry under the browser vendor's root key. Not every browser in the ruleset has a known registry root and generating a pinned-tabs entry with no keys in it would produce a broken entry.
+Chromium browsers record pinned-tab state in the registry under the browser vendor's root key. Not every browser in the ruleset has a known registry root, and a pinned-tabs entry with no RegKeys in it would clean nothing.
 
 **Intent**
 
@@ -298,7 +299,7 @@ Skipping Arc for Pinned Tabs: scaffold requires RegistryRoot
 **Explanation**
 
 - One `RegKey` is generated per `RegistryRoot` per `RegKeyBase` template: Brave's three roots × one template = `RegKey1`-`RegKey3`
-- `RequiresRegistryRoot` excludes browsers without a `RegistryRoot` from this scaffold entirely, with a warning naming the browser and scaffold
+- `RequiresRegistryRoot` leaves browsers without a `RegistryRoot` out of this scaffold, with a warning naming the browser and the scaffold
 
 ---
 
@@ -306,7 +307,7 @@ Skipping Arc for Pinned Tabs: scaffold requires RegistryRoot
 
 **Context**
 
-Some browser files live *outside* the user data directory (e.g. installer logs, setup metrics). When a Chromium browser is installed "for all users", those application files live under `%ProgramFiles%` instead of the per-user location.
+Some browser files live *outside* the user data directory, such as installer logs and setup metrics. When a Chromium browser is installed for all users, those files live under `%ProgramFiles%` instead of the per-user location.
 
 **Intent**
 
@@ -335,7 +336,7 @@ winapp2ool -browserbuilder -1d C:\rulesets
 
 **Output**
 
-###### **Output file (`browsers.ini`), trimmed to match above**
+###### **Output file (`browsers.ini`), trimmed to the two templates above**
 
 ```ini
 [Chromium Telemetry *]
@@ -350,9 +351,9 @@ FileKey21=%ProgramFiles%\Chromium\Application\SetupMetrics|*|REMOVESELF
 
 **Explanation**
 
-- `<UserDataParent>` is the parent of `UserDataPath`. Here: `%LocalAppData%\Chromium`
-- Each `<UserDataParent>` template produced two `FileKeys`: the substituted path, and a mirror with the user-profile variable swapped for `%ProgramFiles%`
-- The mirror is Chromium-only; Gecko browsers get just the direct substitution
+- `<UserDataParent>` is the parent of `UserDataPath`, here `%LocalAppData%\Chromium`
+- Each `<UserDataParent>` template produced two FileKeys: one with that path, and a copy with `%LocalAppData%` changed to `%ProgramFiles%`
+- Only Chromium browsers get the `%ProgramFiles%` copy
 
 ---
 
@@ -360,11 +361,11 @@ FileKey21=%ProgramFiles%\Chromium\Application\SetupMetrics|*|REMOVESELF
 
 **Context**
 
-Gecko browsers split their profile data: settings and history roam under `%AppData%`, while caches and other machine-local data sit in a mirrored path under `%LocalAppData%`. Cache-cleaning templates need to target the local mirror, but `BrowserInfo` sections only declare the roaming path.
+Gecko browsers split their profile data. Settings and history roam under `%AppData%`, while caches and other machine-local data sit in a matching path under `%LocalAppData%`. Cache-cleaning templates need the local path, but `BrowserInfo` sections only declare the roaming one.
 
 **Intent**
 
-We want the Caches scaffold to clean the `%LocalAppData%` mirror without every browser declaring a second path.
+We want the Caches scaffold to clean the `%LocalAppData%` path without every browser declaring a second one.
 
 **Files**
 
@@ -414,9 +415,9 @@ FileKey9=%LocalAppData%\Waterfox\Profiles\*\thumbnails|*|REMOVESELF
 
 **Explanation**
 
-- `<LocalUserDataPath>` took the declared `UserDataPath` and swapped `%AppData%` → `%LocalAppData%`, producing FileKey7-9
-- The `DetectFile` still only points at the roaming path
-- The keys and their parameters have been reordered relative to their templates as a result of BrowserBuilder running its output through WinappDebug
+- `<LocalUserDataPath>` took the declared `UserDataPath` and changed `%AppData%` to `%LocalAppData%`, producing FileKey7-9
+- The `DetectFile` still points only at the roaming path
+- The keys and their patterns are in a different order from the templates because BrowserBuilder runs its output through [WinappDebug](readme.md#output-format)
 
 ---
 
@@ -424,11 +425,11 @@ FileKey9=%LocalAppData%\Waterfox\Profiles\*\thumbnails|*|REMOVESELF
 
 **Context**
 
-You run Google Chrome Portable from `D:\PortableApps`. The distributed winapp2.ini doesn't cover this: its Chrome entries detect and clean the standard install locations. BrowserBuilder can generate entries for *your* install path, and because scaffolds are just text, you can copy whichever ones you care about from the [project's chromium.ini](https://github.com/MoscaDotTo/Winapp2/blob/master/Assembler/BrowserBuilder/chromium.ini).
+You run Google Chrome Portable from `D:\PortableApps`. The published winapp2.ini doesn't cover it, because its Chrome entries only look in the standard install locations. BrowserBuilder can generate entries for *your* install path, and since scaffolds are plain text, you can copy whichever ones you want from the [project's chromium.ini](https://github.com/MoscaDotTo/Winapp2/blob/master/Assembler/BrowserBuilder/chromium.ini).
 
 **Intent**
 
-We want history and cookie cleaning entries for a portable Chrome, then we want them merged into our local winapp2.ini.
+We want history and cookie entries for a portable Chrome, added to our local winapp2.ini.
 
 **Files**
 
@@ -471,14 +472,12 @@ FileKey1=D:\PortableApps\GoogleChromePortable\Data\profile\*|History*;Network Ac
 
 **Explanation**
 
-Two steps are chained:
-
 | Step | Module | Effect |
 |:-|:-|:-|
 | 1 | BrowserBuilder | Generates the two entries above from the hand-written ruleset |
-| 2 | Transmute (Add) | Merges the generated entries into your local `winapp2.ini` in place |
+| 2 | Transmute (Add) | Adds the generated entries to your local `winapp2.ini`, in place |
 
 ###### Notes
 
-- `UserDataPath` and `RegistryRoot` values accept absolute paths and also environment variables
-- Because your additions live in the ruleset, you can regenerate and re-merge after each winapp2.ini update
+- `UserDataPath` and `RegistryRoot` take absolute paths as well as environment variables
+- Your entries live in the ruleset, so after each winapp2.ini update you can run both commands again
