@@ -293,4 +293,111 @@ Imports System.Text
 
     End Sub
 
+    ' ----- Keys with no value -----
+
+    ''' <summary>
+    ''' A bare <c> Skip= </c> skips the entry. A key with no value has the KeyType
+    ''' <c> DeleteMe </c>, so the parser goes by its name.
+    ''' </summary>
+    <TestMethod()> Public Sub BareSkip_SkipsTheEntry()
+
+        Dim log As List(Of String) = Nothing
+        Dim exitCode As Integer
+        Dim spec = ParseLogged(Preamble & "FileKey=%LocalAppData%\VideoKeeper|*.log" & vbCrLf & "Skip=" & vbCrLf, log, exitCode)
+
+        Assert.IsTrue(spec.ShouldSkip)
+        Assert.AreEqual(0, exitCode)
+        Assert.IsFalse(log.Any(Function(l) l.Contains("DeleteMe")), "Got: " & String.Join(" | ", log))
+
+    End Sub
+
+    ''' <summary>
+    ''' An empty <c> WebViewScaffolds= </c> selects no scaffolds, rather than the default set
+    ''' </summary>
+    <TestMethod()> Public Sub EmptyScaffoldSelection_SelectsNone()
+
+        Dim webView As New Dictionary(Of String, List(Of String)) From {
+            {"Caches", New List(Of String) From {"<WebViewRoot>\Cache|*"}}
+        }
+
+        Dim menu As New winapp2ool.MenuSection
+        Using winapp2ool.gLogCapture()
+
+            Dim spec = winapp2ool.EntryBuilder.parseEntrySpec(FirstSection(Preamble &
+                "WebViewRoot=%LocalAppData%\VideoKeeper\EBWebView\Default" & vbCrLf &
+                "WebViewScaffolds=" & vbCrLf &
+                "FileKey=%LocalAppData%\VideoKeeper|*.log" & vbCrLf), menu)
+
+            Dim section = winapp2ool.EntryBuilder.generateEntry(spec, webView,
+                New Dictionary(Of String, List(Of String)),
+                New Dictionary(Of String, List(Of String)),
+                New winapp2ool.EntryBuilder.EntryBuilderStats,
+                menu)
+
+            Dim fileKeys = section.Keys.Where(Function(k) k.KeyType.Equals("FileKey", StringComparison.InvariantCultureIgnoreCase)) _
+                                       .Select(Function(k) k.Value).ToList()
+
+            CollectionAssert.AreEqual(New List(Of String) From {"%LocalAppData%\VideoKeeper|*.log"}, fileKeys)
+
+        End Using
+
+    End Sub
+
+    ''' <summary>
+    ''' Any other key with no value is dropped with a warning, without failing the run, rather
+    ''' than giving an empty key or root
+    ''' </summary>
+    <TestMethod()> Public Sub EmptyValueKey_IsDroppedWithWarning()
+
+        Dim log As List(Of String) = Nothing
+        Dim exitCode As Integer
+        Dim spec = ParseLogged(Preamble &
+                               "FileKey=%LocalAppData%\VideoKeeper|*.log" & vbCrLf &
+                               "FileKey2=" & vbCrLf &
+                               "WebViewRoot=" & vbCrLf &
+                               "Version=" & vbCrLf, log, exitCode)
+
+        Assert.AreEqual(0, exitCode)
+        Assert.AreEqual(1, spec.FileKeys.Count)
+        Assert.AreEqual(0, spec.WebViewRoots.Count)
+        Assert.IsFalse(spec.Variables.IsDeclared("Version"))
+        Assert.IsTrue(log.Any(Function(l) l.Contains("[Test App *].FileKey2 has no value; key dropped")), "Got: " & String.Join(" | ", log))
+        Assert.IsTrue(log.Any(Function(l) l.Contains("[Test App *].WebViewRoot has no value; key dropped")), "Got: " & String.Join(" | ", log))
+
+    End Sub
+
+    ' ----- Whole runs -----
+
+    ''' <summary>
+    ''' A run over a source directory with no sections writes nothing and fails the run
+    ''' </summary>
+    <TestMethod()> Public Sub NoSources_FailsTheRun()
+
+        Dim dir = IO.Path.Combine(IO.Path.GetTempPath(), $"winapp2ool-entrybuilder-{Guid.NewGuid():N}")
+        Dim savedSource = winapp2ool.EntryBuilderFile1
+        Dim savedSuppress = winapp2ool.SuppressOutput
+        Dim savedExitCode = Environment.ExitCode
+
+        Try
+
+            IO.Directory.CreateDirectory(dir)
+            winapp2ool.EntryBuilderFile1 = New winapp2ool.iniFileChooser(dir, "", "")
+            winapp2ool.SuppressOutput = True
+            Environment.ExitCode = 0
+
+            winapp2ool.EntryBuilder.initEntryBuilder()
+
+            Assert.AreEqual(1, Environment.ExitCode)
+
+        Finally
+
+            winapp2ool.EntryBuilderFile1 = savedSource
+            winapp2ool.SuppressOutput = savedSuppress
+            Environment.ExitCode = savedExitCode
+            IO.Directory.Delete(dir, recursive:=True)
+
+        End Try
+
+    End Sub
+
 End Class

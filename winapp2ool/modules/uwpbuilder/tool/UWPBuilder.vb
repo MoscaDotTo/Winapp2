@@ -110,6 +110,19 @@ Public Module UWPBuilder
     }
 
     ''' <summary>
+    ''' The keys that mean something with no value: <c> Skip= </c>, <c> SkipUWPFileKeys= </c>,
+    ''' and the scaffold selections and exclusions, where an empty list selects or excludes
+    ''' nothing. <see cref="parseAppInfo"/> drops any other key with no value, which would
+    ''' otherwise give an empty key or path.
+    ''' </summary>
+    Private ReadOnly ValueOptionalKeys As String() = {
+        "SKIP", "SKIPUWPFILEKEYS",
+        "WEBVIEWSCAFFOLDS", "EXCLUDEWEBVIEWSCAFFOLDS",
+        "QTWEBENGINESCAFFOLDS", "EXCLUDEQTWEBENGINESCAFFOLDS",
+        "ELECTRONSCAFFOLDS", "EXCLUDEELECTRONSCAFFOLDS"
+    }
+
+    ''' <summary>
     ''' The token stems UWPBuilder refuses, passed to <see cref="RetiredTokens.FindRetiredToken"/>.
     ''' <c> %Package% </c> and <c> %PackageN% </c> are now <c> &lt;Package&gt; </c> and
     ''' <c> &lt;Package[N]&gt; </c>, and the five root placeholders such as
@@ -417,9 +430,9 @@ Public Module UWPBuilder
     ''' <summary>
     ''' Reads the source directory, runs the generation pipeline, writes the output file,
     ''' and displays the results unless <c> SuppressOutput </c> is set. When <c> UWP.ini </c>
-    ''' is missing or empty, or <c> AppInfo\ </c> yields no sections, we set a header message
-    ''' and return without writing anything. Of those cases only a missing <c> UWP.ini </c>
-    ''' fails the run, and a missing source directory throws from <see cref="iniFile.FromFile"/>.
+    ''' is missing or empty, or <c> AppInfo\ </c> yields no sections, we set a header message,
+    ''' fail the run and return without writing anything. A missing source directory throws from
+    ''' <see cref="iniFile.FromFile"/>.
     ''' </summary>
     Public Sub initUWPBuilder()
 
@@ -431,6 +444,7 @@ Public Module UWPBuilder
         If templateIni.Count = 0 Then
 
             setNextMenuHeaderText($"UWP.ini not found or empty in: {sourceDir}", printColor:=ConsoleColor.Red)
+            markRunFailed()
             Return
 
         End If
@@ -444,6 +458,7 @@ Public Module UWPBuilder
         If appsIni.Count = 0 Then
 
             setNextMenuHeaderText($"No app definitions found in: {appInfoDir}", printColor:=ConsoleColor.Red)
+            markRunFailed()
             Return
 
         End If
@@ -745,7 +760,16 @@ Public Module UWPBuilder
 
         For Each key In appSection.Keys
 
-            Dim keyType = key.KeyType.ToUpperInvariant()
+            Dim keyType = key.TypeOrName().ToUpperInvariant()
+
+            If key.Value.Length = 0 AndAlso Not ValueOptionalKeys.Contains(keyType) Then
+
+                Dim emptyMsg = $"[{app.Name}].{key.Name} has no value; key dropped"
+                gLog(emptyMsg)
+                menuOutput.AddWarning(emptyMsg)
+                Continue For
+
+            End If
 
             ' Package= is used literally and Warning= is prose, so neither can hold a token
             If keyType <> "PACKAGE" AndAlso keyType <> "WARNING" AndAlso

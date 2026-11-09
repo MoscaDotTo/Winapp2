@@ -1011,4 +1011,107 @@ Imports System.Text
 
     End Sub
 
+    ' ----- Keys with no value -----
+
+    ''' <summary>
+    ''' A bare <c> Skip= </c> or <c> SkipUWPFileKeys= </c> works. A key with no value has the
+    ''' KeyType <c> DeleteMe </c>, so the parser goes by its name.
+    ''' </summary>
+    <TestMethod()> Public Sub BareFlags_AreRead()
+
+        Dim diags As List(Of String) = Nothing
+        Dim app = ParseApp(Preamble & "Skip=" & vbCrLf & "SkipUWPFileKeys=" & vbCrLf, diags)
+
+        Assert.IsTrue(app.ShouldSkip)
+        Assert.IsTrue(app.SkipUWPFileKeys)
+        Assert.IsFalse(diags.Any(Function(d) d.Contains("DeleteMe")), "Got: " & String.Join(" | ", diags))
+
+    End Sub
+
+    ''' <summary>
+    ''' An empty <c> WebViewScaffolds= </c> selects no scaffolds, rather than the default set
+    ''' </summary>
+    <TestMethod()> Public Sub EmptyScaffoldSelection_SelectsNone()
+
+        Dim section = Build(Preamble &
+                            "WebViewRoot=<Package>\LocalState\EBWebView\Default" & vbCrLf &
+                            "WebViewScaffolds=" & vbCrLf,
+                            webViewCatalog:=New Dictionary(Of String, List(Of String)) From {
+                                {"Caches", New List(Of String) From {"<WebViewRoot>\Cache|*"}}
+                            })
+
+        Assert.IsFalse(ValuesOf(section, "FileKey").Any(Function(v) v.Contains("\Cache|")),
+                       "Got: " & String.Join(" | ", ValuesOf(section, "FileKey")))
+
+    End Sub
+
+    ''' <summary>
+    ''' Any other key with no value is dropped with a warning, without failing the run, rather
+    ''' than giving an empty key or root
+    ''' </summary>
+    <TestMethod()> Public Sub EmptyValueKey_IsDroppedWithWarning()
+
+        Dim diags As List(Of String) = Nothing
+        Dim app As winapp2ool.UWPBuilder.UWPAppInfo = Nothing
+        Dim exitCode = ExitCodeAfter(Sub() app = ParseApp(Preamble &
+                                                          "FileKey=" & vbCrLf &
+                                                          "WebViewRoot=" & vbCrLf &
+                                                          "Version=" & vbCrLf, diags))
+
+        Assert.AreEqual(0, exitCode)
+        Assert.AreEqual(0, app.AppKeys.Count)
+        Assert.AreEqual(0, app.WebViewPaths.Count)
+        Assert.IsFalse(app.Variables.IsDeclared("Version"))
+        Assert.IsTrue(diags.Any(Function(d) d.Contains("[Test App *].FileKey has no value; key dropped")), "Got: " & String.Join(" | ", diags))
+
+    End Sub
+
+    ' ----- Whole runs -----
+
+    ''' <summary>
+    ''' Runs a whole UWPBuilder build over a scratch source directory and returns the exit code
+    ''' it leaves. The run stops before it reads the scaffolds or writes anything when it has
+    ''' no sources, which is all these tests reach.
+    ''' </summary>
+    '''
+    ''' <param name="uwpIni">The text of <c> UWP.ini </c></param>
+    Private Shared Function RunWithoutAppInfo(uwpIni As String) As Integer
+
+        Dim dir = IO.Path.Combine(IO.Path.GetTempPath(), $"winapp2ool-uwpbuilder-{Guid.NewGuid():N}")
+        Dim savedSource = winapp2ool.UWPFile1
+        Dim savedSuppress = winapp2ool.SuppressOutput
+
+        Try
+
+            IO.Directory.CreateDirectory(IO.Path.Combine(dir, "AppInfo"))
+            IO.File.WriteAllText(IO.Path.Combine(dir, "UWP.ini"), uwpIni)
+            winapp2ool.UWPFile1 = New winapp2ool.iniFileChooser(dir, "", "")
+            winapp2ool.SuppressOutput = True
+
+            Return ExitCodeAfter(Sub() winapp2ool.UWPBuilder.initUWPBuilder())
+
+        Finally
+
+            winapp2ool.UWPFile1 = savedSource
+            winapp2ool.SuppressOutput = savedSuppress
+            IO.Directory.Delete(dir, recursive:=True)
+
+        End Try
+
+    End Function
+
+    ''' <summary> An empty <c> UWP.ini </c> fails the run </summary>
+    <TestMethod()> Public Sub EmptyUwpIni_FailsTheRun()
+
+        Assert.AreEqual(1, RunWithoutAppInfo(""))
+
+    End Sub
+
+    ''' <summary> An empty <c> AppInfo\ </c> folder fails the run </summary>
+    <TestMethod()> Public Sub NoAppInfo_FailsTheRun()
+
+        Assert.AreEqual(1, RunWithoutAppInfo("[EntryScaffold: UWP]" & vbCrLf & "FileKeyBase=<Package>\AC\INetCache|*" & vbCrLf))
+
+    End Sub
+
 End Class

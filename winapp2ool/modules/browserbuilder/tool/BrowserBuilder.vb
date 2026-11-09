@@ -310,7 +310,7 @@ Public Module BrowserBuilder
 
         For Each key In browserSection.Keys
 
-            Select Case keyKind(key).ToUpperInvariant()
+            Select Case key.TypeOrName().ToUpperInvariant()
 
                 Case "USERDATAPATH" : pathKeys.Add(key)
 
@@ -450,21 +450,6 @@ Public Module BrowserBuilder
     End Function
 
     ''' <summary>
-    ''' Returns the kind of <paramref name="key"/> for matching against the reserved key names.
-    ''' A key with no value, such as a bare <c> Skip </c>, has the type <c> DeleteMe </c>, so
-    ''' we go by its name instead.
-    ''' </summary>
-    '''
-    ''' <param name="key">
-    ''' A key from a ruleset section
-    ''' </param>
-    Private Function keyKind(key As iniKey) As String
-
-        Return If(key.KeyType = "DeleteMe", key.Name.Trim(), key.KeyType)
-
-    End Function
-
-    ''' <summary>
     ''' Declares <paramref name="key"/> as a variable named after its key type, with its
     ''' comma-separated value as the list. The key type drops trailing digits, so <c> Dirs1= </c>
     ''' and <c> Dirs2= </c> both declare <c> Dirs </c>. A second declaration replaces the first
@@ -492,7 +477,7 @@ Public Module BrowserBuilder
                                 variables As VariableSet,
                                 menuOutput As MenuSection)
 
-        Dim name = keyKind(key)
+        Dim name = key.TypeOrName()
 
         If isTokenName(name) Then
 
@@ -678,7 +663,7 @@ Public Module BrowserBuilder
 
             For Each key In scaffoldSection.Keys
 
-                Select Case keyKind(key).ToUpperInvariant()
+                Select Case key.TypeOrName().ToUpperInvariant()
 
                     Case "FILEKEYBASE", "REGKEYBASE" : templates.Add(key)
 
@@ -694,7 +679,7 @@ Public Module BrowserBuilder
 
             For Each template In templates
 
-                Dim isRegKey = keyKind(template).Equals("RegKeyBase", StringComparison.OrdinalIgnoreCase)
+                Dim isRegKey = template.TypeOrName().Equals("RegKeyBase", StringComparison.OrdinalIgnoreCase)
                 If Not templateIsUsable(template, isRegKey, isGecko, scaffoldSection.Name, variables, menuOutput) Then Continue For
 
                 If isRegKey Then

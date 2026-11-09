@@ -698,7 +698,7 @@ We want the entry omitted from the output while keeping its definition in source
 
 ```ini
 [Discontinued App *]
-Skip=True
+Skip=
 WebViewRoot=%AppData%\DiscontinuedApp
 LangSecRef=3023
 DetectFile=%AppData%\DiscontinuedApp
@@ -710,5 +710,5 @@ The entry does not appear in `entrybuilder.ini`. Re-enabling it later is a one-l
 
 **Explanation**
 
-- `Skip=` leaves the entry out whatever its value, so even `Skip=False` skips. The value can't be empty, though: a bare `Skip=` does nothing (see [Skip](readme.md#skip))
+- `Skip=` leaves the entry out whatever its value, so even `Skip=False` skips
 - The run statistics count skipped entries, so a skipped entry still shows up in the totals

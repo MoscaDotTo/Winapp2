@@ -144,6 +144,18 @@ Public Module EntryBuilder
     }
 
     ''' <summary>
+    ''' The keys that mean something with no value: <c> Skip= </c>, and the scaffold selections
+    ''' and exclusions, where an empty list selects or excludes nothing. <see cref="parseEntrySpec"/>
+    ''' drops any other key with no value, which would otherwise give an empty key or path.
+    ''' </summary>
+    Private ReadOnly ValueOptionalKeys As String() = {
+        "SKIP",
+        "WEBVIEWSCAFFOLDS", "EXCLUDEWEBVIEWSCAFFOLDS",
+        "QTWEBENGINESCAFFOLDS", "EXCLUDEQTWEBENGINESCAFFOLDS",
+        "ELECTRONSCAFFOLDS", "EXCLUDEELECTRONSCAFFOLDS"
+    }
+
+    ''' <summary>
     ''' Records one scaffold-family root declaration, warning first if the value looks like the
     ''' author expected a comma-delimited list. Root keys are <em>repeatable</em>, not list-valued:
     ''' several roots are declared as <c> XRoot1= </c> / <c> XRoot2= </c>, or by putting a
@@ -765,7 +777,8 @@ Public Module EntryBuilder
     ''' <summary>
     ''' Reads the source directory, runs the generation pipeline, writes the output, and
     ''' displays the results unless <c> SuppressOutput </c> is set. Bails early with a header
-    ''' message if the source directory is missing or contains no parseable sections. The
+    ''' message, failing the run, if the source directory is missing or contains no parseable
+    ''' sections. The
     ''' closing "Entries built successfully" line doesn't depend on whether the write
     ''' succeeded.
     ''' </summary>
@@ -782,6 +795,7 @@ Public Module EntryBuilder
         If sourceIni.Count = 0 Then
 
             setNextMenuHeaderText($"No EntryBuilder source definitions found in: {sourceDir}", printColor:=ConsoleColor.Red)
+            markRunFailed()
             Return
 
         End If
@@ -1166,7 +1180,9 @@ Public Module EntryBuilder
     ''' variable via <see cref="inferRootDetection"/>. Sets <c> ShouldSkip </c> with a warning
     ''' when the entry has no category, or no content (no scaffold root, <c> FileKeyBase= </c>,
     ''' <c> FileKey= </c>, <c> RegKeyBase= </c> or <c> RegKey= </c>; exclude keys alone don't
-    ''' count), and silently for <c> Skip= </c>. <br /><br />
+    ''' count), and silently for <c> Skip= </c>. A key with no value is read by its name, so a
+    ''' bare <c> Skip= </c> skips and an empty <c> WebViewScaffolds= </c> selects no scaffolds;
+    ''' any other key with no value is dropped with a warning. <br /><br />
     '''
     ''' Also warns on, and drops, <c> SpecialDetect= </c> and <c> Default= </c>; warns when
     ''' both <c> Section= </c> and <c> LangSecRef= </c> are present, keeping
@@ -1195,7 +1211,16 @@ Public Module EntryBuilder
 
         For Each key In entrySection.Keys
 
-            Dim keyType = key.KeyType.ToUpperInvariant()
+            Dim keyType = key.TypeOrName().ToUpperInvariant()
+
+            If key.Value.Length = 0 AndAlso Not ValueOptionalKeys.Contains(keyType) Then
+
+                Dim emptyMsg = $"[{entrySection.Name}].{key.Name} has no value; key dropped"
+                gLog(emptyMsg)
+                menuOutput.AddWarning(emptyMsg)
+                Continue For
+
+            End If
 
             ' Warning= is prose, so it can't hold a token
             If keyType <> "WARNING" AndAlso

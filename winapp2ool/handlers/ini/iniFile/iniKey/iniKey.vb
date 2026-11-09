@@ -112,6 +112,16 @@ Public Class iniKey
         Return If(ignoreCase, KeyType.Equals(t, StringComparison.InvariantCultureIgnoreCase), KeyType = t)
     End Function
 
+    ''' <summary>
+    ''' Returns the KeyType, or for a key with no value (KeyType <c> DeleteMe </c>) its Name with
+    ''' digits removed. The generators read their sources through this, so a bare <c> Skip= </c>
+    ''' reads as <c> Skip </c>.
+    ''' </summary>
+    Public Function TypeOrName() As String
+        If _keyType = "DeleteMe" AndAlso _name IsNot Nothing Then Return StripNums(_name.Trim())
+        Return _keyType
+    End Function
+
     ''' <summary>Returns whether the key's Value contains the given string</summary>
     ''' <param name="txt">The string to search for</param>
     ''' <param name="ignoreCase">

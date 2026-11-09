@@ -68,7 +68,7 @@ None of it is mandatory. A plain winapp2 entry pasted into a source file comes o
 - A source directory containing one or more `*.ini` files with at least one parseable section
 - The shared scaffold directory (normally `Assembler\Scaffolds`), if any entry declares a scaffold root. EntryBuilder reads every `*.ini` in it and tells the catalogs apart by their section headers, not their file names: `[WebViewScaffold: ...]` sections (in `webview.ini`) serve `WebViewRoot=`, `[QtWebEngineScaffold: ...]` sections (`qtwebengine.ini`) serve `QtWebEngineRoot=` and `QtWebEngineCacheRoot=`, and `[ElectronScaffold: ...]` sections (`electron.ini`) serve `ElectronRoot=` and `ElectronUpdaterRoot=`
 
-If the source directory is empty, missing, or holds no parseable sections, EntryBuilder reports `No EntryBuilder source definitions found in: <directory>` and writes nothing. If the scaffold directory is missing, it warns `Scaffold directory not found: <dir>; no scaffold keys will be generated` and builds the entries without scaffold keys. A directory with no catalog for a family gives no such warning, but every entry that uses the family warns `Unknown … scaffold` for each scaffold it selects, defaults included. None of these fail the run, and entries that declare no root aren't affected.
+If the source directory is empty, missing, or holds no parseable sections, EntryBuilder reports `No EntryBuilder source definitions found in: <directory>`, writes nothing, and fails the run (exit code 1). If the scaffold directory is missing, it warns `Scaffold directory not found: <dir>; no scaffold keys will be generated` and builds the entries without scaffold keys. A directory with no catalog for a family gives no such warning, but every entry that uses the family warns `Unknown … scaffold` for each scaffold it selects, defaults included. Neither of these fails the run, and entries that declare no root aren't affected.
 
 ---
 
@@ -102,7 +102,7 @@ In the menu, you make the same choices with the source, save target and scaffold
 
 | Option | Effect | Notes |
 |:-|:-|:-|
-| Run (default) | Generate entries from the configured source directory | Reports `No EntryBuilder source definitions found` and writes nothing if there's nothing to read |
+| Run (default) | Generate entries from the configured source directory | Reports `No EntryBuilder source definitions found`, writes nothing, and fails the run if there's nothing to read |
 | Choose source directory | Select the directory containing per-letter source files | Only the directory is used; the file name is ignored |
 | Choose save target | Select where to save the generated entries | Default: `entrybuilder.ini` in the current directory. With output splitting on, only its folder is used |
 | Choose scaffolds directory | Select the folder holding the shared scaffold catalogs | Default: current directory |
@@ -254,7 +254,7 @@ Older versions spelled the root placeholders `%WebViewRoot%`, `%QtWebEngineRoot%
 | Form | Behavior |
 |:-|:-|
 | Key absent | The default set: `Caches`, `Telemetry` |
-| Key present, value empty | Also the default set. EntryBuilder can't see the name of a key with no value, so it reads it as a variable and warns that nothing uses it (see [Troubleshooting](#troubleshooting)) |
+| Key present, value empty | No scaffolds from this family |
 | `WebViewScaffolds=Caches,Telemetry,DRMData` | Exactly the named scaffolds |
 | `WebViewScaffolds=All` | Every scaffold in the catalog except the legacy tier, **including the host-risk ones** (cookies, history, sessions, web storage, login data) |
 | `WebViewScaffolds=All,LegacyTelemetry` | `All`, plus the named legacy scaffold |
@@ -268,7 +268,7 @@ WebViewScaffolds=All
 ExcludeWebViewScaffolds=WebStorage,LoginData
 ```
 
-Exclusions also work without a `WebViewScaffolds=` key, where they come out of the default set, so `ExcludeWebViewScaffolds=Caches,Telemetry` is how to turn the family's scaffolds off. On an explicit list other than `All` they still apply, but warn (`Both WebViewScaffolds and ExcludeWebViewScaffolds set in [Entry]; applying exclusions to explicit list`); list only the scaffolds you want instead. An unknown scaffold name is dropped with a warning, beside `All` or not.
+Exclusions also work without a `WebViewScaffolds=` key, where they come out of the default set. On an explicit list other than `All` they still apply, but warn (`Both WebViewScaffolds and ExcludeWebViewScaffolds set in [Entry]; applying exclusions to explicit list`); list only the scaffolds you want instead. An unknown scaffold name is dropped with a warning, beside `All` or not.
 
 The catalog, not this page, decides the scaffold names, and [`Assembler/Scaffolds/readme.md`](../../../Assembler/Scaffolds/readme.md) keeps the current lists. When this was written, the WebView catalog defined `Autofill`, `Autoplay`, `BookmarkFavicons`, `Caches`, `DefaultApps`, `DownloadHistory`, `DRMData`, `PrivacySandbox`, `LoginData`, `Security`, `Shopping`, `Sync Data`, `Telemetry`, `WebCookies`, `WebHistory`, `WebSession`, `WebStorage`, and in the legacy tier `LegacyCaches`, `LegacyDownloadHistory`, `LegacyDRMData`, `LegacyExtensionCookies`, `LegacyProgressiveWebApps`, `LegacyStorageQuota`, `LegacyTelemetry`, `LegacyWebHistory`. Only `Caches` and `Telemetry` are on by default. The scaffolds that remove state a user would notice (`WebCookies`, `WebHistory`, `WebSession`, `WebStorage`, `LoginData`) always need an opt-in, through `All` or by name.
 
@@ -355,10 +355,10 @@ Templates of your own, added to whatever the scaffolds produce. Each works like 
 Leaves the entry out of the output. Use it to retire an entry without deleting its definition.
 
 ```ini
-Skip=True
+Skip=
 ```
 
-EntryBuilder ignores the value: `Skip=False`, `Skip=True` and `Skip=0` all skip the entry. **The value can't be empty, though.** A bare `Skip=` doesn't skip anything: EntryBuilder can't see the name of a key with no value, so it reads it as a variable and warns that nothing uses it.
+EntryBuilder ignores the value: a bare `Skip=`, `Skip=True` and even `Skip=False` all skip the entry.
 
 ---
 
@@ -496,6 +496,7 @@ Warnings show in the menu output after a run and go to the winapp2ool log. Advis
 | Neither `Section` nor `LangSecRef` declared | Entry **skipped** | `No Section or LangSecRef in [Entry], skipping` |
 | No root keys and no FileKey/RegKey content in any form | Entry **skipped** | `[Entry] declares no WebViewRoot, QtWebEngineRoot, ElectronRoot, FileKeyBase, or RegKeyBase — nothing to emit, skipping` |
 | No detection (after `Root` inference) | Entry emitted, always-on | `[Entry] declares no detection (Detect / DetectFile / DetectOS); generated entry will be always-on` |
+| A key other than `Skip=` or a scaffold list has no value | Key dropped | `[Entry].FileKey has no value; key dropped` |
 | `Default=` declared | Key dropped | `Default= declared in [Entry]; EntryBuilder never emits Default, ignoring` |
 | `SpecialDetect=` declared | Key dropped | `SpecialDetect is deprecated; key dropped from [Entry]. Replace with Detect or DetectFile` |
 | A key uses a retired `%...Root%` spelling | Key dropped, run fails (exit code 1) | `` `%X%` in [Entry].FileKeyBase is now spelled `<X>`; key dropped `` |
@@ -589,10 +590,10 @@ Use the same declared variable twice in one key when two positions have to match
 
 | Symptom | Likely Cause | Fix |
 |:-|:-|:-|
-| `No EntryBuilder source definitions found in: <dir>` | Source directory is empty, missing, or contains no `*.ini` files with parseable sections | Verify the source directory in **Choose source directory** or via `-1d` |
+| `No EntryBuilder source definitions found in: <dir>` and exit code 1 | Source directory is empty, missing, or contains no `*.ini` files with parseable sections | Verify the source directory in **Choose source directory** or via `-1d` |
 | Entry is silently absent from the output | `Skip=` is set, or the entry was skipped by validation (`No Section or LangSecRef...` / `...nothing to emit, skipping`) | Check the run log for the corresponding message |
 | `Duplicate EntryBuilder section [<name>] at <file> line <n> ignored; keeping the first definition, in <file>` | Two sections share a name (in any case), in one file or in two. Files are read in name order and only the first definition is used. The output is still written, but the run fails with exit code 1 | Merge the two sections, or rename one |
-| `Variable 'DeleteMe=' declared in [Entry] but never referenced...` | A key in the entry has no value. EntryBuilder can't see the name of an empty key, so it doesn't act on it: a bare `Skip=` doesn't skip, and an empty `WebViewScaffolds=` leaves the default set on | Give `Skip=` a value (`Skip=True`). To turn a family's scaffolds off, exclude its defaults (`ExcludeWebViewScaffolds=Caches,Telemetry`) |
+| `[Entry].X has no value; key dropped` | A key that needs a value, such as a root, a FileKey or a variable, was left empty | Fill in the value or delete the key |
 | Output is missing expected scaffold FileKeys | Scaffold directory not found (`Scaffold directory not found: <dir>...`), scaffold name misspelled (`Unknown WebView scaffold 'X'...`), or scaffold excluded by `Exclude*Scaffolds=` | Check the `Loaded N … scaffold(s)` line for each family, and the warnings |
 | A key holding `<WebViewRoot>` / `<QtWebEngineRoot>` / `<QtWebEngineCacheRoot>` / `<ElectronRoot>` / `<ElectronUpdaterRoot>` is missing from the output | The matching root key wasn't declared on the entry, which drops the key silently, or the placeholder was used in a `DetectFile`, where it is never substituted and drops as an undeclared token (a `Detect` keeps it literally) | Declare the root key, or write the path / a `<Variable>` directly in detection keys |
 | `... is now spelled <WebViewRoot>; key dropped` and exit code 1 | The key still uses a retired `%WebViewRoot%`-style spelling | Respell it as the message says (see [The retired `%WebViewRoot%` spelling](#the-retired-webviewroot-spelling)) |

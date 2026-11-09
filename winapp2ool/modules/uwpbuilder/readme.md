@@ -353,7 +353,7 @@ Each selected scaffold's templates are expanded once per declared root, with `<W
 |:-|:-|
 | No `WebViewScaffolds=` key | The default set: Caches, Telemetry |
 | `WebViewScaffolds=Name1,Name2` | Exactly the named scaffolds |
-| `WebViewScaffolds=` (present but empty) | The default set, the same as leaving the key out. To get no WebView keys, leave out `WebViewRoot=` |
+| `WebViewScaffolds=` (present but empty) | No WebView scaffolds |
 | `WebViewScaffolds=All` | Every scaffold in the catalog except the legacy tier, host-risk scaffolds included |
 | `WebViewScaffolds=All,LegacyTelemetry` | `All`, plus the named legacy scaffold |
 | `ExcludeWebViewScaffolds=Name1,Name2` | Taken out of whichever selection is active |
@@ -456,8 +456,9 @@ This isn't an ordinary validation warning. It means an AppInfo value or a scaffo
 
 | Message | Cause |
 |:-|:-|
-| "UWP.ini not found or empty in: {dir}" | The source directory has no readable `UWP.ini`. Nothing is generated |
-| "No app definitions found in: {dir}" | The `AppInfo\` subdirectory is missing or empty, or has no readable sections. Nothing is generated |
+| "UWP.ini not found or empty in: {dir}" | The source directory has no readable `UWP.ini`. Nothing is generated, and the run fails with exit code 1 |
+| "No app definitions found in: {dir}" | The `AppInfo\` subdirectory is missing or empty, or has no readable sections. Nothing is generated, and the run fails with exit code 1 |
+| "[{name}].{key} has no value; key dropped" | A key that needs a value was left empty. Only `Skip=`, `SkipUWPFileKeys=` and the scaffold lists mean something with no value |
 | "Duplicate AppInfo section [{name}] at {file} line {n} ignored; keeping the first definition, in {file}" | Two AppInfo sections share a name (in any case), in one file or in two. Files are read in name order, and only the first definition is used. The output is still written, but the run fails with exit code 1 |
 | "Unexpected section in template file: [{name}]" | `UWP.ini` has a section that isn't an `[EntryScaffold: ...]` |
 | "Unexpected key in scaffold [{name}]: {key}" | An `[EntryScaffold: ...]` section has a key other than `DetectFileBase=` or `FileKeyBase=` |
