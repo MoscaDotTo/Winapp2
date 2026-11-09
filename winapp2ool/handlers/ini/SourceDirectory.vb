@@ -28,7 +28,8 @@ Public Module SourceDirectory
     ''' Combines the top-level <c> *.ini </c> files in <paramref name="dir"/> into a single
     ''' in-memory <c> iniFile </c>, reading them in sorted path order. The first definition of a
     ''' section name (case-insensitive) wins. A repeat, in a later file or the same one, is
-    ''' dropped with a warning naming its file and line and the file whose definition is kept.
+    ''' dropped with a warning naming its file and line and the file whose definition is kept,
+    ''' and fails the run.
     ''' </summary>
     '''
     ''' <param name="dir">
@@ -72,6 +73,7 @@ Public Module SourceDirectory
                     Dim dupeMsg = $"Duplicate {sectionKind} section [{section.Name}] at {f.Name} line {section.StartingLineNumber} ignored; keeping the first definition, in {definedIn(section.Name)}"
                     gLog(dupeMsg)
                     menuOutput.AddWarning(dupeMsg)
+                    markRunFailed()
 
                 Else
 

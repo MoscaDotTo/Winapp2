@@ -52,8 +52,8 @@ Imports System.Text
 
     ''' <summary>
     ''' A section repeated in the same file or a later one is dropped with a warning naming the
-    ''' repeat's file and line and the file whose definition is kept. Files are read in name
-    ''' order, the first definition wins, names match in any case, and the run doesn't fail.
+    ''' repeat's file and line and the file whose definition is kept, and the run fails. Files
+    ''' are read in name order, the first definition wins, and names match in any case.
     ''' </summary>
     <TestMethod()> Public Sub Combine_WarnsAboutRepeatsAndKeepsTheFirst()
 
@@ -80,7 +80,7 @@ Imports System.Text
             End Using
 
             Dim allLog = String.Join("; ", log)
-            Assert.AreEqual(0, Environment.ExitCode, allLog)
+            Assert.AreEqual(1, Environment.ExitCode, allLog)
             Assert.AreEqual(2, combined.Count)
             Assert.AreEqual("A.First", combined.GetSection("Alpha *").Keys.GetKey("Package").Value)
 
@@ -88,6 +88,35 @@ Imports System.Text
             Assert.AreEqual(2, warnings.Count, allLog)
             Assert.IsTrue(warnings.Any(Function(w) w.Contains("[alpha *] at A.ini line 3") AndAlso w.EndsWith("in A.ini", StringComparison.Ordinal)), allLog)
             Assert.IsTrue(warnings.Any(Function(w) w.Contains("[Alpha *] at B.ini line 1") AndAlso w.EndsWith("in A.ini", StringComparison.Ordinal)), allLog)
+
+        Finally
+
+            Environment.ExitCode = savedExitCode
+            IO.Directory.Delete(dir, recursive:=True)
+
+        End Try
+
+    End Sub
+
+    ''' <summary>
+    ''' Files with no repeated names leave the exit code alone
+    ''' </summary>
+    <TestMethod()> Public Sub Combine_NoRepeats_DoesNotFail()
+
+        Dim dir = IO.Path.Combine(IO.Path.GetTempPath(), $"sourcedir-clean-{Guid.NewGuid():N}")
+        IO.Directory.CreateDirectory(dir)
+        Dim savedExitCode = Environment.ExitCode
+
+        Try
+
+            IO.File.WriteAllText(IO.Path.Combine(dir, "A.ini"), "[Alpha *]" & vbCrLf & "Package=A" & vbCrLf)
+            IO.File.WriteAllText(IO.Path.Combine(dir, "B.ini"), "[Beta *]" & vbCrLf & "Package=B" & vbCrLf)
+
+            Environment.ExitCode = 0
+            Dim combined = winapp2ool.SourceDirectory.Combine(dir, "EntryBuilder", New winapp2ool.MenuSection)
+
+            Assert.AreEqual(2, combined.Count)
+            Assert.AreEqual(0, Environment.ExitCode)
 
         Finally
 
