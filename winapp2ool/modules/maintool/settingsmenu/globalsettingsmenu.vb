@@ -69,7 +69,7 @@ Module globalsettingsmenu
                 Sub() toggleModuleSetting(NameOf(readSettingsFromDisk), NameOf(Winapp2ool), GetType(maintoolsettings), NameOf(readSettingsFromDisk), NameOf(toolSettingsHaveChanged))) _
             .AddDispatchedToggle("Beta Participation", "participating in the 'beta' builds of winapp2ool (requires a restart)", isBeta,
                 Sub()
-                    If denyActionWithHeader(DotNetFrameworkOutOfDate, "Winapp2ool beta requires .NET 4.6 or higher") Then Return
+                    If denyActionWithHeader(DotNetFrameworkOutOfDate, "Winapp2ool beta requires a newer version of the .NET Framework") Then Return
                     toggleModuleSetting(NameOf(isBeta), NameOf(Winapp2ool), GetType(maintoolsettings), NameOf(isBeta), NameOf(toolSettingsHaveChanged))
                     autoUpdate()
                 End Sub) _

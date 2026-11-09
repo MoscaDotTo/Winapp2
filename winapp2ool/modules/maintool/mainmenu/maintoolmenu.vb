@@ -111,7 +111,7 @@ Module maintoolmenu
             .AddDispatchedOption("Go online", "Retry your internet connection",
                 Sub()
                     chkOfflineMode()
-                    setNextMenuHeaderText("Winapp2ool was unable to establish a network connection. You are still in offline mode.", printColor:=ConsoleColor.Red)
+                    setNextMenuHeaderText("Winapp2ool was unable to establish a network connection. You are still in offline mode.", isOffline, ConsoleColor.Red)
                 End Sub, condition:=isOffline) _
             .OnText(AddressOf handleHiddenCommand)
 
