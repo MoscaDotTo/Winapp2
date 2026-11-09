@@ -103,6 +103,7 @@
     <Compile Include="UpdateTargetTests.vb" />
     <Compile Include="RetiredTokensTests.vb" />
     <Compile Include="UWPBuilderTests.vb" />
+    <Compile Include="SourceDirectoryTests.vb" />
     <Compile Include="VariableExpanderTests.vb" />
     <Compile Include="ScaffoldCatalogsTests.vb" />
     <Compile Include="ElevationHelperTests.vb" />

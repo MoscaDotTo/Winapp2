@@ -435,8 +435,11 @@ Public Module UWPBuilder
 
         End If
 
+        Dim output As New MenuSection
+        output.AddBoxWithText("Building UWP app entries")
+
         Dim appInfoDir = $"{sourceDir}\AppInfo"
-        Dim appsIni = combineAppInfoDir(appInfoDir)
+        Dim appsIni = SourceDirectory.Combine(appInfoDir, "AppInfo", output)
 
         If appsIni.Count = 0 Then
 
@@ -450,9 +453,6 @@ Public Module UWPBuilder
         ' from section headers, so a new family costs no new setting here. A missing directory
         ' or catalog warns and yields zero scaffold FileKeys rather than aborting the run.
         Dim scaffoldDir = UWPFile3.Dir
-
-        Dim output As New MenuSection
-        output.AddBoxWithText("Building UWP app entries")
 
         Using gLogScope("Building UWP app entries")
 
@@ -1304,41 +1304,6 @@ Public Module UWPBuilder
         gLog($"        {generatedMsg}")
 
         Return section
-
-    End Function
-
-    ''' <summary>
-    ''' Combines all <c> *.ini </c> files in <paramref name="appInfoDir"/> into a single
-    ''' in-memory <c> iniFile </c>. Files are processed in sorted order, top level only.
-    ''' A section whose name an earlier file already used is silently dropped (first file
-    ''' wins), and so is a repeated section within one file.
-    ''' </summary>
-    '''
-    ''' <param name="appInfoDir">
-    ''' Path to the <c> AppInfo\ </c> directory containing per-letter <c> *.ini </c> files
-    ''' </param>
-    '''
-    ''' <returns>
-    ''' The merged <c> iniFile </c>, or an empty one if the directory does not exist
-    ''' or contains no parseable sections
-    ''' </returns>
-    Private Function combineAppInfoDir(appInfoDir As String) As iniFile
-
-        Dim combined = iniFile.Empty("", "")
-
-        If Not Directory.Exists(appInfoDir) Then Return combined
-
-        Dim files = Directory.GetFiles(appInfoDir, "*.ini", SearchOption.TopDirectoryOnly).ToList()
-        files.Sort()
-
-        For Each filePath In files
-
-            Dim f = iniFile.FromFile(filePath)
-            For Each section In f : combined.AddSection(section) : Next
-
-        Next
-
-        Return combined
 
     End Function
 

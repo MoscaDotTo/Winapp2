@@ -172,6 +172,7 @@
     <Compile Include="handlers\ini\iniFile\iniKeyCollection\iniKeyCollection.vb" />
     <Compile Include="handlers\ini\iniFile\iniSection\iniSection.vb" />
     <Compile Include="handlers\ini\iniFile\iniFile.vb" />
+    <Compile Include="handlers\ini\SourceDirectory.vb" />
     <Compile Include="handlers\logger\logger.vb" />
     <Compile Include="handlers\menus\iniFileChooser\iniFileChooser.vb" />
     <Compile Include="handlers\menus\ConsoleWindow.vb" />

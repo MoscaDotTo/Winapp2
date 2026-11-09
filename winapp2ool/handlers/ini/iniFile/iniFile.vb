@@ -39,7 +39,7 @@ End Enum
 ''' <summary>
 ''' An object representing a parsed .ini file with O(1) section lookup. Section names are unique
 ''' (case-insensitive): when a file repeats a section, we keep the first and drop the later one
-''' along with its keys.
+''' along with its keys. The parser lists what it dropped in <see cref="DuplicateSections"/>.
 ''' </summary>
 Public Class iniFile
 
@@ -67,6 +67,18 @@ Public Class iniFile
     Private ReadOnly _ordered As New List(Of iniSection)
     Private ReadOnly _byName As New Dictionary(Of String, iniSection)(StringComparer.OrdinalIgnoreCase)
     Private ReadOnly _comments As New List(Of iniComment)
+    Private ReadOnly _duplicates As New List(Of iniSection)
+
+    ''' <summary>
+    ''' The sections the parser dropped because an earlier section in the file had the same name
+    ''' (case-insensitive), keys included, in file order. A repeat refused by a direct
+    ''' <see cref="AddSection"/> call isn't listed.
+    ''' </summary>
+    Public ReadOnly Property DuplicateSections As IReadOnlyList(Of iniSection)
+        Get
+            Return _duplicates
+        End Get
+    End Property
 
     ''' <summary>
     ''' All comment lines encountered during parsing, in the order they appeared in the file.
@@ -275,7 +287,8 @@ Public Class iniFile
     ''' <summary>
     ''' Reads <paramref name="r"/> line by line into sections, keys and comments. We skip blank
     ''' lines and drop any key that appears before the first section header. A repeated section
-    ''' header starts a section that <see cref="AddSection"/> refuses, so its keys are lost too.
+    ''' header starts a section that goes into <see cref="DuplicateSections"/> instead of the file,
+    ''' and its keys go with it.
     ''' </summary>
     Private Sub ParseStream(r As StreamReader)
 
@@ -293,7 +306,11 @@ Public Class iniFile
             ElseIf line.StartsWith("[", StringComparison.InvariantCulture) Then
                 Dim sectionName = line.TrimStart(CChar("[")).TrimEnd(CChar("]"))
                 currentSection = New iniSection(sectionName, lineNumber)
-                AddSection(currentSection)
+                If _byName.ContainsKey(sectionName) Then
+                    _duplicates.Add(currentSection)
+                Else
+                    AddSection(currentSection)
+                End If
             ElseIf currentSection IsNot Nothing Then
                 currentSection.AddKey(New iniKey(line, lineNumber))
             End If

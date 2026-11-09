@@ -773,8 +773,11 @@ Public Module EntryBuilder
 
         clrConsole()
 
+        Dim output As New MenuSection
+        output.AddBoxWithText("Building shorthand-DSL entries")
+
         Dim sourceDir = EntryBuilderFile1.Dir
-        Dim sourceIni = combineSourceDir(sourceDir)
+        Dim sourceIni = SourceDirectory.Combine(sourceDir, "EntryBuilder", output)
 
         If sourceIni.Count = 0 Then
 
@@ -784,9 +787,6 @@ Public Module EntryBuilder
         End If
 
         Dim scaffoldDir = EntryBuilderFile3.Dir
-
-        Dim output As New MenuSection
-        output.AddBoxWithText("Building shorthand-DSL entries")
 
         Using gLogScope("Building shorthand-DSL entries")
 
@@ -2190,40 +2190,5 @@ Public Module EntryBuilder
         gLog(splitMsg)
 
     End Sub
-
-    ''' <summary>
-    ''' Combines the top-level <c> *.ini </c> files in <paramref name="sourceDir"/> into a
-    ''' single in-memory <c> iniFile </c>, processed in sorted path order. A section whose
-    ''' name (case-insensitive) is already present is dropped without a warning, so the first
-    ''' file in that order wins. Returns an empty file if the directory does not exist or
-    ''' contains no parseable sections.
-    ''' </summary>
-    '''
-    ''' <param name="sourceDir">
-    ''' Path to the directory containing per-letter <c> *.ini </c> source files
-    ''' </param>
-    '''
-    ''' <returns>
-    ''' The merged <c> iniFile </c>, or an empty one if the directory is missing or empty
-    ''' </returns>
-    Private Function combineSourceDir(sourceDir As String) As iniFile
-
-        Dim combined = iniFile.Empty("", "")
-
-        If Not Directory.Exists(sourceDir) Then Return combined
-
-        Dim files = Directory.GetFiles(sourceDir, "*.ini", SearchOption.TopDirectoryOnly).ToList()
-        files.Sort()
-
-        For Each filePath In files
-
-            Dim f = iniFile.FromFile(filePath)
-            For Each section In f : combined.AddSection(section) : Next
-
-        Next
-
-        Return combined
-
-    End Function
 
 End Module
