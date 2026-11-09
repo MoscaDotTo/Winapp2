@@ -156,7 +156,7 @@ Public Module Combine
             outputMenu.AddLine(outputHeader, centered:=True)
             outputMenu.AddDivider()
 
-            Dim foundMsg = $"Found {allINIFiles.Count} files with ini extension in {targetDir}"
+            Dim foundMsg = $"Found {allINIFiles.Count} file{If(allINIFiles.Count = 1, "", "s")} with ini extension in {targetDir}"
             Using gLogScope(foundMsg)
                 outputMenu.AddLine(foundMsg)
 
@@ -175,7 +175,7 @@ Public Module Combine
 
                     Try
 
-                        attemptCombine(filePath, combinedOutput, validFileCount, outputMenu, sectionOrigins, collisions)
+                        attemptCombine(filePath, displayName(targetDir, filePath), combinedOutput, validFileCount, outputMenu, sectionOrigins, collisions)
 
                     Catch ex As Exception
 
@@ -187,13 +187,13 @@ Public Module Combine
 
                 Next
 
-                gLog($"Processed {processedCount} files, {validFileCount} contained combinable sections")
+                gLog($"Processed {processedCount} file{If(processedCount = 1, "", "s")}, {validFileCount} contained combinable sections")
 
                 Dim strictNamesViolated = CombineStrictNames AndAlso collisions.Count > 0
 
                 If collisions.Count > 0 Then
 
-                    Dim collisionMsg = $"{collisions.Count} section name(s) appeared in more than one input file:"
+                    Dim collisionMsg = $"{collisions.Count} section name{If(collisions.Count = 1, "", "s")} appeared in more than one input file:"
                     gLog(collisionMsg)
                     outputMenu.AddWarning(collisionMsg)
 
@@ -232,7 +232,7 @@ Public Module Combine
                 gLog(saveFailedMsg, cond:=shouldSave AndAlso Not outputWasSaved)
                 outputMenu.AddWarning(saveFailedMsg, condition:=shouldSave AndAlso Not outputWasSaved)
 
-                Dim combinedCountMsg = $"Combined {validFileCount} files into {combinedOutput.Name} with {combinedOutput.Count} sections"
+                Dim combinedCountMsg = $"Combined {validFileCount} file{If(validFileCount = 1, "", "s")} into {combinedOutput.Name} with {combinedOutput.Count} section{If(combinedOutput.Count = 1, "", "s")}"
                 gLog(combinedCountMsg, cond:=outputWasSaved)
                 outputMenu.AddBlank()
                 outputMenu.AddColoredLine(combinedCountMsg, ConsoleColor.Green, centered:=True, condition:=outputWasSaved)
@@ -292,6 +292,10 @@ Public Module Combine
     ''' The path of a particular ini file to be combined
     ''' </param>
     '''
+    ''' <param name="fileName">
+    ''' How we name <paramref name="filepath"/> in the output, from <see cref="displayName"/>
+    ''' </param>
+    '''
     ''' <param name="combinedOutput">
     ''' The output file into which <paramref name="filepath"/> will be combined
     ''' </param>
@@ -316,6 +320,7 @@ Public Module Combine
     ''' section of that name (a cross-file name collision)
     ''' </param>
     Private Sub attemptCombine(filepath As String,
+                               fileName As String,
                          ByRef combinedOutput As iniFile,
                          ByRef validFileCount As Integer,
                          ByRef outputMenu As MenuSection,
@@ -326,27 +331,55 @@ Public Module Combine
 
         If currentFile.Count = 0 Then
 
-            gLog($"Skipping file with no sections: {Path.GetFileName(filepath)}", buffr:=True)
+            gLog($"Skipping file with no sections: {fileName}", buffr:=True)
             Return
 
         End If
 
-        Dim processingMsg = $"Processing: {Path.GetFileName(filepath)} ({currentFile.Count} sections)"
+        Dim processingMsg = $"Processing: {fileName} ({currentFile.Count} section{If(currentFile.Count = 1, "", "s")})"
 
         Using gLogScope(processingMsg)
 
-            mergeFileIntoOutput(currentFile, combinedOutput, Path.GetFileName(filepath), sectionOrigins, collisions)
+            mergeFileIntoOutput(currentFile, combinedOutput, fileName, sectionOrigins, collisions)
 
             validFileCount += 1
 
 
         End Using
 
-        Dim processedMsg = $"Processed: {Path.GetFileName(filepath)} ({currentFile.Count} sections)"
+        Dim processedMsg = $"Processed: {fileName} ({currentFile.Count} section{If(currentFile.Count = 1, "", "s")})"
         gLog(processedMsg, buffr:=True)
         outputMenu.AddLine(processedMsg)
 
     End Sub
+
+    ''' <summary>
+    ''' Names a file found under <paramref name="targetDir"/> by its path relative to that
+    ''' directory, so <c> UWP\A.ini </c> and a top-level <c> A.ini </c> can be told apart in
+    ''' the output. A file outside <paramref name="targetDir"/> gets its file name alone.
+    ''' </summary>
+    '''
+    ''' <param name="targetDir">
+    ''' The directory being combined
+    ''' </param>
+    '''
+    ''' <param name="filePath">
+    ''' The path of a file <c> Directory.GetFiles </c> found under <paramref name="targetDir"/>
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' <paramref name="filePath"/> relative to <paramref name="targetDir"/>
+    ''' </returns>
+    Friend Function displayName(targetDir As String,
+                                filePath As String) As String
+
+        Dim root = targetDir.TrimEnd("\"c, "/"c) & "\"
+
+        If filePath.StartsWith(root, StringComparison.OrdinalIgnoreCase) Then Return filePath.Substring(root.Length)
+
+        Return Path.GetFileName(filePath)
+
+    End Function
 
     ''' <summary>
     ''' Updates the console with the current progress of the combination process while it runs. <br />
@@ -386,7 +419,8 @@ Public Module Combine
     ''' </param>
     '''
     ''' <param name="sourceFileName">
-    ''' The file name of <paramref name="sourceFile"/>, recorded in collision reports
+    ''' The name of <paramref name="sourceFile"/> from <see cref="displayName"/>, recorded in
+    ''' collision reports
     ''' </param>
     '''
     ''' <param name="sectionOrigins">
@@ -417,7 +451,7 @@ Public Module Combine
 
             combinedOutput.AddSection(sourceSection)
             sectionOrigins(sourceSection.Name) = sourceFileName
-            gLog($"Added new section: [{sourceSection.Name}] ({sourceSection.Keys.Count} keys)")
+            gLog($"Added new section: [{sourceSection.Name}] ({sourceSection.Keys.Count} key{If(sourceSection.Keys.Count = 1, "", "s")})")
 
         Next
 

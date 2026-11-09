@@ -85,6 +85,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BrowserBuilderTests.vb" />
+    <Compile Include="CombineTests.vb" />
     <Compile Include="DiffKeyComparisonTests.vb" />
     <Compile Include="DiffPipelineTests.vb" />
     <Compile Include="EntryBuilderTests.vb" />

@@ -72,7 +72,7 @@ winapp2ool -combine -1d C:\ini\case1\customs -3d C:\ini\case1 -3f custom.ini
  ╠════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
  ║ Found 2 files with ini extension in C:\ini\case1\customs                                                           ║
  ║ Processed: C.ini (2 sections)                                                                                      ║
- ║ Processed: O.ini (1 sections)                                                                                      ║
+ ║ Processed: O.ini (1 section)                                                                                       ║
  ║                                                                                                                    ║
  ║                                    Combined 2 files into custom.ini with 3 sections                                ║
  ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
@@ -144,8 +144,8 @@ winapp2ool -combine -1d C:\ini\case2\collection -3d C:\ini\case2\collection -3f 
 First run:
 ```
  ║ Found 2 files with ini extension in C:\ini\case2\collection                                                        ║
- ║ Processed: retired.ini (1 sections)                                                                                ║
- ║ Processed: current.ini (1 sections)                                                                                ║
+ ║ Processed: archive\retired.ini (1 section)                                                                         ║
+ ║ Processed: current.ini (1 section)                                                                                 ║
  ║                                                                                                                    ║
  ║                                   Combined 2 files into combined.ini with 2 sections                               ║
 ```
@@ -153,8 +153,8 @@ First run:
 Second run of the identical command:
 ```
  ║ Found 3 files with ini extension in C:\ini\case2\collection                                                        ║
- ║ Processed: retired.ini (1 sections)                                                                                ║
- ║ Processed: current.ini (1 sections)                                                                                ║
+ ║ Processed: archive\retired.ini (1 section)                                                                         ║
+ ║ Processed: current.ini (1 section)                                                                                 ║
  ║                                                                                                                    ║
  ║                                   Combined 2 files into combined.ini with 2 sections                               ║
 ```
@@ -173,7 +173,7 @@ FileKey1=%AppData%\foobar2000-v2\playlists-v2|*.bak
 ```
 
 **Explanation**
-- The `archive` subdirectory is searched without being asked for
+- The `archive` subdirectory is searched without being asked for, and its file is named by its path below the target directory, `archive\retired.ini`
 - `[Winamp Cache *]` comes *first* because files sort by full path, and `collection\archive\retired.ini` sorts before `collection\current.ini`
 - On the second run Combine finds `combined.ini` too (3 files), recognizes it as the output file and skips it
 - The log records the skip: `Output file found in target directory, skipping: C:\ini\case2\collection\combined.ini`
@@ -225,12 +225,12 @@ winapp2ool -combine -1d C:\ini\case3\customs -3d C:\ini\case3 -3f combined.ini
  ║                                        Combining files from C:\ini\case3\customs                                   ║
  ╠════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
  ║ Found 2 files with ini extension in C:\ini\case3\customs                                                           ║
- ║ Processed: my_customs.ini (1 sections)                                                                             ║
- ║ Processed: second_opinion.ini (1 sections)                                                                         ║
- ║                                1 section name(s) appeared in more than one input file:                             ║
- ║          [Obsidian Workspace Cache *] first defined in my_customs.ini, contributed again by second_opinion.ini     ║
+ ║ Processed: my_customs.ini (1 section)                                                                              ║
+ ║ Processed: second_opinion.ini (1 section)                                                                          ║
+ ║ 1 section name appeared in more than one input file:                                                               ║
+ ║   [Obsidian Workspace Cache *] first defined in my_customs.ini, contributed again by second_opinion.ini            ║
  ║                                                                                                                    ║
- ║                                   Combined 2 files into combined.ini with 1 sections                               ║
+ ║                                   Combined 2 files into combined.ini with 1 section                                ║
  ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 ```
 
@@ -259,15 +259,15 @@ The output now has two keys named `FileKey1`. [Example 8](#example-8-correcting-
 The Log Viewer shows the merge key by key:
 
 ```
-Processing: my_customs.ini (1 sections)
+Processing: my_customs.ini (1 section)
   Added new section: [Obsidian Workspace Cache *] (3 keys)
-Processed: my_customs.ini (1 sections)
-Processing: second_opinion.ini (1 sections)
+Processed: my_customs.ini (1 section)
+Processing: second_opinion.ini (1 section)
   Skipped duplicate key in [Obsidian Workspace Cache *]: Section
   Skipped duplicate key in [Obsidian Workspace Cache *]: detectfile
   Added FileKey1 to [Obsidian Workspace Cache *]
   Added FileKey2 to [Obsidian Workspace Cache *]
-Processed: second_opinion.ini (1 sections)
+Processed: second_opinion.ini (1 section)
 ```
 
 ---
@@ -307,12 +307,12 @@ winapp2ool -combine -1d C:\ini\case4\precedence -3d C:\ini\case4 -3f combined.in
 
 ```
  ║ Found 2 files with ini extension in C:\ini\case4\precedence                                                        ║
- ║ Processed: 1_overrides.ini (1 sections)                                                                            ║
- ║ Processed: handbrake.ini (1 sections)                                                                              ║
- ║                                1 section name(s) appeared in more than one input file:                             ║
- ║             [HandBrake Activity Logs *] first defined in 1_overrides.ini, contributed again by handbrake.ini       ║
+ ║ Processed: 1_overrides.ini (1 section)                                                                             ║
+ ║ Processed: handbrake.ini (1 section)                                                                               ║
+ ║ 1 section name appeared in more than one input file:                                                               ║
+ ║   [HandBrake Activity Logs *] first defined in 1_overrides.ini, contributed again by handbrake.ini                 ║
  ║                                                                                                                    ║
- ║                                   Combined 2 files into combined.ini with 1 sections                               ║
+ ║                                   Combined 2 files into combined.ini with 1 section                                ║
 ```
 
 ###### **Output file (`combined.ini`)**
@@ -355,7 +355,7 @@ winapp2ool -combine -strict -1d C:\ini\case1\customs -3d C:\ini\case1 -3f custom
  ╠════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
  ║ Found 2 files with ini extension in C:\ini\case1\customs                                                           ║
  ║ Processed: C.ini (2 sections)                                                                                      ║
- ║ Processed: O.ini (1 sections)                                                                                      ║
+ ║ Processed: O.ini (1 section)                                                                                       ║
  ║                                                                                                                    ║
  ║                                    Combined 2 files into custom.ini with 3 sections                                ║
  ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
@@ -436,12 +436,12 @@ winapp2ool -combine -strict -1d C:\ini\case6\Entries -3d C:\ini\case6 -3f Winapp
  ╠════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
  ║ Found 3 files with ini extension in C:\ini\case6\Entries                                                           ║
  ║ Processed: A.ini (2 sections)                                                                                      ║
- ║ Processed: browsers.ini (2 sections)                                                                               ║
- ║ Processed: uwp.ini (2 sections)                                                                                    ║
- ║                                2 section name(s) appeared in more than one input file:                             ║
- ║                  [Anki Media Cache *] first defined in A.ini, contributed again by browsers.ini, uwp.ini           ║
- ║                       [Audacity Temp Files *] first defined in A.ini, contributed again by uwp.ini                 ║
- ║                            Strict name checking is enabled - Winapp2.ini will not be saved                         ║
+ ║ Processed: Browsers\browsers.ini (2 sections)                                                                      ║
+ ║ Processed: UWP\uwp.ini (2 sections)                                                                                ║
+ ║ 2 section names appeared in more than one input file:                                                              ║
+ ║   [Anki Media Cache *] first defined in A.ini, contributed again by Browsers\browsers.ini, UWP\uwp.ini             ║
+ ║   [Audacity Temp Files *] first defined in A.ini, contributed again by UWP\uwp.ini                                 ║
+ ║ Strict name checking is enabled - Winapp2.ini will not be saved                                                    ║
  ║                                                                                                                    ║
  ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 ```
@@ -513,8 +513,8 @@ winapp2ool -transmute -add -1d C:\ini\case7\base -1f winapp2.ini -2d C:\ini\case
 Step 1, Combine:
 ```
  ║ Found 2 files with ini extension in C:\ini\case7\customs                                                           ║
- ║ Processed: handbrake_extra.ini (1 sections)                                                                        ║
- ║ Processed: obsidian.ini (1 sections)                                                                               ║
+ ║ Processed: handbrake_extra.ini (1 section)                                                                         ║
+ ║ Processed: obsidian.ini (1 section)                                                                                ║
  ║                                                                                                                    ║
  ║                                    Combined 2 files into custom.ini with 2 sections                                ║
 ```
@@ -666,7 +666,7 @@ winapp2ool -s -offline -combine -strict -1d \Entries -3f Winapp2.ini
  ║ Processed: #.ini (37 sections)                                                                                     ║
  ║ Processed: A.ini (365 sections)                                                                                    ║
  ║ Processed: B.ini (72 sections)                                                                                     ║
- ║ Processed: browsers.ini (1240 sections)                                                                            ║
+ ║ Processed: Browsers\browsers.ini (1240 sections)                                                                   ║
  ║ Processed: C.ini (165 sections)                                                                                    ║
  ║ Processed: D.ini (148 sections)                                                                                    ║
  ║ Processed: E.ini (87 sections)                                                                                     ║
@@ -686,7 +686,7 @@ winapp2ool -s -offline -combine -strict -1d \Entries -3f Winapp2.ini
  ║ Processed: S.ini (252 sections)                                                                                    ║
  ║ Processed: T.ini (127 sections)                                                                                    ║
  ║ Processed: U.ini (29 sections)                                                                                     ║
- ║ Processed: uwp.ini (187 sections)                                                                                  ║
+ ║ Processed: UWP\uwp.ini (187 sections)                                                                              ║
  ║ Processed: V.ini (51 sections)                                                                                     ║
  ║ Processed: W.ini (143 sections)                                                                                    ║
  ║ Processed: X.ini (22 sections)                                                                                     ║
@@ -759,11 +759,11 @@ winapp2ool -combine -1d C:\ini\case10\sources -3d C:\ini\case10 -3f combined.ini
  ║                                       Combining files from C:\ini\case10\sources                                   ║
  ╠════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
  ║ Found 3 files with ini extension in C:\ini\case10\sources                                                          ║
- ║ Processed: b_good.ini (1 sections)                                                                                 ║
- ║                                Error processing file: C:\ini\case10\sources\c_locked.ini                           ║
- ║                      Check the winapp2ool log for more information: C:\ini\case10\winapp2ool.log                   ║
+ ║ Processed: b_good.ini (1 section)                                                                                  ║
+ ║ Error processing file: C:\ini\case10\sources\c_locked.ini                                                          ║
+ ║ Check the winapp2ool log for more information: C:\ini\case10\winapp2ool.log                                        ║
  ║                                                                                                                    ║
- ║                                   Combined 1 files into combined.ini with 1 sections                               ║
+ ║                                   Combined 1 file into combined.ini with 1 section                                 ║
  ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 ```
 
@@ -786,6 +786,6 @@ FileKey1=%AppData%\Anki2\*\media.trash|*|REMOVESELF
 A directory where no file has a section produces no output file at all:
 
 ```
- ║ Found 1 files with ini extension in C:\ini\case10\nosections                                                       ║
- ║                        No valid sections found to combine - empty-result.ini will not be saved                     ║
+ ║ Found 1 file with ini extension in C:\ini\case10\nosections                                                        ║
+ ║ No valid sections found to combine - empty-result.ini will not be saved                                            ║
 ```

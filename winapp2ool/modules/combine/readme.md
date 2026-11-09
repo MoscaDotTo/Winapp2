@@ -120,7 +120,7 @@ Command line runs always start from Combine's default settings, whatever you've 
 
 ## File Discovery
 
-Combine searches the target directory and all of its subdirectories for files with the `.ini` extension, then sorts them alphabetically by full path. Because the whole path is compared, a file in a subdirectory can sort ahead of a file in the target directory itself (see [Example 2](EXAMPLES.md#example-2-subdirectories-and-repeated-runs)).
+Combine searches the target directory and all of its subdirectories for files with the `.ini` extension, then sorts them alphabetically by full path. Because the whole path is compared, a file in a subdirectory can sort ahead of a file in the target directory itself (see [Example 2](EXAMPLES.md#example-2-subdirectories-and-repeated-runs)). Messages name each file by its path below the target directory (`A.ini`, `UWP\A.ini`), so two files with the same name in different folders are never confused.
 
 If the output file lives inside the target directory, Combine skips it. It still counts toward `Found N files`, but it contributes nothing and isn't counted in the run statistics.
 
@@ -141,9 +141,9 @@ The merged section ends up with every distinct key from every file that defined 
 Whenever a section name appears in more than one input file, Combine lists it on screen and in the log:
 
 ```
- ║                                2 section name(s) appeared in more than one input file:                             ║
- ║                  [Anki Media Cache *] first defined in A.ini, contributed again by browsers.ini, uwp.ini           ║
- ║                       [Audacity Temp Files *] first defined in A.ini, contributed again by uwp.ini                 ║
+ ║ 2 section names appeared in more than one input file:                                                              ║
+ ║   [Anki Media Cache *] first defined in A.ini, contributed again by Browsers\browsers.ini, UWP\uwp.ini             ║
+ ║   [Audacity Temp Files *] first defined in A.ini, contributed again by UWP\uwp.ini                                 ║
 ```
 
 Names are compared ignoring case, so `[Foo *]` and `[foo *]` collide. Without strict checking this report is informational. Whether a collision is a problem depends on whether your files were meant to overlap.
@@ -179,7 +179,7 @@ Each run prints a summary:
  ╠════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
  ║ Found 2 files with ini extension in C:\ini\case1\customs                                                           ║
  ║ Processed: C.ini (2 sections)                                                                                      ║
- ║ Processed: O.ini (1 sections)                                                                                      ║
+ ║ Processed: O.ini (1 section)                                                                                       ║
  ║                                                                                                                    ║
  ║                                    Combined 2 files into custom.ini with 3 sections                                ║
  ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
@@ -198,7 +198,7 @@ The **Log Viewer** menu option shows the run's part of the winapp2ool log, which
 | `Skipped duplicate key in [{section}]: {key}` | A key matched an existing key's name and value and was left out |
 | `Skipping file with no sections: {file}` | A file was found but had no sections |
 | `Output file found in target directory, skipping: {path}` | The output file lives inside the target directory and was left out |
-| `N section name(s) appeared in more than one input file:` | Followed by one line per colliding name |
+| `N section names appeared in more than one input file:` | Followed by one line per colliding name |
 | `Strict name checking is enabled - {file} will not be saved` | A strict run found at least one collision |
 | `Processed N files, M contained combinable sections` | Run statistics. `N` leaves out the skipped output file; `M` leaves out files with no sections |
 | `Saving {file}` | The output was written to disk |
@@ -230,7 +230,7 @@ After a run, the Log Viewer shows which files were processed, which sections and
 | Message / Symptom | Cause |
 |:-|:-|
 | "Target directory not found. Please select a valid directory." | The target directory doesn't exist. Shown in red above the menu; the run does nothing |
-| "N section name(s) appeared in more than one input file:" | Normal output. It only matters if your inputs were supposed to be disjoint |
+| "N section names appeared in more than one input file:" | Normal output. It only matters if your inputs were supposed to be disjoint |
 | "Strict name checking is enabled - {file} will not be saved" | A strict run found a collision. Nothing was written and the exit code is 1 |
 | "No valid sections found to combine - {file} will not be saved" | No file in the target directory had a section Combine could read, or there were no `.ini` files at all (`Found 0 files...`), so there's no output file |
 | "Error processing file: {path}" followed by "Check the winapp2ool log for more information: {path}" | Combine couldn't read that file, often because another program had it open. The other files are still combined and the output is saved, but the exit code is 1, and the global log is saved to disk straight away |
