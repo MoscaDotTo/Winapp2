@@ -458,7 +458,7 @@ This isn't an ordinary validation warning. It means an AppInfo value or a scaffo
 |:-|:-|
 | "UWP.ini not found or empty in: {dir}" | The source directory has no readable `UWP.ini`. Nothing is generated |
 | "No app definitions found in: {dir}" | The `AppInfo\` subdirectory is missing or empty, or has no readable sections. Nothing is generated |
-| "Duplicate AppInfo section [{name}] at {file} line {n} ignored; keeping the first definition, in {file}" | Two AppInfo sections share a name (in any case), in one file or in two. Files are read in name order, and only the first definition is used |
+| "Duplicate AppInfo section [{name}] at {file} line {n} ignored; keeping the first definition, in {file}" | Two AppInfo sections share a name (in any case), in one file or in two. Files are read in name order, and only the first definition is used. The output is still written, but the run fails with exit code 1 |
 | "Unexpected section in template file: [{name}]" | `UWP.ini` has a section that isn't an `[EntryScaffold: ...]` |
 | "Unexpected key in scaffold [{name}]: {key}" | An `[EntryScaffold: ...]` section has a key other than `DetectFileBase=` or `FileKeyBase=` |
 | "`%Package%` in [{name}].{key} is now spelled `<Package>`; key dropped" | The key uses a [retired spelling](#the-retired-package-and-webviewroot-spellings), and the run fails with exit code 1. A shared catalog template reports `; template dropped` instead |
