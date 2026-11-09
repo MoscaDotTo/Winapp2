@@ -247,6 +247,13 @@ Any other key name declares a [variable](#variables), so an unfamiliar key is ne
 
 The scaffold's `DetectFileBase=` already detects every package, so an entry never needs its own `DetectFile=<Package>`.
 
+### The retired `%Package%` and `%WebViewRoot%` spellings
+
+Older versions spelled these `%Package%`, `%Package1%`, `%Package2%` and so on, and the [root placeholders](#root-placeholders-in-appinfo-keys) `%WebViewRoot%`, `%QtWebEngineRoot%`, `%QtWebEngineCacheRoot%`, `%ElectronRoot%` and `%ElectronUpdaterRoot%`. UWPBuilder drops a key still written that way, including one missing its closing `%` (`%Package\LocalCache`, `%ElectronRoot\logs`), warns with the new spelling, and fails the run with exit code 1:
+
+```
+`%WebViewRoot%` in [Test App *].FileKeyBase is now spelled `<WebViewRoot>`; key dropped
+```
 
 `Package=` and `Warning=` values aren't checked. The shared scaffold catalogs refuse the same spellings when they load: a catalog template holding one is dropped (`...; template dropped`) and the run fails.
 
