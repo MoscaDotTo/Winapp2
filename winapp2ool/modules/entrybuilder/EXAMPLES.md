@@ -23,15 +23,15 @@ Worked examples for [EntryBuilder](readme.md). The [Common Uses](readme.md#commo
 
 ---
 
-The production source files these examples are drawn from live in [`Assembler/EntryBuilder`](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/EntryBuilder) in the main repo. Every example follows the same recipe: put the source snippet in a `.ini` file (the production letter file is named per example), run
+Most of these examples are simplified versions of entries in [`Assembler/EntryBuilder`](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/EntryBuilder), and a few apps are made up. Each one works the same way: put the source snippet in an `.ini` file (each example names the letter file it would live in), run
 
 ```
 winapp2ool -entrybuilder -1d <folder containing the source file>
 ```
 
-and read the generated `entrybuilder.ini` in the current directory. The scaffold examples (8–10) additionally need the shared catalogs reachable; their full commands are shown inline.
+and open `entrybuilder.ini` in the current directory. The scaffold examples (8 to 12) also need `-3d` pointing at the shared catalogs, as the commands in Examples 8 to 11 show.
 
-###### Note: The outputs below are shown as EntryBuilder generates them, before WinappDebug's normalization pass alphabetizes key numbering within each family, and without the generated file header. The *key set* is exactly as shown. Long fan-outs are truncated with `; ...` comments.
+###### Note: These outputs show the keys as EntryBuilder generates them, before WinappDebug's normalization pass sorts and renumbers each key family, and without the file header. The set of keys is exactly what you'll get. Long fan-outs are cut short with `; ...` comments.
 
 ## Pass-Through and Variables
 
@@ -43,7 +43,7 @@ A simple game with one log file. The entry is already plain winapp2 syntax; the 
 
 **Intent**
 
-We want the standard entry, with the path declared once. We deliberately name the variable `DiskRoot` (*not* `Root`) because we're declaring detection by hand and don't want the [reserved-`Root` inference](readme.md#the-reserved-root-variable) involved (here it would be harmless, but the naming choice should be deliberate).
+We want the standard entry with the path written once. We name the variable `DiskRoot`, *not* `Root`, because we're writing detection by hand and don't need [reserved-`Root` inference](readme.md#the-reserved-root-variable). Here it would do no harm, but pick the name on purpose.
 
 **Files**
 
@@ -76,7 +76,7 @@ FileKey1=%AppData%\PoBros\Annies Millions|logfile.txt
 
 **Explanation**
 
-- `DiskRoot=` is not a recognised key, so it becomes a single-value variable
+- `DiskRoot=` isn't a key EntryBuilder knows, so it becomes a single-value variable
 - `<DiskRoot>` expands in both keys; a single-value variable produces no fan-out
 - The un-numbered `FileKey=` is renumbered to `FileKey1`; the single `DetectFile` stays bare
 - `DiskRoot=` itself is consumed and does not appear in the output
@@ -91,7 +91,7 @@ Most entries anchor both their detection and their cleaning targets on one path.
 
 **Intent**
 
-We want a complete entry for a utility whose data lives under one folder, without writing any detection key.
+We want a complete entry for a game whose logs live under its install folder, without writing a detection key.
 
 **Files**
 
@@ -130,7 +130,7 @@ The log records the inference: `[A Hat in Time *] inferred DetectFile=<Root>`. I
 
 **Context**
 
-Microsoft Office entries span many historical versions, each with its own registry node. Hand-writing them means dozens of near-identical lines that must all be touched when a version is added.
+Microsoft Office entries cover many old versions, each with its own registry key. Written by hand, that's dozens of nearly identical lines, and every one of them needs touching when a version comes out.
 
 **Intent**
 
@@ -172,11 +172,11 @@ RegKey21=HKCU\Software\Microsoft\Office\16.0\Outlook\Office Finder|3
 - `Detect` references one 7-value variable → 7 keys, numbered `Detect1`–`Detect7`
 - `RegKeyBase` references two variables → 7 × 3 = 21 keys; the leftmost reference (`<Versions>`) varies slowest
 - `<RegRoot>` is single-valued, so it abbreviates without multiplying
-- Adding Office vNext is a one-token edit to `Versions=`: both key families grow automatically
+- Supporting the next Office version means adding one item to `Versions=`, and both key families grow with it
 
 **Notes**
 
-WinappDebug's alphabetization is number-aware: digit runs compare by numeric value, so `..\10.0` sorts after `..\9.0` and the ascending version order shown here survives normalization unchanged. The pre-normalization caveat above bites only when declaration order differs from sort order - [Example 4](#example-4-co-variance-of-repeated-variables)'s `Stable,Beta` keys, for instance, come back renumbered with `Beta` first.
+WinappDebug sorts numbers by value, so `..\10.0` comes after `..\9.0` and the version order shown here survives normalization. The note at the top about pre-normalization output only matters when declaration order differs from sort order. [Example 4](#example-4-co-variance-of-repeated-variables)'s `Stable,Beta` keys, for instance, come back renumbered with `Beta` first.
 
 ---
 
@@ -184,7 +184,7 @@ WinappDebug's alphabetization is number-aware: digit runs compare by numeric val
 
 **Context**
 
-Some applications embed the same version number twice in one path: once as a folder name, once inside a file name. Those two positions must always agree - version 1.0's folder never contains version 2.0's log.
+Some applications put the same version number in a path twice, once as a folder name and once inside a file name. The two always agree: version 1.0's folder never holds version 2.0's log.
 
 **Intent**
 
@@ -222,8 +222,8 @@ FileKey6=%AppData%\Hazel Vault\2.0|app-2.0.log
 **Explanation**
 
 - The first `FileKeyBase` references two *different* multi-value variables, so they cross-multiply: 2 × 2 = 4 keys (`<Root>` is single-valued and just abbreviates)
-- The second `FileKeyBase` references `<Versions>` *twice*, so the occurrences co-vary: 2 keys, not 4. Both occurrences bind to the same value in each output key - there is no `\1.0|app-2.0.log`
-- Co-variance is automatic for repeated *declared* variables. A repeated identical *inline* list also co-varies, but logs an advisory because an anonymous list can't state that intent (see [Inline Lists](readme.md#inline-lists))
+- The second `FileKeyBase` references `<Versions>` *twice*, so the two uses co-vary: 2 keys, not 4. Both take the same value in each output key, so there's no `\1.0|app-2.0.log`
+- A repeated *declared* variable always co-varies. The same *inline* list repeated in one key does too, but logs an advisory (see [Inline Lists](readme.md#inline-lists))
 
 ---
 
@@ -231,11 +231,11 @@ FileKey6=%AppData%\Hazel Vault\2.0|app-2.0.log
 
 **Context**
 
-7-Zip keeps an archive-history value under two sibling registry keys. Declaring a named variable for a two-item list used once is ceremony without benefit.
+7-Zip keeps an archive history value under two sibling registry keys. A named variable for a two-item list we use once is more typing than it's worth.
 
 **Intent**
 
-We want one `RegKey` per sibling key, from a single line, and a free detection anchor while we're at it.
+We want one `RegKey` per sibling key from a single line, and we'll take detection for free while we're at it.
 
 **Files**
 
@@ -260,9 +260,9 @@ RegKey2=HKCU\Software\7-Zip\Extraction|ArcHistory
 
 **Explanation**
 
-- `<Compression,Extraction>` contains a comma, so it is an inline list: an anonymous two-value axis needing no declaration
-- `Root=` is a registry-hive value here, so the inferred detection is a `Detect`, not a `DetectFile`
-- Repeating the *same* inline list twice in one key makes the occurrences co-vary and logs an advisory. Declare a named variable when co-variance (or independence) needs to be explicit
+- `<Compression,Extraction>` has a comma in it, so it's an inline list: two values, no declaration needed
+- `Root=` starts with a registry hive here, so the inferred detection is a `Detect`, not a `DetectFile`
+- Writing the *same* inline list twice in one key makes the two copies co-vary and logs an advisory. Declare a named variable when you want to say outright whether they co-vary
 
 ---
 
@@ -306,7 +306,7 @@ RegKey3=HKCU\Software\ESRI\Desktop10.1\ArcMap\Recent File List
 **Explanation**
 
 - `ArcMapKey`'s value list contains `<Versions>`, so it resolves first: the 2-value `Versions` expands the second list item, yielding the 3-value list `(ArcMap, Desktop10.0\ArcMap, Desktop10.1\ArcMap)`
-- `Detect` and `RegKeyBase` then fan across the fully-literal 3-value list
+- `Detect` and `RegKeyBase` then fan out across those three plain values
 - A cycle (`A` referencing `B` referencing `A`) would leave both variables as authored, with a warning naming the participants
 
 ---
@@ -319,7 +319,7 @@ Unlike file paths, registry key and value names may legitimately contain `<` and
 
 **Intent**
 
-We want to target a registry value literally named `<default>` and understand why EntryBuilder lets this through instead of treating it as a broken variable reference.
+We want to clean a registry value named `<default>`, and to see why EntryBuilder lets it through instead of treating it as a broken variable reference.
 
 **Files**
 
@@ -362,11 +362,11 @@ This is why the unreferenced-variable backstop matters: if you declare `Versions
 
 **Context**
 
-Discord is one of dozens of Electron/WebView apps whose embedded Chromium leaves the same cache and telemetry residue. The shared catalog exists so none of those patterns are written per-app.
+Every app that embeds Chromium leaves the same cache and telemetry files behind, and the shared catalog holds those patterns so no entry has to. We'll use Discord's data folder to show the WebView catalog. Discord is really an Electron app, so a real entry would use `ElectronRoot=` instead, as in [Example 11](#example-11-an-electron-app-with-an-updater-cache).
 
 **Intent**
 
-We want baseline cache and telemetry cleaning for Discord's Chromium data folder, from a four-line definition.
+We want baseline cache and telemetry cleaning for Discord's Chromium data folder from a four-line definition.
 
 **Files**
 
@@ -409,10 +409,10 @@ FileKey26=%AppData%\discord\OriginTrials|*|REMOVESELF
 
 **Explanation**
 
-- No `WebViewScaffolds=` key is present, so the default set applies: `Caches` + `Telemetry`
-- Every `FileKeyBase=` template in each selected catalog scaffold is copied in with `<WebViewRoot>` replaced by `%AppData%\discord`
+- There's no `WebViewScaffolds=` key, so the default set applies: `Caches` and `Telemetry`
+- Every `FileKeyBase=` template in each selected scaffold is copied in with `<WebViewRoot>` replaced by `%AppData%\discord`
 - The lint pass merged templates that share a path: FileKey2 and FileKey3 each combine a Caches pattern list with a Telemetry one
-- The exact keys (and their count, 26 here) track the catalog: when the catalog gains a pattern, every entry that selects that scaffold gains the key on the next build, with no source edits
+- The keys, and their count (26 here), follow the catalog. When the catalog gains a pattern, every entry that selects the scaffold gets it on the next build without a source edit
 
 **Notes**
 
@@ -424,7 +424,7 @@ A second `WebViewRoot=` line would double the scaffold output: one full set per 
 
 **Context**
 
-Adobe Photoshop's embedded WebView is used for plugin UI; nearly all of its browsing-type residue is safe to remove, but wiping web storage and saved logins would break plugin state users care about.
+Adobe Photoshop's embedded WebView draws plugin UI. Most of what it leaves behind is safe to remove, but clearing its web storage and saved logins would lose plugin state people care about.
 
 **Intent**
 
@@ -475,9 +475,9 @@ FileKey56=%AppData%\Adobe\UXP\PluginsStorage\PHSP\26\Shared\EBWebView\ZxcvbnData
 
 **Explanation**
 
-- `All` expands to every scaffold outside the legacy tier and the log records it: `WebViewScaffolds=All in [Adobe Photoshop *]; expanded to 17 scaffold(s) from catalog, 8 legacy withheld`
+- `All` expands to every scaffold outside the legacy tier, and the log records it: `WebViewScaffolds=All in [Adobe Photoshop *]; expanded to 17 scaffold(s) from catalog, 8 legacy withheld`
 - The two exclusions subtract from that expansion, leaving 15 scaffolds that produce 55 FileKeys after the lint pass merges same-path templates. That includes the host-risk sets `All` deliberately opts into: `WebCookies` (the `Cookies*;Device Bound Sessions*` patterns merged into FileKey20), `WebHistory` (the `History*` through `Visited Links*` patterns merged into FileKey4), and `WebSession` (FileKey15 and FileKey27)
-- `All` + `Exclude...` is the sanctioned idiom and does not warn; an explicit non-`All` list combined with exclusions does
+- `All` with `Exclude...` is the intended way to write this and doesn't warn. An explicit list other than `All` with exclusions does
 - The hand-written `FileKey=` goes through the same normalization as the scaffold keys, so it sorts to FileKey1
 - A legacy scaffold would have to be named to be included, e.g. `WebViewScaffolds=All,LegacyTelemetry`
 
@@ -548,7 +548,7 @@ FileKey22=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\viewer-lookup\Sha
 
 - One `QtWebEngineRoot=` line produced three roots. Root substitution happens before token expansion, so the `<Default,OffTheRecord,viewer-lookup>` inline list inside the root value fans out normally and `<QtRoot>` resolves in the same pass
 - Each root got keys for all the default scaffolds (`Caches`, `StorageQuota`, `Telemetry`, `VisitedLinks`)
-- FileKey3, 10 and 17 are each the merged product of two scaffolds, this is caused by the optimization pass through WinappDebug
+- FileKey3, 10 and 17 each hold two scaffolds' patterns, merged by WinappDebug's optimization pass
 - The `<QtWebEngineCacheRoot>` template in `Caches` was dropped, since the entry declares no `QtWebEngineCacheRoot=`; calibre's own cache is covered by the hand-written FileKey1 instead
 - `Favicons`, `PrivacySandbox`, `Security` and the host-risk `WebCookies`, `WebHistory`, `WebSession`, `WebStorage` would require `QtWebEngineScaffolds=All` or an explicit list. The legacy `LegacyTelemetry` and `LegacyWebStorage` must be named even beside `All`
 
@@ -562,7 +562,7 @@ Signal Desktop is a typical Electron app: its `userData` folder is `%AppData%\Si
 
 **Intent**
 
-Take the default Electron scaffolds for both the app data and the updater cache, and add one app-specific target the catalog does not cover.
+We want the default Electron scaffolds for both the app data and the updater cache, plus one target of Signal's own that the catalog doesn't cover.
 
 **Files**
 
@@ -615,8 +615,8 @@ FileKey18=%LocalAppData%\Signal-Desktop-Updater\pending|*|REMOVESELF
 
 - Five source lines produced eighteen FileKeys, from the default set `AppLogs`, `Caches`, `StorageQuota`, `Telemetry`, `UpdaterCache`
 - FileKey1 is the merged product of several scaffolds' root-level pattern lists
-- FileKey17 and 18 came from `<ElectronUpdaterRoot>`. Had `ElectronUpdaterRoot=` been omitted, those two templates would not be generated
-- The placeholder in `FileKeyBase=` is `<ElectronRoot>`. The old `%ElectronRoot%` spelling is refused and fails the run
+- FileKey17 and 18 came from `<ElectronUpdaterRoot>`. Without `ElectronUpdaterRoot=`, those two templates would have been dropped
+- The placeholder in `FileKeyBase=` is `<ElectronRoot>`. EntryBuilder refuses the old `%ElectronRoot%` spelling and fails the run
 
 ---
 
@@ -624,11 +624,11 @@ FileKey18=%LocalAppData%\Signal-Desktop-Updater\pending|*|REMOVESELF
 
 **Context**
 
-Notion uses partitions, so alongside its own profile it keeps a full Chromium profile per partition under `%AppData%\Notion\partitions\`. Each of those is a complete profile, and we want to ensure they're all cleaned.
+Notion uses session partitions, so alongside its own profile it keeps a complete Chromium profile for each partition under `%AppData%\Notion\partitions\`, and every one of them needs cleaning.
 
 **Intent**
 
-Apply cache and log cleaning to the main profile and every partition.
+We want cache and log cleaning for the main profile and every partition.
 
 **Files**
 
@@ -674,7 +674,7 @@ FileKey20=%LocalAppData%\notion-updater\pending|*|REMOVESELF
 
 **Explanation**
 
-- Two numbered root keys each expanded against the selected scaffolds
+- Each of the two numbered root keys got its own copy of the selected scaffolds
 - `DetectFile=%AppData%\Notion` was inferred from the reserved `Root` variable (see [The Reserved Root Variable](readme.md#the-reserved-root-variable)); `ElectronRoot1=<Root>` reuses it so the path appears once in the source
 - `UpdaterCache` had to be named explicitly because `ElectronScaffolds=` replaces the default set rather than adding to it
 
@@ -686,7 +686,7 @@ FileKey20=%LocalAppData%\notion-updater\pending|*|REMOVESELF
 
 **Context**
 
-An application is discontinued, but deleting its definition would lose the research embedded in it should the app return or a fork appear.
+An application is discontinued, but deleting its definition would throw away the research in it, and the app might come back or get forked.
 
 **Intent**
 
@@ -698,7 +698,7 @@ We want the entry omitted from the output while keeping its definition in source
 
 ```ini
 [Discontinued App *]
-Skip=
+Skip=True
 WebViewRoot=%AppData%\DiscontinuedApp
 LangSecRef=3023
 DetectFile=%AppData%\DiscontinuedApp
@@ -710,5 +710,5 @@ The entry does not appear in `entrybuilder.ini`. Re-enabling it later is a one-l
 
 **Explanation**
 
-- `Skip=` omits the entry regardless of its value: even `Skip=False` skips (see [Skip](readme.md#skip))
-- Skipped entries are counted in the run statistics, so a `Skip=` never disappears unaccounted
+- `Skip=` leaves the entry out whatever its value, so even `Skip=False` skips. The value can't be empty, though: a bare `Skip=` does nothing (see [Skip](readme.md#skip))
+- The run statistics count skipped entries, so a skipped entry still shows up in the totals
