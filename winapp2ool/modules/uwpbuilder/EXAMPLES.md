@@ -1,6 +1,6 @@
 # UWPBuilder Examples
 
-Worked examples for [UWPBuilder](readme.md). The [Common Uses](readme.md#common-uses) table in the readme lists the commands; these show what each one does, with real input and output.
+Worked examples for [UWPBuilder](readme.md), each with real input and output. The [Common Uses](readme.md#common-uses) table in the readme lists the commands.
 
 # Table of Contents
 
@@ -15,23 +15,23 @@ Worked examples for [UWPBuilder](readme.md). The [Common Uses](readme.md#common-
 
 ---
 
-All examples below were generated with real runs of UWPBuilder against the scaffold template and catalogs shipped in `Assembler/`. The source files shown are AppInfo sections; the command for every example is the standard invocation:
+Every example below is a real run of UWPBuilder against the scaffold template and catalogs in `Assembler/`. Each shows an AppInfo section and what UWPBuilder made from it, and they all use the same command:
 
 ```
 winapp2ool -uwpbuilder -1d \UWP -2f uwp.ini -3d \Scaffolds
 ```
 
-###### Note: The generated header comment block (see [Output Formatting](readme.md#output-formatting)) is omitted from the outputs below for brevity.
+###### Note: The outputs below leave out the generated header (see [Output Formatting](readme.md#output-formatting)).
 
 ### Example 1: A Minimal Entry
 
 **Context**
 
-The vast majority of UWP applications store nothing cleanable outside the standard package layout. For these apps, the scaffold baseline is the entire entry.
+Most UWP apps keep nothing worth cleaning outside the standard package folders. For those apps, the scaffold baseline is the whole entry.
 
 **Intent**
 
-We want a complete winapp2.ini entry for ASUS Quick Launch by declaring only its package and category.
+We want a complete entry for ASUS Quick Launch from nothing more than its package and category.
 
 **Files**
 
@@ -58,7 +58,7 @@ FileKey4=%LocalAppData%\Packages\B9ECED6F.ASUSQuickLaunch_qmba6cd70vzyy\TempStat
 - `DetectFile` is generated from the scaffold's `DetectFileBase=<Package>` template
 - The four FileKeys are the scaffold's `FileKeyBase=` templates with `<Package>` expanded
 - The category key passes through as written
-- Nothing in this entry was written by hand except the package name and category
+- The package name and category are the only parts written by hand
 
 ---
 
@@ -70,7 +70,7 @@ Apple Devices keeps logs in several locations under its package that the baselin
 
 **Intent**
 
-We want to extend the baseline with three additional package-relative FileKeys.
+We want to add three FileKeys inside the package to the baseline.
 
 **Files**
 
@@ -100,8 +100,8 @@ FileKey7=%LocalAppData%\Packages\AppleInc.AppleDevices_nzyj5cx40ttqa\TempState|*
 ```
 
 **Explanation**
-- The three app-specific keys are interleaved with the scaffold baseline: the lint pass sorts FileKeys alphabetically by value, so source ordering is lost
-- All seven keys were renumbered sequentially after sorting
+- The three app-specific keys end up mixed in with the baseline, because the lint pass sorts FileKeys by value and the source order is lost
+- All seven keys were renumbered after sorting
 
 ---
 
@@ -109,11 +109,11 @@ FileKey7=%LocalAppData%\Packages\AppleInc.AppleDevices_nzyj5cx40ttqa\TempState|*
 
 **Context**
 
-Amazon Music ships as both a UWP package and a win32 installation. A single entry can clean both.
+Amazon Music ships as both a UWP package and a win32 install. One entry can clean both.
 
 **Intent**
 
-We want package-relative keys (`FileKeyBase=` with `<Package>`) for the UWP install, verbatim win32 keys (`FileKey=`), and a registry detection for the win32 version alongside the generated package detection.
+We want `<Package>` keys (`FileKeyBase=`) for the UWP install, win32 keys passed through as written (`FileKey=`), and registry detection for the win32 version beside the generated package detection.
 
 **Files**
 
@@ -175,9 +175,9 @@ FileKey22=%UserProfile%\Documents\Amazon Music Importer\Logs|*|RECURSE
 ```
 
 **Explanation**
-- `Detect=` passes through verbatim, providing win32 detection; the package `DetectFile` is generated alongside it
-- The win32 `FileKey=` values contain no `<Package>` variable and pass through verbatim
-- One entry covers both installations
+- `Detect=` passes through as written and detects the win32 install. The package `DetectFile` is generated beside it
+- The win32 `FileKey=` values have no `<Package>` variable, so they pass through unchanged
+- One entry covers both installs
 
 ---
 
@@ -185,11 +185,11 @@ FileKey22=%UserProfile%\Documents\Amazon Music Importer\Logs|*|RECURSE
 
 **Context**
 
-Cortana has shipped under two different package identities. Some data locations exist under both packages, others only under the newer one.
+Cortana has shipped under two package names. Some of its data lives under both packages, and some only under the newer one.
 
 **Intent**
 
-We want one entry covering both packages: shared keys should expand for every package (`<Package>`), package-specific keys should target only one (`<Package[2]>`).
+We want one entry for both packages, with shared keys expanded for every package (`<Package>`) and package-specific keys aimed at just one (`<Package[2]>`).
 
 **Files**
 
@@ -226,9 +226,9 @@ ExcludeKey1=FILE|%LocalAppData%\Packages\Microsoft.Cortana_8wekyb3d8bbwe\LocalSt
 ```
 
 **Explanation**
-- One `DetectFile` was generated per package from the scaffold's `DetectFileBase=<Package>`
-- The scaffold baseline and the `<Package>` FileKey expanded once per package: keys 1–5 for `Package1`, keys 6–7 and 9–11 for `Package2`
-- The `<Package[2]>` keys (FileKey8's `LocalState`, and the ExcludeKey) expanded exactly once, targeting only the second package
+- The scaffold's `DetectFileBase=<Package>` produced one `DetectFile` per package
+- The baseline and the `<Package>` FileKey expanded once per package: keys 1–5 for `Package1`, keys 6–7 and 9–11 for `Package2`
+- The `<Package[2]>` keys (FileKey8's `LocalState` and the ExcludeKey) expanded once, for the second package only
 
 ---
 
@@ -240,7 +240,7 @@ GoldKey Acellus is an education app that embeds WebView2 and keeps its browser d
 
 **Intent**
 
-We want the entry to draw the default scaffold selection (Caches + Telemetry) from the shared catalog by declaring only the WebView root.
+We want the entry to get the default scaffold selection (Caches and Telemetry) from the shared catalog, declaring nothing but the WebView root.
 
 **Files**
 
@@ -252,7 +252,7 @@ WebViewRoot=<Package>\LocalState\EBWebView
 LangSecRef=3021
 ```
 
-###### Note: The entry for this app shipped in the winapp2.ini project selects `WebViewScaffolds=All` with exclusions — that variant is [Example 6](#example-6-webview-scaffolds-all-with-exclusions). This example omits the selector keys to demonstrate the default behavior.
+###### Note: The entry the winapp2.ini project ships for this app selects `WebViewScaffolds=All` with exclusions, which is [Example 6](#example-6-webview-scaffolds-all-with-exclusions). This one leaves the selection keys out to show the default.
 
 **Output**
 
@@ -293,11 +293,11 @@ FileKey30=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\TempS
 ```
 
 **Explanation**
-- Declaring `WebViewRoot=` opted the entry into scaffold emission
-- With no `WebViewScaffolds=` key, the default Caches + Telemetry selection applied
-- The catalog templates had `<WebViewRoot>` substituted with the package-expanded root path
-- 26 WebView FileKeys were generated from a single declaration line
-- The lint pass merged scaffold templates targeting the same folder (e.g. FileKey4 combines a Caches template and a Telemetry template both targeting `EBWebView\*`)
+- Declaring `WebViewRoot=` opted the entry into WebView scaffolds
+- With no `WebViewScaffolds=` key, it got the default Caches and Telemetry selection
+- Each catalog template had `<WebViewRoot>` replaced with the root path, `<Package>` already expanded
+- One line of source produced 26 WebView FileKeys
+- The lint pass merged templates aimed at the same folder: FileKey4 combines a Caches template and a Telemetry template that both target `EBWebView\*`
 
 ---
 
@@ -305,11 +305,11 @@ FileKey30=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\TempS
 
 **Context**
 
-For a dedicated single-purpose app like Acellus, the browsing data inside the WebView (history, cookies, sessions) can be safely deleted, but wiping `WebStorage` or `LoginData` would log the user out or destroy locally-stored user data.
+In a single-purpose app like Acellus, the browsing data inside the WebView (history, cookies, sessions) is safe to delete, but clearing `WebStorage` or `LoginData` would sign the user out or destroy data kept on the machine.
 
 **Intent**
 
-We want every scaffold outside the legacy tier *except* the two that remove primary user state. This is the variant of this entry actually shipped by the winapp2.ini project.
+We want every scaffold outside the legacy tier *except* the two that remove the user's own data. This is the version of the entry the winapp2.ini project ships.
 
 **Files**
 
@@ -325,7 +325,7 @@ LangSecRef=3021
 
 **Output**
 
-The full output carries **59 FileKeys**; the excerpt below shows the shape, with the middle trimmed for brevity:
+The full output has **59 FileKeys**. The excerpt below shows its shape, with the middle cut:
 
 ```ini
 [GoldKey Acellus *]
@@ -345,9 +345,9 @@ FileKey59=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\TempS
 ```
 
 **Explanation**
-- `WebViewScaffolds=All` expanded to every scaffold outside the legacy tier, logged as `WebViewScaffolds=All in [GoldKey Acellus *]; expanded to 17 scaffold(s) from catalog, 8 legacy withheld`. `ExcludeWebViewScaffolds=WebStorage,LoginData` then removed those two from the selection
-- Compare FileKey4 with Example 5's FileKey4: the same `EBWebView\*` folder now aggregates parameters from many more scaffolds, merged into one key by the lint pass
-- No legacy scaffold was emitted. Adding one requires naming it: `WebViewScaffolds=All,LegacyTelemetry`
+- `WebViewScaffolds=All` selected every scaffold outside the legacy tier, logged as `WebViewScaffolds=All in [GoldKey Acellus *]; expanded to 17 scaffold(s) from catalog, 8 legacy withheld`. `ExcludeWebViewScaffolds=WebStorage,LoginData` then took those two out
+- Compare FileKey4 with Example 5's: the same `EBWebView\*` folder now collects patterns from many more scaffolds, merged into one key by the lint pass
+- No legacy scaffold was generated. To add one, name it: `WebViewScaffolds=All,LegacyTelemetry`
 
 ---
 
@@ -355,11 +355,11 @@ FileKey59=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\TempS
 
 **Context**
 
-Spotify's downloaded songs occupy significant disk space, but users won't necessarily expect a cleaner to remove their offline music. This warrants a *separate* entry so the two cleaning surfaces can be toggled independently, but a second entry for the same package would duplicate the scaffold baseline.
+Spotify's downloaded songs take up a lot of disk space, but people don't necessarily expect a cleaner to delete their offline music. That calls for a *separate* entry, so each can be turned on and off by itself, but a second entry for the same package would repeat the scaffold baseline.
 
 **Intent**
 
-We want a primary `[Spotify *]` entry with full coverage, and a secondary `[Spotify - Downloaded Songs *]` entry that shares the package but carries only its own keys.
+We want a main `[Spotify *]` entry with full coverage, and a second `[Spotify - Downloaded Songs *]` entry that shares the package but carries only its own keys.
 
 **Files**
 
@@ -412,9 +412,9 @@ ExcludeKey1=PATH|%LocalAppData%\Spotify\Storage\*\|*
 ```
 
 **Explanation**
-- `SkipUWPFileKeys` suppressed only the four scaffold FileKeys on the secondary entry; its detection was still generated (both entries carry the same two DetectFiles)
-- The primary entry keeps full baseline coverage but excludes the `Storage` folder, which belongs to the secondary entry.
-- Note the entries are alphabetized in the output, and FileKey5's parameter list was alphabetized by the lint pass
+- `SkipUWPFileKeys` left out only the four baseline FileKeys on the second entry. Its detection was still generated, so both entries carry the same two DetectFiles
+- The main entry keeps the full baseline but excludes the `Storage` folder, which belongs to the second entry
+- The entries come out in alphabetical order, and the lint pass sorted FileKey5's pattern list
 
 ---
 
@@ -422,11 +422,11 @@ ExcludeKey1=PATH|%LocalAppData%\Spotify\Storage\*\|*
 
 **Context**
 
-AppInfo sections are validated before generation. It's worth seeing what rejection actually looks like, and what happens to entries that only *partially* misbehave.
+UWPBuilder checks each AppInfo section before generating it. This example shows what a rejected section looks like, and what happens to one that only *partly* misbehaves.
 
 **Intent**
 
-We run three deliberately flawed sections through the builder: one with no `Package=`, one declaring both category keys plus an unsupported key, and one carrying `Skip=False`.
+We run three deliberately broken sections through the builder: one with no `Package=`, one with both category keys and a key UWPBuilder doesn't know, and one with `Skip=False`.
 
 **Files**
 
@@ -454,8 +454,8 @@ The run reports:
 
 ```
 No Package key in [Hazel Notes *], skipping
-Unexpected key type in [Hazel Weather *]: Author
 Both LangSecRef and Section present in [Hazel Weather *], using LangSecRef
+Variable 'Author=' declared in [Hazel Weather *] but never referenced by any <Author> token; possible typo
 ```
 
 **Output**
@@ -472,6 +472,6 @@ FileKey4=%LocalAppData%\Packages\Hazel.Weather_123abc\TempState|*|REMOVESELF
 
 **Explanation**
 - `[Hazel Notes *]` was skipped entirely because it has no `Package=` key
-- `[Hazel Weather *]` was generated with warnings: the conflicting `Section=` was discarded in favor of `LangSecRef`, and the unsupported `Author=` key was dropped entirely
-- `[Hazel Legacy *]` was skipped **silently**: `Skip` is presence-based, so `Skip=False` skips just like `Skip=True`
-- Only one of the three sections produced an entry
+- `[Hazel Weather *]` was generated with warnings. The conflicting `Section=` was thrown away in favor of `LangSecRef`. `Author=` isn't a key UWPBuilder knows, so it declared a variable, and since nothing uses `<Author>`, the unused-variable check flagged it as a possible typo. It doesn't appear in the output
+- `[Hazel Legacy *]` was skipped **without a warning**: `Skip` takes effect whenever it's present, so `Skip=False` skips just like `Skip=True`
+- Only one of the three sections became an entry
