@@ -1,18 +1,16 @@
 # Combine
 
-**Combine** is a winapp2ool build-chain module for winapp2.ini maintainers that merges all ini files from a target directory (and all of its subdirectories) into a single output file. It is the winapp2.ini build pipeline's assembly stage, but it works standalone on any collection of ini files. Most end users won't need it. The exception is merging a folder of your own entries into one `custom.ini` for [Transmute](../transmute/readme.md) (see [Example 7](EXAMPLES.md#example-7-building-a-customini-for-transmute)).
+**Combine** is a winapp2ool build-chain module for winapp2.ini maintainers that merges every ini file in a target directory (subdirectories included) into one output file. It's the assembly stage of the winapp2.ini build, but it works on any collection of ini files. Most end users won't need it. The exception is merging a folder of your own entries into one `custom.ini` for [Transmute](../transmute/readme.md) (see [Example 7](EXAMPLES.md#example-7-building-a-customini-for-transmute)).
 
 ### What does Combine do?
 
-Combine recursively scans a target directory for files with the `.ini` extension, reads each one, and merges their sections into a single output file. When two source files contain a section with the same name, Combine reports the collision and merges their keys together, skipping any key that is an exact duplicate of one already present. With [strict name checking](#strict-name-checking) enabled, name collisions instead fail the run without writing anything.
+Combine finds every `.ini` file under the target directory, reads them in order, and writes their sections into a single output file. When two files define a section with the same name, Combine reports the collision and merges the two sections' keys, leaving out any key that exactly repeats one already there. With [strict name checking](#strict-name-checking) on, a collision fails the run instead and nothing is written.
 
 ### Why Combine?
 
-- Build pipeline assembly: winapp2.ini's thousands of entries are generated into dozens of separate artifact files; Combine folds them into one database
-- Collision detection: every section name defined by more than one input file is reported, naming the file that defined it first and every file that redefined it
-- Build safety: strict name checking turns name collisions into a failed build
-- Consolidating customizations: merge a folder of personal entry files into a single `custom.ini` for use with [Transmute](../transmute/readme.md)
-- Organized maintenance: keep large ini collections split into manageable files 
+The winapp2.ini build generates its entries into separate artifact files, one per letter for the base entries plus one each for the browser and UWP generators, and Combine is the step that folds them back into one database. It reports every section name that more than one file defines, naming the file that defined it first and each file that defined it again. In strict mode those collisions fail the build, which is what the pipeline wants, since its inputs are supposed to be disjoint.
+
+Outside the build, it lets you keep a large ini collection split into files small enough to work in, and join them whenever something wants a single file.
 
 ---
 
@@ -53,10 +51,10 @@ Combine recursively scans a target directory for files with the `.ini` extension
 
 ### Common Workflow
 
-1. Launch Combine from the winapp2ool main menu (option 7)
-2. Use **Change the target directory** to select the directory containing your ini files
-3. Optionally use **Change the save file location** to set a different output path
-4. Run. all `.ini` files in the directory and its subdirectories will be merged into the output file
+1. Open Combine from the winapp2ool main menu (option 7)
+2. Use **Change the target directory** to pick the directory holding your ini files
+3. If you want the output somewhere other than `combined.ini` in the current directory, use **Change the save file location**
+4. Choose **Run**. Every `.ini` file in the directory and its subdirectories is merged into the output file
 
 Or from the command line:
 
@@ -86,19 +84,19 @@ In the menu, the same choices are **Change the target directory**, **Change the 
 | Option | Effect | Notes |
 |:-|:-|:-|
 | Run (default) | Merge all ini files in the target directory into the output file | |
-| Change the target directory | Select the directory to scan for ini files | Default: `current directory` |
-| Change the save file location | Select the output file path and name | Default: `combined.ini` in the current directory |
-| Strict Mode | Toggle [strict name checking](#strict-name-checking). | Fails the run instead of merging when a section name appears in more than one input file. Default: `False` |
-| Log Viewer | Show the detailed log from the last Combine run | Only available after Combine has been run at least once during the current session |
-| Reset Settings | Restore all settings to their defaults | Only shown when settings have been changed |
+| Change the target directory | Pick the directory to scan for ini files | Default: the current directory |
+| Change the save file location | Pick the output file's folder and name | Default: `combined.ini` in the current directory |
+| Toggle Strict Mode | Turn [strict name checking](#strict-name-checking) on or off | When on, a section name found in more than one input file fails the run instead of merging. Default: off |
+| Log Viewer | Show the detailed log from the last Combine run | Only appears once Combine has run in the current session |
+| Reset Settings | Restore all settings to their defaults | Only appears when a setting has been changed |
 
 ---
 
 # Command-Line Arguments
 
-Combine accepts file and directory parameters for specifying the target directory and output file location. It is CLI module **7**, invocable as `-combine` or `-7`.
+Combine takes a target directory and an output file location. It is CLI module **7**, called as `-combine` or `-7`.
 
-Command line runs always begin from Combine's default settings.
+Command line runs always start from Combine's default settings, whatever you've saved in the menu.
 
 ## File Selection
 
@@ -108,13 +106,13 @@ Command line runs always begin from Combine's default settings.
 | `-3d path` | Set the output directory | Current directory |
 | `-3f name` | Set the output file name | `combined.ini` |
 
-###### Note: A leading `\` (eg. `-1d \Entries`) targets a subfolder of the current directory. 
+###### Note: A leading `\` (eg. `-1d \Entries`) names a subfolder of the current directory.
 
 ## Toggles
 
 | Arg | Effect |
 |:-|:-|
-| `-strict` | Enable [strict name checking](#strict-name-checking): when a section name appears in more than one input file, report every collision and exit with code 1 instead of saving the combined output |
+| `-strict` | Turn on [strict name checking](#strict-name-checking): when a section name appears in more than one input file, report every collision and exit with code 1 instead of saving the combined output |
 
 ---
 
@@ -122,25 +120,25 @@ Command line runs always begin from Combine's default settings.
 
 ## File Discovery
 
-Combine searches the target directory and all of its subdirectories for files with the `.ini` extension. Files are always sorted alphabetically by their full path before processing. Because the entire path is compared, a file inside a subdirectory can sort ahead of a file in the target directory itself (see [Example 2](EXAMPLES.md#example-2-subdirectories-and-repeated-runs)).
+Combine searches the target directory and all of its subdirectories for files with the `.ini` extension, then sorts them alphabetically by full path. Because the whole path is compared, a file in a subdirectory can sort ahead of a file in the target directory itself (see [Example 2](EXAMPLES.md#example-2-subdirectories-and-repeated-runs)).
 
-If the configured output file is located inside the target directory, it is automatically skipped. A skipped output file still appears in the `Found N files` count, but does nothing and is excluded from the run statistics.
+If the output file lives inside the target directory, Combine skips it. It still counts toward `Found N files`, but it contributes nothing and isn't counted in the run statistics.
 
-Files that contain no sections are skipped and excluded from the run statistics; this is noted in the [log](#run-summary-and-log) rather than the on-screen summary. Unreadable files produce a warning (see [Example 10](EXAMPLES.md#example-10-unreadable-and-empty-inputs)).
+A file with no sections is skipped too. Only the [log](#run-summary-and-log) mentions it; the on-screen summary doesn't. A file that can't be read gets a warning and fails the run, but the other files are still combined and the output is still saved (see [Example 10](EXAMPLES.md#example-10-unreadable-and-empty-inputs)).
 
 ## Duplicate Section Handling
 
-When two or more source files contain a section with the same name, Combine merges their keys:
+When two or more files contain a section with the same name, Combine merges their keys into the first copy:
 
-- A key is skipped if another key with the same name and also the same value is already present in the output section
-- Keys with the same name but a different value are not considered duplicates and are both included
-- No keys are renumbered or reordered during combination
+- A key is skipped if the section already has a key with the same name and the same value, ignoring case
+- A key with the same name but a different value isn't a duplicate, so both are kept
+- Nothing is renumbered or reordered
 
-The merged section in the output contains the union of all unique keys from every source file that shared that section name. See [Example 3](EXAMPLES.md#example-3-merging-two-copies-of-the-same-entry) 
+The merged section ends up with every distinct key from every file that defined it. See [Example 3](EXAMPLES.md#example-3-merging-two-copies-of-the-same-entry).
 
 ## Cross-File Name Collisions
 
-Whenever a section name appears in more than one input file, Combine logs it on screen:
+Whenever a section name appears in more than one input file, Combine lists it on screen and in the log:
 
 ```
  ║                                2 section name(s) appeared in more than one input file:                             ║
@@ -148,30 +146,32 @@ Whenever a section name appears in more than one input file, Combine logs it on 
  ║                       [Audacity Temp Files *] first defined in A.ini, contributed again by uwp.ini                 ║
 ```
 
-Whether a collision is a problem or not is situational and these logs are purely informational.
+Names are compared ignoring case, so `[Foo *]` and `[foo *]` collide. Without strict checking this report is informational. Whether a collision is a problem depends on whether your files were meant to overlap.
 
 ## Strict Name Checking
 
-Strict name checking (**Strict Mode** in the menu, `-strict` on the command line, `off` by default) turns name collisions into an error:
+Strict name checking (**Toggle Strict Mode** in the menu, `-strict` on the command line, off by default) turns name collisions into an error:
 
-- Every collision is logged exactly as above
-- `Strict name checking is enabled - {file} will not be saved` is logged too
-- No output file is written by Combine
-- winapp2ool exits with error code **1** and saves a `winapp2ool.log`
+- Every collision is listed, as above
+- `Strict name checking is enabled - {file} will not be saved` follows the list
+- Combine doesn't write the output file
+- The exit code is set to **1**. A silent run exits with it and writes the global log to `winapp2ool.log`
+
+Strict mode doesn't stop at the first collision, so one run shows you all of them.
 
 ## Output Formatting
 
-The output is written as a plain ini file:
+The output is a plain ini file:
 
-- Sections appear in the order they were first encountered across the alphabetically-sorted source files 
-- Keys within a merged section appear in the order they were added
-- Comments are not preserved. Comments from the source files will *not* be carried over into the output file.
+- Sections appear in the order they were first seen across the sorted input files
+- Keys in a merged section appear in the order they were added
+- Comments in the input files aren't carried over
 
-If the final output contains no sections, nothing is written to disk.
+If the output has no sections, Combine doesn't write it.
 
 ## Run Summary and Log
 
-A run prints a summary to the screen as it works:
+Each run prints a summary:
 
 ```
  ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
@@ -189,19 +189,18 @@ A run prints a summary to the screen as it works:
 Press any key to return to the menu.
 ```
 
-
-The **Log Viewer** menu option displays information from the winapp2ool log that the on-screen summary omits:
+The **Log Viewer** menu option shows the run's part of the winapp2ool log, which has detail the summary leaves out:
 
 | Log message | Meaning |
 |:-|:-|
 | `Added new section: [name] (N keys)` | A section was seen for the first time and copied into the output |
 | `Added {key} to [{section}]` | A key was merged into an existing section of the same name |
-| `Skipped duplicate key in [{section}]: {key}` | A key matched an existing key's name and value and was not added |
-| `Skipping file with no sections: {file}` | A file was found but contained nothing |
-| `Output file found in target directory, skipping: {path}` | The configured output file lives inside the target directory and was excluded |
+| `Skipped duplicate key in [{section}]: {key}` | A key matched an existing key's name and value and was left out |
+| `Skipping file with no sections: {file}` | A file was found but had no sections |
+| `Output file found in target directory, skipping: {path}` | The output file lives inside the target directory and was left out |
 | `N section name(s) appeared in more than one input file:` | Followed by one line per colliding name |
 | `Strict name checking is enabled - {file} will not be saved` | A strict run found at least one collision |
-| `Processed N files, M contained combinable sections` | Run statistic. `N` excludes the skipped output file; `M` excludes files with no sections |
+| `Processed N files, M contained combinable sections` | Run statistics. `N` leaves out the skipped output file; `M` leaves out files with no sections |
 | `Saving {file}` | The output was written to disk |
 
 ---
@@ -210,19 +209,19 @@ The **Log Viewer** menu option displays information from the winapp2ool log that
 
 ### Output File Location
 
-If your output file is inside the target directory, Combine detects and skips it automatically, so repeated runs are safe ([Example 2](EXAMPLES.md#example-2-subdirectories-and-repeated-runs)). Placing the output file outside the target directory is cleaner and avoids any ambiguity.
+If the output file is inside the target directory, Combine skips it, so running the same command again is safe ([Example 2](EXAMPLES.md#example-2-subdirectories-and-repeated-runs)). Keeping the output outside the target directory is still cleaner, since then there's nothing to skip.
 
 ### Alphabetical Processing Order
 
-Files are processed in alphabetical order by full path. When two files have a duplicate section and you want a specific file's keys to take precedence, name or locate the files such that the preferred one sorts first; later files contribute only their novel keys. See [Example 4](EXAMPLES.md#example-4-controlling-key-order-with-file-names).
+Files are processed in alphabetical order by full path. When two files define the same section and you want one file's keys to come first, name or place it so it sorts first. Later files only add the keys the section doesn't already have. See [Example 4](EXAMPLES.md#example-4-controlling-key-order-with-file-names).
 
 ### winapp2.ini Outputs
 
-Combine does not renumber keys or apply winapp2.ini styling. If the combined result is a winapp2.ini file, run WinappDebug on it afterward (`winapp2ool -debug -c -1f yourfile.ini -3f yourfile.ini`) to normalize numbering, ordering, and style. See [Example 8](EXAMPLES.md#example-8-correcting-syntax-after-combining).
+Combine doesn't renumber keys or apply winapp2.ini styling. If the result is meant to be a winapp2.ini file, run WinappDebug on it afterward (`winapp2ool -debug -c -1f yourfile.ini -3f yourfile.ini`) to fix numbering, key order and style. See [Example 8](EXAMPLES.md#example-8-correcting-syntax-after-combining).
 
 ### Checking the Result
 
-Use the Log Viewer after a run to see exactly which files were processed, which sections and keys each contributed, and whether any duplicate keys were skipped. 
+After a run, the Log Viewer shows which files were processed, which sections and keys each one contributed, and which duplicate keys were skipped.
 
 ---
 
@@ -230,10 +229,10 @@ Use the Log Viewer after a run to see exactly which files were processed, which 
 
 | Message / Symptom | Cause |
 |:-|:-|
-| "Target directory not found. Please select a valid directory." | The configured target directory does not exist. Shown in red atop the menu; the run does nothing |
-| "N section name(s) appeared in more than one input file:" | Normal output. Informational unless your inputs were supposed to be disjoint |
-| "Strict name checking is enabled - {file} will not be saved" | A `-strict` run found a collision. Nothing was written and the exit code is 1. |
-| "No valid sections found to combine - {file} will not be saved" | No file in the target directory contained a parseable section; no output file is written |
-| "Error processing file: {path}" followed by "Check the winapp2ool log for more information: {path}" | A file failed while to read. The remaining files are still processed, and the global log is saved to disk automatically |
-| A scripted run fails with exit code 1 and no obvious error | A strict-mode collision. In silent mode nothing is printed; check `winapp2ool.log`, which is written automatically whenever the exit code is nonzero |
-| No output file created, no warning shown | The target directory contained no `.ini` files at all (`Found 0 files...`) |
+| "Target directory not found. Please select a valid directory." | The target directory doesn't exist. Shown in red above the menu; the run does nothing |
+| "N section name(s) appeared in more than one input file:" | Normal output. It only matters if your inputs were supposed to be disjoint |
+| "Strict name checking is enabled - {file} will not be saved" | A strict run found a collision. Nothing was written and the exit code is 1 |
+| "No valid sections found to combine - {file} will not be saved" | No file in the target directory had a section Combine could read, or there were no `.ini` files at all (`Found 0 files...`), so there's no output file |
+| "Error processing file: {path}" followed by "Check the winapp2ool log for more information: {path}" | Combine couldn't read that file, often because another program had it open. The other files are still combined and the output is saved, but the exit code is 1, and the global log is saved to disk straight away |
+| "{file} was not saved" | Combine couldn't write the output file. Check that the folder exists and that you can write to it. In the menu, winapp2ool offers to restart with administrator rights when the folder is protected |
+| A scripted run fails with exit code 1 and no obvious error | Silent mode prints nothing, so the cause is in `winapp2ool.log`, which is written whenever a silent run exits nonzero. Usually it's a strict-mode collision; an unreadable input or an output that couldn't be written does the same |

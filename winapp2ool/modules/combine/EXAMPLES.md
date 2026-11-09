@@ -1,6 +1,6 @@
 # Combine Examples
 
-Worked examples for [Combine](readme.md). The [Common Uses](readme.md#common-uses) table in the readme lists the commands; these show what each one does, with real input and output.
+Worked examples for [Combine](readme.md). The readme's [Common Uses](readme.md#common-uses) table lists the commands; these show what each one does, with real input and output.
 
 # Table of Contents
 
@@ -22,7 +22,7 @@ Worked examples for [Combine](readme.md). The [Common Uses](readme.md#common-use
 
 ---
 
-The inputs, console output, and output files below are lifted verbatim from real Combine runs. 
+The inputs, console output and output files below come from real Combine runs. Some console captures show only the lines that matter to the example.
 
 ## Basics
 
@@ -30,7 +30,7 @@ The inputs, console output, and output files below are lifted verbatim from real
 
 **Context**
 
-You maintain your personal winapp2.ini entries the way the project maintains its own: split across per-letter files so each one stays small and easy to find things in. Your cleaner only reads one file, so they have to be joined before use.
+You keep your own winapp2.ini entries the way the project keeps its own, split into per-letter files so each one stays small and easy to search. Your cleaner reads only one file, so they have to be joined before you can use them.
 
 **Intent**
 
@@ -102,7 +102,7 @@ FileKey1=%AppData%\obsidian\Cache|*|RECURSE
 **Explanation**
 - The target directory is `C:\ini\case1\customs`
 - The output file is `C:\ini\case1\custom.ini`
-- `C.ini` sorts before `O.ini`, so its sections appear first
+- `C.ini` sorts before `O.ini`, so its sections come first
 
 ---
 
@@ -110,11 +110,11 @@ FileKey1=%AppData%\obsidian\Cache|*|RECURSE
 
 **Context**
 
-Combine recurses into subdirectories, and the output file may live inside the target directory. We want to  demonstrate that a second run does not re-combine the first run's output.
+Combine searches subdirectories too, and the output file can live inside the target directory. This example shows that a second run doesn't fold the first run's output back in.
 
 **Intent**
 
-We want to combine a collection directory (including its `archive` subfolder) into a `combined.ini` inside that same directory, and be able to re-run the combination safely.
+We want to combine a collection directory, `archive` subfolder included, into a `combined.ini` inside that same directory, and be able to run the same command again safely.
 
 **Files**
 
@@ -173,10 +173,10 @@ FileKey1=%AppData%\foobar2000-v2\playlists-v2|*.bak
 ```
 
 **Explanation**
-- The `archive` subdirectory is searched automatically as part of the recursive call
-- `[Winamp Cache *]` appears *first* because files sort by full path: `collection\archive\retired.ini` sorts before `collection\current.ini`
-- On the second run, `combined.ini` itself is found (3 files) but recognized as the output file and skipped
-- The skip is recorded in the log: `Output file found in target directory, skipping: C:\ini\case2\collection\combined.ini`
+- The `archive` subdirectory is searched without being asked for
+- `[Winamp Cache *]` comes *first* because files sort by full path, and `collection\archive\retired.ini` sorts before `collection\current.ini`
+- On the second run Combine finds `combined.ini` too (3 files), recognizes it as the output file and skips it
+- The log records the skip: `Output file found in target directory, skipping: C:\ini\case2\collection\combined.ini`
 
 ---
 
@@ -186,9 +186,9 @@ FileKey1=%AppData%\foobar2000-v2\playlists-v2|*.bak
 
 **Context**
 
-You wrote a custom entry for Obsidian, then later wrote a second, more thorough version in a different file without remembering the first. Both describe `[Obsidian Workspace Cache *]`. 
+You wrote a custom entry for Obsidian, then later wrote a second, more thorough one in a different file, having forgotten the first. Both describe `[Obsidian Workspace Cache *]`.
 
-This example demonstrates all three duplicate-handling rules at once: a new key is added, an exact duplicate differing only in casing is skipped, and a same-name/different-value key is kept alongside the original
+This example shows all three duplicate rules at once: a new key is added, a duplicate that differs only in case is skipped, and a key with the same name but a different value is kept beside the original.
 
 **Intent**
 
@@ -245,26 +245,28 @@ FileKey2=%AppData%\obsidian\GPUCache|*|RECURSE
 ```
 
 **Explanation**
-- `my_customs.ini` sorts first, so its copy of `[Obsidian Workspace Cache *]` is used as the base in the output section
-- `Section=My Custom Entries` from the second file is an exact duplicate and is skipped
-- `detectfile=%appdata%\obsidian` is also skipped. Duplicate matching is case-insensitive.
-- `FileKey1=...\Code Cache|*|RECURSE` shares a name with the existing `FileKey1` but has a different value, so both are kept
-- `FileKey2=...\GPUCache|*|RECURSE` is new and is added
-- The collision log appears even though this merge is exactly what we wanted; it is informational here, not an error
+- `my_customs.ini` sorts first, so its copy of `[Obsidian Workspace Cache *]` is the one the other file's keys are merged into
+- `Section=My Custom Entries` from the second file is an exact duplicate, so it's skipped
+- `detectfile=%appdata%\obsidian` is skipped too, because duplicates are matched ignoring case
+- `FileKey1=...\Code Cache|*|RECURSE` has the same name as the existing `FileKey1` but a different value, so both are kept
+- `FileKey2=...\GPUCache|*|RECURSE` is new, so it's added
+- The collision report still appears, even though this merge is exactly what we wanted. Without strict mode it's only information
 
 **Notes**
 
-Two keys named `FileKey1` now exist in the output. [Example 8](#example-8-correcting-syntax-after-combining) shows the WinappDebug pass that fixes this. 
+The output now has two keys named `FileKey1`. [Example 8](#example-8-correcting-syntax-after-combining) shows the WinappDebug pass that fixes that.
 
-The per-key detail behind this merge is visible in the Log Viewer:
+The Log Viewer shows the merge key by key:
 
 ```
-Added new section: [Obsidian Workspace Cache *] (3 keys)
+Processing: my_customs.ini (1 sections)
+  Added new section: [Obsidian Workspace Cache *] (3 keys)
 Processed: my_customs.ini (1 sections)
-Skipped duplicate key in [Obsidian Workspace Cache *]: Section
-Skipped duplicate key in [Obsidian Workspace Cache *]: detectfile
-Added FileKey1 to [Obsidian Workspace Cache *]
-Added FileKey2 to [Obsidian Workspace Cache *]
+Processing: second_opinion.ini (1 sections)
+  Skipped duplicate key in [Obsidian Workspace Cache *]: Section
+  Skipped duplicate key in [Obsidian Workspace Cache *]: detectfile
+  Added FileKey1 to [Obsidian Workspace Cache *]
+  Added FileKey2 to [Obsidian Workspace Cache *]
 Processed: second_opinion.ini (1 sections)
 ```
 
@@ -274,7 +276,7 @@ Processed: second_opinion.ini (1 sections)
 
 **Context**
 
-When duplicate sections carry same-name/different-value keys, both are kept, but are ordered as they were encountered. Since files are processed alphabetically by full path, you can force a preferred file's keys to lead by naming it to sort first.
+When two copies of a section have keys with the same name but different values, both keys are kept, in the order Combine met them. Files are processed alphabetically by full path, so you can put one file's keys first by giving it a name that sorts first.
 
 **Intent**
 
@@ -323,8 +325,8 @@ FileKey1=%AppData%\HandBrake\logs|*.log
 ```
 
 **Explanation**
-- The `1_` prefix makes `1_overrides.ini` sort before `handbrake.ini`, so its `FileKey1` is part of the base section and appears first
-- The bulk file's `Section`, `DetectFile`, and different-valued `FileKey1` are appended after it, in their original order
+- The `1_` prefix makes `1_overrides.ini` sort before `handbrake.ini`, so its `FileKey1` is in the section first
+- The bulk file's `Section`, `DetectFile` and its own `FileKey1` follow, in their original order
 
 ---
 
@@ -334,7 +336,7 @@ FileKey1=%AppData%\HandBrake\logs|*.log
 
 **Context**
 
-Strict mode is invisible when nothing goes wrong, we want to know what success looks like. 
+When nothing goes wrong, strict mode doesn't show itself at all, so it helps to know what a passing run looks like.
 
 **Intent**
 
@@ -366,7 +368,7 @@ winapp2ool -s -offline -combine -strict -1d C:\ini\case1\customs -3d C:\ini\case
 ```
 
 **Explanation**
-- The output is identical to the non-strict run in [Example 1](#example-1-combining-files-with-distinct-sections) - Because no section name is defined twice, no collision log is produced and the file is saved normally
+- The output matches the non-strict run in [Example 1](#example-1-combining-files-with-distinct-sections). No section name is defined twice, so there's no collision report and the file is saved as usual
 
 ---
 
@@ -374,11 +376,11 @@ winapp2ool -s -offline -combine -strict -1d C:\ini\case1\customs -3d C:\ini\case
 
 **Context**
 
-This is what strict mode exists for. Three staged artifact files are supposed to describe disjoint sets of entries, but a maintainer has added `[Anki Media Cache *]` in three of them and `[Audacity Temp Files *]` in two. Without strict mode these would silently merge into single entries carrying keys from every contributor.
+This is the case strict mode is for. Three staged artifact files are supposed to hold separate sets of entries, but `[Anki Media Cache *]` has ended up in all three and `[Audacity Temp Files *]` in two. Without strict mode each would be merged into one entry carrying keys from every file, and the build would carry on.
 
 **Intent**
 
-We want the build to fail, with enough detail to find the duplicates, rather than build a potentially malformatted winapp2.ini
+We want the build to fail, with enough detail to find the duplicates, rather than produce a winapp2.ini with merged entries nobody wrote.
 
 **Files**
 
@@ -444,18 +446,18 @@ winapp2ool -combine -strict -1d C:\ini\case6\Entries -3d C:\ini\case6 -3f Winapp
  ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 ```
 
-No `Winapp2.ini` is written, and the process exits with code **1**.
+Combine doesn't write `Winapp2.ini`, and the process exits with code **1**.
 
 **Explanation**
-- Both colliding names are logged: strict mode does not stop at the first collision
-- The count is **2** because two distinct section *names* collided, across three collision events
-- `[Anki Media Cache *]` lists two later contributors; `A.ini` defined it first only because it sorts first
+- Both colliding names are listed, because strict mode doesn't stop at the first collision
+- The count is **2** because it counts colliding section *names*. There were three repeat definitions
+- `[Anki Media Cache *]` lists two later files. `A.ini` counts as the first definition only because it sorts first
 
 **Notes**
 
-Dropping `-strict` from the same command produces the identical collision log, then saves a 3-section file in which each duplicated entry has been merged. This is what strict mode is meant to prevent
+Without `-strict`, the same command prints the same collision report and then saves a 3-section file with each duplicated entry merged. That's the outcome strict mode is there to stop.
 
-In silent mode (`-s`) nothing is printed at all; the failure shows only as the nonzero exit code. The global log (containing the collision log) is written to `winapp2ool.log` automatically whenever the exit code is nonzero.
+In silent mode (`-s`) nothing is printed, and the failure shows only in the exit code. A silent run that exits nonzero writes the global log, collision report included, to `winapp2ool.log`.
 
 ---
 
@@ -465,11 +467,11 @@ In silent mode (`-s`) nothing is printed at all; the failure shows only as the n
 
 **Context**
 
-[Transmute](../transmute/readme.md) applies one source file to one base file. If your customizations are spread across several files, Combine is the step that turns them into the single source file Transmute expects.
+[Transmute](../transmute/readme.md) applies one source file to one base file. If your customizations are spread across several files, Combine turns them into the single source file Transmute needs.
 
 **Intent**
 
-We want to fold two customization files into one `custom.ini`, then use it to patch a winapp2.ini: adding a key to an entry that already exists and adding an entry that does not.
+We want to join two customization files into one `custom.ini`, then use it to patch a winapp2.ini: adding a key to an entry that already exists, and adding an entry that doesn't.
 
 **Files**
 
@@ -508,7 +510,7 @@ winapp2ool -transmute -add -1d C:\ini\case7\base -1f winapp2.ini -2d C:\ini\case
 
 **Output**
 
-Step 1: combination:
+Step 1, Combine:
 ```
  ║ Found 2 files with ini extension in C:\ini\case7\customs                                                           ║
  ║ Processed: handbrake_extra.ini (1 sections)                                                                        ║
@@ -528,7 +530,7 @@ DetectFile=%AppData%\obsidian
 FileKey1=%AppData%\obsidian\Cache|*|RECURSE
 ```
 
-Step 2: transmutation:
+Step 2, Transmute:
 ```
  ║ Transmutator: AddByKey - ByName                                                                                    ║
  ║ Adding keys to HandBrake Activity Logs *                                                                           ║
@@ -557,12 +559,12 @@ FileKey1=%AppData%\obsidian\Cache|*|RECURSE
 
 **Explanation**
 - Combine produces the single source file
-- Transmute then matches the customizations against an existing base file, adding `FileKey` to the entry that already existed and inserting the entry that did not
-- Transmute applies a winapp2.ini formatting pass  
+- Transmute matches it against the base file, adding `FileKey` to the entry that already existed and adding the entry that didn't
+- Transmute saves the result as a winapp2.ini file, with the standard header (left out above), but it doesn't renumber keys. The added `FileKey` stays unnumbered until a WinappDebug pass like [Example 8](#example-8-correcting-syntax-after-combining)'s
 
 **Notes**
 
-Combine and Transmute Add differ in an important way. Combine merges all of its inputs symmetrically and skips exact duplicate keys; Transmute Add applies a source onto a base and does not check for duplicate keys. 
+Combine and Transmute's Add mode treat duplicates differently. Combine merges all its inputs as equals and skips exact duplicate keys. Transmute Add applies a source onto a base and doesn't check for duplicate keys at all.
 
 ---
 
@@ -570,11 +572,11 @@ Combine and Transmute Add differ in an important way. Combine merges all of its 
 
 **Context**
 
-Continuing from [Example 4](#example-4-controlling-key-order-with-file-names), whose output is a valid ini file but an invalid winapp2.ini entry: the keys are out of order and `FileKey1` is defined twice. 
+This picks up from [Example 4](#example-4-controlling-key-order-with-file-names), whose output is a valid ini file but not a valid winapp2.ini entry: the keys are out of order and there are two `FileKey1`s.
 
 **Intent**
 
-We want to normalize the combined output into valid winapp2.ini style.
+We want to turn the combined output into valid winapp2.ini.
 
 **Files**
 
@@ -629,10 +631,11 @@ FileKey2=%AppData%\HandBrake\logs|*.txt|REMOVESELF
 ```
 
 **Explanation**
-- The `-c` flag tells WinappDebug to write its corrections rather than only reporting them
-- The duplicated `FileKey1` is renumbered to `FileKey2`, resolving the collision Combine left behind
-- The keys are regrouped into winapp2.ini order
-- The FileKeys are alphabetized by value, which is why the `*.log` key ends up first
+- `-c` tells WinappDebug to save its corrections instead of only reporting them
+- The second `FileKey1` becomes `FileKey2`
+- The keys are put back in winapp2.ini order
+- FileKeys are sorted by value, which is why the `*.log` key ends up first
+- The saved file also starts with the standard winapp2.ini header, left out above
 
 ---
 
@@ -640,7 +643,7 @@ FileKey2=%AppData%\HandBrake\logs|*.txt|REMOVESELF
 
 **Context**
 
-This is Combine's production job. The winapp2.ini build pipeline stages all of its generated artifacts under the Winapp2 repository's `Assembler\Entries\` directory: the 27 per-letter base files (`#.ini`, `A.ini` … `Z.ini`, written by EntryBuilder), `Browsers\browsers.ini` (written by BrowserBuilder), and `UWP\uwp.ini` (written by UWPBuilder). A single strict-mode Combine merges all of them into the base winapp2.ini in one pass. Strict name checking guarantees no entry name is defined by more than one artifact.
+This is Combine's day job. The winapp2.ini build puts its generated artifacts under the Winapp2 repository's `Assembler\Entries\` directory: the 27 per-letter base files (`#.ini`, `A.ini` … `Z.ini`, written by EntryBuilder), `Browsers\browsers.ini` (written by BrowserBuilder) and `UWP\uwp.ini` (written by UWPBuilder). One strict-mode Combine merges them all into the base winapp2.ini, and strict checking makes sure no entry name comes from more than one artifact.
 
 **Intent**
 
@@ -651,7 +654,7 @@ We want to reproduce the build pipeline's merge stage.
 winapp2ool -s -offline -combine -strict -1d \Entries -3f Winapp2.ini
 ```
 
-###### Note: This is the invocation from `Assembler\build winapp2.ps1`, verbatim, run with `Assembler` as the working directory. `-s` (silent) and `-offline` are global winapp2ool flags used by the pipeline for unattended runs; `-1d \Entries` targets the `Entries` subfolder of the working directory.
+###### Note: This is the command `Assembler\build winapp2.ps1` runs, word for word, with `Assembler` as the working directory. `-s` (silent) and `-offline` are global winapp2ool flags the build uses for unattended runs, and `-1d \Entries` names the `Entries` subfolder of the working directory.
 
 **Output**
 
@@ -695,14 +698,15 @@ winapp2ool -s -offline -combine -strict -1d \Entries -3f Winapp2.ini
 ```
 
 **Explanation**
-- All 29 artifact files are discovered recursively and processed in alphabetical order by full path 
-- The staged artifacts have no overlapping section names, so no collision log appears. 
-- The output is saved in the working directory (`Assembler\Winapp2.ini`) 
-- In silent mode nothing is printed to the screen
+- Combine finds all 29 artifact files across the subfolders and processes them in alphabetical order by full path
+- No two artifacts share a section name, so there's no collision report
+- The output is saved in the working directory, as `Assembler\Winapp2.ini`
+- The build itself runs in silent mode, so it prints none of this. The capture above is the same command without `-s`
+- The section counts are from one day's build and change with every build
 
 **Notes**
 
-The files under `Assembler\Entries\` are generated build artifacts
+The files under `Assembler\Entries\` are generated. Edit their sources, never the files themselves.
 
 ---
 
@@ -712,11 +716,11 @@ The files under `Assembler\Entries\` are generated build artifacts
 
 **Context**
 
-Not every file in a directory is usable. This example puts three files in front of Combine: one holding only comments, one valid entry file, and one that is locked open by another program at the moment of the run.
+Not every file in a directory is usable. This example gives Combine three files: one holding only comments, one valid entry file, and one that another program has open and locked during the run.
 
 **Intent**
 
-We want to see how a bad input is reported and confirm that it does not cost us the rest of the run.
+We want to see how a bad input is reported, and check that it doesn't cost us the rest of the run.
 
 **Files**
 
@@ -772,14 +776,14 @@ FileKey1=%AppData%\Anki2\*\media.trash|*|REMOVESELF
 ```
 
 **Explanation**
-- `a_notes.ini` contains no sections and is silently skipped. Only the log records it: `Skipping file with no sections: a_notes.ini`
-- `c_locked.ini` could not be read, which produces the two-line error and an automatic save of the global log to disk
-- The run continues regardless and still writes the output
-- `Found 3` but `Combined 1`: the found count is every `.ini` on disk, while the combined count is only files that actually contributed sections
+- `a_notes.ini` has no sections, so it's skipped without a word on screen. Only the log records it: `Skipping file with no sections: a_notes.ini`
+- `c_locked.ini` couldn't be read. That prints the two-line error and saves the global log to disk straight away
+- The run carries on and still writes the output, but it exits with code **1**, so a script running it sees the failure
+- `Found 3` but `Combined 1`: the found count is every `.ini` on disk, and the combined count is only the files that contributed sections
 
 **Notes**
 
-A directory in which nothing is parseable produces no output file at all:
+A directory where no file has a section produces no output file at all:
 
 ```
  ║ Found 1 files with ini extension in C:\ini\case10\nosections                                                       ║
