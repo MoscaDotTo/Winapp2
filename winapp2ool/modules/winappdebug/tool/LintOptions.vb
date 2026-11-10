@@ -110,9 +110,9 @@ Public Class LintOptions
 
     ''' <summary>
     ''' The flavor whose own checks apply, such as BleachBit's ExcludeKey REG flag check
-    ''' <br /> Default: <c> WinappFlavor.CCleaner </c>
+    ''' <br /> Default: <c> WinappFlavor.Base </c>
     ''' </summary>
-    Public Property Flavor As WinappFlavor = WinappFlavor.CCleaner
+    Public Property Flavor As WinappFlavor = WinappFlavor.Base
 
     ''' <summary>
     ''' Creates options holding the default rules and settings: every rule on except

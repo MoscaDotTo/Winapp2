@@ -130,7 +130,7 @@ Imports System.IO
     ''' <summary>A flavor named on the command line stamps a file that named none, as the base build needs</summary>
     <TestMethod()> Public Sub Lint_CommandLineFlavorStamps()
 
-        StringAssert.Contains(RunLint(Nothing, winapp2ool.WinappFlavor.NonCCleaner), "; Flavor: Base" & vbCrLf)
+        StringAssert.Contains(RunLint(Nothing, winapp2ool.WinappFlavor.Base), "; Flavor: Base" & vbCrLf)
 
     End Sub
 

@@ -18,7 +18,7 @@ Removed entries are then split three ways:
 
 By default, Diff compares your local winapp2.ini against the latest one on GitHub, trimmed for the current machine.
 
-###### The downloaded file is flavor-specific, and the default flavor is CCleaner. See [Flavors](#flavors).
+###### The downloaded file is flavor-specific, and the default flavor is base. See [Flavors](#flavors).
 
 ### Why Diff?
 
@@ -117,7 +117,7 @@ When a new winapp2.ini is available, the main menu offers `Show winapp2.ini chan
 
 winapp2.ini is published in several **flavors**, each one tailored to the program that reads it. Diff downloads whichever flavor is currently selected as the "newer" file, the same way the Download module does.
 
-The default flavor is CCleaner, not base, so `winapp2ool -diff` with no flavor argument compares your local file against the *CCleaner* build. Comparing two different flavors is noisy and not recommended, so make sure your local file's flavor matches.
+The default flavor is base, so `winapp2ool -diff` with no flavor argument compares your local file against the base build. If your local file is the CCleaner flavor, pass `-cc`. Comparing two different flavors is noisy and not recommended, so make sure your local file's flavor matches.
 
 Set the flavor for a single run with a command-line flag (see [Flavor Selection](#flavor-selection)), or permanently from the main menu's `Global Settings` → `Change Flavor`. The Diff menu doesn't show the current flavor.
 
@@ -127,8 +127,8 @@ Set the flavor for a single run with a command-line flag (see [Flavor Selection]
 
 | To | Run | Example |
 |:-|:-|:-|
-| See what changed between your winapp2.ini and the latest CCleaner-flavor release, trimmed for this machine | `winapp2ool -diff` | |
-| Do the same against the latest base (non-CCleaner) release | `winapp2ool -diff -base` | [Default Workflow](EXAMPLES.md#example-1-default-workflow) |
+| See what changed between your winapp2.ini and the latest base release, trimmed for this machine | `winapp2ool -diff` | |
+| Do the same against the latest base release, naming the flavor as a script should | `winapp2ool -diff -base` | [Default Workflow](EXAMPLES.md#example-1-default-workflow) |
 | Compare against another flavor's latest release without trimming it | `winapp2ool -diff -bb -donttrim` | [Diffing a Non-Default Flavor](EXAMPLES.md#example-6-diffing-a-non-default-flavor) |
 | Print the full text of each changed entry alongside its changes | `winapp2ool -diff -verbose` | [Verbose Mode](EXAMPLES.md#example-4-verbose-mode) |
 | Save the changelog to `diff.txt` | `winapp2ool -diff -savelog` | [Saving the Log](EXAMPLES.md#example-5-saving-the-log) |
@@ -192,8 +192,8 @@ These are global winapp2ool arguments, not Diff's own. They pick which published
 
 | Arg | Flavor |
 |:-|:-|
-| `-base`, `-ncc` | Base (non-CCleaner) |
-| `-ccleaner`, `-cc` | CCleaner (**default**) |
+| `-base`, `-ncc` | Base (non-CCleaner) (**default**) |
+| `-ccleaner`, `-cc` | CCleaner |
 | `-bleachbit`, `-bb` | BleachBit |
 | `-systemninja`, `-sn` | System Ninja |
 | `-tron` | Tron |

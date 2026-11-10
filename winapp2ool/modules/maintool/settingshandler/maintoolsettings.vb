@@ -55,8 +55,9 @@ Public Module maintoolsettings
 
     ''' <summary>
     ''' The currently selected winapp2.ini flavor
+    ''' <br /> Default: <c> WinappFlavor.Base </c>
     ''' </summary>
-    Public Property CurrentWinappFlavor As Winapp2ool.WinappFlavor = Winapp2ool.WinappFlavor.CCleaner
+    Public Property CurrentWinappFlavor As Winapp2ool.WinappFlavor = Winapp2ool.WinappFlavor.Base
 
     ''' <summary>
     ''' Restores all <c> Winapp2ool </c> settings to their defaults and records them in
@@ -72,7 +73,7 @@ Public Module maintoolsettings
         saveSettingsToDisk = False
         readSettingsFromDisk = False
         isBeta = False
-        CurrentWinappFlavor = WinappFlavor.CCleaner
+        CurrentWinappFlavor = WinappFlavor.Base
         SaveModule(NameOf(Winapp2ool), GetType(maintoolsettings))
 
     End Sub

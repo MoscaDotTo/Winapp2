@@ -65,7 +65,7 @@ Public NotInheritable Class WinappFlavorInfo
     End Sub
 
     Private Shared ReadOnly Table As New Dictionary(Of WinappFlavor, WinappFlavorInfo) From {
-        {WinappFlavor.NonCCleaner, New WinappFlavorInfo("Base", "winapp2.ini", "changelog-base.txt",
+        {WinappFlavor.Base, New WinappFlavorInfo("Base", "winapp2.ini", "changelog-base.txt",
             "This is the base flavor of winapp2.ini, with no entries removed or changed. Use it with",
             "BleachBit 6+, and with any program that has no flavor of its own. This file will not",
             "work with System Ninja or CCleaner 7+, use those applications' respective flavors with them.")},
@@ -102,7 +102,7 @@ Public NotInheritable Class WinappFlavorInfo
 
     ''' <summary>
     ''' Returns the flavor a <c> ; Flavor: </c> line names. Case and spaces don't matter, and
-    ''' the enum name works as well as the display name, so <c> Base </c>, <c> NonCCleaner </c>
+    ''' the enum name works as well as the display name, so <c> Base </c>, <c> CCleaner7 </c>
     ''' and <c> system ninja </c> all parse.
     ''' </summary>
     '''

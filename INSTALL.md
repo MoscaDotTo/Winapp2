@@ -13,7 +13,7 @@ The download links on this page fetch each file from the [latest release](https:
 Winapp2ool is the only install method that also keeps winapp2.ini current afterwards, as long as you leave a copy of it beside the file. It works the same way for every application:
 
 1. Download [winapp2ool.exe](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2ool.exe) and put it in the folder where your application looks for winapp2.ini. Each section below names that folder.
-2. Run it, open **Settings**, and press **Change Flavor** until it shows the flavor your application's section names. It cycles through CCleaner, NonCCleaner, BleachBit, SystemNinja, Tron, CCleaner7, and FluentCleaner, and the default is CCleaner. To keep your choice between sessions, turn on **Toggle Saving Settings** and **Toggle Reading settings**.
+2. Run it, open **Settings**, and press **Change Flavor** until it shows the flavor your application's section names. It cycles through CCleaner, Base, BleachBit, SystemNinja, Tron, CCleaner7, and FluentCleaner, and the default is Base. To keep your choice between sessions, turn on **Toggle Saving Settings** and **Toggle Reading settings**.
 3. Go back to the main menu and choose **Update Winapp2.ini** to install, or **Update & Trim** to install a copy without the entries that don't apply to your machine.
 
 Both options write into the folder winapp2ool is running from, replacing the copy that's already there. They save `winapp2.ini`, or `winapp2.rules` for System Ninja. They're listed only while winapp2ool sees your local copy as out of date, which includes having no copy at all, so they'll be waiting for you on a first install. Neither is available in offline mode. If the folder is protected, such as one under Program Files, winapp2ool asks for administrator rights when it starts.
@@ -77,7 +77,7 @@ You should use the [CCleaner flavor](https://github.com/MoscaDotTo/Winapp2/relea
 
 Place winapp2.ini in the same folder as ccleaner.exe. By default that's `..\Program Files\CCleaner`.
 
-We recommend trimming winapp2.ini whenever you update it, because the full file slows down CCleaner's startup. With winapp2ool in that folder and the flavor left at its CCleaner default, **Update & Trim** is the main menu option you want.
+We recommend trimming winapp2.ini whenever you update it, because the full file slows down CCleaner's startup. With winapp2ool in that folder and its flavor set to CCleaner, **Update & Trim** is the main menu option you want.
 
 The same install from the command line:
 
@@ -154,7 +154,7 @@ CCleaner 7 puts a `custom-clean.name.` prefix on every winapp2.ini entry, and th
 1. Turn off "Download and update cleaners from community (Winapp2.ini)" in BleachBit's settings.
 2. Place winapp2.ini in `%AppData%\BleachBit\Cleaners`.
 
-With winapp2ool in `%AppData%\BleachBit\Cleaners`, set the flavor to NonCCleaner (or BleachBit on version 5 and older) and choose **Update Winapp2.ini**.
+With winapp2ool in `%AppData%\BleachBit\Cleaners`, set the flavor to Base (or BleachBit on version 5 and older) and choose **Update Winapp2.ini**.
 
 The same install from the command line:
 
@@ -217,7 +217,7 @@ You should use the base [winapp2.ini](https://github.com/MoscaDotTo/Winapp2/rele
 ### Installation
 Avira System Speedup ships with its own copy of winapp2.ini, served by Avira, and stores it in your `..\Avira\System Speedup\sdf` folder. You can replace or update that copy without changing any of Avira System Speedup's settings.
 
-Put winapp2ool in that folder, set the flavor to NonCCleaner, and choose **Update Winapp2.ini**. The same install from the command line:
+Put winapp2ool in that folder, set the flavor to Base, and choose **Update Winapp2.ini**. The same install from the command line:
 
 ```
 winapp2ool -download winapp2 -base -1d "C:\Path\To\Avira\System Speedup\sdf"
@@ -261,7 +261,7 @@ You should use the base [winapp2.ini](https://github.com/MoscaDotTo/Winapp2/rele
 
 ### Installation
 
-R-Wipe & Clean's winapp2.ini support is unofficial. It imports winapp2.ini once, through a prompt, instead of reading it from a fixed location when it starts. Put winapp2ool wherever is convenient, set the flavor to NonCCleaner, and choose **Update Winapp2.ini** to fetch the file you are about to import. The same from the command line:
+R-Wipe & Clean's winapp2.ini support is unofficial. It imports winapp2.ini once, through a prompt, instead of reading it from a fixed location when it starts. Put winapp2ool wherever is convenient, set the flavor to Base, and choose **Update Winapp2.ini** to fetch the file you are about to import. The same from the command line:
 
 ```
 winapp2ool -download winapp2 -base -1d "C:\Path\To\Your\Winapp2 Folder"
@@ -302,7 +302,7 @@ You should use the base [winapp2.ini](https://github.com/MoscaDotTo/Winapp2/rele
 
 HDCleaner ships with a built-in copy of winapp2.ini. You can override or add to it by placing winapp2.ini in the same folder as `HDCleaner.exe`. By default, that's `..\Program Files\HDCleaner`.
 
-Put winapp2ool in that folder, set the flavor to NonCCleaner, and choose **Update Winapp2.ini**. The same install from the command line:
+Put winapp2ool in that folder, set the flavor to Base, and choose **Update Winapp2.ini**. The same install from the command line:
 
 ```
 winapp2ool -download winapp2 -base -1d "%ProgramFiles%\HDCleaner"
@@ -355,7 +355,7 @@ You should use the base [winapp2.ini](https://github.com/MoscaDotTo/Winapp2/rele
 
 Reg Organizer ships with a copy of winapp2.ini maintained by ChemTable, in `..\AppData\Roaming\ChemTable Software\Reg Organizer\CleanupDatabases` by default. Replace it with the one from this repository to update it yourself. Reg Organizer may put its own copy back when it updates.
 
-Put winapp2ool in that folder, set the flavor to NonCCleaner, and choose **Update Winapp2.ini**. The same install from the command line:
+Put winapp2ool in that folder, set the flavor to Base, and choose **Update Winapp2.ini**. The same install from the command line:
 
 ```
 winapp2ool -download winapp2 -base -1d "%AppData%\ChemTable Software\Reg Organizer\CleanupDatabases"

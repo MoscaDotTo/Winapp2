@@ -146,7 +146,7 @@ From here, most people want one of these:
 | Get a winapp2.ini trimmed for your machine, from the menu | Choose `Update & Trim` on the main menu | [First run](#example-1-first-run-updating-and-trimming-from-the-menu) |
 | Download the latest winapp2.ini from a script, with no output or prompts | `winapp2ool download winapp2 -s` | [Scripted download](#example-2-scripted-download) |
 | Download the latest winapp2.ini and trim it in one command | `winapp2ool -2 -d -s` | [Downloading and trimming in one command](#example-3-downloading-and-trimming-in-one-command) |
-| Download a flavor other than CCleaner | `winapp2ool -bleachbit download winapp2 -s` | [Choosing a Flavor](#example-4-choosing-a-flavor) |
+| Download a flavor other than base | `winapp2ool -bleachbit download winapp2 -s` | [Choosing a Flavor](#example-4-choosing-a-flavor) |
 | Apply your own additions in `custom.ini` to winapp2.ini, then lint the result, without going online | `winapp2ool -transmute -add -2f custom.ini -3f winapp2.ini -s -offline`, then `winapp2ool -debug -c -1f winapp2.ini -3f winapp2.ini -s -offline` | [Fully offline maintenance chain](#example-5-fully-offline-maintenance-chain) |
 
 Each module's readme has its own Common Uses table near the top. Every module is also a numbered option in the menu (see [Menu Options](#menu-options)). `-s` and `-offline` are described under [Global Args](#global-args), and `-bleachbit` under [Flavor Args](#flavor-args).
@@ -221,8 +221,8 @@ The active [Flavor](../README.md#what-are-flavors) determines which variant of w
 
 | Arg | Effect | Notes |
 |:-|:-|:-|
-| `-ccleaner` or `-cc` | Sets the Flavor to CCleaner | Default |
-| `-ncc` or `-base` | Sets the Flavor to Non-CCleaner (base) | |
+| `-ccleaner` or `-cc` | Sets the Flavor to CCleaner | |
+| `-base` or `-ncc` | Sets the Flavor to Base | Default |
 | `-bleachbit` or `-bb` | Sets the Flavor to BleachBit | |
 | `-systemninja` or `-sn` | Sets the Flavor to System Ninja | |
 | `-tron` | Sets the Flavor to Tron | |
@@ -256,7 +256,7 @@ You have just downloaded winapp2ool.exe into an empty folder and want a copy of 
 
 1. Run winapp2ool.exe.
 2. Because there is no local winapp2.ini, the main menu opens with the update options shown in [Quick Start](#quick-start)
-3. Choose `Update & Trim`. Winapp2ool prints `Downloading & trimming, this may take a moment...`, downloads the latest winapp2.ini in the active Flavor (CCleaner unless you've changed it in [Settings](modules/maintool/readme.md)), removes the entries that do not apply to your system, and saves the result as `winapp2.ini` (`winapp2.rules` for System Ninja) in the current folder.
+3. Choose `Update & Trim`. Winapp2ool prints `Downloading & trimming, this may take a moment...`, downloads the latest winapp2.ini in the active Flavor (base unless you've changed it in [Settings](modules/maintool/readme.md)), removes the entries that do not apply to your system, and saves the result as `winapp2.ini` (`winapp2.rules` for System Ninja) in the current folder.
 4. The update options disappear from the menu because your local copy is now current.
 
 ---
@@ -287,7 +287,7 @@ Nothing is printed to the console. `winapp2.ini` is downloaded from GitHub and s
 - `download` launches the Downloader module
 - `winapp2` is the Downloader's file selector for winapp2.ini
 - `-s` suppresses output and prompts, so the command can run unattended
-- No Flavor arg is given, so the active Flavor is downloaded: CCleaner, unless you've changed it in [Settings](modules/maintool/readme.md). System Ninja's file is saved as `winapp2.rules`
+- No Flavor arg is given, so the active Flavor is downloaded: base, unless you've changed it in [Settings](modules/maintool/readme.md). System Ninja's file is saved as `winapp2.rules`
 
 ---
 
@@ -324,7 +324,7 @@ Nothing is printed to the console. `winapp2.ini` appears in the working director
 
 **Context**
 
-A BleachBit user wants the BleachBit flavor of winapp2.ini instead of the default CCleaner one.
+A BleachBit user wants the BleachBit flavor of winapp2.ini instead of the default base one.
 
 **Command**
 

@@ -49,12 +49,12 @@ Downloaded winapp2.ini to C:\Tools\winapp2
 **Result**
 ```
 C:\Tools\winapp2\
-    winapp2.ini          (CCleaner flavor)
+    winapp2.ini          (base flavor)
     winapp2ool.exe
 ```
 
 **Explanation**
-- No flavor flag was given, so you got the default flavor, CCleaner
+- No flavor flag was given, so you got the default flavor, base
 - The save directory defaults to the current directory
 - Winapp2ool does not exit afterwards; it opens its main menu. See [Example 5](#example-5-silent-scriptable-downloads) for silent mode
 

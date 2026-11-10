@@ -53,7 +53,7 @@ Public Module updater
     ''' The flavor of the local winapp2.ini the last update check compared, which the main menu's
     ''' winapp2.ini update options fetch. Set by <see cref="findLocalWinapp2"/>.
     ''' </summary>
-    Public Property localWa2Flavor As WinappFlavor = WinappFlavor.CCleaner
+    Public Property localWa2Flavor As WinappFlavor = WinappFlavor.Base
     ''' <summary>
     ''' The file name of the local winapp2.ini the last update check compared, which the main
     ''' menu's winapp2.ini update options write. Set by <see cref="findLocalWinapp2"/>.

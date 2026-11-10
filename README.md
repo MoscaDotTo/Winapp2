@@ -45,7 +45,7 @@ Winapp2.ini is provided as-is and without warranty. Its whole purpose is to dele
 
 # [Quick Start](#quick-start)
 1. Download [winapp2ool.exe](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2ool.exe)
-    - If you use something other than CCleaner, open the winapp2ool settings and pick your tool's flavor. CCleaner is the default.
+    - Open the winapp2ool settings and pick your tool's flavor. The default is the base flavor, which suits any program without a flavor of its own.
 2. Follow the [installation guide](INSTALL.md) for your cleaner application.
 3. Use winapp2ool to keep your copy up to date, and trimmed to the entries your machine needs.
 

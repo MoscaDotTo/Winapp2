@@ -37,7 +37,7 @@ Public Module Winapp2ool
         ''' <summary>
         ''' The base flavor of winapp2.ini from which all others are derived
         ''' </summary>
-        NonCCleaner = 1
+        Base = 1
 
         ''' <summary>
         ''' Designed to pass BleachBit's sanity checker 

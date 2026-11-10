@@ -143,11 +143,11 @@ The global flavor flags turn on a flavor's [flavor-aware checks](#flavor-aware-c
 
 | Arg | Alias | Flavor |
 |:-|:-|:-|
-| `-ccleaner` | `-cc` | CCleaner (default) |
+| `-ccleaner` | `-cc` | CCleaner |
 | `-bleachbit` | `-bb` | BleachBit |
 | `-systemninja` | `-sn` | System Ninja |
 | `-tron` | | Tron |
-| `-base` | `-ncc` | Base (non-CCleaner) |
+| `-base` | `-ncc` | Base (default) |
 | `-ccleaner7` | `-cc7` | CCleaner 7 |
 | `-fluentcleaner` | `-fc` | FluentCleaner |
 

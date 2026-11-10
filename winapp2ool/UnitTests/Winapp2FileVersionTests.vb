@@ -126,8 +126,7 @@ Imports System.Text
     ''' </summary>
     <TestMethod()> Public Sub FlavorNamesParse()
 
-        Assert.AreEqual(winapp2ool.WinappFlavor.NonCCleaner, winapp2ool.WinappFlavorInfo.ParseName("Base"))
-        Assert.AreEqual(winapp2ool.WinappFlavor.NonCCleaner, winapp2ool.WinappFlavorInfo.ParseName("NonCCleaner"))
+        Assert.AreEqual(winapp2ool.WinappFlavor.Base, winapp2ool.WinappFlavorInfo.ParseName("Base"))
         Assert.AreEqual(winapp2ool.WinappFlavor.SystemNinja, winapp2ool.WinappFlavorInfo.ParseName("system ninja"))
         Assert.AreEqual(winapp2ool.WinappFlavor.SystemNinja, winapp2ool.WinappFlavorInfo.ParseName("SystemNinja"))
         Assert.AreEqual(winapp2ool.WinappFlavor.CCleaner7, winapp2ool.WinappFlavorInfo.ParseName("CCleaner 7"))

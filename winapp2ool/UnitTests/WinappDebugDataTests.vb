@@ -33,7 +33,7 @@ Imports System.Reflection
 '''   A value that doesn't parse as an integer asserts a count of 0.
 ''' - May include a <c> Flavor= </c> metadata key naming a <c> WinappFlavor </c> member, matched
 '''   case-insensitively, to set the winapp2.ini flavor. Without the key the flavor is
-'''   <c> NonCCleaner </c>; a value that doesn't parse gives <c> CCleaner </c>.
+'''   <c> Base </c>; a value that doesn't parse gives <c> CCleaner </c>.
 ''' - May include a <c> Group=name </c> metadata key to combine multiple input sections into one
 '''   <c> winapp2file </c> for testing file-level checks (e.g. entry alphabetization).
 '''   All sections sharing the same <c> Group= </c> value are combined into a single test.
@@ -70,7 +70,7 @@ Imports System.Reflection
         Dim inputPath = IO.Path.Combine(Environment.CurrentDirectory, "WinappDebugInputs.ini")
         Dim outputPath = IO.Path.Combine(Environment.CurrentDirectory, "WinappDebugOutputs.ini")
         If Not IO.File.Exists(inputPath) OrElse Not IO.File.Exists(outputPath) Then
-            Yield {Nothing, Nothing, Integer.MinValue, -1, winapp2ool.Winapp2ool.WinappFlavor.NonCCleaner, False, Nothing}
+            Yield {Nothing, Nothing, Integer.MinValue, -1, winapp2ool.Winapp2ool.WinappFlavor.Base, False, Nothing}
             Return
         End If
 
@@ -129,7 +129,7 @@ Imports System.Reflection
                 section.Keys.Remove(errorKey)
             End If
 
-            Dim flavor As winapp2ool.WinappFlavor = winapp2ool.WinappFlavor.NonCCleaner
+            Dim flavor As winapp2ool.WinappFlavor = winapp2ool.WinappFlavor.Base
             Dim flavorKey = section.Keys.GetKey("Flavor")
             If flavorKey IsNot Nothing Then
                 [Enum].TryParse(flavorKey.Value.Trim(), True, flavor)
@@ -203,7 +203,7 @@ Imports System.Reflection
     ''' <param name="section">The input section the failure is about</param>
     ''' <param name="msg">The failure message <see cref="debug_Repair"/> reports</param>
     Private Shared Function SingleErrorCase(section As winapp2ool.iniSection, msg As String) As Object()
-        Return {New winapp2ool.iniSection() {section}, Nothing, 0, -1, winapp2ool.WinappFlavor.NonCCleaner, False, msg}
+        Return {New winapp2ool.iniSection() {section}, Nothing, 0, -1, winapp2ool.WinappFlavor.Base, False, msg}
     End Function
 
     ''' <summary>

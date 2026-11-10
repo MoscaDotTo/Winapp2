@@ -177,14 +177,14 @@ The flavor only matters for `winapp2`.
 
 The active flavor comes from winapp2ool's global settings (**Settings → Change Flavor** on the main menu), but any command-line [flavor flag](#flavor-flags) overrides it for that run. Command-line runs never save settings.
 
-###### Note: the default flavor is **CCleaner**, not base. On a winapp2ool that has never had its flavor changed, `winapp2ool -download winapp2` fetches the CCleaner flavor. Pass `-base` (or `-ncc`) for the non-CCleaner build. 
+###### Note: the default flavor is base. On a winapp2ool that has never had its flavor changed, `winapp2ool -download winapp2` fetches the base flavor. Pass `-cc` (or `-ccleaner`) for the CCleaner flavor.
 
 ## Output File Names
 
 | Request | Active flavor | File written |
 |:-|:-|:-|
-| `winapp2` | Base | `winapp2.ini` |
-| `winapp2` | CCleaner *(default)* | `winapp2.ini` |
+| `winapp2` | Base *(default)* | `winapp2.ini` |
+| `winapp2` | CCleaner | `winapp2.ini` |
 | `winapp2` | BleachBit | `winapp2.ini` |
 | `winapp2` | System Ninja | `winapp2.rules` |
 | `winapp2` | Tron | `winapp2.ini` |

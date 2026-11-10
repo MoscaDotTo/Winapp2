@@ -235,7 +235,7 @@ Module Downloader
 
     ''' <summary>
     ''' Returns the link to the winapp2.ini flavor named by <see cref="CurrentWinappFlavor"/>,
-    ''' which defaults to CCleaner
+    ''' which defaults to Base
     ''' </summary>
     Public Function getWinappLink() As String
 
@@ -253,7 +253,7 @@ Module Downloader
 
         Select Case flavor
 
-            Case WinappFlavor.NonCCleaner
+            Case WinappFlavor.Base
 
                 Return baseFlavorLink
 

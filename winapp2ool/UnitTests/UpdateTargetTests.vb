@@ -102,7 +102,7 @@ Imports System.IO
         winapp2ool.findLocalWinapp2(_dir)
 
         Assert.AreEqual("winapp2.ini", winapp2ool.localWa2Name)
-        Assert.AreEqual(winapp2ool.WinappFlavor.NonCCleaner, winapp2ool.localWa2Flavor)
+        Assert.AreEqual(winapp2ool.WinappFlavor.Base, winapp2ool.localWa2Flavor)
 
     End Sub
 
@@ -115,6 +115,23 @@ Imports System.IO
 
         Assert.AreEqual(winapp2ool.WinappFlavor.SystemNinja, winapp2ool.localWa2Flavor)
         Assert.AreEqual("winapp2.rules", winapp2ool.localWa2Name)
+
+    End Sub
+
+    ''' <summary>
+    ''' The default flavor is base, so a fresh winapp2ool with no local copy compares and
+    ''' downloads the base winapp2.ini
+    ''' </summary>
+    <TestMethod()> Public Sub DefaultFlavorIsBase()
+
+        winapp2ool.InitDefaultToolSettings()
+
+        winapp2ool.findLocalWinapp2(_dir)
+
+        Assert.AreEqual(winapp2ool.WinappFlavor.Base, winapp2ool.CurrentWinappFlavor)
+        Assert.AreEqual(winapp2ool.WinappFlavor.Base, winapp2ool.localWa2Flavor)
+        Assert.AreEqual(winapp2ool.baseFlavorLink, winapp2ool.getWinappLink())
+        Assert.AreEqual(winapp2ool.WinappFlavor.Base, New winapp2ool.LintOptions().Flavor)
 
     End Sub
 

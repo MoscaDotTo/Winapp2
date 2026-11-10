@@ -49,13 +49,13 @@ The active flavor determines which version of winapp2.ini is used when modules d
 
 | Flavor | Description |
 |:-|:-|
-| CCleaner | The CCleaner-compatible variant (default) |
-| NonCCleaner | The base (non-CCleaner) variant |
-| BleachBit | The BleachBit-compatible variant |
-| SystemNinja | The System Ninja-compatible variant |
+| CCleaner | The CCleaner Classic (v1-6) variant |
+| Base | The base variant from which every other flavor is built (default) |
+| BleachBit | The BleachBit 5 (and older) variant |
+| SystemNinja | The System Ninja variant |
 | Tron | The Tron-compatible variant |
-| CCleaner7 | The CCleaner 7-compatible variant |
-| FluentCleaner | The FluentCleaner-compatible variant |
+| CCleaner7 | The CCleaner 7 variant |
+| FluentCleaner | The FluentCleaner variant |
 
 The current flavor is shown on the Settings menu. Modules that download winapp2.ini (Diff, Trim, CC7Patcher when downloading) use this setting to determine which file to fetch.
 
