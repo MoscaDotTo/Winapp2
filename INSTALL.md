@@ -2,7 +2,7 @@
 
 This page covers installing and configuring winapp2.ini in each application that supports it. For what winapp2.ini is and how it's built, see the [main readme](README.md).
 
-Whichever application you use, install winapp2.ini with [winapp2ool.exe](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2ool.exe) and keep a copy of it in the same folder as winapp2.ini. That's how you keep the file up to date afterwards.
+Whichever application you use, we recommend installing winapp2.ini with [winapp2ool.exe](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2ool.exe). The next section shows how.
 
 The download links on this page fetch each file from the [latest release](https://github.com/MoscaDotTo/Winapp2/releases/latest), where most file names carry their flavor, such as `winapp2-ccleaner.ini`. If you install one by hand, rename it to `winapp2.ini` first, or to `winapp2.rules` for System Ninja.
 
@@ -10,7 +10,7 @@ The download links on this page fetch each file from the [latest release](https:
 
 ## Installing with winapp2ool
 
-Winapp2ool is the recommended way to install winapp2.ini for every application on this page, and the only one that also keeps it current afterwards. The procedure is the same everywhere:
+Winapp2ool is the only install method that also keeps winapp2.ini current afterwards, as long as you leave a copy of it beside the file. It works the same way for every application:
 
 1. Download [winapp2ool.exe](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2ool.exe) and put it in the folder where your application looks for winapp2.ini. Each section below names that folder.
 2. Run it, open **Settings**, and press **Change Flavor** until it shows the flavor your application's section names. It cycles through CCleaner, NonCCleaner, BleachBit, SystemNinja, Tron, CCleaner7, and FluentCleaner, and the default is CCleaner. To keep your choice between sessions, turn on **Toggle Saving Settings** and **Toggle Reading settings**.
@@ -75,9 +75,9 @@ You should use the [CCleaner flavor](https://github.com/MoscaDotTo/Winapp2/relea
 
 ### Installation
 
-Place winapp2.ini in the same folder as ccleaner.exe. By default this is `..\Program Files\CCleaner`
+Place winapp2.ini in the same folder as ccleaner.exe. By default that's `..\Program Files\CCleaner`.
 
-We recommend trimming winapp2.ini whenever you update it, because the full file slows down CCleaner's startup for no benefit. With winapp2ool in that folder and the flavor left at its CCleaner default, **Update & Trim** is the main menu option you want.
+We recommend trimming winapp2.ini whenever you update it, because the full file slows down CCleaner's startup. With winapp2ool in that folder and the flavor left at its CCleaner default, **Update & Trim** is the main menu option you want.
 
 The same install from the command line:
 
@@ -93,7 +93,7 @@ winapp2ool -download winapp2 -cc -1d "%ProgramFiles%\CCleaner"
 
 ### Configuration
 
-CCleaner shows the winapp2.ini entries it detects on your system in its Applications tab, which modern versions keep under Custom Clean. Every winapp2.ini entry starts out disabled, and you enable them one at a time or in groups. To enable a whole group, right click its section header and select "Check all."
+CCleaner lists the winapp2.ini entries it detects on your system in its Applications tab, which modern versions keep under Custom Clean. They all start out disabled. To turn on a whole group at once, right click its section header and select "Check all."
 
 ###### Note: CCleaner 5.64.7577 is the last version to work on Windows XP and Vista (for non-SSE2 CPUs CCleaner 5.26.5937). Winapp2.ini and Winapp3.ini will continue to work with this version.
 
@@ -113,7 +113,7 @@ Back up your `ccleaner.ini` before your first run. Patching rewrites the file in
 
 1. Download [winapp2ool.exe](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2ool.exe) and run it
 2. Select **CC7Patcher** from the main menu
-3. Use **Change ccleaner.ini** to point at CCleaner 7's `ccleaner.ini`, by default this is `..\Program Files\Piriform\CCleaner 7`
+3. Use **Change ccleaner.ini** to point at CCleaner 7's `ccleaner.ini`. By default it's in `..\Program Files\Piriform\CCleaner 7`
 4. Optionally turn on **Toggle Trim** to install only the entries that apply to your system, which shortens CCleaner's startup
 5. Select **Run (default)**
 
@@ -133,7 +133,7 @@ You also need to run it again after every CCleaner 7 update, because the update 
 
 ### Configuration
 
-CCleaner 7 shows the winapp2.ini entries it detects on your system beside its own cleaning options in Custom Clean. Every winapp2.ini entry starts out disabled, and you enable them one at a time or in groups.
+CCleaner 7 lists the winapp2.ini entries it detects on your system next to its own cleaning options in Custom Clean. As in older versions, they start out disabled.
 
 CCleaner 7 puts a `custom-clean.name.` prefix on every winapp2.ini entry, and there's no way to turn it off. The entry list can't be widened either, so hover over an entry to see its full name. Entries are sorted alphabetically, *ignoring* the prefix.
 
@@ -151,7 +151,7 @@ CCleaner 7 puts a `custom-clean.name.` prefix on every winapp2.ini entry, and th
 
 ### Installation
 
-1. Ensure that you have disabled "Download and update cleaners from community (Winapp2.ini)" in the BleachBit settings.
+1. Turn off "Download and update cleaners from community (Winapp2.ini)" in BleachBit's settings.
 2. Place winapp2.ini in `%AppData%\BleachBit\Cleaners`.
 
 With winapp2ool in `%AppData%\BleachBit\Cleaners`, set the flavor to NonCCleaner (or BleachBit on version 5 and older) and choose **Update Winapp2.ini**.
@@ -173,7 +173,7 @@ BleachBit also maintains its own [customized version of winapp2.ini](https://git
 
 ### Configuration 
 
-BleachBit shows the winapp2.ini entries that have valid syntax and are detected on your system in its sidebar. Every winapp2.ini entry starts out disabled, and you enable them one at a time or in groups. To enable a whole group, select the check box next to its section header.
+BleachBit's sidebar lists the winapp2.ini entries it detects on your system, leaving out any with invalid syntax. None are enabled at first. Select the check box next to a section header to enable that whole group.
 
 ###### Note: BleachBit 2.2 is the last version to work on Windows XP. Winapp2.ini and Winapp3.ini will continue to work with this version.
 
@@ -185,7 +185,7 @@ BleachBit shows the winapp2.ini entries that have valid syntax and are detected 
 You should use the [System Ninja flavor](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-systemninja.rules), which replaces keys System Ninja can't run with ones it can. We don't recommend any other flavor with System Ninja.
 
 ### Installation
-System Ninja ships with its own copy of winapp2.ini, served from its own servers, and stores it in your `..\System Ninja\scripts\` folder as `winapp2.rules`.
+System Ninja ships with a copy of winapp2.ini, served from its developer's servers, and stores it in your `..\System Ninja\scripts\` folder as `winapp2.rules`.
 
 To keep that `winapp2.rules` up to date with winapp2ool instead:
 1. Open System Ninja
@@ -249,7 +249,7 @@ winapp2ool -download winapp2 -tron -1d "C:\Path\To\tron\resources\stage_1_tempcl
 
 ### Configuration
 
-Tron ships with its own configuration. You can modify it by opening the copy of CCleaner or modifying the `ccleaner.ini` file shipped with Tron.
+Tron ships with its own CCleaner configuration. Change it in the copy of CCleaner that comes with Tron, or edit Tron's `ccleaner.ini` directly.
 
 ## R-Wipe & Clean
 
@@ -261,15 +261,13 @@ You should use the base [winapp2.ini](https://github.com/MoscaDotTo/Winapp2/rele
 
 ### Installation
 
-R-Wipe & Clean supports winapp2.ini unofficially.
-
-R-Wipe & Clean imports winapp2.ini once through a prompt, instead of reading it from a fixed location when it starts. Put winapp2ool wherever you find convenient, set the flavor to NonCCleaner, and choose **Update Winapp2.ini** to fetch the file you are about to import. The same from the command line:
+R-Wipe & Clean's winapp2.ini support is unofficial. It imports winapp2.ini once, through a prompt, instead of reading it from a fixed location when it starts. Put winapp2ool wherever is convenient, set the flavor to NonCCleaner, and choose **Update Winapp2.ini** to fetch the file you are about to import. The same from the command line:
 
 ```
 winapp2ool -download winapp2 -base -1d "C:\Path\To\Your\Winapp2 Folder"
 ```
 
-The import steps below are adapted from [this thread](https://forum.r-tt.com/viewtopic.php?t=11018)
+These import steps are adapted from [a thread on the R-Tools forum](https://forum.r-tt.com/viewtopic.php?t=11018):
 
 1. In R-Wipe & Clean, select "Tools" from the menu bar
 2. From the Tools menu, click R-Wipe&Clean Smart
@@ -284,9 +282,9 @@ The import steps below are adapted from [this thread](https://forum.r-tt.com/vie
 7. In R-Wipe & Clean Smart, select "Advanced" from the menu bar
 8. In the Advanced menu, select "Import From .INI"
 9. Browse to and select winapp2.ini
-10. Import as either many wipe lists or as a single one, whichever is your preference
+10. Import it as many wipe lists or as a single one
     * You'll repeat the import every time you update, so we recommend a single wipe list, which is easy to remove before the next import
-11. Once winapp2.ini is imported, you should see a message saying `LangSecRef`, `Section`, and `Warning` are unsupported functions, press OK
+11. When the import finishes, a message says `LangSecRef`, `Section`, and `Warning` are unsupported functions. Press OK
 
 ### Configuration
 
@@ -315,7 +313,7 @@ winapp2ool -download winapp2 -base -1d "%ProgramFiles%\HDCleaner"
 Once winapp2.ini is beside `HDCleaner.exe`, tell HDCleaner how to handle rules that conflict with its own:
 
 1. Open HDCleaner
-2. From the side bar, select the bottom most icon (settings)
+2. In the sidebar, select the bottom icon (settings)
 3. From the settings panel, select "Options"
 4. Change the setting "If using Winapp2.ini" to "Ignore duplicate entries in HDCleaner resource file"
 
@@ -327,11 +325,11 @@ Your winapp2.ini now takes priority over HDCleaner's built-in entries.
 
 ### Flavor
 
-You should use the [FluentCleaner flavor](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-fluentcleaner.ini), which carries the changes FluentCleaner makes to its own winapp2.ini.
+You should use the [FluentCleaner flavor](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-fluentcleaner.ini), which matches the edits FluentCleaner makes to the copy it ships.
 
 ### Installation
 
-FluentCleaner ships with a copy of winapp2.ini in the same folder as `FCleaner.exe` or `FluentCleaner.Classic.exe`. You can update winapp2.ini by replacing this file yourself.
+FluentCleaner keeps its copy of winapp2.ini in the same folder as `FCleaner.exe` or `FluentCleaner.Classic.exe`, and you can update it by replacing that file.
 
 Put winapp2ool in that folder, set the flavor to FluentCleaner, and choose **Update Winapp2.ini**. The same install from the command line:
 
@@ -347,7 +345,7 @@ With FluentCleaner's own winapp2.ini or the FluentCleaner flavor, almost every e
 
 ###### [Download Reg Organizer](https://www.chemtable.com/organizer.htm)
 
-###### ChemTable also provides their own information about winapp2.ini [here](https://www.chemtable.com/blog/en/community-driven-cleanup.htm)
+###### ChemTable has [its own page about winapp2.ini](https://www.chemtable.com/blog/en/community-driven-cleanup.htm)
 
 ### Flavor
 
@@ -371,9 +369,11 @@ In the left toolbar, open the *Miscellaneous Tools* drop-down and select *Commun
 
 ## Keeping your copy up to date
 
-Run winapp2ool from the folder holding your winapp2.ini and choose `Update Winapp2.ini` or `Update & Trim`. If your copy's header has a `; Flavor:` line, winapp2ool updates it in that flavor. Otherwise it uses the flavor in Settings, which only lasts between sessions if you turned on saving and reading settings, so set it again if you didn't. Before you update, `Show winapp2.ini changelog` shows what changed since your copy was published, and `Show trimmed changelog` does the same against a trimmed copy.
+Run winapp2ool from the folder holding your winapp2.ini and choose `Update Winapp2.ini` or `Update & Trim`. If your copy's header has a `; Flavor:` line, winapp2ool updates it in that flavor. If not, it goes by the flavor in Settings, and that setting only lasts between sessions if you turned on saving and reading settings.
 
-You can also update in-place using the winapp2ool commands provided in the sections above.
+To see what changed before you update, choose `Show winapp2.ini changelog`, or `Show trimmed changelog` if your copy is trimmed.
+
+The command in each section above updates in place too.
 
 Applications that ship their own copy of winapp2.ini may overwrite yours when they update themselves.
 

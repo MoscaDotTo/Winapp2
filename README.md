@@ -4,11 +4,11 @@
 
 **Winapp2.ini** is a community-maintained database of declarative cleaning routines for Windows. It maps individual applications and system components to their transient data: temporary files, caches, logs, recently used lists, and so on. It started in [2010](https://community.ccleaner.com/t/winapp2-ini-additions/40035) and has lived on GitHub since 2016. Most of the cleaning tools that support it bundle it or fetch it on demand, so plenty of the people using it never see this repository (welcome!). Winapp2.ini is rebuilt every day, and a new version is published whenever its content changes.
 
-Winapp2.ini works with CCleaner (*including* CCleaner 7), BleachBit, System Ninja, Avira System Speedup, R-Wipe&Clean, HDCleaner, FluentCleaner, and Reg Organizer. It's published in seven variants, called *flavors*. Each one is tailored to what the tool reading it supports, and each has its own changelog.
+Winapp2.ini works with CCleaner (*including* CCleaner 7), BleachBit, System Ninja, Avira System Speedup, R-Wipe&Clean, HDCleaner, FluentCleaner, and Reg Organizer. It comes in seven variants, called *flavors*, each tailored to what its tool supports and each with its own changelog.
 
 ### Why Winapp2.ini?
 
-A lot of cleaning tools sweep whole drives for file types they think are junk, and sometimes they take things you wanted. Winapp2.ini takes the opposite approach. Every entry names the exact paths it cleans and the application they belong to, so you can read what an entry will delete before it runs, audit it, and change it if it doesn't suit you.
+A lot of cleaning tools sweep whole drives for file types they think are junk. Winapp2.ini names its targets instead. Every entry lists the exact paths it cleans and the application they belong to, so you can read what an entry deletes before it runs, and change it if it doesn't suit you.
 
 Winapp2.ini is an extension to the cleaners that read it, so it updates on its own schedule instead of waiting for theirs. That also means you can switch tools, or versions of a tool, without losing your cleaning rules.
 
@@ -25,10 +25,10 @@ That said, there are still plenty of good reasons to clean:
 
 ### What are flavors?
 
-A flavor is winapp2.ini with one tool's set of changes applied, so that it fits what that tool supports. The build makes every flavor from each new winapp2.ini automatically, so a flavor is always as current as the base file, even when the copy that shipped with your cleaner isn't. Each flavor is meant as a drop-in replacement for the winapp2.ini that comes with its tool.
+A flavor is winapp2.ini with one tool's changes applied. The build makes every flavor from each new winapp2.ini, so your flavor is as current as the base file even when the copy your cleaner shipped with isn't. Each one is meant as a drop-in replacement for that copy.
 
 ### Disclaimer
-Winapp2.ini is provided as-is and without warranty. Its whole purpose is to delete files, folders, and registry keys from your system, automatically and potentially irreversibly, so be careful with it and back up anything that matters. We recommend managing your local copy with winapp2ool, which can show you the changelog between your copy and the latest. Read it before you update, so you know what changed.
+Winapp2.ini is provided as-is and without warranty. Its whole purpose is to delete files, folders, and registry keys from your system, automatically and potentially irreversibly, so be careful with it and back up anything that matters. We recommend managing your local copy with winapp2ool, which can show you the changelog between your copy and the latest. Read it before you update.
 
 ---
 
@@ -61,10 +61,10 @@ The winapp2ool and flavor links below download from the [latest release](https:/
 | [Winapp2.ini](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2.ini)                                        | The base winapp2.ini, with nothing removed or changed. [Latest changelog](https://github.com/MoscaDotTo/Winapp2/blob/master/Non-CCleaner/diff.txt).
 | [CCleaner winapp2.ini](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-ccleaner.ini)                      | The CCleaner flavor, which fits better into its UI. [Latest changelog](https://github.com/MoscaDotTo/Winapp2/blob/master/diff.txt).
 | [CCleaner 7 winapp2.ini](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-ccleaner7.ini)                   | The CCleaner 7 flavor, converted to the entry format CCleaner 7 requires. You don't install this file by hand: winapp2ool downloads it and patches it into `ccleaner.ini` for you (see [CCleaner 7](INSTALL.md#ccleaner-7)). [Latest changelog](https://github.com/MoscaDotTo/Winapp2/blob/master/Non-CCleaner/CCleaner7/diff.txt).
-| [BleachBit winapp2.ini](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-bleachbit.ini)                    | The BleachBit flavor, **for BleachBit 5 and older only.** It removes the registry exclusions those versions don't support, which their sanity checker rejects. BleachBit 6 and newer support them, so use the base winapp2.ini above with those. [Latest changelog](https://github.com/MoscaDotTo/Winapp2/blob/master/Non-CCleaner/BleachBit/diff.txt).
+| [BleachBit winapp2.ini](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-bleachbit.ini)                    | The BleachBit flavor, **for BleachBit 5 and older only.** It removes the registry exclusions those versions' sanity checker rejects. BleachBit 6 and newer handle them fine, so use the base winapp2.ini with those. [Latest changelog](https://github.com/MoscaDotTo/Winapp2/blob/master/Non-CCleaner/BleachBit/diff.txt).
 | [System Ninja winapp2.rules](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-systemninja.rules)           | The System Ninja flavor, which replaces keys System Ninja can't run with ones it can. [Latest changelog](https://github.com/MoscaDotTo/Winapp2/blob/master/Non-CCleaner/SystemNinja/diff.txt).
 | [Tron winapp2.ini](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-tron.ini)                              | The Tron flavor, which carries the changes Tron makes to its own winapp2.ini. [Latest changelog](https://github.com/MoscaDotTo/Winapp2/blob/master/Non-CCleaner/Tron/diff.txt).
-| [FluentCleaner winapp2.ini](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-fluentcleaner.ini)            | The FluentCleaner flavor, which carries the changes FluentCleaner makes to its own winapp2.ini. [Latest changelog](https://github.com/MoscaDotTo/Winapp2/blob/master/Non-CCleaner/FluentCleaner/diff.txt).
+| [FluentCleaner winapp2.ini](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-fluentcleaner.ini)            | The FluentCleaner flavor, matching the edits FluentCleaner makes to the copy it ships. [Latest changelog](https://github.com/MoscaDotTo/Winapp2/blob/master/Non-CCleaner/FluentCleaner/diff.txt).
 | [Winapp3.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/Winapp3.ini)                                   | An extension for an extension, with entries for power users. *Do **not** use this file if you don't know what you're doing. Some of its entries are very aggressive and can do real damage to your file system.*
 | [Assembler](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler)                                                         | The sources every published file above is built from, and the build script that drives them. Contributions go here. See [How Winapp2.ini is built](#how-winapp2ini-is-built).
 
@@ -90,9 +90,9 @@ Each build runs four stages, driven by [`build winapp2.ps1`](Assembler/build%20w
 
 | Stage | What runs | What it does |
 | :- | :- | :- |
-| Generate | [EntryBuilder](winapp2ool/modules/entrybuilder/readme.md) | Expands the per-letter [base entry sources](Assembler/EntryBuilder) into artifacts, resolving an optional shorthand DSL and shared scaffold catalogs |
+| Generate | [EntryBuilder](winapp2ool/modules/entrybuilder/readme.md) | Expands the per-letter [base entry sources](Assembler/EntryBuilder) into artifacts. Sources can use a shorthand DSL and the shared scaffold catalogs |
 | | [BrowserBuilder](winapp2ool/modules/browserbuilder/readme.md) | Produces one entry per browser per cleaning category, crossing [browser declarations](Assembler/BrowserBuilder) with the templates that apply to their engine |
-| | [UWPBuilder](winapp2ool/modules/uwpbuilder/readme.md) | Generates Microsoft Store entries from [package declarations](Assembler/UWP), resolving the same shared scaffold catalogs |
+| | [UWPBuilder](winapp2ool/modules/uwpbuilder/readme.md) | Generates Microsoft Store entries from [package declarations](Assembler/UWP), with the same scaffold catalogs |
 | Merge | [Combine](winapp2ool/modules/combine/readme.md) | Joins the generated artifacts into one file in strict mode, which fails the build if two artifacts use the same entry name |
 | Lint | [WinappDebug](winapp2ool/modules/winappdebug/README.md) | Checks the merged file's syntax and style, and saves its own corrections |
 | Publish | [Flavorizer](winapp2ool/modules/transmute/Flavorizer/readme.md), [WinappDebug](winapp2ool/modules/winappdebug/README.md), and [Diff](winapp2ool/modules/diff/readme.md) | Applies each flavor's ruleset to make the six other variants and lints each one, then writes a changelog against the previously published version for every output whose content changed |
@@ -101,15 +101,15 @@ Each build runs four stages, driven by [`build winapp2.ps1`](Assembler/build%20w
 
 The build artifacts under [Assembler/Entries](Assembler/Entries) are committed to the repository instead of living only for the length of a build. That lets us check the build against itself, and gives CI something to hold still while it varies one input at a time:
 
-| Check | Question it answers |
+| Check | What it does |
 | :- | :- |
-| **Generated artifact guard** | Did this change edit build output without editing the source that produces it? If so, it names the file you should have edited |
-| **PR verify** | What would this pull request change? It builds winapp2.ini twice, from `master` alone and from `master` with the pull request merged, then comments the resulting changelog on the pull request, or the stage where the build broke |
-| **Artifact drift** | Did generator output change when it wasn't supposed to? It regenerates every artifact into a scratch folder and compares them byte for byte with what's committed |
-| **Binary parity** | Does the committed winapp2ool.exe still match the source code beside it? If not, every published file would be built by code that isn't in the repository |
-| **Update signature** | Will deployed copies of winapp2ool accept the committed update? It fails when the update's signature doesn't verify, or `version.txt` doesn't match the exe's version |
+| **Generated artifact guard** | Fails a change that edits build output without touching the source that produces it, and names the file you should have edited |
+| **PR verify** | Builds winapp2.ini from `master`, then again with the pull request merged, and comments either the changelog the pull request would produce or the stage where it broke the build |
+| **Artifact drift** | Regenerates every artifact into a scratch folder and compares it byte for byte with what's committed, which catches generator output changing when it shouldn't |
+| **Binary parity** | Checks that the committed winapp2ool.exe still matches the source beside it. Otherwise every published file would come from code that isn't in the repository |
+| **Update signature** | Checks that copies of winapp2ool already out there will accept the committed update: its signature has to verify, and `version.txt` has to match the exe |
 | **Maintainer paths guard** | Fails a pull request from outside the project that touches winapp2ool's source, its committed exe, the build scripts, or the workflows |
-| **Daily build and release** | Rebuilds from current sources, commits the result, and cuts a tagged release with every flavor and changelog attached when the content changed |
+| **Daily build and release** | Rebuilds from current sources. When the content changed, it commits the result and cuts a tagged release with every flavor and changelog attached |
 
 Every build restamps the version line, so the daily build ignores that line when it decides whether the content changed. Otherwise an untouched rebuild would look like a change and publish an empty changelog every day.
 
