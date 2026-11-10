@@ -37,9 +37,9 @@ Winapp2.ini is provided as-is and without warranty. Its whole purpose is to dele
 1. [Quick Start](#quick-start)
 2. [Files of Interest](#files-of-interest)
 3. [Installation & Configuration](INSTALL.md)
-4. [How Winapp2.ini is built](#how-winapp2ini-is-built)
-5. [Contributing](#contributing)
-6. [Custom Content](#custom-content)
+4. [Contributing](#contributing)
+5. [Custom Content](#custom-content)
+6. [How Winapp2.ini is built](#how-winapp2ini-is-built)
 
 ---
 
@@ -76,11 +76,32 @@ Pick your cleaner to see how to install and configure winapp2.ini for it:
 
 [CCleaner Classic](INSTALL.md#ccleaner-classic) &middot; [CCleaner 7](INSTALL.md#ccleaner-7) &middot; [BleachBit](INSTALL.md#bleachbit) &middot; [System Ninja](INSTALL.md#system-ninja) &middot; [Avira System Speedup](INSTALL.md#avira-system-speedup) &middot; [Tron](INSTALL.md#tron) &middot; [R-Wipe & Clean](INSTALL.md#r-wipe--clean) &middot; [HDCleaner](INSTALL.md#hdcleaner) &middot; [FluentCleaner](INSTALL.md#fluentcleaner) &middot; [Reg Organizer](INSTALL.md#reg-organizer)
 
-Whatever cleaner you use, we strongly recommend keeping a copy of [winapp2ool.exe](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2ool.exe) in the same folder as winapp2.ini. That's how you keep it up to date.
+Whatever cleaner you use, we strongly recommend keeping a copy of [winapp2ool.exe](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2ool.exe) in the same folder as winapp2.ini to help keep it up to date.
 
 ---
 
+# [Contributing](#contributing)
+
+###### This section is for people who want to contribute to the project. You do not need to read or understand this in order to use winapp2.ini.
+
+Contributions go to the source files under [Assembler](Assembler), never to the published files the build makes from them. [Our contributor guidelines](CONTRIBUTING.md) cover where each kind of entry lives, the syntax rules for each, and what the automated checks will tell you after you open a pull request. Editing in the GitHub web interface is enough for most contributions. You never need to run the build or generate an output file yourself.
+
+---
+
+# [Custom content](#custom-content)
+
+###### This section is for people who may want to modify winapp2.ini for their system. You do not need to read or understand this in order to use winapp2.ini.
+
+Winapp2.ini doesn't cover non-English system configurations or portable software out of the box. If you need them, keep your own entries in a `custom.ini` file and use winapp2ool's [Transmute](winapp2ool/modules/transmute/readme.md) in `Add` mode to apply them to each new winapp2.ini. For a portable browser, [BrowserBuilder](winapp2ool/modules/browserbuilder/readme.md) can generate the entries from your own install's path.
+
+Winapp2ool 1.6 replaced the Merge feature with Transmute. If you used `custom.ini` with Merge, see [Migrating from Merge](winapp2ool/modules/transmute/readme.md#migrating-from-merge) in the Transmute readme.
+
+--- 
+
 # [How Winapp2.ini is built](#how-winapp2ini-is-built)
+
+###### This section is for people who maintain winapp2.ini or are interested in the technical details of how it is maintained. You do not need to read or understand this in order to use winapp2.ini. 
+
 
 Nobody edits the published winapp2.ini files in this repository by hand. Every one of them, and every changelog beside it, is generated from the sources in [Assembler](Assembler) by [winapp2ool](winapp2ool/Readme.md), a console application we maintain alongside the database. Its readme covers the tool itself, and each stage below links the readme for the module that runs it.
 
@@ -112,17 +133,3 @@ The build artifacts under [Assembler/Entries](Assembler/Entries) are committed t
 | **Daily build and release** | Rebuilds from current sources. When the content changed, it commits the result and cuts a tagged release with every flavor and changelog attached |
 
 Every build restamps the version line, so the daily build ignores that line when it decides whether the content changed. Otherwise an untouched rebuild would look like a change and publish an empty changelog every day.
-
----
-
-# [Contributing](#contributing)
-
-Contributions go to the source files under [Assembler](Assembler), never to the published files the build makes from them. [Our contributor guidelines](CONTRIBUTING.md) cover where each kind of entry lives, the syntax rules for each, and what the automated checks will tell you after you open a pull request. Editing in the GitHub web interface is enough for most contributions. You never need to run the build or generate an output file yourself.
-
----
-
-# [Custom content](#custom-content)
-
-Winapp2.ini doesn't cover non-English system configurations or portable software out of the box. If you need them, keep your own entries in a `custom.ini` file and use winapp2ool's [Transmute](winapp2ool/modules/transmute/readme.md) in `Add` mode to apply them to each new winapp2.ini. For a portable browser, [BrowserBuilder](winapp2ool/modules/browserbuilder/readme.md) can generate the entries from your own install's path.
-
-Winapp2ool 1.6 replaced the Merge feature with Transmute. If you used `custom.ini` with Merge, see [Migrating from Merge](winapp2ool/modules/transmute/readme.md#migrating-from-merge) in the Transmute readme.
