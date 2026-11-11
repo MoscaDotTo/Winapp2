@@ -63,7 +63,7 @@ Apps that ship both a UWP package and a win32 install keep both sets of keys in 
   - `qtwebengine.ini`: `[QtWebEngineScaffold: ...]`, the QtWebEngine catalog
   - `electron.ini`: `[ElectronScaffold: ...]`, the Electron catalog
 
-The winapp2.ini project keeps its source files in [`Assembler/UWP/`](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/UWP) (source directory) and [`Assembler/Scaffolds/`](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Scaffolds) (scaffold directory).
+The winapp2.ini project keeps its source files in [`Assembler/Sources/UWPBuilder/`](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/UWPBuilder) (source directory) and [`Assembler/Sources/Scaffolds/`](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/Scaffolds) (scaffold directory).
 
 ###### Note: You only need the scaffold directory if an AppInfo entry declares a scaffold root. If the directory doesn't exist, UWPBuilder warns `Scaffold directory not found` and carries on without scaffold keys. If it exists but has no catalog for a family, every entry using that family warns that its scaffolds are unknown. The run succeeds either way.
 
@@ -84,8 +84,8 @@ To add an app, add a section to the matching `AppInfo\{letter}.ini` file.
 
 | To | Run | Example |
 |:-|:-|:-|
-| Generate `uwp.ini` from the sources in `UWP\`, using the shared scaffold catalogs | `winapp2ool -uwpbuilder -1d \UWP -2f uwp.ini -3d \Scaffolds` | [A Minimal Entry](EXAMPLES.md#example-1-a-minimal-entry) |
-| Write the committed artifact silently and offline, as the build script does | `winapp2ool -s -offline -uwpbuilder -1d \UWP -2d \Entries\UWP -2f uwp.ini -3d \Scaffolds` | |
+| Generate `uwp.ini` from the sources in `Sources\UWPBuilder\`, using the shared scaffold catalogs | `winapp2ool -uwpbuilder -1d \Sources\UWPBuilder -2f uwp.ini -3d \Sources\Scaffolds` | [A Minimal Entry](EXAMPLES.md#example-1-a-minimal-entry) |
+| Write the committed artifact silently and offline, as the build script does | `winapp2ool -s -offline -uwpbuilder -1d \Sources\UWPBuilder -2d \Generated\UWPBuilder -2f uwp.ini -3d \Sources\Scaffolds` | |
 
 Every worked example runs the first command. Only the AppInfo section it reads changes. In the menu, set **Choose source directory**, **Choose save target** and **Choose scaffolds directory**, then choose **Run**; see [Menu Options](#menu-options). `-s` and `-offline` are winapp2ool [global args](../../Readme.md#global-args).
 
@@ -118,7 +118,7 @@ UWPBuilder is invoked as `winapp2ool -uwpbuilder`. It takes three directory argu
 | `-2f name` | Set the output file name | `uwp.ini` |
 | `-3d path` | Set the shared scaffold directory | Current directory |
 
-Paths can be absolute, or relative to the working directory with a leading backslash (`-1d \UWP`).
+Paths can be absolute, or relative to the working directory with a leading backslash (`-1d \Sources\UWPBuilder`).
 
 ###### Note: Slot 3 only reads a directory, so `-3f` does nothing there. It defaults to the current directory, and if that holds no catalogs the run still succeeds, minus every scaffold key, with only an `Unknown ... scaffold` warning for each entry that asked for them. Always pass `-3d` when scripting.
 
@@ -146,7 +146,7 @@ Paths can be absolute, or relative to the working directory with a leading backs
 UWPBuilder reads everything from one source directory:
 
 ```
-UWP\
+UWPBuilder\
 ├── UWP.ini            ← scaffold template
 └── AppInfo\
     ├── A.ini          ← app definitions, split alphabetically

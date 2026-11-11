@@ -190,7 +190,7 @@ The winapp2.ini project's CCleaner flavor doesn't keep these per-entry lists any
 
 **Context**
 
-The winapp2.ini project keeps each flavor's correction files in a directory of their own, named by the auto-detection conventions with a flavor prefix added. The [CCleaner flavor directory](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/CCleaner) has:
+The winapp2.ini project keeps each flavor's correction files in a directory of their own, named by the auto-detection conventions with a flavor prefix added. The [CCleaner flavor directory](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/Flavors/CCleaner) has:
 
 ```
 cc_additions.ini
@@ -209,13 +209,13 @@ We want to apply the whole CCleaner flavor without assigning six file slots by h
 
 **Command**
 ```
-winapp2ool -flavorize -autodetect -2f winapp2-ccleaner-flavor.ini -9d C:\path\to\Assembler\CCleaner
+winapp2ool -flavorize -autodetect -2f winapp2-ccleaner-flavor.ini -9d C:\path\to\Assembler\Sources\Flavors\CCleaner
 ```
 
 The build pipeline runs the same command from the Assembler directory, where `\CCleaner` resolves, and adds the global flags `-s` (silent) and `-offline` (skip the network check):
 
 ```
-winapp2ool -s -offline -flavorize -autodetect -2f winapp2-ccleaner-flavor.ini -9d \CCleaner
+winapp2ool -s -offline -flavorize -autodetect -2f winapp2-ccleaner-flavor.ini -9d \Sources\Flavors\CCleaner
 ```
 
 **What gets assigned**

@@ -4,6 +4,8 @@
 
 This folder contains the set of Transmutation rules required by Winapp2ool to produce the [CCleaner 7 flavor](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-ccleaner7.ini) of Winapp2.ini 
 
+These rules, applied to the CCleaner flavor, produce `winapp2-ccleaner7.ini`.
+
 ### What changes are made to create the CCleaner 7 flavor? 
 
 CCleaner 7 dropped support for reading a separate winapp2.ini and requires additional keys on every cleaning definition, while replacing the `LangSecRef`/`Section` categorization system with a comma-delimited `Tags` string. The rules in this folder are applied to the **CCleaner flavor** of Winapp2.ini (not the base) and perform that format conversion on every entry:
@@ -20,5 +22,5 @@ Note: rules for categories with no current entries emit a "matched nothing" warn
 # Files 
 | File                                                                                                                                                   | Description                                                                                                                 |
 | :-                                                                                                                                                     | :-                                                                                                                          |
-| [cc7_additions.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/CCleaner7/cc7_additions.ini)                      | Contains the global `[*]` addition which gives every entry its `ID` and `Author` keys                                       |
-| [cc7_key_replacements.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/CCleaner7/cc7_key_replacements.ini)        | Contains the global `[*Map:]` rules which convert each entry's category key into its CCleaner 7 `Tags` key                  |
+| [cc7_additions.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/Flavors/CCleaner7/cc7_additions.ini)                      | Contains the global `[*]` addition which gives every entry its `ID` and `Author` keys                                       |
+| [cc7_key_replacements.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/Flavors/CCleaner7/cc7_key_replacements.ini)        | Contains the global `[*Map:]` rules which convert each entry's category key into its CCleaner 7 `Tags` key                  |

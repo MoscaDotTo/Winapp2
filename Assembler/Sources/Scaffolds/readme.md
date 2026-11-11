@@ -97,6 +97,6 @@ Note that the QtWebEngine default set (bolded above) is wider than the WebView o
 
 | Name                                                                                                                              | Description                                                                          |
 | :-                                                                                                                                | :-                                                                                   |
-| [webview.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Scaffolds/webview.ini)             | The scaffold catalog for embedded WebView2 / EBWebView data folders                  |
-| [qtwebengine.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Scaffolds/qtwebengine.ini)     | The scaffold catalog for embedded QtWebEngine data folders                           |
-| [electron.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Scaffolds/electron.ini)           | The scaffold catalog for Electron application data folders                            |
+| [webview.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/Scaffolds/webview.ini)             | The scaffold catalog for embedded WebView2 / EBWebView data folders                  |
+| [qtwebengine.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/Scaffolds/qtwebengine.ini)     | The scaffold catalog for embedded QtWebEngine data folders                           |
+| [electron.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/Scaffolds/electron.ini)           | The scaffold catalog for Electron application data folders                            |

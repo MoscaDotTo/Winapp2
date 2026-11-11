@@ -444,13 +444,13 @@ This section is for people who contribute to winapp2.ini, or who are curious how
 
 Nobody assembles the published winapp2.ini by hand. Its sources live in [Assembler](../Assembler), and winapp2ool runs every stage that turns them into the published files:
 
-1. [Entry Builder](modules/entrybuilder/readme.md), [Browser Builder](modules/browserbuilder/readme.md), and [UWP Builder](modules/uwpbuilder/readme.md) expand the [base entry](../Assembler/EntryBuilder), [browser](../Assembler/BrowserBuilder), and [Microsoft Store app](../Assembler/UWP) sources into the committed [build artifacts](../Assembler/Entries)
+1. [Entry Builder](modules/entrybuilder/readme.md), [Browser Builder](modules/browserbuilder/readme.md), and [UWP Builder](modules/uwpbuilder/readme.md) expand the [base entry](../Assembler/Sources/EntryBuilder), [browser](../Assembler/Sources/BrowserBuilder), and [Microsoft Store app](../Assembler/Sources/UWPBuilder) sources into the committed [build artifacts](../Assembler/Generated)
 2. [Combine](modules/combine/readme.md) joins those artifacts into one file in strict mode
 3. [WinappDebug](modules/winappdebug/README.md) applies the style and syntax rules to the merged file and saves its corrections
 4. [Flavorizer](modules/transmute/Flavorizer/readme.md) applies each flavor's ruleset to produce the CCleaner, CCleaner 7, BleachBit, FluentCleaner, Tron, and System Ninja variants, and WinappDebug lints each one
 5. [Diff](modules/diff/readme.md) writes a changelog against the previous version for the base file and each flavor whose content changed
 
-The artifacts under [Entries](../Assembler/Entries) are committed to the repository instead of living only for the length of a build, so we can check the build against itself. `build winapp2.ps1 -Verify` regenerates all of them, compares them byte for byte with what's committed, and exits nonzero if anything drifted. GitHub Actions runs that check, and two more jobs:
+The artifacts under [Generated](../Assembler/Generated) are committed to the repository instead of living only for the length of a build, so we can check the build against itself. `build winapp2.ps1 -Verify` regenerates all of them, compares them byte for byte with what's committed, and exits nonzero if anything drifted. GitHub Actions runs that check, and two more jobs:
 
 * A pull request that touches the build sources gets built twice, once from master alone and once with the pull request merged in. A bot comment then posts either the changelog the change produces or the stage where it broke the build
 * The sources are rebuilt every day. When the output changes, the build commits it back and cuts a release with every flavor and changelog attached

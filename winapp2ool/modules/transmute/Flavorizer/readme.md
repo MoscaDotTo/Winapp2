@@ -81,7 +81,7 @@ Strictly speaking, every correction file is optional. If you assign none, or non
 | Apply a key replacement file of global key mapping rules to `browsers.ini`, saving to `browsers-cc.ini` | `winapp2ool -flavorize -1f browsers.ini -2f browsers-cc.ini -7f cc_key_replacements.ini` | [Global Operations in Flavor Files](EXAMPLES.md#example-4-global-operations-in-flavor-files) |
 | Auto-detect every correction file in a flavor directory | `winapp2ool -flavorize -autodetect -9d C:\Flavors\CCleaner` | [Auto-Detecting a Flavor](EXAMPLES.md#example-3-auto-detecting-a-flavor) |
 | Auto-detect correction files in the current directory and save without winapp2.ini formatting | `winapp2ool -flavorize -autodetect -nowinapp` | |
-| Build a flavor from a script, with no output or prompts | `winapp2ool -s -offline -flavorize -autodetect -2f winapp2-ccleaner-flavor.ini -9d \CCleaner` | [Auto-Detecting a Flavor](EXAMPLES.md#example-3-auto-detecting-a-flavor) |
+| Build a flavor from a script, with no output or prompts | `winapp2ool -s -offline -flavorize -autodetect -2f winapp2-ccleaner-flavor.ini -9d \Sources\Flavors\CCleaner` | [Auto-Detecting a Flavor](EXAMPLES.md#example-3-auto-detecting-a-flavor) |
 
 In the menu, each correction file has its own option, such as **Change additions file**, or **Auto detect Flavor** fills them all from the target directory; see [Menu Options](#menu-options). `-s` and `-offline` are winapp2ool [global args](../../../Readme.md#global-args).
 

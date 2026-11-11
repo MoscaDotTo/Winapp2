@@ -95,7 +95,7 @@ jobs:
           # Exactly the tracked build outputs (never the log or scratch). Order is
           # irrelevant; missing paths are harmless to `git add`.
           $outputs = @(
-            'Assembler/Entries'
+            'Assembler/Generated'
             'Winapp2.ini'; 'diff.txt'
             'Non-CCleaner/Winapp2.ini'; 'Non-CCleaner/diff.txt'
             'Non-CCleaner/BleachBit/Winapp2.ini'; 'Non-CCleaner/BleachBit/diff.txt'
@@ -113,11 +113,11 @@ jobs:
             exit 0
           }
 
-          # Committing and releasing are separate decisions. Regenerated Entries/ or a rewritten
+          # Committing and releasing are separate decisions. Regenerated Generated/ or a rewritten
           # changelog must be committed so the tree never drifts from its sources, but neither is
           # something to cut a release over -- only a change to a file end users actually download
           # is. (build winapp2.ps1 already declines to republish an artifact whose content did not
-          # move, so reaching this branch means Entries/ or a diff.txt moved on its own.)
+          # move, so reaching this branch means Generated/ or a diff.txt moved on its own.)
           $published = @(
             'Winapp2.ini'
             'Non-CCleaner/Winapp2.ini'
@@ -150,7 +150,7 @@ jobs:
           # Read it from the files actually being RELEASED, not unconditionally from the base
           # build. build winapp2.ps1's content gate declines to republish an artifact whose
           # content did not move, which deliberately leaves that file's stamp pinned to its
-          # last real change. So a flavor-only change (edit Assembler/Tron/ and nothing else)
+          # last real change. So a flavor-only change (edit Assembler/Sources/Flavors/Tron/ and nothing else)
           # leaves Non-CCleaner/Winapp2.ini on the PREVIOUS date while Tron carries today's --
           # sourcing the version from the base would then tag today's release with the previous
           # release's date, and release.yml's free-tag loop would quietly suffix it .2 rather

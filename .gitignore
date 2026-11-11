@@ -33,3 +33,7 @@ OBJECT_MODEL_DESIGN.md
 # VB designer codegen
 winapp2ool/My Project/Settings.Designer.vb
 winapp2ool/My Project/Resources.Designer.vb
+
+# Build scratch folders (-Verify, exe-parity.yml)
+Assembler/Verify/
+Assembler/Parity/

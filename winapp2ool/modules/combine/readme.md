@@ -73,7 +73,7 @@ winapp2ool -combine -1d "C:\path\to\your\files"
 | Combine a folder and save the result under another name in another folder | `winapp2ool -combine -1d "C:\ini\source" -3d "C:\ini\output" -3f merged.ini` | [Combining Files with Distinct Sections](EXAMPLES.md#example-1-combining-files-with-distinct-sections) |
 | Merge a folder of your own entries into a `custom.ini` for Transmute | `winapp2ool -combine -1d C:\ini\case7\customs -3d C:\ini\case7 -3f custom.ini` | [Building a custom.ini for Transmute](EXAMPLES.md#example-7-building-a-customini-for-transmute) |
 | Fail the run with exit code 1 when two files define the same section | `winapp2ool -combine -strict -1d "C:\ini\source" -3f merged.ini` | [A Strict Run That Fails the Build](EXAMPLES.md#example-6-a-strict-run-that-fails-the-build) |
-| Run the winapp2.ini build's merge stage | `winapp2ool -s -offline -combine -strict -1d \Entries -3f Winapp2.ini` | [Merging the winapp2.ini Build Artifacts](EXAMPLES.md#example-9-merging-the-winapp2ini-build-artifacts) |
+| Run the winapp2.ini build's merge stage | `winapp2ool -s -offline -combine -strict -1d \Generated -3f Winapp2.ini` | [Merging the winapp2.ini Build Artifacts](EXAMPLES.md#example-9-merging-the-winapp2ini-build-artifacts) |
 
 In the menu, the same choices are **Change the target directory**, **Change the save file location** and **Toggle Strict Mode**, set before **Run**; see [Menu Options](#menu-options). `-s` and `-offline` are winapp2ool [global args](../../Readme.md#global-args).
 
@@ -106,7 +106,7 @@ Command line runs always start from Combine's default settings, whatever you've 
 | `-3d path` | Set the output directory | Current directory |
 | `-3f name` | Set the output file name | `combined.ini` |
 
-###### Note: A leading `\` (eg. `-1d \Entries`) names a subfolder of the current directory.
+###### Note: A leading `\` (eg. `-1d \Generated`) names a subfolder of the current directory.
 
 ## Toggles
 

@@ -2,7 +2,7 @@
 
 **EntryBuilder** is a winapp2ool build-chain module for winapp2.ini maintainers that generates winapp2.ini entries from a shorthand DSL. You write one ini section per application. Anything already in winapp2 syntax passes through unchanged, and a few keys that only winapp2ool understands expand into ordinary winapp2 keys at generation time. It's a preprocessor for winapp2.ini: you write the repetitive parts once and EntryBuilder writes them out. If you only use winapp2.ini with a cleaner, you don't need EntryBuilder.
 
-The winapp2.ini build uses it for every entry that isn't a browser or a UWP app. Their sources are the per-letter files in `Assembler\EntryBuilder\`, which EntryBuilder reads alongside the shared scaffold catalogs in `Assembler\Scaffolds\`. By default it writes a single `entrybuilder.ini`. With `-split` it writes the 27 per-letter files that the build commits to `Assembler\Entries\` and combines into the final winapp2.ini.
+The winapp2.ini build uses it for every entry that isn't a browser or a UWP app. Their sources are the per-letter files in `Assembler\Sources\EntryBuilder\`, which EntryBuilder reads alongside the shared scaffold catalogs in `Assembler\Sources\Scaffolds\`. By default it writes a single `entrybuilder.ini`. With `-split` it writes the 27 per-letter files that the build commits to `Assembler\Generated\` and combines into the final winapp2.ini.
 
 ### What does EntryBuilder do?
 
@@ -66,7 +66,7 @@ None of it is mandatory. A plain winapp2 entry pasted into a source file comes o
 # Requirements
 
 - A source directory containing one or more `*.ini` files with at least one parseable section
-- The shared scaffold directory (normally `Assembler\Scaffolds`), if any entry declares a scaffold root. EntryBuilder reads every `*.ini` in it and tells the catalogs apart by their section headers, not their file names: `[WebViewScaffold: ...]` sections (in `webview.ini`) serve `WebViewRoot=`, `[QtWebEngineScaffold: ...]` sections (`qtwebengine.ini`) serve `QtWebEngineRoot=` and `QtWebEngineCacheRoot=`, and `[ElectronScaffold: ...]` sections (`electron.ini`) serve `ElectronRoot=` and `ElectronUpdaterRoot=`
+- The shared scaffold directory (normally `Assembler\Sources\Scaffolds`), if any entry declares a scaffold root. EntryBuilder reads every `*.ini` in it and tells the catalogs apart by their section headers, not their file names: `[WebViewScaffold: ...]` sections (in `webview.ini`) serve `WebViewRoot=`, `[QtWebEngineScaffold: ...]` sections (`qtwebengine.ini`) serve `QtWebEngineRoot=` and `QtWebEngineCacheRoot=`, and `[ElectronScaffold: ...]` sections (`electron.ini`) serve `ElectronRoot=` and `ElectronUpdaterRoot=`
 
 If the source directory is empty, missing, or holds no parseable sections, EntryBuilder reports `No EntryBuilder source definitions found in: <directory>`, writes nothing, and fails the run (exit code 1). If the scaffold directory is missing, it warns `Scaffold directory not found: <dir>; no scaffold keys will be generated` and builds the entries without scaffold keys. A directory with no catalog for a family gives no such warning, but every entry that uses the family warns `Unknown … scaffold` for each scaffold it selects, defaults included. Neither of these fails the run, and entries that declare no root aren't affected.
 
@@ -80,7 +80,7 @@ If the source directory is empty, missing, or holds no parseable sections, Entry
 2. Open EntryBuilder from the **Entry Lab** main menu, or run `winapp2ool -entrybuilder` from the command line
 3. Choose **Run**. EntryBuilder combines the files, expands the shorthand, and writes the result to `entrybuilder.ini`
 
-The source directory, save target and scaffold directory all default to the current directory. The build script runs EntryBuilder from the `Assembler` folder with `-1d \EntryBuilder -3d \Scaffolds`, where a leading `\` means the current directory, and adds `-split` and an output folder.
+The source directory, save target and scaffold directory all default to the current directory. The build script runs EntryBuilder from the `Assembler` folder with `-1d \Sources\EntryBuilder -3d \Sources\Scaffolds`, where a leading `\` means the current directory, and adds `-split` and an output folder.
 
 ---
 
@@ -89,10 +89,10 @@ The source directory, save target and scaffold directory all default to the curr
 | To | Run | Example |
 |:-|:-|:-|
 | Generate entries from the source files in the current directory | `winapp2ool -entrybuilder` | |
-| Generate from the project's source files, saving `entrybuilder.ini` in the current directory | `winapp2ool -entrybuilder -1d ..\..\Assembler\EntryBuilder` | [A pass-through entry with a single-value variable](EXAMPLES.md#example-1-a-pass-through-entry-with-a-single-value-variable) |
-| Generate with the shared scaffold catalogs in silent mode | `winapp2ool -entrybuilder -1d ..\..\Assembler\EntryBuilder -3d ..\..\Assembler\Scaffolds -s` | [Default WebView scaffolds](EXAMPLES.md#example-8-default-webview-scaffolds) |
+| Generate from the project's source files, saving `entrybuilder.ini` in the current directory | `winapp2ool -entrybuilder -1d ..\..\Assembler\Sources\EntryBuilder` | [A pass-through entry with a single-value variable](EXAMPLES.md#example-1-a-pass-through-entry-with-a-single-value-variable) |
+| Generate with the shared scaffold catalogs in silent mode | `winapp2ool -entrybuilder -1d ..\..\Assembler\Sources\EntryBuilder -3d ..\..\Assembler\Sources\Scaffolds -s` | [Default WebView scaffolds](EXAMPLES.md#example-8-default-webview-scaffolds) |
 | Save the output under another file name | `winapp2ool -entrybuilder -2f test-output.ini` | |
-| Write the per-letter artifact files into `Assembler\Entries` | `winapp2ool -entrybuilder -split -2d ..\..\Assembler\Entries` | |
+| Write the per-letter artifact files into `Assembler\Generated` | `winapp2ool -entrybuilder -split -2d ..\..\Assembler\Generated` | |
 
 In the menu, you make the same choices with the source, save target and scaffolds directory choosers and the output splitting toggle before choosing **Run**; see [Menu Options](#menu-options). `-s` is one of winapp2ool's [global args](../../Readme.md#global-args).
 
@@ -245,7 +245,7 @@ Older versions spelled the root placeholders `%WebViewRoot%`, `%QtWebEngineRoot%
 `%ElectronRoot` in [Test App *].FileKey looks like the retired `%ElectronRoot%` token, which is now spelled `<ElectronRoot>`; key dropped
 ```
 
-`%...%` is winapp2.ini's environment variable syntax, so a stale token would otherwise reach the output looking like a real path. EntryBuilder checks every key except `Warning=`. UWPBuilder's retired `%Package%` means nothing here and passes through. The shared catalogs in `Assembler\Scaffolds` are checked as they load, and a catalog template with a retired token is dropped and fails the run the same way.
+`%...%` is winapp2.ini's environment variable syntax, so a stale token would otherwise reach the output looking like a real path. EntryBuilder checks every key except `Warning=`. UWPBuilder's retired `%Package%` means nothing here and passes through. The shared catalogs in `Assembler\Sources\Scaffolds` are checked as they load, and a catalog template with a retired token is dropped and fails the run the same way.
 
 ## WebViewScaffolds / ExcludeWebViewScaffolds
 
@@ -270,7 +270,7 @@ ExcludeWebViewScaffolds=WebStorage,LoginData
 
 Exclusions also work without a `WebViewScaffolds=` key, where they come out of the default set. On an explicit list other than `All` they still apply, but warn (`Both WebViewScaffolds and ExcludeWebViewScaffolds set in [Entry]; applying exclusions to explicit list`); list only the scaffolds you want instead. An unknown scaffold name is dropped with a warning, beside `All` or not.
 
-The catalog, not this page, decides the scaffold names, and [`Assembler/Scaffolds/readme.md`](../../../Assembler/Scaffolds/readme.md) keeps the current lists. When this was written, the WebView catalog defined `Autofill`, `Autoplay`, `BookmarkFavicons`, `Caches`, `DefaultApps`, `DownloadHistory`, `DRMData`, `PrivacySandbox`, `LoginData`, `Security`, `Shopping`, `Sync Data`, `Telemetry`, `WebCookies`, `WebHistory`, `WebSession`, `WebStorage`, and in the legacy tier `LegacyCaches`, `LegacyDownloadHistory`, `LegacyDRMData`, `LegacyExtensionCookies`, `LegacyProgressiveWebApps`, `LegacyStorageQuota`, `LegacyTelemetry`, `LegacyWebHistory`. Only `Caches` and `Telemetry` are on by default. The scaffolds that remove state a user would notice (`WebCookies`, `WebHistory`, `WebSession`, `WebStorage`, `LoginData`) always need an opt-in, through `All` or by name.
+The catalog, not this page, decides the scaffold names, and [`Assembler/Sources/Scaffolds/readme.md`](../../../Assembler/Sources/Scaffolds/readme.md) keeps the current lists. When this was written, the WebView catalog defined `Autofill`, `Autoplay`, `BookmarkFavicons`, `Caches`, `DefaultApps`, `DownloadHistory`, `DRMData`, `PrivacySandbox`, `LoginData`, `Security`, `Shopping`, `Sync Data`, `Telemetry`, `WebCookies`, `WebHistory`, `WebSession`, `WebStorage`, and in the legacy tier `LegacyCaches`, `LegacyDownloadHistory`, `LegacyDRMData`, `LegacyExtensionCookies`, `LegacyProgressiveWebApps`, `LegacyStorageQuota`, `LegacyTelemetry`, `LegacyWebHistory`. Only `Caches` and `Telemetry` are on by default. The scaffolds that remove state a user would notice (`WebCookies`, `WebHistory`, `WebSession`, `WebStorage`, `LoginData`) always need an opt-in, through `All` or by name.
 
 ### The legacy tier
 
@@ -535,7 +535,7 @@ The output file begins with this comment header, where the second line names the
 ; # of entries: <count>
 ; entrybuilder.ini is generated by the Winapp2ool EntryBuilder
 ; This file is a build artifact: DO NOT EDIT IT DIRECTLY
-; Changes made here will be overwritten by the next build; these entries' sources live in Assembler\EntryBuilder
+; Changes made here will be overwritten by the next build; these entries' sources live in Assembler\Sources\EntryBuilder
 ; Entries in this file may be incomplete and are not intended to be used directly with any cleaning software
 ; They are utilized by winapp2ool to create the final winapp2.ini file for distribution
 ; If you are not maintaining winapp2.ini for distribution, you probably don't need this file!

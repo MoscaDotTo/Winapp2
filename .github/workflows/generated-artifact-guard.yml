@@ -1,9 +1,9 @@
 # Generated-artifact guard: fail when a change edits a build OUTPUT without editing the
 # SOURCE that produces it.
 #
-# The failure mode this exists for: you edit Assembler/Entries/#.ini when you meant
-# Assembler/EntryBuilder/#.ini. Nothing complains. The file on disk says what you wanted.
-# Then the daily build regenerates Entries/ from the untouched EntryBuilder source 
+# The failure mode this exists for: you edit Assembler/Generated/EntryBuilder/#.ini when you meant
+# Assembler/Sources/EntryBuilder/#.ini. Nothing complains. The file on disk says what you wanted.
+# Then the daily build regenerates Generated/ from the untouched EntryBuilder source 
 # This makes it a red X instead.
 #
 # How this differs from the two workflows that already build things:
@@ -12,7 +12,7 @@
 #     (minutes) and its scope is "is the committed output still correct", which is a
 #     different and more expensive question than "are these changed paths coherent".
 #   * pr-verify.yml builds the PR merged into master and reports the output delta. It
-#     regenerates Entries/ in place, so a hand-edit there is overwritten before it is
+#     regenerates Generated/ in place, so a hand-edit there is overwritten before it is
 #     ever noticed.
 # This guard runs no build at all
 # It is a cheap provenance check layered under both, not a replacement for either.

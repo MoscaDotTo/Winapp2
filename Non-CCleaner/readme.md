@@ -8,15 +8,15 @@ These files are assembled by Winapp2ool as part of the build process for Winapp2
 
 ### Contributions 
 
-You should not open up contributions directly against the Winapp2.ini files found in these folders. Instead, you should modify the files used to build Winapp2.ini. The base entries which make up the bulk of winapp2.ini can be found [here](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/EntryBuilder). The entries targeting web browsers can be found [here](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/BrowserBuilder). 
+You should not open up contributions directly against the Winapp2.ini files found in these folders. Instead, you should modify the files used to build Winapp2.ini. The base entries which make up the bulk of winapp2.ini can be found [here](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/EntryBuilder). The entries targeting web browsers can be found [here](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/BrowserBuilder). 
 
 If you are contributing a change specific to a particular flavor, please make changes against the Transmutation rules in the [folder associated](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler) with that flavor.
 
 Links to transmutation rules per-flavor:
-* [BleachBit](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/BleachBit)
-* [CCleaner](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/CCleaner)
-* [System Ninja](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/SystemNinja)
-* [Tron](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Tron)
+* [BleachBit](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/Flavors/BleachBit)
+* [CCleaner](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/Flavors/CCleaner)
+* [System Ninja](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/Flavors/SystemNinja)
+* [Tron](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/Flavors/Tron)
 
 # Files of interest
 

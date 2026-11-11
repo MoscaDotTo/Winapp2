@@ -4,20 +4,20 @@
 
 .DESCRIPTION
     This script requires winapp2ool v1.8 or newer, and refuses to run an older one:
-    Creates backups, regenerates the committed build artifacts under Entries\
-    (base entries from EntryBuilder sources, browser entries into Entries\Browsers,
-    UWP entries into Entries\UWP), merges them with a single strict-mode Combine
-    pass, generates tool flavors, and creates a diff for each generated flavor.
-    Generator stages read the shared scaffold catalogs from the Scaffolds directory.
+    Creates backups, regenerates the committed build artifacts under Generated\
+    (base entries from Sources\EntryBuilder into Generated\EntryBuilder, browser entries
+    into Generated\BrowserBuilder, UWP entries into Generated\UWPBuilder), merges them
+    with a single strict-mode Combine pass, generates tool flavors, and creates a diff for each generated flavor.
+    Generator stages read the shared scaffold catalogs from the Sources\Scaffolds directory.
 
     With -Verify, no build is performed: all artifacts are instead regenerated into
-    a scratch directory and byte-compared against the committed Entries\ artifacts,
+    a scratch directory and byte-compared against the committed Generated\ artifacts,
     exiting nonzero on any drift. This is the characteristic test used to prove the
     committed artifacts match their sources
 
 .PARAMETER Verify
     Regenerate all artifacts into Verify\ and byte-compare them against the
-    committed artifacts under Entries\ instead of building. Exits 0 when every
+    committed artifacts under Generated\ instead of building. Exits 0 when every
     artifact matches, 1 on any drift (the scratch output is retained for
     inspection on failure).
 
@@ -270,23 +270,23 @@ function Build-Artifacts {
     param([string]$OutputRoot)
 
     Write-Step "Generating browser entries"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-browserbuilder', '-1d', '\BrowserBuilder', `
-        '-2d', "$OutputRoot\Browsers", '-2f', 'browsers.ini' `
-        -ErrorMessage "Failed to generate browser entries" -RequiredDirs @(Join-Path $PSScriptRoot 'BrowserBuilder'))) { return $false }
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-browserbuilder', '-1d', '\Sources\BrowserBuilder', `
+        '-2d', "$OutputRoot\BrowserBuilder", '-2f', 'browsers.ini' `
+        -ErrorMessage "Failed to generate browser entries" -RequiredDirs @(Join-Path $PSScriptRoot 'Sources\BrowserBuilder'))) { return $false }
 
     Write-Step "Generating UWP entries"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-uwpbuilder', '-1d', '\UWP', `
-        '-2d', "$OutputRoot\UWP", '-2f', 'uwp.ini', `
-        '-3d', '\Scaffolds' `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-uwpbuilder', '-1d', '\Sources\UWPBuilder', `
+        '-2d', "$OutputRoot\UWPBuilder", '-2f', 'uwp.ini', `
+        '-3d', '\Sources\Scaffolds' `
         -ErrorMessage "Failed to generate UWP entries" `
-        -RequiredDirs @((Join-Path $PSScriptRoot 'UWP'), (Join-Path $PSScriptRoot 'Scaffolds')))) { return $false }
+        -RequiredDirs @((Join-Path $PSScriptRoot 'Sources\UWPBuilder'), (Join-Path $PSScriptRoot 'Sources\Scaffolds')))) { return $false }
 
     Write-Step "Generating base entries from EntryBuilder sources"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-entrybuilder', '-split', '-1d', '\EntryBuilder', `
-        '-2d', $OutputRoot, `
-        '-3d', '\Scaffolds' `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-entrybuilder', '-split', '-1d', '\Sources\EntryBuilder', `
+        '-2d', "$OutputRoot\EntryBuilder", `
+        '-3d', '\Sources\Scaffolds' `
         -ErrorMessage "Failed to generate EntryBuilder entries" `
-        -RequiredDirs @((Join-Path $PSScriptRoot 'EntryBuilder'), (Join-Path $PSScriptRoot 'Scaffolds')))) { return $false }
+        -RequiredDirs @((Join-Path $PSScriptRoot 'Sources\EntryBuilder'), (Join-Path $PSScriptRoot 'Sources\Scaffolds')))) { return $false }
 
     return $true
 }
@@ -294,11 +294,11 @@ function Build-Artifacts {
 function Build-MainFile {
     Write-Step "Building winapp2.ini, please wait"
 
-    if (-not (Build-Artifacts -OutputRoot '\Entries')) { return $false }
+    if (-not (Build-Artifacts -OutputRoot '\Generated')) { return $false }
 
     Write-Step "Merging entry artifacts"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-combine', '-strict', '-1d', '\Entries', '-3f', 'Winapp2.ini' `
-        -ErrorMessage "Failed to merge entry artifacts" -RequiredDirs @(Join-Path $PSScriptRoot 'Entries'))) { return $false }
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-combine', '-strict', '-1d', '\Generated', '-3f', 'Winapp2.ini' `
+        -ErrorMessage "Failed to merge entry artifacts" -RequiredDirs @(Join-Path $PSScriptRoot 'Generated'))) { return $false }
 
     Write-Step "Performing static analysis and saving corrections"
     if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-base', '-debug', '-usedate', '-c', '-opti', '-1f', 'Winapp2.ini', '-3f', 'Winapp2.ini' `
@@ -328,20 +328,20 @@ function Build-CCCleanerFlavor {
     Write-Step "Creating CCleaner flavor"
 
     if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-cc', '-flavorize', '-autodetect', '-2f', 'winapp2-ccleaner-flavor.ini', `
-        '-9d', '\CCleaner' -ErrorMessage "Failed to create CCleaner flavor" -RequiredDirs @(Join-Path $PSScriptRoot 'CCleaner'))) { return $false }
+        '-9d', '\Sources\Flavors\CCleaner' -ErrorMessage "Failed to create CCleaner flavor" -RequiredDirs @(Join-Path $PSScriptRoot 'Sources\Flavors\CCleaner'))) { return $false }
 
     Write-Step "Creating BleachBit flavor"
     if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-bb', '-flavorize', '-autodetect', '-2f', 'winapp2-bleachbit-flavor.ini', `
-        '-9d', '\BleachBit' -ErrorMessage "Failed to create BleachBit flavor" -RequiredDirs @(Join-Path $PSScriptRoot 'BleachBit'))) { return $false }
+        '-9d', '\Sources\Flavors\BleachBit' -ErrorMessage "Failed to create BleachBit flavor" -RequiredDirs @(Join-Path $PSScriptRoot 'Sources\Flavors\BleachBit'))) { return $false }
 
     Write-Step "Creating Tron flavor"
     if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-tron', '-flavorize', '-autodetect', '-1f', 'winapp2-ccleaner-flavor.ini', `
-        '-2f', 'winapp2-tron-flavor.ini', '-9d', '\Tron' `
-        -ErrorMessage "Failed to create Tron flavor" -RequiredDirs @(Join-Path $PSScriptRoot 'Tron'))) { return $false }
+        '-2f', 'winapp2-tron-flavor.ini', '-9d', '\Sources\Flavors\Tron' `
+        -ErrorMessage "Failed to create Tron flavor" -RequiredDirs @(Join-Path $PSScriptRoot 'Sources\Flavors\Tron'))) { return $false }
 
     Write-Step "Creating System Ninja flavor"
     if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-sn', '-flavorize', '-autodetect', '-2f', 'winapp2-systemninja-flavor.ini', `
-        '-9d', '\SystemNinja' -ErrorMessage "Failed to create System Ninja flavor" -RequiredDirs @(Join-Path $PSScriptRoot 'SystemNinja'))) { return $false }
+        '-9d', '\Sources\Flavors\SystemNinja' -ErrorMessage "Failed to create System Ninja flavor" -RequiredDirs @(Join-Path $PSScriptRoot 'Sources\Flavors\SystemNinja'))) { return $false }
 
     Write-Step "Performing static analysis and saving corrections"
     if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-cc', '-debug', '-usedate', '-c', '-opti', '-1f', 'winapp2-ccleaner-flavor.ini', `
@@ -372,8 +372,8 @@ function Build-CCleaner7Flavor {
     Write-Step "Creating CCleaner7 flavor"
 
     if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-cc7', '-flavorize', '-autodetect', '-1f', 'winapp2-ccleaner-flavor.ini', `
-        '-2f', 'winapp2-cc7.ini', '-9d', '\CCleaner7' `
-        -ErrorMessage "Failed to create CCleaner7 flavor" -RequiredDirs @(Join-Path $PSScriptRoot 'CCleaner7'))) { return $false }
+        '-2f', 'winapp2-cc7.ini', '-9d', '\Sources\Flavors\CCleaner7' `
+        -ErrorMessage "Failed to create CCleaner7 flavor" -RequiredDirs @(Join-Path $PSScriptRoot 'Sources\Flavors\CCleaner7'))) { return $false }
 
     if (-not (Test-ContentChanged 'winapp2-cc7.ini' 'winapp2-cc7.old')) {
         Write-Host "CCleaner7 flavor is unchanged since the last build - not republishing" -ForegroundColor Yellow
@@ -402,12 +402,12 @@ function Build-FluentCleanerFlavor {
     # changes to the base file that are pulled from the downstream 
     # FluentCleaner winapp2.ini and then apply the CCleaner flavor on top of that 
     if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-fc', '-flavorize', '-autodetect', '-1f', 'Winapp2.ini', `
-        '-2f', 'winapp2-fluentcleaner-pre.ini', '-9d', '\FluentCleaner' `
-        -ErrorMessage "Failed to create FluentCleaner pre-pass" -RequiredDirs @(Join-Path $PSScriptRoot 'FluentCleaner'))) { return $false }
+        '-2f', 'winapp2-fluentcleaner-pre.ini', '-9d', '\Sources\Flavors\FluentCleaner' `
+        -ErrorMessage "Failed to create FluentCleaner pre-pass" -RequiredDirs @(Join-Path $PSScriptRoot 'Sources\Flavors\FluentCleaner'))) { return $false }
 
     if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-fc', '-flavorize', '-autodetect', '-1f', 'winapp2-fluentcleaner-pre.ini', `
-        '-2f', 'winapp2-fluentcleaner.ini', '-9d', '\CCleaner' `
-        -ErrorMessage "Failed to categorize FluentCleaner flavor" -RequiredDirs @(Join-Path $PSScriptRoot 'CCleaner'))) { return $false }
+        '-2f', 'winapp2-fluentcleaner.ini', '-9d', '\Sources\Flavors\CCleaner' `
+        -ErrorMessage "Failed to categorize FluentCleaner flavor" -RequiredDirs @(Join-Path $PSScriptRoot 'Sources\Flavors\CCleaner'))) { return $false }
 
     # -keepdefaults preserves FluentCleaner's Default=False keys through the linter 
     Write-Step "Performing static analysis and saving corrections"
@@ -519,9 +519,9 @@ function Test-Artifacts {
 
     if (-not (Build-Artifacts -OutputRoot '\Verify')) { return $false }
 
-    Write-Step "Comparing regenerated artifacts against committed Entries"
+    Write-Step "Comparing regenerated artifacts against committed artifacts under Generated"
 
-    $entriesDir = Join-Path $PSScriptRoot 'Entries'
+    $entriesDir = Join-Path $PSScriptRoot 'Generated'
     $drift = @()
 
     foreach ($file in Get-ChildItem $entriesDir -Filter '*.ini' -Recurse -File) {
@@ -544,7 +544,7 @@ function Test-Artifacts {
     }
 
     if ($drift.Count -gt 0) {
-        Write-ErrorMsg "Artifact drift detected - committed Entries do not match their sources"
+        Write-ErrorMsg "Artifact drift detected - committed artifacts under Generated do not match their sources"
         $drift | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }
         Write-Host "Regenerated artifacts retained in $scratch for inspection" -ForegroundColor Yellow
         return $false
@@ -580,7 +580,7 @@ try {
     }
     if (-not (Test-Winapp2oolVersion $script:Winapp2oolPath)) { exit 1 }
 
-    # Generate-and-stop. Deliberately does NOT compare against Entries\: the caller is
+    # Generate-and-stop. Deliberately does NOT compare against Generated\: the caller is
     # diffing two generated trees against each other, so the committed artifacts are
     # not part of the question and their staleness must not fail the run.
     if ($GenerateTo) {

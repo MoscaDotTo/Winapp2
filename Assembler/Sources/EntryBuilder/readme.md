@@ -4,7 +4,7 @@
 
 This folder contains the source files for all of the base entries in winapp2.ini. Every entry that isn't a generated browser or UWP entry lives in one of these 27 alphabetically-split files. This is where contributions to base entries are made; see the [contributor guidelines](https://github.com/MoscaDotTo/Winapp2/blob/master/CONTRIBUTING.md).
 
-During the build, winapp2ool's [EntryBuilder](https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/modules/entrybuilder/readme.md) module combines all 27 files in-memory, expands any shorthand into standard winapp2.ini syntax, normalizes the result, and writes it back out as the per-letter artifacts in [`Assembler/Entries/`](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Entries), which are then merged into the base Winapp2.ini alongside the other generated content. Comments written here survive permanently in the sources but are stripped from the generated artifacts.
+During the build, winapp2ool's [EntryBuilder](https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/modules/entrybuilder/readme.md) module combines all 27 files in-memory, expands any shorthand into standard winapp2.ini syntax, normalizes the result, and writes it back out as the per-letter artifacts in [`Assembler/Generated/`](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Generated), which are then merged into the base Winapp2.ini alongside the other generated content. Comments written here survive permanently in the sources but are stripped from the generated artifacts.
 
 **You do not need to learn the shorthand to contribute.** Standard winapp2.ini syntax is valid here as-is and passes through generation unchanged.
 
@@ -14,7 +14,7 @@ EntryBuilder is a preprocessor for winapp2.ini: anything that is already valid w
 
 * **List variables**: declare `Versions=10.0,11.0,12.0` once and reference it from any key as `<Versions>`; each referencing key fans out into one output key per value. Inline lists (`<a,b,c>` written directly inside a key value) fan out the same way without a declaration, and `<Versions[2]>` picks a single value by position
 * **Automatic detection**: an entry which declares the reserved variable `Root=` receives a `Detect` (registry root) or `DetectFile` (filesystem root) generated from it automatically
-* **Scaffold families**: an entry which declares `WebViewRoot=` or `QtWebEngineRoot=` receives baseline cleaning FileKeys for its embedded browser data drawn from the shared catalogs in [Scaffolds](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Scaffolds) 
+* **Scaffold families**: an entry which declares `WebViewRoot=` or `QtWebEngineRoot=` receives baseline cleaning FileKeys for its embedded browser data drawn from the shared catalogs in [Scaffolds](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/Scaffolds) 
 
 ### Example
 

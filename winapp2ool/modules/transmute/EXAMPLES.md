@@ -20,7 +20,7 @@ Worked examples for [Transmute](readme.md). The [Common Uses](readme.md#common-u
 
 ---
 
-Several of these examples come from the corrections winapp2ool applies to BrowserBuilder's output. Those files live in [Assembler/BrowserBuilder](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/BrowserBuilder), but each example shows the lines it needs.
+Several of these examples come from the corrections winapp2ool applies to BrowserBuilder's output. Those files live in [Assembler/Sources/BrowserBuilder](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/BrowserBuilder), but each example shows the lines it needs.
 
 ###### Note: With Syntax on (the default), Transmute writes the winapp2.ini header comments at the top of the output file. The outputs below leave the header out to save space.
 

@@ -68,7 +68,7 @@ Every input file comes from that one directory, under a fixed name. Choosing the
 | To | Run | Example |
 |:-|:-|:-|
 | Generate entries from the rulesets in the current directory | `winapp2ool -browserbuilder` | |
-| Generate the project's browser entries from its rulesets and flavor files, saving `browsers.ini` in the current directory | `winapp2ool -browserbuilder -1d "C:\Winapp2\Assembler\BrowserBuilder"` | |
+| Generate the project's browser entries from its rulesets and flavor files, saving `browsers.ini` in the current directory | `winapp2ool -browserbuilder -1d "C:\Winapp2\Assembler\Sources\BrowserBuilder"` | |
 | Generate from a ruleset folder and save the result under another name in another folder | `winapp2ool -browserbuilder -1d "C:\rulesets" -2d "C:\output" -2f generated.ini` | |
 | Generate entries for a portable or relocated browser from your own ruleset | `winapp2ool -browserbuilder -1d C:\myrules -2d C:\myrules` | [Generating Entries for a Portable Browser](EXAMPLES.md#example-8-generating-entries-for-a-portable-browser) |
 | Add those generated entries to your winapp2.ini | `winapp2ool -transmute -add -1f winapp2.ini -2d C:\myrules -2f browsers.ini -3f winapp2.ini` | [Generating Entries for a Portable Browser](EXAMPLES.md#example-8-generating-entries-for-a-portable-browser) |

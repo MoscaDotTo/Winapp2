@@ -18,7 +18,7 @@ Worked examples for [UWPBuilder](readme.md), each with real input and output. Th
 Every example below is a real run of UWPBuilder against the scaffold template and catalogs in `Assembler/`. Each shows an AppInfo section and what UWPBuilder made from it, and they all use the same command:
 
 ```
-winapp2ool -uwpbuilder -1d \UWP -2f uwp.ini -3d \Scaffolds
+winapp2ool -uwpbuilder -1d \Sources\UWPBuilder -2f uwp.ini -3d \Sources\Scaffolds
 ```
 
 ###### Note: The outputs below leave out the generated header (see [Output Formatting](readme.md#output-formatting)).

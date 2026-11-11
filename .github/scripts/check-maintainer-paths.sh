@@ -78,7 +78,7 @@ if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
     echo
     printf '%s\n' "$protected" | sed '/^$/d; s/^/- `/; s/$/`/'
     echo
-    echo "Entry contributions belong under \`Assembler/\` (the EntryBuilder, BrowserBuilder and UWP sources)"
+    echo "Entry contributions belong under \`Assembler/Sources/\` (the EntryBuilder, BrowserBuilder, UWPBuilder and Scaffolds sources, and the flavor rule sets)"
     echo "or \`Winapp3/\`. If you think one of these files needs a change, open an issue instead."
   } >> "$GITHUB_STEP_SUMMARY"
 fi

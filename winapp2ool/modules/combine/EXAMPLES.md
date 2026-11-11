@@ -643,7 +643,7 @@ FileKey2=%AppData%\HandBrake\logs|*.txt|REMOVESELF
 
 **Context**
 
-This is Combine's day job. The winapp2.ini build puts its generated artifacts under the Winapp2 repository's `Assembler\Entries\` directory: the 27 per-letter base files (`#.ini`, `A.ini` … `Z.ini`, written by EntryBuilder), `Browsers\browsers.ini` (written by BrowserBuilder) and `UWP\uwp.ini` (written by UWPBuilder). One strict-mode Combine merges them all into the base winapp2.ini, and strict checking makes sure no entry name comes from more than one artifact.
+This is Combine's day job. The winapp2.ini build puts its generated artifacts under the Winapp2 repository's `Assembler\Generated\` directory: the 27 per-letter base files (`EntryBuilder\#.ini`, `EntryBuilder\A.ini` … `EntryBuilder\Z.ini`, written by EntryBuilder), `BrowserBuilder\browsers.ini` (written by BrowserBuilder) and `UWPBuilder\uwp.ini` (written by UWPBuilder). One strict-mode Combine merges them all into the base winapp2.ini, and strict checking makes sure no entry name comes from more than one artifact.
 
 **Intent**
 
@@ -651,47 +651,47 @@ We want to reproduce the build pipeline's merge stage.
 
 **Command**
 ```
-winapp2ool -s -offline -combine -strict -1d \Entries -3f Winapp2.ini
+winapp2ool -s -offline -combine -strict -1d \Generated -3f Winapp2.ini
 ```
 
-###### Note: This is the command `Assembler\build winapp2.ps1` runs, word for word, with `Assembler` as the working directory. `-s` (silent) and `-offline` are global winapp2ool flags the build uses for unattended runs, and `-1d \Entries` names the `Entries` subfolder of the working directory.
+###### Note: This is the command `Assembler\build winapp2.ps1` runs, word for word, with `Assembler` as the working directory. `-s` (silent) and `-offline` are global winapp2ool flags the build uses for unattended runs, and `-1d \Generated` names the `Generated` subfolder of the working directory.
 
 **Output**
 
 ```
  ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
- ║                       Combining files from C:\Users\hazel\source\repos\Winapp2\Assembler\Entries                   ║
+ ║                    Combining files from C:\Users\hazel\source\repos\Winapp2\Assembler\Generated                    ║
  ╠════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
- ║ Found 29 files with ini extension in C:\Users\hazel\source\repos\Winapp2\Assembler\Entries                         ║
- ║ Processed: #.ini (37 sections)                                                                                     ║
- ║ Processed: A.ini (365 sections)                                                                                    ║
- ║ Processed: B.ini (72 sections)                                                                                     ║
- ║ Processed: Browsers\browsers.ini (1240 sections)                                                                   ║
- ║ Processed: C.ini (165 sections)                                                                                    ║
- ║ Processed: D.ini (148 sections)                                                                                    ║
- ║ Processed: E.ini (87 sections)                                                                                     ║
- ║ Processed: F.ini (92 sections)                                                                                     ║
- ║ Processed: G.ini (81 sections)                                                                                     ║
- ║ Processed: H.ini (61 sections)                                                                                     ║
- ║ Processed: I.ini (98 sections)                                                                                     ║
- ║ Processed: J.ini (34 sections)                                                                                     ║
- ║ Processed: K.ini (31 sections)                                                                                     ║
- ║ Processed: L.ini (73 sections)                                                                                     ║
- ║ Processed: M.ini (219 sections)                                                                                    ║
- ║ Processed: N.ini (101 sections)                                                                                    ║
- ║ Processed: O.ini (39 sections)                                                                                     ║
- ║ Processed: P.ini (157 sections)                                                                                    ║
- ║ Processed: Q.ini (17 sections)                                                                                     ║
- ║ Processed: R.ini (97 sections)                                                                                     ║
- ║ Processed: S.ini (252 sections)                                                                                    ║
- ║ Processed: T.ini (127 sections)                                                                                    ║
- ║ Processed: U.ini (29 sections)                                                                                     ║
- ║ Processed: UWP\uwp.ini (187 sections)                                                                              ║
- ║ Processed: V.ini (51 sections)                                                                                     ║
- ║ Processed: W.ini (143 sections)                                                                                    ║
- ║ Processed: X.ini (22 sections)                                                                                     ║
- ║ Processed: Y.ini (4 sections)                                                                                      ║
- ║ Processed: Z.ini (11 sections)                                                                                     ║
+ ║ Found 29 files with ini extension in C:\Users\hazel\source\repos\Winapp2\Assembler\Generated                       ║
+ ║ Processed: BrowserBuilder\browsers.ini (1240 sections)                                                             ║
+ ║ Processed: EntryBuilder\#.ini (37 sections)                                                                        ║
+ ║ Processed: EntryBuilder\A.ini (365 sections)                                                                       ║
+ ║ Processed: EntryBuilder\B.ini (72 sections)                                                                        ║
+ ║ Processed: EntryBuilder\C.ini (165 sections)                                                                       ║
+ ║ Processed: EntryBuilder\D.ini (148 sections)                                                                       ║
+ ║ Processed: EntryBuilder\E.ini (87 sections)                                                                        ║
+ ║ Processed: EntryBuilder\F.ini (92 sections)                                                                        ║
+ ║ Processed: EntryBuilder\G.ini (81 sections)                                                                        ║
+ ║ Processed: EntryBuilder\H.ini (61 sections)                                                                        ║
+ ║ Processed: EntryBuilder\I.ini (98 sections)                                                                        ║
+ ║ Processed: EntryBuilder\J.ini (34 sections)                                                                        ║
+ ║ Processed: EntryBuilder\K.ini (31 sections)                                                                        ║
+ ║ Processed: EntryBuilder\L.ini (73 sections)                                                                        ║
+ ║ Processed: EntryBuilder\M.ini (219 sections)                                                                       ║
+ ║ Processed: EntryBuilder\N.ini (101 sections)                                                                       ║
+ ║ Processed: EntryBuilder\O.ini (39 sections)                                                                        ║
+ ║ Processed: EntryBuilder\P.ini (157 sections)                                                                       ║
+ ║ Processed: EntryBuilder\Q.ini (17 sections)                                                                        ║
+ ║ Processed: EntryBuilder\R.ini (97 sections)                                                                        ║
+ ║ Processed: EntryBuilder\S.ini (252 sections)                                                                       ║
+ ║ Processed: EntryBuilder\T.ini (127 sections)                                                                       ║
+ ║ Processed: EntryBuilder\U.ini (29 sections)                                                                        ║
+ ║ Processed: EntryBuilder\V.ini (51 sections)                                                                        ║
+ ║ Processed: EntryBuilder\W.ini (143 sections)                                                                       ║
+ ║ Processed: EntryBuilder\X.ini (22 sections)                                                                        ║
+ ║ Processed: EntryBuilder\Y.ini (4 sections)                                                                         ║
+ ║ Processed: EntryBuilder\Z.ini (11 sections)                                                                        ║
+ ║ Processed: UWPBuilder\uwp.ini (187 sections)                                                                       ║
  ║                                                                                                                    ║
  ║                                  Combined 29 files into Winapp2.ini with 4040 sections                             ║
  ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
@@ -706,7 +706,7 @@ winapp2ool -s -offline -combine -strict -1d \Entries -3f Winapp2.ini
 
 **Notes**
 
-The files under `Assembler\Entries\` are generated. Edit their sources, never the files themselves.
+The files under `Assembler\Generated\` are generated. Edit their sources, never the files themselves.
 
 ---
 

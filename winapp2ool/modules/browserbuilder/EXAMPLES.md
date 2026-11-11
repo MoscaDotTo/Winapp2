@@ -15,7 +15,7 @@ Worked examples for [BrowserBuilder](readme.md). The [Common Uses](readme.md#com
 
 ---
 
-The examples use excerpts from the project's real [rulesets](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/BrowserBuilder), and every output is what BrowserBuilder actually wrote. Unless an example says otherwise, the source directory holds only the rulesets, with no flavor files, and the outputs leave out the [generated comment header](readme.md#output-format).
+The examples use excerpts from the project's real [rulesets](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/BrowserBuilder), and every output is what BrowserBuilder actually wrote. Unless an example says otherwise, the source directory holds only the rulesets, with no flavor files, and the outputs leave out the [generated comment header](readme.md#output-format).
 
 ## Example 1: Generating an Entry
 
@@ -425,7 +425,7 @@ FileKey9=%LocalAppData%\Waterfox\Profiles\*\thumbnails|*|REMOVESELF
 
 **Context**
 
-You run Google Chrome Portable from `D:\PortableApps`. The published winapp2.ini doesn't cover it, because its Chrome entries only look in the standard install locations. BrowserBuilder can generate entries for *your* install path, and since scaffolds are plain text, you can copy whichever ones you want from the [project's chromium.ini](https://github.com/MoscaDotTo/Winapp2/blob/master/Assembler/BrowserBuilder/chromium.ini).
+You run Google Chrome Portable from `D:\PortableApps`. The published winapp2.ini doesn't cover it, because its Chrome entries only look in the standard install locations. BrowserBuilder can generate entries for *your* install path, and since scaffolds are plain text, you can copy whichever ones you want from the [project's chromium.ini](https://github.com/MoscaDotTo/Winapp2/blob/master/Assembler/Sources/BrowserBuilder/chromium.ini).
 
 **Intent**
 

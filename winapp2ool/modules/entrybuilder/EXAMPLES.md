@@ -23,7 +23,7 @@ Worked examples for [EntryBuilder](readme.md). The [Common Uses](readme.md#commo
 
 ---
 
-Most of these examples are simplified versions of entries in [`Assembler/EntryBuilder`](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/EntryBuilder), and a few apps are made up. Each one works the same way: put the source snippet in an `.ini` file (each example names the letter file it would live in), run
+Most of these examples are simplified versions of entries in [`Assembler/Sources/EntryBuilder`](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/EntryBuilder), and a few apps are made up. Each one works the same way: put the source snippet in an `.ini` file (each example names the letter file it would live in), run
 
 ```
 winapp2ool -entrybuilder -1d <folder containing the source file>
@@ -60,7 +60,7 @@ FileKey=<DiskRoot>|logfile.txt
 **Command**
 
 ```
-winapp2ool -entrybuilder -1d ..\..\Assembler\EntryBuilder
+winapp2ool -entrybuilder -1d ..\..\Assembler\Sources\EntryBuilder
 ```
 
 ###### Note: `-1d` points at the directory containing the source files; `entrybuilder.ini` is written to the current directory
@@ -382,7 +382,7 @@ DetectFile=%AppData%\discord
 **Command**
 
 ```
-winapp2ool -entrybuilder -1d ..\..\Assembler\EntryBuilder -3d ..\..\Assembler\Scaffolds
+winapp2ool -entrybuilder -1d ..\..\Assembler\Sources\EntryBuilder -3d ..\..\Assembler\Sources\Scaffolds
 ```
 
 ###### Note: `-3d` points file slot 3 (the scaffold directory) at the shared scaffolds folder, from which every family's catalog is loaded
@@ -448,7 +448,7 @@ FileKey=%AppData%\Adobe\Adobe Photoshop *\Logs|*
 **Command**
 
 ```
-winapp2ool -entrybuilder -1d ..\..\Assembler\EntryBuilder -3d ..\..\Assembler\Scaffolds
+winapp2ool -entrybuilder -1d ..\..\Assembler\Sources\EntryBuilder -3d ..\..\Assembler\Sources\Scaffolds
 ```
 
 **Output**
@@ -509,7 +509,7 @@ FileKeyBase=%LocalAppData%\calibre-cache|*|RECURSE
 **Command**
 
 ```
-winapp2ool -entrybuilder -1d ..\..\Assembler\EntryBuilder -3d ..\..\Assembler\Scaffolds
+winapp2ool -entrybuilder -1d ..\..\Assembler\Sources\EntryBuilder -3d ..\..\Assembler\Sources\Scaffolds
 ```
 
 ###### Note: `-3d` points file slot 3 (the scaffold directory) at the shared scaffolds folder; `qtwebengine.ini` is discovered inside it by section header
@@ -580,7 +580,7 @@ FileKeyBase=<ElectronRoot>\Temp|*
 **Command**
 
 ```
-winapp2ool -entrybuilder -1d ..\..\Assembler\EntryBuilder -3d ..\..\Assembler\Scaffolds
+winapp2ool -entrybuilder -1d ..\..\Assembler\Sources\EntryBuilder -3d ..\..\Assembler\Sources\Scaffolds
 ```
 
 ###### Note: `-3d` points file slot 3 (the scaffold directory) at the shared scaffolds folder; `electron.ini` is discovered inside it by section header

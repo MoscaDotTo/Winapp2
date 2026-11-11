@@ -111,16 +111,16 @@ Each build runs four stages, driven by [`build winapp2.ps1`](Assembler/build%20w
 
 | Stage | What runs | What it does |
 | :- | :- | :- |
-| Generate | [EntryBuilder](winapp2ool/modules/entrybuilder/readme.md) | Expands the per-letter [base entry sources](Assembler/EntryBuilder) into artifacts. Sources can use a shorthand DSL and the shared scaffold catalogs |
-| | [BrowserBuilder](winapp2ool/modules/browserbuilder/readme.md) | Produces one entry per browser per cleaning category, crossing [browser declarations](Assembler/BrowserBuilder) with the templates that apply to their engine |
-| | [UWPBuilder](winapp2ool/modules/uwpbuilder/readme.md) | Generates Microsoft Store entries from [package declarations](Assembler/UWP), with the same scaffold catalogs |
+| Generate | [EntryBuilder](winapp2ool/modules/entrybuilder/readme.md) | Expands the per-letter [base entry sources](Assembler/Sources/EntryBuilder) into artifacts. Sources can use a shorthand DSL and the shared scaffold catalogs |
+| | [BrowserBuilder](winapp2ool/modules/browserbuilder/readme.md) | Produces one entry per browser per cleaning category, crossing [browser declarations](Assembler/Sources/BrowserBuilder) with the templates that apply to their engine |
+| | [UWPBuilder](winapp2ool/modules/uwpbuilder/readme.md) | Generates Microsoft Store entries from [package declarations](Assembler/Sources/UWPBuilder), with the same scaffold catalogs |
 | Merge | [Combine](winapp2ool/modules/combine/readme.md) | Joins the generated artifacts into one file in strict mode, which fails the build if two artifacts use the same entry name |
 | Lint | [WinappDebug](winapp2ool/modules/winappdebug/README.md) | Checks the merged file's syntax and style, and saves its own corrections |
 | Publish | [Flavorizer](winapp2ool/modules/transmute/Flavorizer/readme.md), [WinappDebug](winapp2ool/modules/winappdebug/README.md), and [Diff](winapp2ool/modules/diff/readme.md) | Applies each flavor's ruleset to make the six other variants and lints each one, then writes a changelog against the previously published version for every output whose content changed |
 
 ### CI/CD
 
-The build artifacts under [Assembler/Entries](Assembler/Entries) are committed to the repository instead of living only for the length of a build. That lets us check the build against itself, and gives CI something to hold still while it varies one input at a time:
+The build artifacts under [Assembler/Generated](Assembler/Generated) are committed to the repository instead of living only for the length of a build. That lets us check the build against itself, and gives CI something to hold still while it varies one input at a time:
 
 | Check | What it does |
 | :- | :- |

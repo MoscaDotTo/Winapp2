@@ -12,7 +12,7 @@
 # the question that actually matters: does the shipped tool still do what the source says.
 #
 # This is the question artifact-drift.yml's header used to claim. It cannot answer it --
-# -Verify compares committed Entries against regenerated Entries, so a tool change and an
+# -Verify compares committed Generated against regenerated Generated, so a tool change and an
 # un-regenerated source edit collapse into the same boolean. Holding sources fixed and
 # varying only the exe is what separates them.
 #
