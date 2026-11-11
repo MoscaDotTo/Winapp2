@@ -372,11 +372,6 @@ function Build-CCCleanerFlavor {
     if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-bb', '-flavorize', '-autodetect', '-2f', 'winapp2-bleachbit-flavor.ini', `
         '-9d', '\Sources\Flavors\BleachBit' -ErrorMessage "Failed to create BleachBit flavor" -RequiredDirs @(Join-Path $PSScriptRoot 'Sources\Flavors\BleachBit'))) { return $false }
 
-    Write-Step "Creating Tron flavor"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-tron', '-flavorize', '-autodetect', '-1f', 'winapp2-ccleaner-flavor.ini', `
-        '-2f', 'winapp2-tron-flavor.ini', '-9d', '\Sources\Flavors\Tron' `
-        -ErrorMessage "Failed to create Tron flavor" -RequiredDirs @(Join-Path $PSScriptRoot 'Sources\Flavors\Tron'))) { return $false }
-
     Write-Step "Creating System Ninja flavor"
     if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-sn', '-flavorize', '-autodetect', '-2f', 'winapp2-systemninja-flavor.ini', `
         '-9d', '\Sources\Flavors\SystemNinja' -ErrorMessage "Failed to create System Ninja flavor" -RequiredDirs @(Join-Path $PSScriptRoot 'Sources\Flavors\SystemNinja'))) { return $false }
@@ -495,6 +490,12 @@ function Build-BleachBitFlavor {
 }
 
 function Build-TronFlavor {
+    # Tron uses BleachBit 6+, so its flavor starts from the base file, not the CCleaner flavor
+    Write-Step "Creating Tron flavor"
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-tron', '-flavorize', '-autodetect', '-2f', 'winapp2-tron-flavor.ini', `
+        '-9d', '\Sources\Flavors\Tron' -ErrorMessage "Failed to create Tron flavor" -RequiredDirs @(Join-Path $PSScriptRoot 'Sources\Flavors\Tron'))) { return $false }
+
+    Write-Step "Performing static analysis and saving corrections"
     if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-tron', '-debug', '-usedate', '-c', '-opti', '-1f', 'winapp2-tron-flavor.ini', `
         '-3f', 'winapp2-tron-flavor.ini' `
         -ErrorMessage "Failed Tron flavor analysis")) { return $false }

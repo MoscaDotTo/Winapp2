@@ -4,7 +4,7 @@
 
 This folder contains the set of Transmutation rules required by Winapp2ool to produce the [CCleaner flavor](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-ccleaner.ini) of Winapp2.ini 
 
-These rules produce `winapp2-ccleaner.ini`, published as [`Releases/winapp2-ccleaner.ini`](https://github.com/MoscaDotTo/Winapp2/blob/master/Releases/winapp2-ccleaner.ini). The Tron and CCleaner 7 flavors are built from the CCleaner flavor, and the FluentCleaner build applies these rules as its second pass, so `winapp2-tron.ini`, `winapp2-ccleaner7.ini` and `winapp2-fluentcleaner.ini` carry them too.
+These rules produce `winapp2-ccleaner.ini`, published as [`Releases/winapp2-ccleaner.ini`](https://github.com/MoscaDotTo/Winapp2/blob/master/Releases/winapp2-ccleaner.ini). The CCleaner 7 flavor is built from the CCleaner flavor, and the FluentCleaner build applies these rules as its second pass, so `winapp2-ccleaner7.ini` and `winapp2-fluentcleaner.ini` carry them too.
 
 ### What changes are made to create the CCleaner flavor? 
 

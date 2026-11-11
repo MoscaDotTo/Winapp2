@@ -4,7 +4,7 @@
 
 This folder contains the set of Transmutation rules required by Winapp2ool to produce the [Tron flavor](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-tron.ini) of Winapp2.ini 
 
-These rules produce `winapp2-tron.ini`, published as [`Releases/winapp2-tron.ini`](https://github.com/MoscaDotTo/Winapp2/blob/master/Releases/winapp2-tron.ini). They are applied to the CCleaner flavor, not to the base file, so `winapp2-tron.ini` carries the CCleaner rules too.
+These rules produce `winapp2-tron.ini`, published as [`Releases/winapp2-tron.ini`](https://github.com/MoscaDotTo/Winapp2/blob/master/Releases/winapp2-tron.ini). They are applied to the base file, since Tron uses BleachBit 6+ (before November 2026 they were applied to the CCleaner flavor).
 
 ### What changes are made to create the Tron flavor? 
 

@@ -51,7 +51,7 @@ These are the pieces the build's strict Combine joins into the base winapp2.ini.
 
 ## Which rules produce which published file
 
-The mapping is not one to one. Tron, CCleaner 7 and FluentCleaner are built on top of the CCleaner rules, so two rule sets reach each of them. Each file is published to `Releases\` and attached to each GitHub release under the name below.
+The mapping is not one to one. CCleaner 7 and FluentCleaner are built on top of the CCleaner rules, so two rule sets reach each of them. Each file is published to `Releases\` and attached to each GitHub release under the name below.
 
 | Rule set | Published as |
 | :- | :- |
@@ -60,5 +60,5 @@ The mapping is not one to one. Tron, CCleaner 7 and FluentCleaner are built on t
 | `Flavors\FluentCleaner`, then `Flavors\CCleaner` | `winapp2-fluentcleaner.ini` |
 | `Flavors\CCleaner`, then `Flavors\CCleaner7` | `winapp2-ccleaner7.ini` |
 | `Flavors\BleachBit` | `winapp2-bleachbit.ini` |
-| `Flavors\CCleaner`, then `Flavors\Tron` | `winapp2-tron.ini` |
+| `Flavors\Tron` | `winapp2-tron.ini` |
 | `Flavors\SystemNinja` | `winapp2-systemninja.rules` |
