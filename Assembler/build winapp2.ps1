@@ -301,7 +301,7 @@ function Build-MainFile {
         -ErrorMessage "Failed to merge entry artifacts" -RequiredDirs @(Join-Path $PSScriptRoot 'Entries'))) { return $false }
 
     Write-Step "Performing static analysis and saving corrections"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-debug', '-usedate', '-c', '-opti', '-1f', 'Winapp2.ini', '-3f', 'Winapp2.ini' `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-base', '-debug', '-usedate', '-c', '-opti', '-1f', 'Winapp2.ini', '-3f', 'Winapp2.ini' `
         -ErrorMessage "Failed static analysis")) { return $false }
 
     if (-not (Test-ContentChanged 'Winapp2.ini' 'winapp2.old')) {
@@ -327,24 +327,24 @@ function Build-MainFile {
 function Build-CCCleanerFlavor {
     Write-Step "Creating CCleaner flavor"
 
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-flavorize', '-autodetect', '-2f', 'winapp2-ccleaner-flavor.ini', `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-cc', '-flavorize', '-autodetect', '-2f', 'winapp2-ccleaner-flavor.ini', `
         '-9d', '\CCleaner' -ErrorMessage "Failed to create CCleaner flavor" -RequiredDirs @(Join-Path $PSScriptRoot 'CCleaner'))) { return $false }
 
     Write-Step "Creating BleachBit flavor"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-flavorize', '-autodetect', '-2f', 'winapp2-bleachbit-flavor.ini', `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-bb', '-flavorize', '-autodetect', '-2f', 'winapp2-bleachbit-flavor.ini', `
         '-9d', '\BleachBit' -ErrorMessage "Failed to create BleachBit flavor" -RequiredDirs @(Join-Path $PSScriptRoot 'BleachBit'))) { return $false }
 
     Write-Step "Creating Tron flavor"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-flavorize', '-autodetect', '-1f', 'winapp2-ccleaner-flavor.ini', `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-tron', '-flavorize', '-autodetect', '-1f', 'winapp2-ccleaner-flavor.ini', `
         '-2f', 'winapp2-tron-flavor.ini', '-9d', '\Tron' `
         -ErrorMessage "Failed to create Tron flavor" -RequiredDirs @(Join-Path $PSScriptRoot 'Tron'))) { return $false }
 
     Write-Step "Creating System Ninja flavor"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-flavorize', '-autodetect', '-2f', 'winapp2-systemninja-flavor.ini', `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-sn', '-flavorize', '-autodetect', '-2f', 'winapp2-systemninja-flavor.ini', `
         '-9d', '\SystemNinja' -ErrorMessage "Failed to create System Ninja flavor" -RequiredDirs @(Join-Path $PSScriptRoot 'SystemNinja'))) { return $false }
 
     Write-Step "Performing static analysis and saving corrections"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-debug', '-usedate', '-c', '-opti', '-1f', 'winapp2-ccleaner-flavor.ini', `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-cc', '-debug', '-usedate', '-c', '-opti', '-1f', 'winapp2-ccleaner-flavor.ini', `
         '-3f', 'winapp2-ccleaner-flavor.ini' `
         -ErrorMessage "Failed CCleaner flavor analysis")) { return $false }
 
@@ -371,7 +371,7 @@ function Build-CCCleanerFlavor {
 function Build-CCleaner7Flavor {
     Write-Step "Creating CCleaner7 flavor"
 
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-flavorize', '-autodetect', '-1f', 'winapp2-ccleaner-flavor.ini', `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-cc7', '-flavorize', '-autodetect', '-1f', 'winapp2-ccleaner-flavor.ini', `
         '-2f', 'winapp2-cc7.ini', '-9d', '\CCleaner7' `
         -ErrorMessage "Failed to create CCleaner7 flavor" -RequiredDirs @(Join-Path $PSScriptRoot 'CCleaner7'))) { return $false }
 
@@ -401,17 +401,17 @@ function Build-FluentCleanerFlavor {
     # FluentCleaner is designed around the CCleaner flavor, so we'll make some
     # changes to the base file that are pulled from the downstream 
     # FluentCleaner winapp2.ini and then apply the CCleaner flavor on top of that 
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-flavorize', '-autodetect', '-1f', 'Winapp2.ini', `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-fc', '-flavorize', '-autodetect', '-1f', 'Winapp2.ini', `
         '-2f', 'winapp2-fluentcleaner-pre.ini', '-9d', '\FluentCleaner' `
         -ErrorMessage "Failed to create FluentCleaner pre-pass" -RequiredDirs @(Join-Path $PSScriptRoot 'FluentCleaner'))) { return $false }
 
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-flavorize', '-autodetect', '-1f', 'winapp2-fluentcleaner-pre.ini', `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-fc', '-flavorize', '-autodetect', '-1f', 'winapp2-fluentcleaner-pre.ini', `
         '-2f', 'winapp2-fluentcleaner.ini', '-9d', '\CCleaner' `
         -ErrorMessage "Failed to categorize FluentCleaner flavor" -RequiredDirs @(Join-Path $PSScriptRoot 'CCleaner'))) { return $false }
 
     # -keepdefaults preserves FluentCleaner's Default=False keys through the linter 
     Write-Step "Performing static analysis and saving corrections"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-debug', '-usedate', '-c', '-opti', '-keepdefaults', '-1f', 'winapp2-fluentcleaner.ini', `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-fc', '-debug', '-usedate', '-c', '-opti', '-keepdefaults', '-1f', 'winapp2-fluentcleaner.ini', `
         '-3f', 'winapp2-fluentcleaner.ini' `
         -ErrorMessage "Failed FluentCleaner flavor analysis")) { return $false }
 
@@ -438,7 +438,7 @@ function Build-FluentCleanerFlavor {
 }
 
 function Build-BleachBitFlavor {
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-debug', '-usedate', '-c', '-opti', '-1f', 'winapp2-bleachbit-flavor.ini', `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-bb', '-debug', '-usedate', '-c', '-opti', '-1f', 'winapp2-bleachbit-flavor.ini', `
         '-3f', 'winapp2-bleachbit-flavor.ini' `
         -ErrorMessage "Failed BleachBit flavor analysis")) { return $false }
 
@@ -463,7 +463,7 @@ function Build-BleachBitFlavor {
 }
 
 function Build-TronFlavor {
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-debug', '-usedate', '-c', '-opti', '-1f', 'winapp2-tron-flavor.ini', `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-tron', '-debug', '-usedate', '-c', '-opti', '-1f', 'winapp2-tron-flavor.ini', `
         '-3f', 'winapp2-tron-flavor.ini' `
         -ErrorMessage "Failed Tron flavor analysis")) { return $false }
 
@@ -488,7 +488,7 @@ function Build-TronFlavor {
 }
 
 function Build-SystemNinjaFlavor {
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-debug', '-usedate', '-c', '-opti', '-1f', 'winapp2-systemninja-flavor.ini', `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-sn', '-debug', '-usedate', '-c', '-opti', '-1f', 'winapp2-systemninja-flavor.ini', `
         '-3f', 'Winapp2.rules' -ErrorMessage "Failed System Ninja flavor analysis")) { return $false }
 
     if (-not (Test-ContentChanged 'Winapp2.rules' 'winapp2-sn.old')) {
