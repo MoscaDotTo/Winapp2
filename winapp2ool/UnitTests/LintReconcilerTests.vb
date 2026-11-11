@@ -351,11 +351,11 @@ Imports System.Text
     ''' </summary>
     <TestMethod()> Public Sub LetterBucketFor_ClassifiesByFirstCharacter()
 
-        Assert.AreEqual("D", winapp2ool.EntryBuilder.LetterBucketFor("Discord *"))
-        Assert.AreEqual("D", winapp2ool.EntryBuilder.LetterBucketFor("discord *"))
-        Assert.AreEqual("#", winapp2ool.EntryBuilder.LetterBucketFor("3DMark *"))
-        Assert.AreEqual("#", winapp2ool.EntryBuilder.LetterBucketFor(".NET Framework *"))
-        Assert.AreEqual("#", winapp2ool.EntryBuilder.LetterBucketFor(""))
+        Assert.AreEqual("D", winapp2ool.LetterSplitOutput.LetterBucketFor("Discord *"))
+        Assert.AreEqual("D", winapp2ool.LetterSplitOutput.LetterBucketFor("discord *"))
+        Assert.AreEqual("#", winapp2ool.LetterSplitOutput.LetterBucketFor("3DMark *"))
+        Assert.AreEqual("#", winapp2ool.LetterSplitOutput.LetterBucketFor(".NET Framework *"))
+        Assert.AreEqual("#", winapp2ool.LetterSplitOutput.LetterBucketFor(""))
 
     End Sub
 

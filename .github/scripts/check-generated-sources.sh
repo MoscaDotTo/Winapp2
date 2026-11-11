@@ -26,13 +26,23 @@
 #
 #   2. Per-artifact. Each generated artifact names the source directory that feeds it:
 #        Assembler/Generated/EntryBuilder/<L>.ini <- Assembler/Sources/EntryBuilder/<L>.ini (1:1 by letter)
+#        Assembler/Generated/UWPBuilder/<L>.ini   <- Assembler/Sources/UWPBuilder/AppInfo/<L>.ini (1:1 by letter)
 #        Assembler/Generated/BrowserBuilder/*     <- Assembler/Sources/BrowserBuilder/**
-#        Assembler/Generated/UWPBuilder/*         <- Assembler/Sources/UWPBuilder/**
+#        any other Assembler/Generated/UWPBuilder/* <- Assembler/Sources/UWPBuilder/**
 #      A changed artifact whose own source is untouched is flagged even when some
 #      unrelated source changed -- that catches "correct source edit, plus a stray
 #      hand-edit somewhere else in Generated/."
 #      Rule 2 is SUPPRESSED when a global input changed (see GLOBAL below), because
 #      those legitimately ripple into artifacts whose per-letter source is untouched.
+#      A change to any Sources/UWPBuilder/ file outside AppInfo/<L>.ini (UWP.ini, the
+#      scaffold every UWP entry is built from) can move every UWP letter, so it
+#      suppresses the UWP letter rule only; the EntryBuilder letter rule still applies.
+#
+#      Known false positive of both letter rules: the generators bucket their output by
+#      entry name, not by source file, so an entry filed under the wrong source letter
+#      (say [Zoom *] in AppInfo/A.ini) lands in Z.ini, and editing it changes Z.ini
+#      alongside A.ini. Rule 2 then flags Z.ini. No source entry is misfiled today; the
+#      fix is to move the entry to its own letter's file.
 #
 # The aggregate published files (Winapp2.ini, Non-CCleaner/**) are deliberately only
 # covered by rule 1: any source anywhere can legitimately move them, so there is no
@@ -51,7 +61,7 @@
 # touched generated files. One was clean, two were drift regenerations, two were
 # first-time artifact seeding -- so expect this to want the token a few times a year,
 # almost always on a commit whose message already says "regenerate". Rule 2 flagged none
-# of the five: it has no known false-positive class.
+# of the five; its one known false-positive class is the misfiled entry described above.
 #
 # Usage:
 #   check-generated-sources.sh <base-ref> <head-ref>   # diff two refs
@@ -87,8 +97,9 @@ fi
 
 # Generated artifacts touched, split by kind.
 gen_letters=""      # bare letters, e.g. "A M #"
+gen_uwp_letters=""  # bare letters of Generated/UWPBuilder/<L>.ini
 gen_browsers=0
-gen_uwp=0
+gen_uwp=""          # other Generated/UWPBuilder files (and the pre-move Entries/UWP/)
 gen_other=""        # other Generated/ files + the published aggregates
 gen_count=0
 
@@ -96,7 +107,9 @@ gen_count=0
 src_count=0
 src_entrybuilder=""     # bare letters whose EntryBuilder source changed
 src_browserbuilder=0
-src_uwp=0
+src_uwp=0               # any UWPBuilder source changed
+src_uwp_letters=""      # bare letters whose AppInfo source changed
+src_uwp_global=0        # a UWPBuilder source outside AppInfo/<L>.ini changed
 global=0                # a global input changed -> suppress rule 2
 global_why=""
 
@@ -133,8 +146,17 @@ while IFS= read -r f; do
     # Generated/EntryBuilder/<L>.ini), kept for branches made before the move.
     'Assembler/Generated/BrowserBuilder/'*|'Assembler/Entries/Browsers/'*)
       gen_browsers=1; gen_count=$((gen_count + 1)) ;;
+    'Assembler/Generated/UWPBuilder/'*.ini)
+      base=${f##*/}; letter=${base%.ini}
+      gen_count=$((gen_count + 1))
+      case "$letter" in
+        # The 27 buckets UWPBuilder -split writes. Anything else (the single-file
+        # uwp.ini UWPBuilder wrote before -split) takes the whole-folder rule.
+        '#'|[A-Z]) gen_uwp_letters="$gen_uwp_letters $letter" ;;
+        *)         gen_uwp="$gen_uwp $f" ;;
+      esac ;;
     'Assembler/Generated/UWPBuilder/'*|'Assembler/Entries/UWP/'*)
-      gen_uwp=1;      gen_count=$((gen_count + 1)) ;;
+      gen_uwp="$gen_uwp $f"; gen_count=$((gen_count + 1)) ;;
     'Assembler/Generated/EntryBuilder/'*.ini|'Assembler/Entries/'*.ini)
       base=${f##*/}; letter=${base%.ini}
       gen_count=$((gen_count + 1))
@@ -159,8 +181,20 @@ while IFS= read -r f; do
       src_entrybuilder="$src_entrybuilder ${base%.ini}" ;;
     'Assembler/Sources/BrowserBuilder/'*|'Assembler/BrowserBuilder/'*)
       src_count=$((src_count + 1)); src_browserbuilder=1 ;;
+    'Assembler/Sources/UWPBuilder/AppInfo/'*.ini|'Assembler/UWP/AppInfo/'*.ini)
+      src_count=$((src_count + 1)); src_uwp=1
+      base=${f##*/}; letter=${base%.ini}
+      case "$f" in
+        # Only a top-level AppInfo/<L>.ini feeds one letter.
+        */AppInfo/"$base") ;;
+        *) letter="" ;;
+      esac
+      case "$letter" in
+        '#'|[A-Z]) src_uwp_letters="$src_uwp_letters $letter" ;;
+        *)         src_uwp_global=1 ;;
+      esac ;;
     'Assembler/Sources/UWPBuilder/'*|'Assembler/UWP/'*)
-      src_count=$((src_count + 1)); src_uwp=1 ;;
+      src_count=$((src_count + 1)); src_uwp=1; src_uwp_global=1 ;;
 
     # ---- anything else under Assembler/ is a build input: Sources/Flavors Transmute
     # directories, EntryBuilder files that are not .ini, future generator sources.
@@ -218,11 +252,16 @@ if [ "$src_count" -eq 0 ]; then
       "generated by BrowserBuilder -- edit the sources in Assembler/Sources/BrowserBuilder/ instead"
     note "- \`Assembler/Generated/BrowserBuilder/browsers.ini\` <- \`Assembler/Sources/BrowserBuilder/\`"
   fi
-  if [ "$gen_uwp" -eq 1 ]; then
-    annotate "Assembler/Generated/UWPBuilder/uwp.ini" \
+  for letter in $gen_uwp_letters; do
+    annotate "Assembler/Generated/UWPBuilder/$letter.ini" \
+      "generated by UWPBuilder -- edit Assembler/Sources/UWPBuilder/AppInfo/$letter.ini instead"
+    note "- \`Assembler/Generated/UWPBuilder/$letter.ini\` <- \`Assembler/Sources/UWPBuilder/AppInfo/$letter.ini\`"
+  done
+  for f in $gen_uwp; do
+    annotate "$f" \
       "generated by UWPBuilder -- edit the sources in Assembler/Sources/UWPBuilder/ instead"
-    note "- \`Assembler/Generated/UWPBuilder/uwp.ini\` <- \`Assembler/Sources/UWPBuilder/\`"
-  fi
+    note "- \`$f\` <- \`Assembler/Sources/UWPBuilder/\`"
+  done
   for f in $gen_other; do
     annotate "$f" "build output -- edit the sources under Assembler/ instead"
     note "- \`$f\` <- the build (\`Assembler/build winapp2.ps1\`)"
@@ -256,11 +295,29 @@ else
       "changed, but no source under Assembler/Sources/BrowserBuilder/ did -- this edit will be regenerated away"
     note "- \`Assembler/Generated/BrowserBuilder/browsers.ini\` changed, but nothing under \`Assembler/Sources/BrowserBuilder/\` did"
   fi
-  if [ "$gen_uwp" -eq 1 ] && [ "$src_uwp" -eq 0 ]; then
+  # A UWPBuilder source outside AppInfo/<L>.ini (UWP.ini) can move every UWP letter.
+  if [ "$src_uwp_global" -eq 0 ]; then
+    for letter in $gen_uwp_letters; do
+      matched=0
+      for s in $src_uwp_letters; do
+        [ "$s" = "$letter" ] && { matched=1; break; }
+      done
+      if [ "$matched" -eq 0 ]; then
+        fail=1
+        orphans=1
+        annotate "Assembler/Generated/UWPBuilder/$letter.ini" \
+          "changed, but its source Assembler/Sources/UWPBuilder/AppInfo/$letter.ini did not -- this edit will be regenerated away"
+        note "- \`Assembler/Generated/UWPBuilder/$letter.ini\` changed, but \`Assembler/Sources/UWPBuilder/AppInfo/$letter.ini\` did not"
+      fi
+    done
+  fi
+  if [ -n "$gen_uwp" ] && [ "$src_uwp" -eq 0 ]; then
     fail=1; orphans=1
-    annotate "Assembler/Generated/UWPBuilder/uwp.ini" \
-      "changed, but no source under Assembler/Sources/UWPBuilder/ did -- this edit will be regenerated away"
-    note "- \`Assembler/Generated/UWPBuilder/uwp.ini\` changed, but nothing under \`Assembler/Sources/UWPBuilder/\` did"
+    for f in $gen_uwp; do
+      annotate "$f" \
+        "changed, but no source under Assembler/Sources/UWPBuilder/ did -- this edit will be regenerated away"
+      note "- \`$f\` changed, but nothing under \`Assembler/Sources/UWPBuilder/\` did"
+    done
   fi
 
   if [ -n "$orphans" ]; then

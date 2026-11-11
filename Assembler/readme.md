@@ -45,7 +45,7 @@ Contributions to Winapp2.ini or its flavors should be made to the files in this 
 | :- | :- |
 | [EntryBuilder](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Generated/EntryBuilder) | `#.ini`, `A.ini` ... `Z.ini`, written by EntryBuilder from `Sources\EntryBuilder` |
 | BrowserBuilder | `browsers.ini`, written by BrowserBuilder from `Sources\BrowserBuilder` |
-| UWPBuilder | `uwp.ini`, written by UWPBuilder from `Sources\UWPBuilder` |
+| [UWPBuilder](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Generated/UWPBuilder) | `#.ini`, `A.ini` ... `Z.ini`, written by UWPBuilder from `Sources\UWPBuilder` |
 
 These are the pieces the build's strict Combine joins into the base winapp2.ini. They are committed so every change to winapp2.ini can be reviewed at the entry level.
 

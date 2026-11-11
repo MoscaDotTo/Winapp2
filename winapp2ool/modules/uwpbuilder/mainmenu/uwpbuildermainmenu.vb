@@ -46,8 +46,11 @@ Public Module uwpbuildermainmenu
             .AddDispatchedOption("Choose scaffolds directory", "Select the shared scaffold catalog directory",
                 Sub() changeFileParams(UWPFile3, UWPBuilderModuleSettingsChanged, NameOf(UWPBuilder), NameOf(UWPFile3), NameOf(UWPBuilderModuleSettingsChanged), "Scaffolds directory")) _
             .AddBlank() _
+            .AddDispatchedToggle("output splitting", "writing per-letter files into the save target's directory", UWPBuilderSplitOutput,
+                Sub() toggleModuleSetting("Split output", NameOf(UWPBuilder), GetType(uwpbuildersettings), NameOf(UWPBuilderSplitOutput), NameOf(UWPBuilderModuleSettingsChanged))) _
+            .AddBlank() _
             .AddColoredFileInfo("Current source directory:    ", UWPFile1.Dir, ConsoleColor.DarkYellow) _
-            .AddColoredFileInfo("Current save target:         ", UWPFile2.Path(), ConsoleColor.Yellow) _
+            .AddColoredFileInfo("Current save target:         ", If(UWPBuilderSplitOutput, UWPFile2.Dir, UWPFile2.Path()), ConsoleColor.Yellow) _
             .AddColoredFileInfo("Current scaffolds directory: ", UWPFile3.Dir, ConsoleColor.DarkYellow) _
             .AddBlank(UWPBuilderModuleSettingsChanged) _
             .AddDispatchedResetOpt(NameOf(UWPBuilder), UWPBuilderModuleSettingsChanged,

@@ -275,8 +275,8 @@ function Build-Artifacts {
         -ErrorMessage "Failed to generate browser entries" -RequiredDirs @(Join-Path $PSScriptRoot 'Sources\BrowserBuilder'))) { return $false }
 
     Write-Step "Generating UWP entries"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-uwpbuilder', '-1d', '\Sources\UWPBuilder', `
-        '-2d', "$OutputRoot\UWPBuilder", '-2f', 'uwp.ini', `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-uwpbuilder', '-split', '-1d', '\Sources\UWPBuilder', `
+        '-2d', "$OutputRoot\UWPBuilder", `
         '-3d', '\Sources\Scaffolds' `
         -ErrorMessage "Failed to generate UWP entries" `
         -RequiredDirs @((Join-Path $PSScriptRoot 'Sources\UWPBuilder'), (Join-Path $PSScriptRoot 'Sources\Scaffolds')))) { return $false }

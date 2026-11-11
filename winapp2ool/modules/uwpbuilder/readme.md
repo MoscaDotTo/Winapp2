@@ -2,7 +2,7 @@
 
 **UWPBuilder** is a winapp2ool build-chain module for winapp2.ini maintainers that generates winapp2.ini entries for Universal Windows Platform (UWP) apps from a few lines of description each. Every UWP app keeps its data under `%LocalAppData%\Packages\PACKAGE_FOLDER`, and part of that folder looks the same from app to app, so UWPBuilder gives every entry the same set of baseline cleaning targets.
 
-Its output, `uwp.ini`, is an intermediate file that winapp2ool combines into the published winapp2.ini. It isn't meant for use with any cleaner on its own, and unless you maintain winapp2.ini you probably don't need this module.
+Its output, `uwp.ini` or, with `-split`, one file per letter, is an intermediate file that winapp2ool combines into the published winapp2.ini. It isn't meant for use with any cleaner on its own, and unless you maintain winapp2.ini you probably don't need this module.
 
 ### What does UWPBuilder do?
 UWPBuilder reads a source directory holding a scaffold template, `UWP.ini`, and app definitions split into per-letter files under `AppInfo\`. It writes one winapp2.ini entry for each app. Every entry gets package detection and the baseline FileKeys automatically, and the app's own keys go on top. The `<Package>` variable stands in for the package folder, so you never have to write a package path out in full.
@@ -24,6 +24,7 @@ Apps that ship both a UWP package and a win32 install keep both sets of keys in 
 4. [Menu Options](#menu-options)
 5. [Command-Line Arguments](#command-line-arguments)
    - [File Selection](#file-selection)
+   - [Toggles](#toggles)
 6. [How Generation Works](#how-generation-works)
 7. [Source Files](#source-files)
    - [The source directory](#the-source-directory)
@@ -85,9 +86,9 @@ To add an app, add a section to the matching `AppInfo\{letter}.ini` file.
 | To | Run | Example |
 |:-|:-|:-|
 | Generate `uwp.ini` from the sources in `Sources\UWPBuilder\`, using the shared scaffold catalogs | `winapp2ool -uwpbuilder -1d \Sources\UWPBuilder -2f uwp.ini -3d \Sources\Scaffolds` | [A Minimal Entry](EXAMPLES.md#example-1-a-minimal-entry) |
-| Write the committed artifact silently and offline, as the build script does | `winapp2ool -s -offline -uwpbuilder -1d \Sources\UWPBuilder -2d \Generated\UWPBuilder -2f uwp.ini -3d \Sources\Scaffolds` | |
+| Write the committed per-letter artifacts silently and offline, as the build script does | `winapp2ool -s -offline -uwpbuilder -split -1d \Sources\UWPBuilder -2d \Generated\UWPBuilder -3d \Sources\Scaffolds` | |
 
-Every worked example runs the first command. Only the AppInfo section it reads changes. In the menu, set **Choose source directory**, **Choose save target** and **Choose scaffolds directory**, then choose **Run**; see [Menu Options](#menu-options). `-s` and `-offline` are winapp2ool [global args](../../Readme.md#global-args).
+Every worked example runs the first command. Only the AppInfo section it reads changes. In the menu, set **Choose source directory**, **Choose save target** and **Choose scaffolds directory**, turn on **output splitting** for per-letter files, then choose **Run**; see [Menu Options](#menu-options). `-s` and `-offline` are winapp2ool [global args](../../Readme.md#global-args).
 
 ---
 
@@ -97,17 +98,18 @@ Every worked example runs the first command. Only the AppInfo section it reads c
 |:-|:-|:-|
 | Run (default) | Generate entries for the apps in the source directory | |
 | Choose source directory | Select the directory holding `UWP.ini` and `AppInfo\` | Default: current directory |
-| Choose save target | Select where to save the generated entries | Default: `uwp.ini` |
+| Choose save target | Select where to save the generated entries | Default: `uwp.ini`. With output splitting on, only its folder is used |
 | Choose scaffolds directory | Select the folder holding the shared scaffold catalogs | Default: current directory |
+| Toggle output splitting | Write per-letter files into the save target's folder instead of one file | Off by default. The menu equivalent of `-split` |
 | Reset Settings | Restore all settings to their defaults | Only shown when settings have been changed |
 
-Below the options, the menu shows the current source directory, save target and scaffolds directory.
+Below the options, the menu shows the current source directory, save target and scaffolds directory. With output splitting on, the save target line shows only the folder.
 
 ---
 
 # Command-Line Arguments
 
-UWPBuilder is invoked as `winapp2ool -uwpbuilder`. It takes three directory arguments and an output file name, and no toggles.
+UWPBuilder is invoked as `winapp2ool -uwpbuilder`. It takes three directory arguments, an output file name and one toggle.
 
 ### File Selection
 
@@ -122,6 +124,12 @@ Paths can be absolute, or relative to the working directory with a leading backs
 
 ###### Note: Slot 3 only reads a directory, so `-3f` does nothing there. It defaults to the current directory, and if that holds no catalogs the run still succeeds, minus every scaffold key, with only an `Unknown ... scaffold` warning for each entry that asked for them. Always pass `-3d` when scripting.
 
+### Toggles
+
+| Arg | Effect |
+|:-|:-|
+| `-split` | Write per-letter files (`#.ini`, `A.ini` ... `Z.ini`) into the save target's folder instead of one file, so `-2f` has no effect. Each entry goes in the file for the first character of its name, and anything that doesn't start with a letter goes in `#.ini`, so each file matches the `AppInfo\` file of the same letter. All 27 files are written every time, empty or not, each with a do-not-edit header. The build uses it |
+
 ---
 
 # How Generation Works
@@ -133,7 +141,7 @@ Paths can be absolute, or relative to the working directory with a leading backs
 | Validate | Each AppInfo section needs at least one `Package=` and a category key. A section missing either is skipped with a warning. A section with *both* category keys warns but is still generated, using `LangSecRef` |
 | Generate | Each valid section becomes one entry: package detection, the baseline FileKeys, the app's own keys, and any WebView, QtWebEngine or Electron scaffold keys it selected, with `<Package>` and every other variable expanded |
 | Lint | WinappDebug normalizes the whole output with Optimizations forced on (see [Output Formatting](#output-formatting)) |
-| Write | The output file is saved |
+| Write | The output file is saved, or with `-split` the 27 per-letter files |
 
 ###### Note: When two AppInfo files define a section with the same name, the file that sorts first wins and the other section is dropped with a warning
 
@@ -426,17 +434,36 @@ Before saving, UWPBuilder runs the output through WinappDebug with Optimizations
 
 So the output won't show the order you wrote or generated the keys in.
 
-The output file starts with a generated header:
+The output file starts with a generated header, where the first line counts its entries and the second names the save target:
 
 ```ini
-; # of entries: 187
-; uwp.ini is generated by the Winapp2ool UWP Builder
-; Entries in this file may be incomplete and are not intended to be used directly with any cleaning software
-; They are utilized by winapp2ool to create the final winapp2.ini file for distribution
-; If you are not maintaining winapp2.ini for distribution, you probably don't need this file!
-; Refer to the Winapp2ool documentation for more information: https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/Readme.md
-; You can find the complete winapp2.ini file here: https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Winapp2.ini
+; # of entries: 192
+; uwp.ini is a build artifact generated by winapp2ool's UWPBuilder. Don't edit it directly:
+; the next build overwrites it. In the winapp2 repository, its entries come from the files in:
+;   https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/UWPBuilder
+;
+; This is one piece of winapp2.ini, not a usable winapp2.ini. The finished file, in every flavor:
+;   https://github.com/MoscaDotTo/Winapp2/releases/latest
+; To add or fix an entry, see:
+;   https://github.com/MoscaDotTo/Winapp2/blob/master/CONTRIBUTING.md
 ```
+
+With `-split`, each per-letter file links the `AppInfo` file of its own letter instead of the folder and adds a line saying which letter it holds. This is the build's `A.ini`:
+
+```ini
+; # of entries: 26
+; A.ini is a build artifact generated by winapp2ool's UWPBuilder. Don't edit it directly:
+; the next build overwrites it. In the winapp2 repository, its entries come from:
+;   https://github.com/MoscaDotTo/Winapp2/blob/master/Assembler/Sources/UWPBuilder/AppInfo/A.ini
+; It contains entries beginning with the letter A.
+;
+; This is one piece of winapp2.ini, not a usable winapp2.ini. The finished file, in every flavor:
+;   https://github.com/MoscaDotTo/Winapp2/releases/latest
+; To add or fix an entry, see:
+;   https://github.com/MoscaDotTo/Winapp2/blob/master/CONTRIBUTING.md
+```
+
+A letter with no entries still gets its file, holding only the header with `; # of entries: 0`. `#.ini`'s link spells the file `%23.ini`, since a bare `#` would end the link. The links always point into the winapp2 repository, whatever source directory the run read.
 
 ## When the lint pass changes meaning
 

@@ -84,6 +84,7 @@
     <Import Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArtifactHeaderTests.vb" />
     <Compile Include="BrowserBuilderTests.vb" />
     <Compile Include="CombineTests.vb" />
     <Compile Include="DiffKeyComparisonTests.vb" />

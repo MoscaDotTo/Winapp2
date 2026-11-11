@@ -1114,4 +1114,154 @@ Imports System.Text
 
     End Sub
 
+    ''' <summary>
+    ''' Runs UWPBuilder's command line over a scratch source directory holding three apps in
+    ''' two AppInfo letters (one filed under the wrong letter), writing into
+    ''' <paramref name="outDir"/>, and restores every setting it touched
+    ''' </summary>
+    '''
+    ''' <param name="sourceDir">The folder given to <c> -1d </c>, from <see cref="WriteSplitSources"/></param>
+    '''
+    ''' <param name="outDir">The folder given to <c> -2d </c></param>
+    '''
+    ''' <param name="extraArgs">Further arguments, such as <c> -split </c></param>
+    Private Shared Sub RunCommandLine(sourceDir As String, outDir As String, ParamArray extraArgs As String())
+
+        Dim saved = {winapp2ool.UWPFile1, winapp2ool.UWPFile2, winapp2ool.UWPFile3}
+        Dim savedSplit = winapp2ool.UWPBuilderSplitOutput
+        Dim savedSuppress = winapp2ool.SuppressOutput
+        Dim savedExitCode = Environment.ExitCode
+
+        Try
+
+            winapp2ool.SuppressOutput = True
+            Environment.ExitCode = 0
+            Dim args = {"-1d", sourceDir, "-2d", outDir, "-3d", IO.Path.Combine(sourceDir, "Scaffolds")}.Concat(extraArgs).ToArray()
+            setCmdLineArgs(AddressOf winapp2ool.UWPBuilder.handleCmdLine, args)
+            Assert.AreEqual(0, Environment.ExitCode, "The run failed")
+
+        Finally
+
+            winapp2ool.UWPFile1 = saved(0)
+            winapp2ool.UWPFile2 = saved(1)
+            winapp2ool.UWPFile3 = saved(2)
+            winapp2ool.UWPBuilderSplitOutput = savedSplit
+            winapp2ool.SuppressOutput = savedSuppress
+            Environment.ExitCode = savedExitCode
+
+        End Try
+
+    End Sub
+
+    ''' <summary>
+    ''' Writes a scratch UWPBuilder source directory and returns its path
+    ''' </summary>
+    Private Shared Function WriteSplitSources() As String
+
+        Dim dir = IO.Path.Combine(IO.Path.GetTempPath(), $"winapp2ool-uwpsplit-{Guid.NewGuid():N}")
+        IO.Directory.CreateDirectory(IO.Path.Combine(dir, "AppInfo"))
+        IO.Directory.CreateDirectory(IO.Path.Combine(dir, "Scaffolds"))
+        IO.File.WriteAllText(IO.Path.Combine(dir, "UWP.ini"),
+            "[EntryScaffold: UWP App]" & vbCrLf & "DetectFileBase=<Package>" & vbCrLf & "FileKeyBase=<Package>\TempState|*|REMOVESELF" & vbCrLf)
+        IO.File.WriteAllText(IO.Path.Combine(dir, "AppInfo", "A.ini"),
+            "[Alpha App *]" & vbCrLf & "Package=Hazel.Alpha_abc" & vbCrLf & "LangSecRef=3021" & vbCrLf & vbCrLf &
+            "[Beta App *]" & vbCrLf & "Package=Hazel.Beta_abc" & vbCrLf & "LangSecRef=3021" & vbCrLf)
+        IO.File.WriteAllText(IO.Path.Combine(dir, "AppInfo", "M.ini"),
+            "[Mu App *]" & vbCrLf & "Package=Hazel.Mu_abc" & vbCrLf & "LangSecRef=3021" & vbCrLf)
+        Return dir
+
+    End Function
+
+    ''' <summary>
+    ''' Returns every section of the <c> *.ini </c> files in <paramref name="dir"/> as
+    ''' <c> name → keys </c>, failing on a name found in two files
+    ''' </summary>
+    '''
+    ''' <param name="dir">The folder to read</param>
+    Private Shared Function SectionsIn(dir As String) As Dictionary(Of String, String)
+
+        Dim result As New Dictionary(Of String, String)
+
+        For Each path In IO.Directory.GetFiles(dir, "*.ini")
+
+            For Each section In winapp2ool.iniFile.FromFile(path)
+
+                Assert.IsFalse(result.ContainsKey(section.Name), $"[{section.Name}] is in two files")
+                result.Add(section.Name, String.Join("|", section.Keys.Select(Function(k) k.Name & "=" & k.Value)))
+
+            Next
+
+        Next
+
+        Return result
+
+    End Function
+
+    ''' <summary>
+    ''' <c> -split </c> writes the 27 per-letter files into the save target's folder and no
+    ''' single output file, buckets by entry name, and the letter files' sections together
+    ''' equal the single-file output's
+    ''' </summary>
+    <TestMethod()> Public Sub Split_WritesLetterFilesEqualToTheSingleFile()
+
+        Dim sourceDir = WriteSplitSources()
+        Dim singleDir = IO.Path.Combine(sourceDir, "single")
+        Dim splitDir = IO.Path.Combine(sourceDir, "split")
+
+        Try
+
+            RunCommandLine(sourceDir, singleDir)
+            RunCommandLine(sourceDir, splitDir, "-split")
+
+            CollectionAssert.AreEqual({"uwp.ini"}, IO.Directory.GetFiles(singleDir).Select(Function(f) IO.Path.GetFileName(f)).ToArray())
+
+            Dim splitFiles = IO.Directory.GetFiles(splitDir).Select(Function(f) IO.Path.GetFileName(f)).ToList()
+            Assert.AreEqual(27, splitFiles.Count)
+            Assert.IsFalse(splitFiles.Contains("uwp.ini"))
+
+            Dim singleSections = SectionsIn(singleDir)
+            Dim splitSections = SectionsIn(splitDir)
+            Assert.AreEqual(3, singleSections.Count)
+            CollectionAssert.AreEquivalent(singleSections.ToList(), splitSections.ToList())
+
+            Dim b = IO.File.ReadAllText(IO.Path.Combine(splitDir, "B.ini"))
+            StringAssert.Contains(b, "[Beta App *]")
+            StringAssert.Contains(b, "/blob/master/Assembler/Sources/UWPBuilder/AppInfo/B.ini" & vbCrLf)
+            StringAssert.Contains(IO.File.ReadAllText(IO.Path.Combine(singleDir, "uwp.ini")),
+                                  "/tree/master/Assembler/Sources/UWPBuilder" & vbCrLf)
+
+        Finally
+
+            IO.Directory.Delete(sourceDir, recursive:=True)
+
+        End Try
+
+    End Sub
+
+    ''' <summary>
+    ''' The command line starts from the default settings, so a saved split setting can't make
+    ''' <c> -split </c> turn splitting off
+    ''' </summary>
+    <TestMethod()> Public Sub Split_IgnoresASavedSplitSetting()
+
+        Dim sourceDir = WriteSplitSources()
+        Dim splitDir = IO.Path.Combine(sourceDir, "split")
+        Dim savedSplit = winapp2ool.UWPBuilderSplitOutput
+
+        Try
+
+            winapp2ool.UWPBuilderSplitOutput = True
+            RunCommandLine(sourceDir, splitDir, "-split")
+
+            Assert.AreEqual(27, IO.Directory.GetFiles(splitDir).Length)
+
+        Finally
+
+            winapp2ool.UWPBuilderSplitOutput = savedSplit
+            IO.Directory.Delete(sourceDir, recursive:=True)
+
+        End Try
+
+    End Sub
+
 End Class

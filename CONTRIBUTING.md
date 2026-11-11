@@ -780,7 +780,7 @@ git commit -m "add an entry for Example App"
 
 Avoid `git add -A` and `git add .`.
 
-If you [ran the full build](#verifying-your-work) to check your work, your working copy now contains 29 regenerated artifacts plus all seven rebuilt published outputs. 
+If you [ran the full build](#verifying-your-work) to check your work, your working copy now contains 55 regenerated artifacts plus all seven rebuilt published outputs. 
 
 The [generated artifact guard](#what-happens-after-you-open-a-pr) will tell you, and `git restore` on the files it names will fix it
 
@@ -813,7 +813,7 @@ CI runs this on every PR, but you can run it locally too
 4. Open the built `winapp2.ini` (each flavor is written to its home location) and check that your entry is there and looks the way you expected.
 5. Optionally, drop the built `winapp2.ini` into a cleaning tool and scan with it to confirm your entry targets what you expected and nothing else. Then run the clean and verify that what should survive did.
 
-The build rewrites all 29 artifacts under `Assembler/Generated/` and all seven published output files in your working copy. Rather than cleaning that up afterwards, [stage your source files by name](#what-to-include-in-your-pr) and ignore the rest.
+The build rewrites all 55 artifacts under `Assembler/Generated/` and all seven published output files in your working copy. Rather than cleaning that up afterwards, [stage your source files by name](#what-to-include-in-your-pr) and ignore the rest.
 
 `& '.\build winapp2.ps1' -Verify` is the maintainer-side variant: it builds nothing, regenerating every artifact into a scratch folder and byte-comparing against the committed `Assembler/Generated/` files instead, and failing on any mismatch. CI runs it automatically on every push to catch artifacts that have drifted from their sources (e.g. bad generator output).
 

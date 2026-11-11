@@ -32,15 +32,15 @@ Imports System.Text.RegularExpressions
 ''' per-family plumbing. <see cref="ScaffoldFamilies"/> is the roster of families the
 ''' builders actually bind:
 ''' <list type="bullet">
-''' <item><c> WebView </c>: WebView2 / EBWebView layout (<c> Assembler\Scaffolds\webview.ini </c>),
+''' <item><c> WebView </c>: WebView2 / EBWebView layout (<c> Assembler\Sources\Scaffolds\webview.ini </c>),
 ''' templates use the <c> &lt;WebViewRoot&gt; </c> placeholder.</item>
-''' <item><c> QtWebEngine </c>: QtWebEngine layout (<c> Assembler\Scaffolds\qtwebengine.ini </c>),
+''' <item><c> QtWebEngine </c>: QtWebEngine layout (<c> Assembler\Sources\Scaffolds\qtwebengine.ini </c>),
 ''' templates use the <c> &lt;QtWebEngineRoot&gt; </c> placeholder. QtWebEngine bundles an older
 ''' Chromium with a flatter on-disk layout. A second placeholder, <c> &lt;QtWebEngineCacheRoot&gt; </c>, names the profile's
 ''' HTTP cache directory, which Qt keeps under its CacheLocation rather than beside the
 ''' profile (<c> %LocalAppData%\App\cache\QtWebEngine\Default </c> against
 ''' <c> %LocalAppData%\App\QtWebEngine\Default </c>).</item>
-''' <item><c> Electron </c>: Electron layout (<c> Assembler\Scaffolds\electron.ini </c>),
+''' <item><c> Electron </c>: Electron layout (<c> Assembler\Sources\Scaffolds\electron.ini </c>),
 ''' templates use <c> &lt;ElectronRoot&gt; </c> (the app's <c> userData </c> folder, which for
 ''' Electron <em>is</em> the Chromium profile, with no <c> ProfileName\ </c> segment) and
 ''' <c> &lt;ElectronUpdaterRoot&gt; </c> (the electron-updater download cache, whose directory name
@@ -447,7 +447,7 @@ Public Module ScaffoldCatalogs
     ''' </summary>
     '''
     ''' <param name="scaffoldDir">
-    ''' Path to the scaffold directory (typically <c> Assembler\Scaffolds </c>)
+    ''' Path to the scaffold directory (typically <c> Assembler\Sources\Scaffolds </c>)
     ''' </param>
     '''
     ''' <param name="menuOutput">

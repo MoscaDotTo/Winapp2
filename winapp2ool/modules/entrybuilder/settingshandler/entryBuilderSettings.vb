@@ -51,7 +51,7 @@ Option Strict On
 ''' <item>
 ''' <b><c> EntryBuilderFile3 </c></b>
 ''' <description>
-''' Shared scaffold directory (typically <c> Assembler\Scaffolds </c>). Every
+''' Shared scaffold directory (typically <c> Assembler\Sources\Scaffolds </c>). Every
 ''' <c> *.ini </c> in it is loaded at once and each scaffold family is derived from its
 ''' section headers (<c> [WebViewScaffold: ...] </c>, <c> [QtWebEngineScaffold: ...] </c>,
 ''' <c> [ElectronScaffold: ...] </c>), consumed when expanding entries that declare the
@@ -82,7 +82,7 @@ Public Module entryBuilderSettings
 
     ''' <summary>
     ''' The shared scaffold directory consumed by both UWPBuilder and EntryBuilder, holding
-    ''' one catalog file per engine family. Typically <c> Assembler\Scaffolds </c>.
+    ''' one catalog file per engine family. Typically <c> Assembler\Sources\Scaffolds </c>.
     ''' Only the <c> Dir </c> property is used; <c> Name </c> is ignored.
     ''' </summary>
     Public Property EntryBuilderFile3 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "", "")
@@ -91,7 +91,7 @@ Public Module entryBuilderSettings
     ''' Indicates whether output is written as per-letter artifact files
     ''' (<c> #.ini </c>, <c> A.ini </c> ... <c> Z.ini </c>) in the save target's directory,
     ''' bucketed by each entry name's first character, instead of a single output file.
-    ''' The build pipeline uses it to produce the committed <c> Assembler\Entries </c>
+    ''' The build pipeline uses it to produce the committed <c> Assembler\Generated\EntryBuilder </c>
     ''' artifacts. CLI: <c> -split </c>, which flips the current value.
     ''' </summary>
     Public Property EntryBuilderSplitOutput As Boolean = False

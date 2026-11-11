@@ -41,7 +41,6 @@ Public Class winapp2file
         "Language Files", "Dangerous Long", "Dangerous"
     }
 
-    Private Const RepoUrl As String = "https://github.com/MoscaDotTo/Winapp2"
     Private Const LatestDownloadUrl As String = RepoUrl & "/releases/latest/download/"
 
     ' One category list per FileSectionHeaders entry, at the same index
@@ -332,7 +331,7 @@ Public Class winapp2file
         Dim builder As New StringBuilder()
 
         builder.AppendLine(Version)
-        builder.AppendLine($"; # of entries: {Count:#,###}")
+        builder.AppendLine(EntryCountLine(Count))
 
         If Flavor.HasValue Then
 

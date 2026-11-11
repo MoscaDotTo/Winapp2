@@ -39,15 +39,16 @@ Option Strict On
 ''' <item>
 ''' <b><c> UWPFile2 </c></b>
 ''' <description>
-''' Output file: where the generated UWP entries are written.
-''' This file is consumed by the build pipeline to produce the final winapp2.ini.
+''' Output file: where the generated UWP entries are written. With
+''' <see cref="UWPBuilderSplitOutput"/> only its <c> Dir </c> is used, and the 27
+''' per-letter files written there are what the build pipeline consumes.
 ''' </description>
 ''' </item>
 '''
 ''' <item>
 ''' <b><c> UWPFile3 </c></b>
 ''' <description>
-''' Shared scaffold directory (typically <c> Assembler\Scaffolds </c>). Every
+''' Shared scaffold directory (typically <c> Assembler\Sources\Scaffolds </c>). Every
 ''' <c> *.ini </c> in it is loaded at once and each scaffold family is derived from its
 ''' section headers (<c> [WebViewScaffold: ...] </c>, <c> [QtWebEngineScaffold: ...] </c>,
 ''' <c> [ElectronScaffold: ...] </c>), so adding a family costs no new setting here. Only
@@ -71,18 +72,29 @@ Public Module uwpbuildersettings
     Public Property UWPFile1 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "", "")
 
     ''' <summary>
-    ''' The output file to which the generated UWP entries are saved.
-    ''' This file is consumed by the build pipeline to produce the final winapp2.ini.
+    ''' The output file to which the generated UWP entries are saved. With
+    ''' <see cref="UWPBuilderSplitOutput"/> only its <c> Dir </c> is used, as the folder for
+    ''' the per-letter files.
     ''' </summary>
     Public Property UWPFile2 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "uwp.ini", "uwp.ini", mustExist:=False)
 
     ''' <summary>
     ''' The shared scaffold directory holding the engine-family catalogs, typically
-    ''' <c> Assembler\Scaffolds </c>, which EntryBuilder reads through its own setting.
+    ''' <c> Assembler\Sources\Scaffolds </c>, which EntryBuilder reads through its own setting.
     ''' We take each family from the section headers, not the filenames.
     ''' Only the <c> Dir </c> property is used; <c> Name </c> is ignored.
     ''' </summary>
     Public Property UWPFile3 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "", "")
+
+    ''' <summary>
+    ''' Indicates whether output is written as per-letter artifact files
+    ''' (<c> #.ini </c>, <c> A.ini </c> ... <c> Z.ini </c>) in the save target's directory,
+    ''' bucketed by each entry name's first character, instead of a single output file.
+    ''' The build pipeline uses it to produce the committed
+    ''' <c> Assembler\Generated\UWPBuilder </c> artifacts, one per <c> AppInfo </c> source
+    ''' letter. CLI: <c> -split </c>, which flips the current value.
+    ''' </summary>
+    Public Property UWPBuilderSplitOutput As Boolean = False
 
     ''' <summary>
     ''' Indicates whether the module settings have been modified from their defaults
@@ -99,6 +111,7 @@ Public Module uwpbuildersettings
         UWPFile1 = New iniFileChooser(Environment.CurrentDirectory, "", "")
         UWPFile2 = New iniFileChooser(Environment.CurrentDirectory, "uwp.ini", "uwp.ini", mustExist:=False)
         UWPFile3 = New iniFileChooser(Environment.CurrentDirectory, "", "")
+        UWPBuilderSplitOutput = False
         UWPBuilderModuleSettingsChanged = False
         SaveModule(NameOf(UWPBuilder), GetType(uwpbuildersettings))
 
