@@ -6,11 +6,13 @@
 
 .DESCRIPTION
     Drives Assembler\build winapp2.ps1 twice around a merge.
-    Preserve the seven committed build outputs after the baseline build, hard
-    reset, merge the PR head, restore those seven as the "previous" baseline, then
-    build again. The build script's own Backup-Files stage copies each committed
-    output to a .old file and its changelog stage diffs .old vs the freshly built
-    file, so the second build's diff.txt is exactly what the PR changes.
+    Preserve the seven flavor files the baseline build published to Releases\, hard
+    reset, merge the PR head, restore those seven to Releases\ as the "previous"
+    baseline, then build again. The build script's own Backup-Files stage copies each
+    Releases\ file to a .old file and its changelog stage diffs .old vs the freshly
+    built file, so the changelogs the second build writes to Releases\ are exactly
+    what the PR changes. The deprecated copies the build also writes outside Releases\
+    feed nothing, so the harness ignores them.
 
 .PARAMETER BaseSha
     The PR base commit (github.event.pull_request.base.sha) -- master.
@@ -63,17 +65,17 @@ if (-not (Test-Path $Exe)) { throw "winapp2ool.exe missing from Assembler -- the
 New-Item -ItemType Directory -Force -Path $ReportDir | Out-Null
 Set-Content -Path (Join-Path $ReportDir 'pr-number.txt') -Value $PrNumber -NoNewline
 
-# The seven committed build outputs, relative to the repo root, paired with the flavor
-# label and the location the build script drops each flavor's diff.txt. Order matches
+# The seven published flavor files, relative to the repo root, paired with the flavor
+# label and the changelog the build script publishes beside each one. Order matches
 # build winapp2.ps1's Backup-Files / changelog stages.
 $Outputs = @(
-    @{ Flavor = 'Base';        Output = 'Non-CCleaner\Winapp2.ini';               Diff = 'Non-CCleaner\diff.txt' }
-    @{ Flavor = 'CCleaner';    Output = 'Winapp2.ini';                            Diff = 'diff.txt' }
-    @{ Flavor = 'BleachBit';   Output = 'Non-CCleaner\BleachBit\Winapp2.ini';     Diff = 'Non-CCleaner\BleachBit\diff.txt' }
-    @{ Flavor = 'CCleaner7';   Output = 'Non-CCleaner\CCleaner7\Winapp2.ini';     Diff = 'Non-CCleaner\CCleaner7\diff.txt' }
-    @{ Flavor = 'FluentCleaner'; Output = 'Non-CCleaner\FluentCleaner\Winapp2.ini'; Diff = 'Non-CCleaner\FluentCleaner\diff.txt' }
-    @{ Flavor = 'Tron';        Output = 'Non-CCleaner\Tron\Winapp2.ini';          Diff = 'Non-CCleaner\Tron\diff.txt' }
-    @{ Flavor = 'SystemNinja'; Output = 'Non-CCleaner\SystemNinja\Winapp2.rules'; Diff = 'Non-CCleaner\SystemNinja\diff.txt' }
+    @{ Flavor = 'Base';          Output = 'Releases\winapp2.ini';               Diff = 'Releases\changelog-base.txt' }
+    @{ Flavor = 'CCleaner';      Output = 'Releases\winapp2-ccleaner.ini';      Diff = 'Releases\changelog-ccleaner.txt' }
+    @{ Flavor = 'BleachBit';     Output = 'Releases\winapp2-bleachbit.ini';     Diff = 'Releases\changelog-bleachbit.txt' }
+    @{ Flavor = 'CCleaner7';     Output = 'Releases\winapp2-ccleaner7.ini';     Diff = 'Releases\changelog-ccleaner7.txt' }
+    @{ Flavor = 'FluentCleaner'; Output = 'Releases\winapp2-fluentcleaner.ini'; Diff = 'Releases\changelog-fluentcleaner.txt' }
+    @{ Flavor = 'Tron';          Output = 'Releases\winapp2-tron.ini';          Diff = 'Releases\changelog-tron.txt' }
+    @{ Flavor = 'SystemNinja';   Output = 'Releases\winapp2-systemninja.rules'; Diff = 'Releases\changelog-systemninja.txt' }
 )
 
 function Invoke-Git {
@@ -159,7 +161,7 @@ $(Get-Tail $baselineTranscript)
     Complete-Verification -Status 'baseline_failed' -ReportMarkdown $body
 }
 
-# --- 2. Preserve the six baseline outputs ----------------------------------------
+# --- 2. Preserve the seven baseline outputs --------------------------------------
 $baselineSave = Join-Path $ReportDir '_baseline'
 New-Item -ItemType Directory -Force -Path $baselineSave | Out-Null
 foreach ($o in $Outputs) {

@@ -280,17 +280,22 @@ An update never installs an older version, even one with a valid signature. Sinc
 
 This section is for people who maintain the winapp2 repository, or who want to know which file in it each download comes from. You don't need it to use Downloader.
 
-Everything is fetched from `github.com/MoscaDotTo/Winapp2` on the `master` branch:
+Every winapp2.ini flavor is downloaded from the [latest release](https://github.com/MoscaDotTo/Winapp2/releases/latest), at `https://github.com/MoscaDotTo/Winapp2/releases/latest/download/<asset>`. The build publishes the same files to [`Releases/`](../../../Releases) in the repository under the same names:
+
+| File | Release asset |
+|:-|:-|
+| winapp2.ini (base) | `winapp2.ini` |
+| winapp2.ini (CCleaner) | `winapp2-ccleaner.ini` |
+| winapp2.ini (BleachBit) | `winapp2-bleachbit.ini` |
+| winapp2.rules (System Ninja) | `winapp2-systemninja.rules` |
+| winapp2.ini (Tron) | `winapp2-tron.ini` |
+| winapp2.ini (CCleaner 7) | `winapp2-ccleaner7.ini` |
+| winapp2.ini (FluentCleaner) | `winapp2-fluentcleaner.ini` |
+
+Each flavor is saved as `winapp2.ini` (`winapp2.rules` for System Ninja), whatever its asset is called. Everything else is fetched from `github.com/MoscaDotTo/Winapp2` on the `master` branch:
 
 | File | Path in the repository |
 |:-|:-|
-| winapp2.ini (base) | `Non-CCleaner/Winapp2.ini` |
-| winapp2.ini (CCleaner) | `Winapp2.ini` |
-| winapp2.ini (BleachBit) | `Non-CCleaner/BleachBit/Winapp2.ini` |
-| winapp2.rules (System Ninja) | `Non-CCleaner/SystemNinja/Winapp2.rules` |
-| winapp2.ini (Tron) | `Non-CCleaner/Tron/Winapp2.ini` |
-| winapp2.ini (CCleaner 7) | `Non-CCleaner/CCleaner7/Winapp2.ini` |
-| winapp2.ini (FluentCleaner) | `Non-CCleaner/FluentCleaner/Winapp2.ini` |
 | winapp2ool.exe | `winapp2ool/bin/Release/winapp2ool.exe` |
 | readme | `winapp2ool/Readme.md` |
 | winapp3.ini | `Winapp3/Winapp3.ini` |

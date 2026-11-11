@@ -162,7 +162,7 @@ Author=Winapp2.ini Project
 Tags=ccwindows
 ```
 
-The winapp2.ini project publishes a ready-made [CCleaner 7 flavor](https://github.com/MoscaDotTo/Winapp2/tree/master/Non-CCleaner/CCleaner7) in this format. A local file has to be in this format too, or its entries won't work in CCleaner 7.
+The winapp2.ini project publishes a ready-made [CCleaner 7 flavor](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-ccleaner7.ini) in this format. A local file has to be in this format too, or its entries won't work in CCleaner 7.
 
 ---
 

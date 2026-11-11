@@ -4,7 +4,7 @@
 
 This folder contains the set of Transmutation rules Winapp2ool uses to produce the **FluentCleaner** flavor of Winapp2.ini. These Transmutation rules produce a winapp2.ini flavor that captures the changes made to [FluentCleaner's downstream copy](https://raw.githubusercontent.com/builtbybel/FluentCleaner/refs/heads/main/Winapp2.ini) of winapp2.ini
 
-These rules, followed by the rules in `Sources\Flavors\CCleaner`, produce `winapp2-fluentcleaner.ini`.
+These rules, followed by the rules in `Sources\Flavors\CCleaner`, produce `winapp2-fluentcleaner.ini`, published as [`Releases/winapp2-fluentcleaner.ini`](https://github.com/MoscaDotTo/Winapp2/blob/master/Releases/winapp2-fluentcleaner.ini).
 
 ### What changes are made to create the FluentCleaner flavor?
 

@@ -92,10 +92,17 @@ jobs:
           # that's expected control flow, so keep PS 7.3+ from throwing on it.
           $PSNativeCommandUseErrorActionPreference = $false
 
+          # The release file lists (Releases/<asset>) and the bundle staging live in one script,
+          # shared with release.yml's manual recovery path so the two can't drift.
+          . ./.github/scripts/release-assets.ps1
+
           # Exactly the tracked build outputs (never the log or scratch). Order is
-          # irrelevant; missing paths are harmless to `git add`.
+          # irrelevant, but every path must exist or be tracked: one unmatched pathspec
+          # makes `git add` stage nothing, which would then read as "no changes". The old
+          # paths below Releases are the deprecation-window copies build winapp2.ps1 still writes.
           $outputs = @(
             'Assembler/Generated'
+            $ReleaseFiles
             'Winapp2.ini'; 'diff.txt'
             'Non-CCleaner/Winapp2.ini'; 'Non-CCleaner/diff.txt'
             'Non-CCleaner/BleachBit/Winapp2.ini'; 'Non-CCleaner/BleachBit/diff.txt'
@@ -105,6 +112,7 @@ jobs:
             'Non-CCleaner/SystemNinja/Winapp2.rules'; 'Non-CCleaner/SystemNinja/diff.txt'
           )
           git add -- @outputs
+          if ($LASTEXITCODE -ne 0) { throw "git add failed (exit $LASTEXITCODE); not committing or releasing" }
 
           git diff --cached --quiet
           if ($LASTEXITCODE -eq 0) {
@@ -117,16 +125,10 @@ jobs:
           # changelog must be committed so the tree never drifts from its sources, but neither is
           # something to cut a release over -- only a change to a file end users actually download
           # is. (build winapp2.ps1 already declines to republish an artifact whose content did not
-          # move, so reaching this branch means Generated/ or a diff.txt moved on its own.)
-          $published = @(
-            'Winapp2.ini'
-            'Non-CCleaner/Winapp2.ini'
-            'Non-CCleaner/BleachBit/Winapp2.ini'
-            'Non-CCleaner/CCleaner7/Winapp2.ini'
-            'Non-CCleaner/FluentCleaner/Winapp2.ini'
-            'Non-CCleaner/Tron/Winapp2.ini'
-            'Non-CCleaner/SystemNinja/Winapp2.rules'
-          )
+          # move, so reaching this branch means Generated/ or a changelog moved on its own.)
+          # Exact paths, because -contains below is an exact match. The old published paths
+          # carry the same bytes as these, so they don't need to be here.
+          $published = @($ReleaseDataFiles | ForEach-Object { "Releases/$_" })
           $staged = @(git diff --cached --name-only)
           $publishedChanged = @($staged | Where-Object { $published -contains $_ })
 
@@ -151,21 +153,14 @@ jobs:
           # build. build winapp2.ps1's content gate declines to republish an artifact whose
           # content did not move, which deliberately leaves that file's stamp pinned to its
           # last real change. So a flavor-only change (edit Assembler/Sources/Flavors/Tron/ and nothing else)
-          # leaves Non-CCleaner/Winapp2.ini on the PREVIOUS date while Tron carries today's --
+          # leaves Releases/winapp2.ini on the PREVIOUS date while Tron carries today's --
           # sourcing the version from the base would then tag today's release with the previous
           # release's date, and release.yml's free-tag loop would quietly suffix it .2 rather
           # than fail, so the mistake would ship looking deliberate.
           #
           # Max across the changed files: picks today's stamp whenever anything was rebuilt,
           # and naturally yields the base's value when the base is among them.
-          $versions = @(foreach ($p in $publishedChanged) {
-            $m = Select-String -Path $p -Pattern '^;\s*Version:\s*(\d+)' | Select-Object -First 1
-            if ($m) { [int]$m.Matches.Groups[1].Value }
-          })
-          if ($versions.Count -eq 0) {
-            throw "could not parse a version line from any changed published artifact: $($publishedChanged -join ', ')"
-          }
-          $version = ($versions | Sort-Object -Descending | Select-Object -First 1).ToString()
+          $version = Get-ReleaseVersion -Paths $publishedChanged
 
           git commit -m "ci: rebuild winapp2.ini artifacts (v$version)"
           if ($LASTEXITCODE -ne 0) { throw 'commit failed' }
@@ -173,35 +168,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'push to master failed -- is the branch protected against the Actions token?' }
           $sha = (git rev-parse HEAD).Trim()
 
-          # Stage the release assets under distinct names (release asset names must be
-          # unique -- there are seven "Winapp2.ini"/"diff.txt" files across the tree).
-          # Mapping (edit here to rename assets): the base (Non-CCleaner) build is the
-          # single source of truth and ships as the primary winapp2.ini; the root
-          # Winapp2.ini is the CCleaner flavor.
-          $assets = @(
-            @{ Src = 'Non-CCleaner/Winapp2.ini';               Name = 'winapp2.ini' }
-            @{ Src = 'Winapp2.ini';                            Name = 'winapp2-ccleaner.ini' }
-            @{ Src = 'Non-CCleaner/BleachBit/Winapp2.ini';     Name = 'winapp2-bleachbit.ini' }
-            @{ Src = 'Non-CCleaner/CCleaner7/Winapp2.ini';     Name = 'winapp2-ccleaner7.ini' }
-            @{ Src = 'Non-CCleaner/FluentCleaner/Winapp2.ini'; Name = 'winapp2-fluentcleaner.ini' }
-            @{ Src = 'Non-CCleaner/Tron/Winapp2.ini';          Name = 'winapp2-tron.ini' }
-            @{ Src = 'Non-CCleaner/SystemNinja/Winapp2.rules'; Name = 'winapp2-systemninja.rules' }
-            @{ Src = 'diff.txt';                               Name = 'changelog-ccleaner.txt' }
-            @{ Src = 'Non-CCleaner/diff.txt';                  Name = 'changelog-base.txt' }
-            @{ Src = 'Non-CCleaner/BleachBit/diff.txt';        Name = 'changelog-bleachbit.txt' }
-            @{ Src = 'Non-CCleaner/CCleaner7/diff.txt';        Name = 'changelog-ccleaner7.txt' }
-            @{ Src = 'Non-CCleaner/FluentCleaner/diff.txt';    Name = 'changelog-fluentcleaner.txt' }
-            @{ Src = 'Non-CCleaner/Tron/diff.txt';             Name = 'changelog-tron.txt' }
-            @{ Src = 'Non-CCleaner/SystemNinja/diff.txt';      Name = 'changelog-systemninja.txt' }
-            @{ Src = 'Assembler/winapp2ool.exe';               Name = 'winapp2ool.exe' }
-          )
-          $bundle = Join-Path $env:RUNNER_TEMP 'release-bundle'
-          New-Item -ItemType Directory -Force -Path $bundle | Out-Null
-          foreach ($a in $assets) {
-            if (Test-Path $a.Src) { Copy-Item $a.Src (Join-Path $bundle $a.Name) -Force }
-          }
-          Set-Content -Path (Join-Path $bundle 'version.txt') -Value $version -NoNewline
-          Set-Content -Path (Join-Path $bundle 'commit.txt') -Value $sha -NoNewline
+          # The 14 Releases files under their own names, plus winapp2ool.exe.
+          New-ReleaseBundle -Destination (Join-Path $env:RUNNER_TEMP 'release-bundle') -Version $version -Sha $sha
 
           "released=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append

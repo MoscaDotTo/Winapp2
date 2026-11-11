@@ -35,43 +35,43 @@ Module downloadmainmenu
             .AddDispatchedColoredOption("Winapp2.ini", "Download the latest base winapp2.ini", ConsoleColor.Cyan,
                 Sub()
                     downloadFile.Name = "winapp2.ini"
-                    download(downloadFile, baseFlavorLink)
+                    download(downloadFile, getWinappLink(WinappFlavor.Base))
                     checkedForUpdates = False
                 End Sub) _
             .AddDispatchedColoredOption("CCleaner Winapp2.ini", "Download the latest CCleaner Flavor of winapp2.ini", ConsoleColor.DarkRed,
                 Sub()
                     downloadFile.Name = "winapp2.ini"
-                    download(downloadFile, ccFlavorLink)
+                    download(downloadFile, getWinappLink(WinappFlavor.CCleaner))
                     checkedForUpdates = False
                 End Sub) _
             .AddDispatchedColoredOption("CCleaner 7 Winapp2.ini", "Download the latest CCleaner 7 Flavor of winapp2.ini", ConsoleColor.Magenta,
                 Sub()
                     downloadFile.Name = "winapp2.ini"
-                    download(downloadFile, cc7FlavorLink)
+                    download(downloadFile, getWinappLink(WinappFlavor.CCleaner7))
                     checkedForUpdates = False
                 End Sub) _
             .AddDispatchedColoredOption("BleachBit Winapp2.ini", "Download the latest BleachBit Flavor of winapp2.ini", ConsoleColor.DarkCyan,
                 Sub()
                     downloadFile.Name = "winapp2.ini"
-                    download(downloadFile, bbFlavorLink)
+                    download(downloadFile, getWinappLink(WinappFlavor.BleachBit))
                     checkedForUpdates = False
                 End Sub) _
             .AddDispatchedColoredOption("FluentCleaner Winapp2.ini", "Download the latest FluentCleaner Flavor of winapp2.ini", ConsoleColor.Green,
                 Sub()
                     downloadFile.Name = "winapp2.ini"
-                    download(downloadFile, fcFlavorLink)
+                    download(downloadFile, getWinappLink(WinappFlavor.FluentCleaner))
                     checkedForUpdates = False
                 End Sub) _
             .AddDispatchedColoredOption("System Ninja Winapp2.rules", "Download the latest System Ninja Flavor of winapp2.ini", ConsoleColor.Blue,
                 Sub()
                     downloadFile.Name = "winapp2.rules"
-                    download(downloadFile, snFlavorLink)
+                    download(downloadFile, getWinappLink(WinappFlavor.SystemNinja))
                     checkedForUpdates = False
                 End Sub) _
             .AddDispatchedColoredOption("Tron", "Download the latest Tron flavor of winapp2.ini", ConsoleColor.Red,
                 Sub()
                     downloadFile.Name = "winapp2.ini"
-                    download(downloadFile, tronFlavorLink)
+                    download(downloadFile, getWinappLink(WinappFlavor.Tron))
                     checkedForUpdates = False
                 End Sub) _
             .AddBlank() _

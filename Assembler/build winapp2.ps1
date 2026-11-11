@@ -8,6 +8,8 @@
     (base entries from Sources\EntryBuilder into Generated\EntryBuilder, browser entries
     into Generated\BrowserBuilder, UWP entries into Generated\UWPBuilder), merges them
     with a single strict-mode Combine pass, generates tool flavors, and creates a diff for each generated flavor.
+    Each flavor and its changelog are published to ..\Releases under their release asset names,
+    then copied to their old paths for the deprecation window ($script:DeprecatedPublishPaths).
     Generator stages read the shared scaffold catalogs from the Sources\Scaffolds directory.
 
     With -Verify, no build is performed: all artifacts are instead regenerated into
@@ -246,17 +248,54 @@ function Invoke-Changelog {
     return $true
 }
 
+# ---- Deprecation window: the old published paths --------------------------------------------
+# Until the window closes, each flavor is copied here after it is published to ..\Releases.
+# Nothing reads these copies: the change gate and the changelog compare against ..\Releases only.
+# Closing the window deletes this table and the block in Publish-Flavor that reads it.
+$script:DeprecatedPublishPaths = @{
+    'winapp2.ini'               = @{ Data = '..\Non-CCleaner\Winapp2.ini';               Changelog = '..\Non-CCleaner\diff.txt' }
+    'winapp2-ccleaner.ini'      = @{ Data = '..\Winapp2.ini';                            Changelog = '..\diff.txt' }
+    'winapp2-bleachbit.ini'     = @{ Data = '..\Non-CCleaner\BleachBit\Winapp2.ini';     Changelog = '..\Non-CCleaner\BleachBit\diff.txt' }
+    'winapp2-ccleaner7.ini'     = @{ Data = '..\Non-CCleaner\CCleaner7\Winapp2.ini';     Changelog = '..\Non-CCleaner\CCleaner7\diff.txt' }
+    'winapp2-fluentcleaner.ini' = @{ Data = '..\Non-CCleaner\FluentCleaner\Winapp2.ini'; Changelog = '..\Non-CCleaner\FluentCleaner\diff.txt' }
+    'winapp2-tron.ini'          = @{ Data = '..\Non-CCleaner\Tron\Winapp2.ini';          Changelog = '..\Non-CCleaner\Tron\diff.txt' }
+    'winapp2-systemninja.rules' = @{ Data = '..\Non-CCleaner\SystemNinja\Winapp2.rules'; Changelog = '..\Non-CCleaner\SystemNinja\diff.txt' }
+}
+# ---- End of the deprecation window -----------------------------------------------------------
+
+function Publish-Flavor {
+    <#
+    .SYNOPSIS
+        Publishes a built flavor to ..\Releases under its release asset name, with its changelog
+        when there is one, then copies the same bytes to the flavor's old paths.
+    #>
+    param([string]$Built, [string]$DataFile, [string]$Changelog, [bool]$HaveDiff)
+
+    $releases = '..\Releases'
+    if (-not (Test-Path $releases)) { New-Item -ItemType Directory -Force -Path $releases | Out-Null }
+
+    Copy-Item $Built "$releases\$DataFile" -Force
+    if ($HaveDiff) { Copy-Item 'diff.txt' "$releases\$Changelog" -Force }
+
+    # Deprecation window
+    $old = $script:DeprecatedPublishPaths[$DataFile]
+    $oldDir = Split-Path $old.Data
+    if (-not (Test-Path $oldDir)) { New-Item -ItemType Directory -Force -Path $oldDir | Out-Null }
+    Copy-Item "$releases\$DataFile" $old.Data -Force
+    if ($HaveDiff) { Copy-Item "$releases\$Changelog" $old.Changelog -Force }
+}
+
 function Backup-Files {
     Write-Step "Creating backups of existing winapp2.ini files"
 
     $backups = @(
-        @{Source = "..\Winapp2.ini"; Dest = "winapp2-cc.old"}
-        @{Source = "..\Non-CCleaner\Winapp2.ini"; Dest = "winapp2.old"}
-        @{Source = "..\Non-CCleaner\BleachBit\Winapp2.ini"; Dest = "winapp2-bb.old"}
-        @{Source = "..\Non-CCleaner\CCleaner7\Winapp2.ini"; Dest = "winapp2-cc7.old"}
-        @{Source = "..\Non-CCleaner\FluentCleaner\Winapp2.ini"; Dest = "winapp2-fc.old"}
-        @{Source = "..\Non-CCleaner\SystemNinja\Winapp2.rules"; Dest = "winapp2-sn.old"}
-        @{Source = "..\Non-CCleaner\Tron\Winapp2.ini"; Dest = "winapp2-tron.old"}
+        @{Source = "..\Releases\winapp2-ccleaner.ini"; Dest = "winapp2-cc.old"}
+        @{Source = "..\Releases\winapp2.ini"; Dest = "winapp2.old"}
+        @{Source = "..\Releases\winapp2-bleachbit.ini"; Dest = "winapp2-bb.old"}
+        @{Source = "..\Releases\winapp2-ccleaner7.ini"; Dest = "winapp2-cc7.old"}
+        @{Source = "..\Releases\winapp2-fluentcleaner.ini"; Dest = "winapp2-fc.old"}
+        @{Source = "..\Releases\winapp2-systemninja.rules"; Dest = "winapp2-sn.old"}
+        @{Source = "..\Releases\winapp2-tron.ini"; Dest = "winapp2-tron.old"}
     )
 
     foreach ($backup in $backups) {
@@ -317,8 +356,7 @@ function Build-MainFile {
         Write-Host "No previous build found, skipping changelog" -ForegroundColor Yellow
     }
 
-    Copy-Item 'Winapp2.ini' '..\Non-CCleaner' -Force
-    if ($haveDiff) { Copy-Item 'diff.txt' '..\Non-CCleaner' -Force }
+    Publish-Flavor -Built 'Winapp2.ini' -DataFile 'winapp2.ini' -Changelog 'changelog-base.txt' -HaveDiff $haveDiff
     Write-Host "Winapp2.ini built" -ForegroundColor Green
 
     return $true
@@ -361,8 +399,7 @@ function Build-CCCleanerFlavor {
         Write-Host "No previous build found, skipping changelog" -ForegroundColor Yellow
     }
 
-    Copy-Item 'winapp2-ccleaner-flavor.ini' '..\Winapp2.ini' -Force
-    if ($haveDiff) { Copy-Item 'diff.txt' '..' -Force }
+    Publish-Flavor -Built 'winapp2-ccleaner-flavor.ini' -DataFile 'winapp2-ccleaner.ini' -Changelog 'changelog-ccleaner.txt' -HaveDiff $haveDiff
     Write-Host "CCleaner flavor built" -ForegroundColor Green
 
     return $true
@@ -388,8 +425,7 @@ function Build-CCleaner7Flavor {
         Write-Host "No previous build found, skipping changelog" -ForegroundColor Yellow
     }
 
-    Copy-Item 'winapp2-cc7.ini' '..\Non-CCleaner\CCleaner7\Winapp2.ini' -Force
-    if ($haveDiff) { Copy-Item 'diff.txt' '..\Non-CCleaner\CCleaner7' -Force }
+    Publish-Flavor -Built 'winapp2-cc7.ini' -DataFile 'winapp2-ccleaner7.ini' -Changelog 'changelog-ccleaner7.txt' -HaveDiff $haveDiff
     Write-Host "CCleaner7 flavor built" -ForegroundColor Green
 
     return $true
@@ -428,10 +464,7 @@ function Build-FluentCleanerFlavor {
         Write-Host "No previous build found, skipping changelog" -ForegroundColor Yellow
     }
 
-    $publishDir = '..\Non-CCleaner\FluentCleaner'
-    if (-not (Test-Path $publishDir)) { New-Item -ItemType Directory -Force -Path $publishDir | Out-Null }
-    Copy-Item 'winapp2-fluentcleaner.ini' "$publishDir\Winapp2.ini" -Force
-    if ($haveDiff) { Copy-Item 'diff.txt' $publishDir -Force }
+    Publish-Flavor -Built 'winapp2-fluentcleaner.ini' -DataFile 'winapp2-fluentcleaner.ini' -Changelog 'changelog-fluentcleaner.txt' -HaveDiff $haveDiff
     Write-Host "FluentCleaner flavor built" -ForegroundColor Green
 
     return $true
@@ -455,8 +488,7 @@ function Build-BleachBitFlavor {
         Write-Host "No previous build found, skipping changelog" -ForegroundColor Yellow
     }
 
-    Copy-Item 'winapp2-bleachbit-flavor.ini' '..\Non-CCleaner\BleachBit\Winapp2.ini' -Force
-    if ($haveDiff) { Copy-Item 'diff.txt' '..\Non-CCleaner\BleachBit' -Force }
+    Publish-Flavor -Built 'winapp2-bleachbit-flavor.ini' -DataFile 'winapp2-bleachbit.ini' -Changelog 'changelog-bleachbit.txt' -HaveDiff $haveDiff
     Write-Host "BleachBit flavor built" -ForegroundColor Green
 
     return $true
@@ -480,8 +512,7 @@ function Build-TronFlavor {
         Write-Host "No previous build found, skipping changelog" -ForegroundColor Yellow
     }
 
-    Copy-Item 'winapp2-tron-flavor.ini' '..\Non-CCleaner\Tron\Winapp2.ini' -Force
-    if ($haveDiff) { Copy-Item 'diff.txt' '..\Non-CCleaner\Tron' -Force }
+    Publish-Flavor -Built 'winapp2-tron-flavor.ini' -DataFile 'winapp2-tron.ini' -Changelog 'changelog-tron.txt' -HaveDiff $haveDiff
     Write-Host "Tron flavor built" -ForegroundColor Green
 
     return $true
@@ -504,8 +535,7 @@ function Build-SystemNinjaFlavor {
         Write-Host "No previous build found, skipping changelog" -ForegroundColor Yellow
     }
 
-    Copy-Item 'Winapp2.rules' '..\Non-CCleaner\SystemNinja' -Force
-    if ($haveDiff) { Copy-Item 'diff.txt' '..\Non-CCleaner\SystemNinja' -Force }
+    Publish-Flavor -Built 'Winapp2.rules' -DataFile 'winapp2-systemninja.rules' -Changelog 'changelog-systemninja.txt' -HaveDiff $haveDiff
     Write-Host "System Ninja flavor built" -ForegroundColor Green
 
     return $true

@@ -28,41 +28,6 @@ Module Downloader
     ''' </summary>
     Public ReadOnly Property gitLink As String = "https://github.com/MoscaDotTo/Winapp2/"
 
-    ''' <summary>
-    ''' The web address of the base version winapp2.ini 
-    ''' </summary>
-    Public ReadOnly Property baseFlavorLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Winapp2.ini"
-
-    ''' <summary>
-    ''' The web address of the CCleaner version of winapp2.ini 
-    ''' </summary>
-    Public ReadOnly Property ccFlavorLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp2.ini"
-
-    ''' <summary>
-    ''' The web address of the System Ninja version of winapp2.ini 
-    ''' </summary>
-    Public ReadOnly Property snFlavorLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/SystemNinja/Winapp2.rules"
-
-    ''' <summary>
-    ''' The web address of the BleachBit version of winapp2.ini 
-    ''' </summary>
-    Public ReadOnly Property bbFlavorLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/BleachBit/Winapp2.ini"
-
-    ''' <summary>
-    ''' The web address of the Tron version of winapp2.ini 
-    ''' </summary>
-    Public ReadOnly Property tronFlavorLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Tron/Winapp2.ini"
-
-    ''' <summary>
-    ''' The web address of the CCleaner 7 version of winapp2.ini
-    ''' </summary>
-    Public ReadOnly Property cc7FlavorLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/CCleaner7/Winapp2.ini"
-
-    ''' <summary>
-    ''' The web address of the FluentCleaner version of winapp2.ini
-    ''' </summary>
-    Public ReadOnly Property fcFlavorLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/FluentCleaner/Winapp2.ini"
-
     ''' <summary> 
     ''' The web address of winapp2ool.exe 
     ''' </summary>
@@ -107,21 +72,6 @@ Module Downloader
     ''' The web address of the winapp2ool ReadMe file 
     ''' </summary>
     Public ReadOnly Property readMeLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/winapp2ool/Readme.md"
-
-    ''' <summary>
-    ''' The web address of the winapp2ool ReadMe for opening in web browsers
-    ''' </summary>
-    Public ReadOnly Property readMeUrl As String = "https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/Readme.md"
-
-    ''' <summary>
-    ''' The web address of the winapp2.ini contribution guidelines
-    ''' </summary>
-    Public ReadOnly Property contributionsUrl As String = "https://github.com/MoscaDotTo/Winapp2/blob/master/CONTRIBUTING.md"
-
-    ''' <summary>
-    ''' The web address of the winapp2.ini license
-    ''' </summary>
-    Public ReadOnly Property winapp2licenceUrl As String = "https://github.com/MoscaDotTo/Winapp2/blob/master/License.md"
 
     ''' <summary>
     ''' Handles command line arguments for the Downloader module and downloads the selected file,
@@ -244,46 +194,14 @@ Module Downloader
     End Function
 
     ''' <summary>
-    ''' Returns the link to the winapp2.ini for <paramref name="flavor"/>. An unlisted flavor
-    ''' gets the base (Non-CCleaner) link.
+    ''' Returns the link to the winapp2.ini for <paramref name="flavor"/>: its asset on the
+    ''' latest GitHub release, which the build publishes under the same name in <c> Releases\ </c>
     ''' </summary>
     '''
     ''' <param name="flavor">The flavor whose file to link</param>
     Public Function getWinappLink(flavor As WinappFlavor) As String
 
-        Select Case flavor
-
-            Case WinappFlavor.Base
-
-                Return baseFlavorLink
-
-            Case WinappFlavor.CCleaner
-
-                Return ccFlavorLink
-
-            Case WinappFlavor.BleachBit
-
-                Return bbFlavorLink
-
-            Case WinappFlavor.SystemNinja
-
-                Return snFlavorLink
-
-            Case WinappFlavor.Tron
-
-                Return tronFlavorLink
-
-            Case WinappFlavor.CCleaner7
-
-                Return cc7FlavorLink
-
-            Case WinappFlavor.FluentCleaner
-
-                Return fcFlavorLink
-
-        End Select
-
-        Return baseFlavorLink
+        Return winapp2file.LatestDownloadUrl & WinappFlavorInfo.Lookup(flavor).AssetName
 
     End Function
 

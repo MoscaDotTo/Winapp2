@@ -4,7 +4,7 @@
 
 This folder contains the set of Transmutation rules required by Winapp2ool to produce the [CCleaner 7 flavor](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-ccleaner7.ini) of Winapp2.ini 
 
-These rules, applied to the CCleaner flavor, produce `winapp2-ccleaner7.ini`.
+These rules, applied to the CCleaner flavor, produce `winapp2-ccleaner7.ini`, published as [`Releases/winapp2-ccleaner7.ini`](https://github.com/MoscaDotTo/Winapp2/blob/master/Releases/winapp2-ccleaner7.ini).
 
 ### What changes are made to create the CCleaner 7 flavor? 
 

@@ -448,7 +448,7 @@ Nobody assembles the published winapp2.ini by hand. Its sources live in [Assembl
 2. [Combine](modules/combine/readme.md) joins those artifacts into one file in strict mode
 3. [WinappDebug](modules/winappdebug/README.md) applies the style and syntax rules to the merged file and saves its corrections
 4. [Flavorizer](modules/transmute/Flavorizer/readme.md) applies each flavor's ruleset to produce the CCleaner, CCleaner 7, BleachBit, FluentCleaner, Tron, and System Ninja variants, and WinappDebug lints each one
-5. [Diff](modules/diff/readme.md) writes a changelog against the previous version for the base file and each flavor whose content changed
+5. [Diff](modules/diff/readme.md) writes a changelog against the previous version for the base file and each flavor whose content changed, and the build publishes both to [Releases](../Releases), named as they are on each GitHub release
 
 The artifacts under [Generated](../Assembler/Generated) are committed to the repository instead of living only for the length of a build, so we can check the build against itself. `build winapp2.ps1 -Verify` regenerates all of them, compares them byte for byte with what's committed, and exits nonzero if anything drifted. GitHub Actions runs that check, and two more jobs:
 

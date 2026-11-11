@@ -14,12 +14,23 @@
 # workflow commits with the GITHUB_TOKEN, and token pushes don't fire push events.
 # The build job hands everything over as the "release-bundle" artifact; if that
 # artifact is absent, the build made no changes and there is nothing to release.
+#
+# Manual recovery (workflow_dispatch): from winapp2ool 1.8 on, clients download each flavor
+# from the latest release rather than the tree, so a release missed after the build committed
+# leaves every client a version behind until the next content change, and re-running the
+# build can't fix it (it sees nothing changed). Dispatching this workflow releases master as
+# it stands: the bundle comes from master's committed Releases/ files and Assembler/winapp2ool.exe,
+# staged by the same script build-on-merge.yml uses (.github/scripts/release-assets.ps1), and
+# the version is the highest "; Version:" stamp across master's seven Releases/ data files.
+# It refuses when the latest release already carries that version, since re-releasing the
+# same content would only add a duplicate release with an empty changelog.
 name: winapp2.ini release
 
 on:
   workflow_run:
     workflows: ["winapp2.ini build on merge"]
     types: [completed]
+  workflow_dispatch:
 
 # Needed to create tags and releases.
 permissions:
@@ -32,10 +43,12 @@ concurrency:
 jobs:
   release:
     runs-on: ubuntu-latest
-    # Only when the build succeeded; a failed build has nothing to publish.
-    if: github.event.workflow_run.conclusion == 'success'
+    # A dispatch always runs; a build run only when it succeeded, since a failed build has
+    # nothing to publish.
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     steps:
       - name: Download the release bundle from the build run
+        if: github.event_name == 'workflow_run'
         id: download
         continue-on-error: true
         uses: actions/download-artifact@v4
@@ -45,6 +58,66 @@ jobs:
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
+      # ---- Manual recovery only: release master's committed files.
+      # The automatic path ships files the Windows build runner wrote, with CRLF line endings,
+      # and git stores most of them normalized to LF. Check out the way that runner does
+      # (core.autocrlf true) so a recovered release carries the same bytes.
+      - name: Use Windows line endings for the checkout
+        if: github.event_name == 'workflow_dispatch'
+        shell: bash
+        run: git config --global core.autocrlf true
+
+      - name: Check out master
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          path: master
+
+      - name: Stage the release bundle from master
+        if: github.event_name == 'workflow_dispatch'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $bundle = Join-Path $env:GITHUB_WORKSPACE 'bundle'
+          Push-Location master
+          try {
+            . ./.github/scripts/release-assets.ps1
+            $version = Get-ReleaseVersion -Paths @($ReleaseDataFiles | ForEach-Object { "Releases/$_" })
+            $sha = (git rev-parse HEAD).Trim()
+            if ($LASTEXITCODE -ne 0 -or -not $sha) { throw 'could not read master HEAD' }
+            New-ReleaseBundle -Destination $bundle -Version $version -Sha $sha
+          } finally {
+            Pop-Location
+          }
+          Write-Host "Staged master ($sha) as v$version"
+
+      - name: Refuse to re-release content the latest release already carries
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const version = require('fs').readFileSync('bundle/version.txt', 'utf8').trim();
+            let latest;
+            try {
+              latest = (await github.rest.repos.getLatestRelease({
+                owner: context.repo.owner, repo: context.repo.repo,
+              })).data.tag_name;
+            } catch (e) {
+              if (e.status === 404) { core.info('No release exists yet.'); return; }
+              throw e;
+            }
+            const base = `v${version}`;
+            // The free-tag step below suffixes .2, .3, ... so v<version>.N carries the same version.
+            const sameVersion = latest === base ||
+              (latest.startsWith(`${base}.`) && /^\d+$/.test(latest.slice(base.length + 1)));
+            if (sameVersion) {
+              core.setFailed(`master's content (v${version}) is already released as ${latest}; nothing to recover.`);
+            } else {
+              core.info(`Latest release is ${latest}; releasing master as v${version}.`);
+            }
+
+      # ---- Both paths: bundle/ now holds the assets, version.txt and commit.txt.
       - name: Decide whether there is anything to release
         id: gate
         shell: bash

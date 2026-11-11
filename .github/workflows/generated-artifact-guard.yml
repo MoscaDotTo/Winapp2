@@ -43,6 +43,7 @@ on:
       - 'Winapp2.ini'
       - 'diff.txt'
       - 'Non-CCleaner/**'
+      - 'Releases/**'
       - '.github/workflows/generated-artifact-guard.yml'
       - '.github/scripts/check-generated-sources.sh'
 

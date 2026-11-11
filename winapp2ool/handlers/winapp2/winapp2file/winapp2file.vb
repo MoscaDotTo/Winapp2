@@ -41,7 +41,11 @@ Public Class winapp2file
         "Language Files", "Dangerous Long", "Dangerous"
     }
 
-    Private Const LatestDownloadUrl As String = RepoUrl & "/releases/latest/download/"
+    ''' <summary>
+    ''' The address a release asset's name is appended to, to download it from the latest
+    ''' GitHub release
+    ''' </summary>
+    Public Const LatestDownloadUrl As String = RepoUrl & "/releases/latest/download/"
 
     ' One category list per FileSectionHeaders entry, at the same index
     Private ReadOnly _categories As New List(Of List(Of winapp2entry))

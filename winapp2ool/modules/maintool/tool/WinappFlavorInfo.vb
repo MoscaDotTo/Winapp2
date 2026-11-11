@@ -25,8 +25,8 @@ Imports System.Text.RegularExpressions
 ''' per <see cref="WinappFlavor"/>.
 ''' <br /><br />
 '''
-''' The asset names must match the release bundle mapping in
-''' <c> .github/workflows/build-on-merge.yml </c>, which is what uploads them.
+''' The asset names are the file names the build publishes in <c> Releases\ </c> and uploads to
+''' each GitHub release, and must match the list in <c> .github/scripts/release-assets.ps1 </c>.
 ''' </summary>
 Public NotInheritable Class WinappFlavorInfo
 

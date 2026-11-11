@@ -8,7 +8,7 @@ This folder contains the build script for Winapp2.ini and everything required by
 
 To build Winapp2.ini, simply place a copy of Winapp2ool 1.8 or newer in this folder and run `& '.\build winapp2.ps1'` from PowerShell
 
-The script regenerates the committed build artifacts in [Generated](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Generated): the base entries from the [EntryBuilder](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/EntryBuilder) sources plus the BrowserBuilder and UWPBuilder generator outputs (the generators read the shared cleaning-pattern catalogs from [Scaffolds](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/Scaffolds)),  merges them all into the base Winapp2.ini with a single strict Combine pass, and then produces each flavor from it
+The script regenerates the committed build artifacts in [Generated](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Generated): the base entries from the [EntryBuilder](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/EntryBuilder) sources plus the BrowserBuilder and UWPBuilder generator outputs (the generators read the shared cleaning-pattern catalogs from [Scaffolds](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/Scaffolds)),  merges them all into the base Winapp2.ini with a single strict Combine pass, and then produces each flavor from it. It publishes each flavor and its changelog to [Releases](https://github.com/MoscaDotTo/Winapp2/tree/master/Releases) at the repository root, named as they are on each GitHub release. Nothing in this folder is published
 
 Running `& '.\build winapp2.ps1' -Verify` performs no build: it regenerates every artifact into a folder and byte-compares against the committed files under `Generated\`, failing the build if they don't match.
 
@@ -51,7 +51,7 @@ These are the pieces the build's strict Combine joins into the base winapp2.ini.
 
 ## Which rules produce which published file
 
-The mapping is not one to one. Tron, CCleaner 7 and FluentCleaner are built on top of the CCleaner rules, so two rule sets reach each of them.
+The mapping is not one to one. Tron, CCleaner 7 and FluentCleaner are built on top of the CCleaner rules, so two rule sets reach each of them. Each file is published to `Releases\` and attached to each GitHub release under the name below.
 
 | Rule set | Published as |
 | :- | :- |

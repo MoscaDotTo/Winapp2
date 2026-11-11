@@ -130,7 +130,7 @@ Imports System.IO
 
         Assert.AreEqual(winapp2ool.WinappFlavor.Base, winapp2ool.CurrentWinappFlavor)
         Assert.AreEqual(winapp2ool.WinappFlavor.Base, winapp2ool.localWa2Flavor)
-        Assert.AreEqual(winapp2ool.baseFlavorLink, winapp2ool.getWinappLink())
+        Assert.AreEqual("https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2.ini", winapp2ool.getWinappLink())
         Assert.AreEqual(winapp2ool.WinappFlavor.Base, New winapp2ool.LintOptions().Flavor)
 
     End Sub
@@ -139,7 +139,7 @@ Imports System.IO
     ''' Each flavor's remote link points at a file of the kind its local copy is saved as, so
     ''' an update never writes a .rules file over a winapp2.ini or the reverse
     ''' </summary>
-    <TestMethod()> Public Sub EveryFlavorLinksToItsOwnKindOfFile()
+    <TestMethod()> Public Sub EveryFlavorDownloadsItsOwnKindOfFile()
 
         For Each flavor As winapp2ool.WinappFlavor In [Enum].GetValues(GetType(winapp2ool.WinappFlavor))
 
@@ -149,6 +149,28 @@ Imports System.IO
             Assert.AreEqual(isRules, link.EndsWith(".rules", StringComparison.OrdinalIgnoreCase), flavor.ToString())
 
         Next
+
+    End Sub
+
+    ''' <summary>
+    ''' Every flavor downloads its own asset from the latest release, so no two flavors share
+    ''' a link
+    ''' </summary>
+    <TestMethod()> Public Sub EveryFlavorDownloadsItsReleaseAsset()
+
+        Const prefix = "https://github.com/MoscaDotTo/Winapp2/releases/latest/download/"
+        Dim links As New HashSet(Of String)
+
+        For Each flavor As winapp2ool.WinappFlavor In [Enum].GetValues(GetType(winapp2ool.WinappFlavor))
+
+            Dim link = winapp2ool.getWinappLink(flavor)
+
+            Assert.AreEqual(prefix & winapp2ool.WinappFlavorInfo.Lookup(flavor).AssetName, link, flavor.ToString())
+            links.Add(link)
+
+        Next
+
+        Assert.AreEqual(7, links.Count)
 
     End Sub
 

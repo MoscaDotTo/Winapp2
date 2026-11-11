@@ -4,7 +4,7 @@
 
 This folder contains the set of Transmutation rules required by Winapp2ool to produce the [System Ninja flavor](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-systemninja.rules) of Winapp2.ini 
 
-These rules produce `winapp2-systemninja.rules`.
+These rules produce `winapp2-systemninja.rules`, published as [`Releases/winapp2-systemninja.rules`](https://github.com/MoscaDotTo/Winapp2/blob/master/Releases/winapp2-systemninja.rules).
 
 ### What changes are made to create the System Ninja flavor? 
 

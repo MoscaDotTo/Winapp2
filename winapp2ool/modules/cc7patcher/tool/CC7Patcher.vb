@@ -106,7 +106,7 @@ Public Module CC7Patcher
             End If
 
             gLog("Downloading CCleaner7 winapp2.ini from GitHub")
-            winapp2Input = getRemoteIniFile(cc7FlavorLink)
+            winapp2Input = getRemoteIniFile(getWinappLink(WinappFlavor.CCleaner7))
 
             If winapp2Input Is Nothing Then
 

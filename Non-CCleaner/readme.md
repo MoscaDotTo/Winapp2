@@ -1,5 +1,20 @@
 # Winapp2.ini Non-CCleaner Flavors 
 
+> [!WARNING]
+> **This folder is deprecated and will be removed in a future release.** Every flavor of winapp2.ini is now published in the [`Releases`](https://github.com/MoscaDotTo/Winapp2/tree/master/Releases) folder, under the same file names it has on the [releases page](https://github.com/MoscaDotTo/Winapp2/releases/latest). The files here are copies, kept up to date for a limited time so scripts that download them have time to switch. Please download from `Releases` or from `https://github.com/MoscaDotTo/Winapp2/releases/latest/download/<file>` instead.
+>
+> | Old path | New file |
+> | :- | :- |
+> | `Winapp2.ini` (repository root) | [`winapp2-ccleaner.ini`](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-ccleaner.ini) |
+> | `Non-CCleaner/Winapp2.ini` | [`winapp2.ini`](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2.ini) |
+> | `Non-CCleaner/BleachBit/Winapp2.ini` | [`winapp2-bleachbit.ini`](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-bleachbit.ini) |
+> | `Non-CCleaner/CCleaner7/Winapp2.ini` | [`winapp2-ccleaner7.ini`](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-ccleaner7.ini) |
+> | `Non-CCleaner/FluentCleaner/Winapp2.ini` | [`winapp2-fluentcleaner.ini`](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-fluentcleaner.ini) |
+> | `Non-CCleaner/Tron/Winapp2.ini` | [`winapp2-tron.ini`](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-tron.ini) |
+> | `Non-CCleaner/SystemNinja/Winapp2.rules` | [`winapp2-systemninja.rules`](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-systemninja.rules) |
+>
+> Each `diff.txt` here is the `changelog-<flavor>.txt` of the same flavor in `Releases`.
+
 ### What is this?
 
 This folder contains the set of Non-CCleaner flavors of Winapp2.ini, including the "base" Winapp2.ini, formerly the singular Non-CCleaner version, from which all flavors are derived. 

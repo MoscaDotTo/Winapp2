@@ -4,7 +4,7 @@
 
 This folder contains the set of Transmutation rules required by Winapp2ool to produce the [BleachBit flavor](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-bleachbit.ini) of Winapp2.ini 
 
-These rules produce `winapp2-bleachbit.ini`.
+These rules produce `winapp2-bleachbit.ini`, published as [`Releases/winapp2-bleachbit.ini`](https://github.com/MoscaDotTo/Winapp2/blob/master/Releases/winapp2-bleachbit.ini).
 
 ### What changes are made to create the BleachBit flavor? 
 
