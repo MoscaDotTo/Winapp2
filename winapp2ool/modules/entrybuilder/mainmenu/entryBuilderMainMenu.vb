@@ -51,7 +51,7 @@ Public Module entryBuilderMainMenu
                 Sub() toggleModuleSetting("Split output", NameOf(EntryBuilder), GetType(entryBuilderSettings), NameOf(EntryBuilderSplitOutput), NameOf(EntryBuilderModuleSettingsChanged))) _
             .AddBlank() _
             .AddColoredFileInfo("Current source directory:            ", EntryBuilderFile1.Dir, ConsoleColor.DarkYellow) _
-            .AddColoredFileInfo("Current save target:                 ", EntryBuilderFile2.Path(), ConsoleColor.Yellow) _
+            .AddColoredFileInfo("Current save target:                 ", If(EntryBuilderSplitOutput, EntryBuilderFile2.Dir, EntryBuilderFile2.Path()), ConsoleColor.Yellow) _
             .AddColoredFileInfo("Current scaffolds directory:         ", EntryBuilderFile3.Dir, ConsoleColor.DarkYellow) _
             .AddBlank(EntryBuilderModuleSettingsChanged) _
             .AddDispatchedResetOpt(NameOf(EntryBuilder), EntryBuilderModuleSettingsChanged,
