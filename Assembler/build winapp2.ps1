@@ -3,7 +3,7 @@
     Builds winapp2.ini and its various flavors using winapp2ool.
 
 .DESCRIPTION
-    This script requires winapp2ool v1.8 or newer, and refuses to run an older one:
+    This script requires winapp2ool v1.8.9811.20779 or newer, and refuses to run an older one:
     Creates backups, regenerates the committed build artifacts under Generated\
     (base entries from Sources\EntryBuilder into Generated\EntryBuilder, browser entries
     into Generated\BrowserBuilder, UWP entries into Generated\UWPBuilder), merges them
@@ -49,7 +49,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $script:Winapp2oolPath = $null
-$script:MinimumToolVersion = [version]'1.8'
+$script:MinimumToolVersion = [version]'1.8.9811.20779'
 
 function Write-Step {
     param([string]$Message)
