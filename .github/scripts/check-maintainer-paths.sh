@@ -13,6 +13,12 @@
 #   Assembler/winapp2ool.exe       run by build-on-merge.yml with a write token
 #   Assembler/*.ps1                the build script, run the same way
 #   .github/**                     the workflows and the scripts they run
+#   Releases/**, and the old         the published winapp2.ini files and changelogs. The
+#   Winapp2.ini/diff.txt copies      build writes them, and its publish gate compares the new
+#   at the root and in               build against them: a PR that commits rebuilt copies
+#   Non-CCleaner/                    makes the next build find nothing changed, so that
+#                                    change gets no release and no changelog. The generated-
+#                                    artifact guard lets them through when a source changed too.
 #
 # A change to any of these in a PR from a fork or a non-member fails. Unlike the
 # generated-artifact guard there is deliberately no override token: the PR author controls
@@ -38,6 +44,7 @@ else
 fi
 
 protected=""
+published=""
 
 while IFS= read -r f; do
   [ -n "$f" ] || continue
@@ -45,6 +52,9 @@ while IFS= read -r f; do
     winapp2ool/*.md) ;;
     winapp2ool/*|Assembler/winapp2ool.exe|.github/*) protected="$protected
 $f" ;;
+    Releases/*|Winapp2.ini|diff.txt|Non-CCleaner/*Winapp2.ini|Non-CCleaner/*Winapp2.rules|Non-CCleaner/*diff.txt)
+      protected="$protected
+$f"; published=1 ;;
     Assembler/*.ps1)
       # Only the top level: scripts in flavor folders aren't run by the build
       [ "${f#Assembler/*/}" = "$f" ] && protected="$protected
@@ -78,6 +88,11 @@ if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
     echo
     printf '%s\n' "$protected" | sed '/^$/d; s/^/- `/; s/$/`/'
     echo
+    if [ -n "$published" ]; then
+      echo "Files under \`Releases/\`, and the old \`Winapp2.ini\` and \`diff.txt\` copies, are build output that the full build rewrites."
+      echo "Revert your changes to them and push again. Your source change is enough: the build publishes it after merge."
+      echo
+    fi
     echo "Entry contributions belong under \`Assembler/Sources/\` (the EntryBuilder, BrowserBuilder, UWPBuilder and Scaffolds sources, and the flavor rule sets)"
     echo "or \`Winapp3/\`. If you think one of these files needs a change, open an issue instead."
   } >> "$GITHUB_STEP_SUMMARY"

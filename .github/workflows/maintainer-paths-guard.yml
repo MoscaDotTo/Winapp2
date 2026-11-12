@@ -1,5 +1,6 @@
 # Maintainer-paths guard: a pull request from a fork or a non-member must not change
-# winapp2ool's source or binaries, the build tooling, or the workflows. See
+# winapp2ool's source or binaries, the build tooling, the workflows, or the published
+# winapp2.ini files (Releases/ and their old copies). See
 # .github/scripts/check-maintainer-paths.sh for the list and why each is protected.
 #
 # Deployed winapp2ool clients download and run the committed exe with no verification, and
