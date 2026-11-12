@@ -1,53 +1,43 @@
-# Daily build: once a day, regenerate winapp2.ini + all flavors + their changelogs
-# from the current master sources and commit them back to master, so the published
-# files never drift from their sources. This automates the build-and-commit step.
-# The companion release.yml then cuts a GitHub Release from what this produced.
+# Daily build: regenerate winapp2.ini, every flavor and their changelogs from master's sources
+# and commit them back to master, so the published files never drift from their sources.
+# release.yml then cuts a GitHub Release from what this produced.
 #
-# Why a daily schedule and NOT a per-push trigger: the changelog (diff.txt) is
-# computed by the build against the currently committed winapp2.ini, so each release's
-# changelog describes only the delta since the previous commit. If we rebuilt on every
-# source push, several same-day builds would each commit and advance that baseline, and
-# the day's single release would show only the last hop's diff, losing the earlier
-# changes. Building at most once a day keeps commit and release 1:1 over a full day's
-# worth of source changes, so every release's changelog is the complete, sequential
-# diff from the previous release. (winapp2.ini rarely changes more than once a day; the
-# workflow_dispatch button is there when an out-of-cycle build is genuinely wanted.)
+# Why daily and not on every push: the build computes each changelog against the currently
+# committed winapp2.ini, so a changelog only covers what changed since the last commit. If we
+# rebuilt on every source push, several builds in one day would each commit and move that
+# baseline, and the day's release would only show the last one's diff. Building at most once a
+# day keeps commits and releases 1:1, so each release's changelog is the whole diff from the one
+# before it. winapp2.ini rarely changes more than once a day anyway, and the workflow_dispatch
+# button covers the days it does.
 #
-# Loop safety: there is no push trigger, so this workflow's own commit back to master
-# cannot retrigger it -- nothing watches those pushes. The commit likewise does not
-# fire release.yml via a push event; release.yml chains off this workflow's completion
-# (workflow_run) instead.
+# No loop: there's no push trigger, so this workflow's own commit to master can't retrigger it.
+# The commit doesn't fire release.yml through a push either. release.yml chains off this
+# workflow finishing (workflow_run).
 #
-# Like artifact-drift.yml, it runs the committed Assembler\winapp2ool.exe under an unelevated
-# token rather than compiling. 
+# Like artifact-drift.yml, it runs the committed Assembler\winapp2ool.exe instead of compiling.
 name: winapp2.ini build on merge
 
 on:
-  # At most one build per day (see the changelog rationale above). If master's sources
-  # did not change since the last build, the rebuild is byte-identical, nothing is
-  # staged, and the run is a cheap no-op that neither commits nor releases.
+  # If master's sources haven't changed since the last build, nothing gets staged and the run
+  # neither commits nor releases.
   #
-  # "Byte-identical" is not free: every lint pass restamps "; Version: <today>" via -usedate,
-  # so an untouched rebuild would still differ from the published file on that one line and
-  # would once have committed and released an empty changelog every single day (this is what
-  # v260729 was). build winapp2.ps1 now compares each freshly built artifact to the one it
-  # would replace, ignoring that stamp, and declines to republish when nothing else moved --
-  # so an unchanged day leaves the tree untouched and the version stamp stays pinned to the
-  # date of the last real content change, which is what it always meant to record.
+  # That took more than an identical rebuild: every lint pass restamps "; Version: <today>"
+  # through -usedate, so an untouched rebuild still differs from the published file on that one
+  # line, and that used to commit and release an empty changelog every day (v260729 was one).
+  # build winapp2.ps1 now compares each built artifact to the one it would replace, ignoring the
+  # stamp, and doesn't republish when nothing else moved. An unchanged day leaves the tree alone,
+  # and the stamp stays on the date of the last real content change.
   schedule:
     - cron: '0 6 * * *'   # 06:00 UTC daily (11PM MST)
-  # Out-of-cycle build button. A manual re-run on a day that already released produces
-  # a v<date>.2 release carrying just the delta since that day's earlier build, kept
-  # alongside it so the changelog sequence stays complete (see release.yml).
+  # Out-of-cycle build. A second build on a day that already released gets its own v<date>.2
+  # release carrying just the change since the earlier build (see release.yml).
   workflow_dispatch:
 
-# Write access is safe here (unlike PR-verify): this runs only on already-merged,
-# trusted master content, never on untrusted PR code.
+# Write access is fine here, unlike pr-verify.yml: this only ever runs on merged master content.
 permissions:
   contents: write
 
-# Serialize builds so two never race to commit master; don't cancel a build that
-# may be mid-commit.
+# One build at a time, and never cancel one: it may be partway through pushing to master.
 concurrency:
   group: winapp2-build-on-merge
   cancel-in-progress: false
@@ -56,24 +46,20 @@ jobs:
   build:
     runs-on: windows-latest
 
-    env:
-      __COMPAT_LAYER: RunAsInvoker
-
     steps:
       - name: Checkout master
         uses: actions/checkout@v4
-        # persist-credentials (default true) leaves the GITHUB_TOKEN wired up so the
-        # commit step can push back to master.
+        # persist-credentials defaults to true, which leaves the GITHUB_TOKEN set up for the
+        # commit step's push.
 
       - name: Build winapp2.ini (full, all flavors)
         shell: pwsh
         working-directory: Assembler
         run: |
-          if (-not (Test-Path 'winapp2ool.exe')) { throw 'winapp2ool.exe missing from Assembler -- the committed Release build should stage it there' }
+          if (-not (Test-Path 'winapp2ool.exe')) { throw 'winapp2ool.exe missing from Assembler; a Release build stages it there, and it should be committed' }
           pwsh -File './build winapp2.ps1'
           exit $LASTEXITCODE
 
-      # A broken build on master is a real problem -- fail loudly and keep the log.
       - name: Upload winapp2ool log on build failure
         if: failure()
         uses: actions/upload-artifact@v4
@@ -88,18 +74,18 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          # git diff --cached --quiet returns exit 1 when there ARE staged changes --
-          # that's expected control flow, so keep PS 7.3+ from throwing on it.
+          # git diff --cached --quiet exits 1 when there are staged changes, which we expect,
+          # so PS 7.3+ mustn't throw on it.
           $PSNativeCommandUseErrorActionPreference = $false
 
-          # The release file lists (Releases/<asset>) and the bundle staging live in one script,
-          # shared with release.yml's manual recovery path so the two can't drift.
+          # The release file lists (Releases/<asset>) and the bundle staging, shared with
+          # release.yml's manual recovery path.
           . ./.github/scripts/release-assets.ps1
 
-          # Exactly the tracked build outputs (never the log or scratch). Order is
-          # irrelevant, but every path must exist or be tracked: one unmatched pathspec
-          # makes `git add` stage nothing, which would then read as "no changes". The old
-          # paths below Releases are the deprecation-window copies build winapp2.ps1 still writes.
+          # Only the tracked build outputs, never the log or scratch. Every path must exist or be
+          # tracked: one unmatched pathspec makes `git add` stage nothing, which would read as
+          # "no changes". The paths after $ReleaseFiles are the old copies build winapp2.ps1
+          # still writes during the deprecation window.
           $outputs = @(
             'Assembler/Generated'
             $ReleaseFiles
@@ -121,13 +107,12 @@ jobs:
             exit 0
           }
 
-          # Committing and releasing are separate decisions. Regenerated Generated/ or a rewritten
-          # changelog must be committed so the tree never drifts from its sources, but neither is
-          # something to cut a release over -- only a change to a file end users actually download
-          # is. (build winapp2.ps1 already declines to republish an artifact whose content did not
-          # move, so reaching this branch means Generated/ or a changelog moved on its own.)
-          # Exact paths, because -contains below is an exact match. The old published paths
-          # carry the same bytes as these, so they don't need to be here.
+          # Committing and releasing are separate decisions. A regenerated Generated/ or a rewritten
+          # changelog still gets committed so the tree matches its sources, but we only release when
+          # a file people download changed. build winapp2.ps1 already skips republishing an artifact
+          # whose content didn't move, so getting here means Generated/ or a changelog changed on
+          # its own. These are exact paths because -contains is an exact match, and the old
+          # published paths carry the same bytes, so they aren't needed.
           $published = @($ReleaseDataFiles | ForEach-Object { "Releases/$_" })
           $staged = @(git diff --cached --name-only)
           $publishedChanged = @($staged | Where-Object { $published -contains $_ })
@@ -141,31 +126,28 @@ jobs:
             git commit -m 'ci: sync regenerated winapp2.ini artifacts (no published changes)'
             if ($LASTEXITCODE -ne 0) { throw 'commit failed' }
             git push origin HEAD:refs/heads/master
-            if ($LASTEXITCODE -ne 0) { throw 'push to master failed -- is the branch protected against the Actions token?' }
+            if ($LASTEXITCODE -ne 0) { throw 'push to master failed; is the branch protected against the Actions token?' }
             "released=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
             exit 0
           }
 
           Write-Host "Published artifacts changed:`n$($publishedChanged -join "`n")"
 
-          # Version is the date stamp in a published artifact's header: "; Version: 260723".
-          # Read it from the files actually being RELEASED, not unconditionally from the base
-          # build. build winapp2.ps1's content gate declines to republish an artifact whose
-          # content did not move, which deliberately leaves that file's stamp pinned to its
-          # last real change. So a flavor-only change (edit Assembler/Sources/Flavors/Tron/ and nothing else)
-          # leaves Releases/winapp2.ini on the PREVIOUS date while Tron carries today's --
-          # sourcing the version from the base would then tag today's release with the previous
-          # release's date, and release.yml's free-tag loop would quietly suffix it .2 rather
-          # than fail, so the mistake would ship looking deliberate.
+          # The version is the date stamp in a published file's header ("; Version: 260723"),
+          # read from the files being released, not always from the base. The content gate leaves
+          # an unchanged file's stamp on its last real change, so a flavor-only change (say,
+          # Assembler/Sources/Flavors/Tron/ and nothing else) leaves Releases/winapp2.ini on the
+          # previous date while Tron carries today's. Reading the base would tag today's release
+          # with the previous release's date, and release.yml's free-tag loop would quietly
+          # suffix it .2 instead of failing, so the mistake would ship looking intentional.
           #
-          # Max across the changed files: picks today's stamp whenever anything was rebuilt,
-          # and naturally yields the base's value when the base is among them.
+          # The max across the changed files is today's stamp whenever anything was rebuilt.
           $version = Get-ReleaseVersion -Paths $publishedChanged
 
           git commit -m "ci: rebuild winapp2.ini artifacts (v$version)"
           if ($LASTEXITCODE -ne 0) { throw 'commit failed' }
           git push origin HEAD:refs/heads/master
-          if ($LASTEXITCODE -ne 0) { throw 'push to master failed -- is the branch protected against the Actions token?' }
+          if ($LASTEXITCODE -ne 0) { throw 'push to master failed; is the branch protected against the Actions token?' }
           $sha = (git rev-parse HEAD).Trim()
 
           # The 14 Releases files under their own names, plus winapp2ool.exe.
@@ -175,8 +157,8 @@ jobs:
           "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           Write-Host "Committed rebuild v$version ($sha); staged release bundle."
 
-      # Only present when a commit happened. release.yml consumes this; its absence
-      # means "no change, no release."
+      # Only uploaded when a published file changed. release.yml reads a missing bundle as
+      # nothing to release.
       - name: Upload release bundle
         if: steps.commit.outputs.released == 'true'
         uses: actions/upload-artifact@v4

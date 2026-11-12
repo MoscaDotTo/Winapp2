@@ -1,28 +1,25 @@
-# Binary parity: is the committed Assembler\winapp2ool.exe still the committed source?
+# Binary parity: is the committed Assembler\winapp2ool.exe still built from the committed source?
 #
-# Assembler\winapp2ool.exe is a tracked binary refreshed by the Release post-build copy.
-# Nothing verified it corresponded to the source beside it. Rebuild locally, forget to
-# commit the exe, push source-only, and the daily build keeps generating with the OLD tool
-# indefinitely -- silently, no red X anywhere, every published artifact coming from code
-# that is not in the repo. This closes that hole.
+# Assembler\winapp2ool.exe is a tracked binary that the Release post-build step refreshes, and
+# nothing used to check it against the source beside it. Rebuild locally, forget to commit the
+# exe, push only the source, and the daily build keeps generating with the old tool with no red
+# X anywhere, publishing output from code that isn't in the repo.
 #
-# It compares BEHAVIOR, not bytes. Recompiling identical source yields a different binary
-# (fresh MVID and timestamps), so byte-comparing the two exes would fail every run and
-# prove nothing. Running both over the same sources and diffing the generated trees asks
-# the question that actually matters: does the shipped tool still do what the source says.
+# We compare behavior, not bytes. Recompiling identical source gives a different binary (new
+# MVID and timestamps), so comparing the exes would fail every run. Running both over the same
+# sources and diffing what they generate asks whether the shipped tool still does what the
+# source says.
 #
-# This is the question artifact-drift.yml's header used to claim. It cannot answer it --
-# -Verify compares committed Generated against regenerated Generated, so a tool change and an
-# un-regenerated source edit collapse into the same boolean. Holding sources fixed and
-# varying only the exe is what separates them.
+# artifact-drift.yml's header used to claim this question, but -Verify compares committed
+# Generated against regenerated Generated, so a tool change and an unregenerated source edit
+# give the same answer. Holding the sources fixed and changing only the exe tells them apart.
 #
-# Buildable on the runner only since c495167e retargeted the projects to .NET 4.8.
+# The runner could only build the projects after c495167e retargeted them to .NET 4.8.
 name: winapp2ool binary parity
 
 on:
   workflow_dispatch:
-  # Fires when either side of the equation moves: the binary, or the source it should
-  # have been built from. Docs excluded -- they cannot change generated output.
+  # Runs when the binary changes, or the source it should have been built from.
   push:
     paths:
       - 'Assembler/winapp2ool.exe'
@@ -42,25 +39,20 @@ jobs:
   parity:
     runs-on: windows-latest
 
-    env:
-      # Same unelevated-token override the other build workflows use; child processes
-      # (the build script's Start-Process calls) inherit it.
-      __COMPAT_LAYER: RunAsInvoker
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # ORDER IS LOAD-BEARING: this runs BEFORE msbuild. The Release PostBuildEvent does
+      # This has to run before msbuild. The Release PostBuildEvent does
       # `copy /Y "$(TargetPath)" "..\Assembler\winapp2ool.exe"`, so compiling first would
-      # overwrite the very baseline being measured and turn this into a tautology. The
-      # msbuild step also blanks that property, but generating first means the guarantee
-      # does not rest on one -p: flag continuing to work.
+      # overwrite the exe we're measuring and the comparison would pass by definition. The
+      # build step blanks PostBuildEvent too, but generating first means we don't depend on
+      # that one -p: flag.
       - name: Generate with the COMMITTED exe
         shell: pwsh
         working-directory: Assembler
         run: |
-          if (-not (Test-Path 'winapp2ool.exe')) { throw 'winapp2ool.exe missing from Assembler -- the committed Release build should stage it there' }
+          if (-not (Test-Path 'winapp2ool.exe')) { throw 'winapp2ool.exe missing from Assembler; a Release build stages it there, and it should be committed' }
           pwsh -File './build winapp2.ps1' -GenerateTo '\Parity\Committed'
           exit $LASTEXITCODE
 
@@ -68,16 +60,16 @@ jobs:
         uses: microsoft/setup-msbuild@v2
 
       # The project's EnsureNuGetPackageBuildImports guard fails the build on any missing
-      # analyzer package, so a failed restore can only surface later as a confusing
-      # build error. Fail here instead.
+      # analyzer package, so a bad restore would otherwise show up later as a confusing
+      # build error.
       - name: Restore packages
         shell: pwsh
         run: |
           msbuild winapp2ool\winapp2ool.sln -t:restore -p:RestorePackagesConfig=true /v:minimal /nologo
           if ($LASTEXITCODE -ne 0) { throw 'package restore failed' }
 
-      # /p:PostBuildEvent= suppresses the copy into Assembler\ (and the version.txt
-      # rewrite). Belt to the ordering's suspenders -- see the generate step above.
+      # /p:PostBuildEvent= skips the copy into Assembler\, the version.txt rewrite and the
+      # signing. Belt to the ordering's suspenders (see the generate step above).
       - name: Build winapp2ool from source
         shell: pwsh
         run: |
@@ -86,9 +78,9 @@ jobs:
           $built = 'winapp2ool\bin\Release\winapp2ool.exe'
           if (-not (Test-Path $built)) { throw "build reported success but produced no exe at $built" }
 
-      # The freshly built binary can live in bin\Release: winapp2ool resolves a leading
-      # backslash in -1d/-2d/-3d/-4d against the WORKING directory, not its own location
-      # (CliArgSpec.vb ApplyDirArg), and working-directory pins that to Assembler.
+      # The fresh build can stay in bin\Release: winapp2ool resolves a leading backslash in
+      # -1d/-2d/-3d/-4d against the working directory, not its own folder (CliArgSpec.vb
+      # ApplyDirArg), and working-directory pins that to Assembler.
       - name: Generate with the SOURCE-built exe
         shell: pwsh
         working-directory: Assembler

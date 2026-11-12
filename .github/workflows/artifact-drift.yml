@@ -1,73 +1,58 @@
-# Artifact drift check: does the committed contents of Assembler/Generated still
-# match what the generators produce from their sources, and does the committed
-# winapp2ool.exe still generate byte-identical output?
+# Artifact drift check: does Assembler/Generated still match what the generators produce
+# from their sources, and does the committed winapp2ool.exe still produce it byte for byte?
 #
-# This is the only workflow that runs `build winapp2.ps1 -Verify`. A *full* build
-# (pr-verify.yml, build-on-merge.yml) regenerates Generated in place before combining,
-# so it never notices drift -- build-on-merge silently repairs it and commits the
-# repair. Only -Verify regenerates into a scratch dir and byte-compares, which is
-# what turns an unrequested change in generator output into a red X instead of a
-# surprise line in tomorrow's changelog.
+# This is the only workflow that runs `build winapp2.ps1 -Verify`. A full build (pr-verify.yml,
+# build-on-merge.yml) regenerates Generated in place before combining, so it never notices
+# drift: build-on-merge just repairs it and commits the repair. -Verify regenerates into a
+# scratch folder and byte-compares instead, so a change in generator output nobody asked for
+# shows up as a red X rather than a surprise line in tomorrow's changelog.
 #
-# Scope, deliberately: it does NOT commit, tag, publish, or diff branches, and it is
-# NOT a gate on contributor PRs. A PR that edits an EntryBuilder source without
-# regenerating Generated is a perfectly good PR -- pr-verify.yml regenerates and reports
-# the real diff. Drift-checking PRs would demand contributors run winapp2ool, which
-# cuts against the entry-data-only contribution model. This runs on pushes only.
+# It doesn't commit, tag, publish or diff branches, and it isn't a PR gate. A PR that edits an
+# EntryBuilder source without regenerating Generated is a fine PR (pr-verify.yml regenerates and
+# reports the real diff), and drift-checking PRs would mean asking contributors to run winapp2ool.
 #
-# And it fires on exactly ONE path: the committed exe. That is the only input to the
-# build whose change is supposed to leave the output byte-identical, so it is the only
-# input whose change makes "committed Generated == regenerate(sources)" a question worth
-# asking. Everything else under Assembler\ (Sources\EntryBuilder\, Sources\UWPBuilder\, Sources\BrowserBuilder\, and
-# Sources\Scaffolds\, which reaches both builders as -3d/-4d) is a SOURCE: editing one is MEANT
-# to change the output, so Generated is legitimately stale from that push until
-# build-on-merge.yml's next daily rebuild commits the regeneration -- and note that
-# workflow is a 06:00 cron despite its name, so the stale window runs up to 24 hours.
-# Watching source paths therefore meant a guaranteed red X on every source push and on
-# the merge commit of every source-only PR (a UI merge fires a push on master): correct
-# every time, useless every time, because drift was the intended state at that moment.
-# Hand-edits of Generated\ itself -- the other thing a wide path list nominally covered --
-# are caught sooner and cheaper by generated-artifact-guard.yml, which runs no build.
+# It fires on one path only: the committed exe. That's the only build input whose change should
+# leave the output byte-identical. Everything else under Assembler\ (Sources\EntryBuilder\,
+# Sources\UWPBuilder\, Sources\BrowserBuilder\, and Sources\Scaffolds\, which both builders read
+# through -3d/-4d) is a source, and editing a source is supposed to change the output. Generated
+# stays stale from that push until build-on-merge.yml's next run commits the regeneration, and
+# despite its name that workflow is a 06:00 cron, so the window can be up to 24 hours. When we
+# watched the source paths too, every source push and every source-only PR merge (a UI merge
+# fires a push on master) went red, which was correct and told us nothing. Hand-edits of
+# Generated\ itself get caught sooner and cheaper by generated-artifact-guard.yml, which runs
+# no build.
 #
-# It runs the *committed* winapp2ool.exe (staged into Assembler\ by the Release post-build
-# step) rather than compiling from source. Running the committed binary is
-# a choice here, no longer a constraint. 
-#
-# It stays the right choice for THIS workflow: Assembler\Generated was produced by the shipped
-# binary, and the question is whether that binary still reproduces it. Tradeoff unchanged --
-# this exercises the shipped binary, does not prove source compiles, and cannot tell you the
-# committed exe matches the committed source. 
+# It runs the committed winapp2ool.exe (staged into Assembler\ by the Release post-build step)
+# instead of compiling from source. Since the 4.8 retarget that's a choice rather than a
+# constraint, and it's still the right one here: Generated was produced by the shipped binary,
+# and the question is whether that binary still reproduces it. It can't tell you the source
+# compiles or that the exe matches it. exe-parity.yml checks that.
 name: winapp2.ini artifact drift check
 
 on:
-  # Manual button (appears once this file is on the default branch).
+  # Manual button (shows up once this file is on the default branch).
   workflow_dispatch:
-  # Push is what gives this workflow its reach: pull_request and schedule triggers
-  # don't fire on feature branches, so this is the only CI a branch gets before it
-  # merges. An exe commit is the highest-value run here and, per the scope note above,
-  # the only one: it asks whether a new build of the tool still generates identical
-  # output from unchanged sources. Red here is exactly the signal wanted -- the rebuild
-  # changed generator behavior, either on purpose (go regenerate Generated and commit it
-  # with [regen]) or by accident (go find out why before it reaches a release).
+  # pull_request and schedule triggers don't fire on feature branches, so push is the only CI
+  # a branch gets before it merges. An exe push asks whether a new build of the tool still
+  # generates identical output from unchanged sources. Red means the rebuild changed generator
+  # behavior, either on purpose (regenerate Generated and commit it with [regen]) or by
+  # accident (find out why before it reaches a release).
   #
-  # No feedback loop: build-on-merge.yml commits Assembler/Generated with the
-  # GITHUB_TOKEN, and token pushes do not fire push events. It never commits the exe
-  # at all -- it only copies it into the release bundle -- so it cannot trip this path.
+  # No feedback loop: build-on-merge.yml commits Assembler/Generated with the GITHUB_TOKEN, and
+  # token pushes don't fire push events. It never commits the exe anyway, only copies it into
+  # the release bundle.
   push:
     paths:
       - 'Assembler/winapp2ool.exe'
       - '.github/workflows/artifact-drift.yml'
-  # Post-build assertion on master. build-on-merge regenerates Generated in place and commits
-  # it, so immediately after that commit "committed Generated == regenerate(sources)" holds by
-  # construction. It is the only moment where drift is never the intended state, which makes
-  # it the only placement where red carries information: generator nondeterminism, an
-  # artifact the build writes that the commit step's hand-maintained path list never stages,
-  # or a push racing the build.
+  # Post-build check on master. Right after build-on-merge commits its regeneration, committed
+  # Generated has to equal regenerate(sources). It's the one moment drift is never expected, so
+  # red here actually means something: nondeterministic generator output, an artifact the build
+  # writes that the commit step's path list doesn't stage, or a push racing the build.
   workflow_run:
     workflows: ["winapp2.ini build on merge"]
     types: [completed]
 
-# Read-only: this never writes back to the repo.
 permissions:
   contents: read
 
@@ -79,44 +64,31 @@ jobs:
   verify:
     runs-on: windows-latest
 
-    # A failed build leaves a half-written tree; verifying it would report drift that says
-    # nothing about the invariant. Push and manual runs are unconditional.
+    # A failed build leaves a half-written tree, and drift reported against that tells us
+    # nothing. Push and manual runs always run.
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
-
-    env:
-      # Deterministic override of the exe's `requireAdministrator` manifest: the
-      # Windows loader runs winapp2ool under the runner's own (unelevated) token
-      # instead of requesting elevation. The build modules touch only ini files in
-      # a working directory and need no admin, so this is the correct token -- and
-      # it sidesteps any UAC/elevation behavior on the hosted runner. Child
-      # processes (the build script's Start-Process calls) inherit this from the
-      # job environment.
-      __COMPAT_LAYER: RunAsInvoker
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          # workflow_run reports the commit the build STARTED from, not the artifact commit
-          # it created. Defaulting to it would verify the pre-rebuild tree and fail every
-          # time. Empty string keeps the normal behavior for push and dispatch.
+          # workflow_run reports the commit the build started from, not the one it committed.
+          # Checking that out would verify the pre-rebuild tree and fail every time. An empty
+          # string keeps the normal behavior for push and dispatch.
           ref: ${{ github.event_name == 'workflow_run' && 'master' || '' }}
 
-      # The characteristic test. -Verify regenerates every artifact into
-      # Assembler/Verify and byte-compares against the committed Assembler/Generated,
-      # exiting 0 on a clean match and 1 on drift (retaining the scratch dir).
-      # Run it as a child process so the script's `exit N` propagates cleanly to
-      # $LASTEXITCODE regardless of call-operator exit semantics.
+      # -Verify regenerates every artifact into Assembler/Verify and byte-compares it against
+      # the committed Assembler/Generated, exiting 1 on drift and keeping the scratch folder.
+      # We run it as a child process so the script's `exit N` lands in $LASTEXITCODE.
       - name: Characteristic test (build winapp2.ps1 -Verify)
         shell: pwsh
         working-directory: Assembler
         run: |
-          if (-not (Test-Path 'winapp2ool.exe')) { throw 'winapp2ool.exe missing from Assembler -- the committed Release build should stage it there' }
+          if (-not (Test-Path 'winapp2ool.exe')) { throw 'winapp2ool.exe missing from Assembler; a Release build stages it there, and it should be committed' }
           pwsh -File './build winapp2.ps1' -Verify
           exit $LASTEXITCODE
 
-      # On any failure, keep the drift scratch and the flushed diagnostic log
-      # (winapp2ool.log now persists on a nonzero silent-mode exit) for inspection.
+      # Silent mode writes winapp2ool.log when it exits nonzero.
       - name: Upload drift scratch + log on failure
         if: failure()
         uses: actions/upload-artifact@v4

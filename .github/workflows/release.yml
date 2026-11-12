@@ -1,29 +1,24 @@
-# Release: whenever build-on-merge.yml produces an updated winapp2.ini, cut a
-# GitHub Release tagged with that build's date version and attach the winapp2.ini
-# family plus the current winapp2ool.exe.
+# Release: when build-on-merge.yml produces an updated winapp2.ini, cut a GitHub Release tagged
+# with that build's date and attach every flavor, its changelog and the current winapp2ool.exe.
 #
-# One release per build. The tag is v<date>. build-on-merge runs at most once a day (a
-# daily schedule, not per-push), so normally each day has exactly one build and the tag
-# is simply v<date>. The only way to get a second build the same day is a manual
-# workflow_dispatch re-run; because that build's changelog covers only the delta since
-# the day's earlier build, its release is tagged v<date>.2 (.3, ...) and kept ALONGSIDE
-# the earlier one, so the sequence of per-release changelogs stays complete and gap-free
-# rather than one release silently overwriting an earlier day-part's diff.
+# One release per build, tagged v<date>. build-on-merge runs once a day, so normally that tag is
+# free. A second build the same day only happens through a manual workflow_dispatch, and its
+# changelog covers only the change since the earlier build, so it gets v<date>.2 (.3, ...) and
+# the earlier release stays. That way no release overwrites another's slice of the changelog.
 #
-# It chains off build-on-merge via workflow_run (not a push trigger) because that
-# workflow commits with the GITHUB_TOKEN, and token pushes don't fire push events.
-# The build job hands everything over as the "release-bundle" artifact; if that
-# artifact is absent, the build made no changes and there is nothing to release.
+# It chains off build-on-merge through workflow_run because that workflow commits with the
+# GITHUB_TOKEN, and token pushes don't fire push events. The build hands everything over as the
+# "release-bundle" artifact, and no artifact means the build had nothing to release.
 #
-# Manual recovery (workflow_dispatch): from winapp2ool 1.8 on, clients download each flavor
-# from the latest release rather than the tree, so a release missed after the build committed
-# leaves every client a version behind until the next content change, and re-running the
-# build can't fix it (it sees nothing changed). Dispatching this workflow releases master as
-# it stands: the bundle comes from master's committed Releases/ files and Assembler/winapp2ool.exe,
-# staged by the same script build-on-merge.yml uses (.github/scripts/release-assets.ps1), and
-# the version is the highest "; Version:" stamp across master's seven Releases/ data files.
-# It refuses when the latest release already carries that version, since re-releasing the
-# same content would only add a duplicate release with an empty changelog.
+# Manual recovery (workflow_dispatch): from 1.8 on, clients download each flavor from the latest
+# release rather than the tree, so a release that goes missing after the build committed leaves
+# every client a version behind until the next content change. Re-running the build can't fix
+# that, because it sees nothing changed. Dispatching this workflow releases master as it stands:
+# the bundle comes from master's committed Releases/ files and Assembler/winapp2ool.exe, staged
+# by the same script build-on-merge.yml uses (.github/scripts/release-assets.ps1), and the
+# version is the highest "; Version:" stamp across master's seven Releases/ data files. It
+# refuses when the latest release already has that version, since all we'd get is a duplicate
+# release with an empty changelog.
 name: winapp2.ini release
 
 on:
@@ -43,8 +38,7 @@ concurrency:
 jobs:
   release:
     runs-on: ubuntu-latest
-    # A dispatch always runs; a build run only when it succeeded, since a failed build has
-    # nothing to publish.
+    # A dispatch always runs. A build run only counts if it succeeded.
     if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     steps:
       - name: Download the release bundle from the build run
@@ -123,16 +117,15 @@ jobs:
         shell: bash
         run: |
           if [ ! -f bundle/version.txt ]; then
-            echo "No release bundle -> the build produced no artifact changes. Skipping."
+            echo "No release bundle, so the build had nothing to release. Skipping."
             echo "skip=true" >> "$GITHUB_OUTPUT"
           else
             echo "version=$(cat bundle/version.txt)" >> "$GITHUB_OUTPUT"
             echo "sha=$(cat bundle/commit.txt)" >> "$GITHUB_OUTPUT"
           fi
 
-      # Tag is v<date>. Normally free (one build/day). A manual same-day re-run collides,
-      # so suffix .2, .3, ... and keep the earlier release -- each release then carries a
-      # distinct, sequential slice of the changelog (see the header note).
+      # v<date>, or v<date>.2, .3, ... when a manual same-day build already took it (see the
+      # header).
       - name: Compute a free tag
         id: tag
         if: steps.gate.outputs.skip != 'true'
@@ -166,18 +159,17 @@ jobs:
           VERSION: ${{ steps.gate.outputs.version }}
         run: |
           set -euo pipefail
-          # Release notes = the base changelog this build produced. GitHub caps a release
-          # body at 125,000 characters and rejects the whole create with a 422 if it is
-          # exceeded, so the changelog is inlined only up to a budget well under that; the
-          # complete text always ships as the changelog-base.txt asset regardless. A daily
-          # diff is nowhere near the cap, but a build whose baseline is months old (or a
-          # sweeping mechanical change across the database) easily is.
+          # The release notes are the base changelog. GitHub caps a release body at 125,000
+          # characters and rejects the whole create with a 422 past that, so we inline the
+          # changelog only up to a budget well under it. The full text always ships as the
+          # changelog-base.txt asset. A daily diff is nowhere near the cap, but a build against
+          # a months-old baseline, or a sweeping mechanical change, can be.
           #
-          # Truncation is whole-lines-only: cutting at a byte offset can split a UTF-8
-          # sequence mid-character and hand the API an invalid body.
+          # We cut on whole lines, because cutting at a byte offset can split a UTF-8 character
+          # and hand the API an invalid body.
           {
             echo "winapp2.ini \`${VERSION}\` automated build."
-            echo "below is the base flavor's semantic changelog (diff.txt)"
+            echo "below is the base flavor's semantic changelog (changelog-base.txt)"
             echo "all flavors and their changelogs are attached at the bottom alongside a copy of the latest winapp2ool"            
             echo
             echo '```'

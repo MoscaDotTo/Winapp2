@@ -1,19 +1,16 @@
-# PR-verify (build job): verifies open PRs against master by building winapp2.ini
-# before and after merging the PR, then reporting either why the build broke or
-# what the PR changes in the output.
+# PR verify, build half: builds winapp2.ini from master before and after merging the PR, then
+# reports either why the build broke or what the PR changes in the output.
 #
-# SECURITY BOUNDARY: this workflow runs on the `pull_request` event, which for fork
-# PRs gives a read-only GITHUB_TOKEN and no repository secrets. That is what makes
-# it safe to run the PR's committed winapp2ool.exe / build script here. This job
-# has NO write access and posts nothing itself -- it only uploads a text report
-# artifact. The separate pr-verify-comment.yml workflow (workflow_run, trusted,
-# write-capable) reads that artifact and posts the PR comment; it never executes
-# any PR code. Do NOT add secrets, write permissions, or pull_request_target here.
+# Security boundary: on the `pull_request` event a fork PR gets a read-only GITHUB_TOKEN and no
+# repository secrets, which is what makes it safe to run the PR's committed winapp2ool.exe and
+# build script here. This job can't write and posts nothing; it only uploads a text report.
+# pr-verify-comment.yml (workflow_run, trusted, can write) reads that report and posts the
+# comment without running any PR code. Don't add secrets, write permissions or
+# pull_request_target here.
 name: winapp2.ini PR verify
 
 on:
-  # Only fires on changes to the winapp2.ini build sources under Assembler/,
-  # matching artifact-drift.yml's scope -- unrelated repo edits don't trigger a build.
+  # Only PRs that touch the build inputs under Assembler/.
   pull_request:
     types: [opened, synchronize, reopened]
     branches:
@@ -37,7 +34,7 @@ on:
         description: 'PR number (for the report bundle)'
         required: true
 
-# Read-only, no secrets: the security boundary for running untrusted PR content.
+# The security boundary from the header. Keep it read-only.
 permissions:
   contents: read
 
@@ -50,9 +47,6 @@ jobs:
     runs-on: windows-latest
 
     env:
-      # Same unelevated-token override artifact-drift.yml uses so winapp2ool runs headless
-      # without requesting elevation; child build processes inherit it.
-      __COMPAT_LAYER: RunAsInvoker
       BASE_SHA: ${{ github.event.pull_request.base.sha || inputs.base_sha }}
       HEAD_SHA: ${{ github.event.pull_request.head.sha || inputs.head_sha }}
       PR_NUMBER: ${{ github.event.number || inputs.pr_number }}
@@ -63,9 +57,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Ensure both the base commit and the PR head object are present locally.
-      # For fork PRs the head lives in the fork, but GitHub exposes it in the base
-      # repo as refs/pull/<n>/head; fetch that so `git merge <head sha>` can resolve.
+      # `git merge <head sha>` needs both commits here. A fork PR's head lives in the fork,
+      # but GitHub exposes it in the base repo as refs/pull/<n>/head.
       - name: Fetch PR refs
         shell: pwsh
         run: |
@@ -85,8 +78,8 @@ jobs:
             -PrNumber $env:PR_NUMBER `
             -ReportDir "$env:RUNNER_TEMP/pr-verify-report"
 
-      # Always upload -- a broken PR build is a *successful* verification whose
-      # outcome (status.txt) the comment job needs. Only a harness crash fails here.
+      # Always upload: a PR that breaks the build is still a successful verification, and
+      # the comment job needs its status.txt. Only a harness crash fails here.
       - name: Upload report bundle
         if: always()
         uses: actions/upload-artifact@v4

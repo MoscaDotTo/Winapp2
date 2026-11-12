@@ -1,12 +1,10 @@
-# PR-verify (comment job): the trusted half of the split pattern. It runs on
-# workflow_run *after* the untrusted "winapp2.ini PR verify" build finishes, in the
-# base repo's context, so it may hold write permissions safely -- it NEVER checks
-# out or executes any PR code. It only downloads the text report artifact the build
-# job produced and posts/updates a single sticky PR comment from it.
+# PR verify, comment half. It runs on workflow_run after the untrusted "winapp2.ini PR verify"
+# build finishes, in the base repo's context, so it can hold write permissions safely: it never
+# checks out or runs PR code. It downloads the text report the build job left and posts or
+# updates one sticky comment on the PR.
 #
-# Because this job is write-capable and reads an artifact written by untrusted code,
-# it treats every byte of that artifact as data (never executed) and does not trust
-# the PR number blindly -- see the validation in the github-script step.
+# Since this job can write and the report came from untrusted code, every byte of the report is
+# data, and the PR number isn't taken on trust (see the github-script step).
 name: winapp2.ini PR verify comment
 
 on:
@@ -37,7 +35,7 @@ jobs:
             const fs = require('fs');
             const marker = '<!-- winapp2-pr-verify -->';
 
-            // Read the bundle written by the (untrusted) build job -- text only.
+            // Written by the untrusted build job; we only ever read it as text.
             let body, fileNumber;
             try {
               body = fs.readFileSync('report/report.md', 'utf8');
@@ -49,10 +47,10 @@ jobs:
 
             const run = context.payload.workflow_run;
 
-            // Resolve the target PR. Same-repo runs carry the association directly;
-            // trust that. Fork runs don't, so fall back to the number the build job
-            // wrote -- but only after confirming that PR's head SHA matches the
-            // commit this run actually built, so a PR can't target someone else's.
+            // Same-repo runs carry the PR association, and we trust that. Fork runs
+            // don't, so we fall back to the number the build job wrote, but only once
+            // that PR's head SHA matches the commit this run built, so a PR can't
+            // aim the report at someone else's.
             let prNumber = null;
             if (run.pull_requests && run.pull_requests.length > 0) {
               prNumber = run.pull_requests[0].number;
@@ -76,8 +74,8 @@ jobs:
 
             const fullBody = `${marker}\n${body}`;
 
-            // Upsert: update our existing sticky comment if present, else create one.
-            // Every page, since a busy PR can push ours past the first 30. Only a comment this
+            // Update our sticky comment if there is one, otherwise create it. We read
+            // every page, since a busy PR can push ours past the first 30. Only a comment this
             // workflow wrote counts: anyone can paste the marker into their own comment, and
             // matching that would have us overwrite a contributor's words with the report.
             const comments = await github.paginate(github.rest.issues.listComments, {

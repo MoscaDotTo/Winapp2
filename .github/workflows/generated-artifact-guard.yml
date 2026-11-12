@@ -1,42 +1,36 @@
-# Generated-artifact guard: fail when a change edits a build OUTPUT without editing the
-# SOURCE that produces it.
+# Generated-artifact guard: fail when a change edits a build output without editing the
+# source that produces it.
 #
-# The failure mode this exists for: you edit Assembler/Generated/EntryBuilder/#.ini when you meant
-# Assembler/Sources/EntryBuilder/#.ini. Nothing complains. The file on disk says what you wanted.
-# Then the daily build regenerates Generated/ from the untouched EntryBuilder source 
-# This makes it a red X instead.
+# The mistake it catches: you edit Assembler/Generated/EntryBuilder/#.ini when you meant
+# Assembler/Sources/EntryBuilder/#.ini. Nothing complains, and the file on disk says what you
+# wanted, until the daily build regenerates Generated/ from the untouched source and your edit
+# is gone. This turns that into a red X.
 #
-# How this differs from the two workflows that already build things:
-#   * artifact-drift.yml runs `-Verify` and byte-compares committed output against
-#     freshly generated output. It WOULD catch this, but it takes a full Windows build
-#     (minutes) and its scope is "is the committed output still correct", which is a
-#     different and more expensive question than "are these changed paths coherent".
-#   * pr-verify.yml builds the PR merged into master and reports the output delta. It
-#     regenerates Generated/ in place, so a hand-edit there is overwritten before it is
-#     ever noticed.
-# This guard runs no build at all
-# It is a cheap provenance check layered under both, not a replacement for either.
+# The two workflows that build things don't catch it:
+#   * artifact-drift.yml's -Verify would, but it only runs when the exe changes, or after the
+#     daily build has already overwritten the edit.
+#   * pr-verify.yml builds the PR merged into master and reports the output delta, but it
+#     regenerates Generated/ in place first, so the hand-edit is gone before anything looks.
+# This guard runs no build. It only checks that the changed paths make sense together.
 #
-# Scope, deliberately: read-only, posts no comments, commits nothing. It is safe on
-# fork PRs because it never executes any repository content only `git diff --name-only`
-# and the checked-in classifier script, which is read from the BASE repo, never the PR.
+# It's read-only, posts no comments and commits nothing, and it's safe on fork PRs: read-only
+# token, no secrets, and nothing runs but `git diff --name-only` and the classifier script.
+# That script comes from the PR's merge commit, so a PR can edit it, but maintainer-paths-guard.yml
+# fails any fork or non-member PR that touches .github/.
 name: generated artifact guard
 
 on:
-  # PR gate. Unlike artifact-drift.yml (which is deliberately not a PR gate because it
-  # would demand contributors run winapp2ool), this one is safe to gate on: it asks only
-  # that the edit be in the right file, which is what a contributor should be doing
-  # anyway. It needs no tooling and cannot be satisfied by running a build.
+  # Unlike artifact-drift.yml, this is safe to gate PRs on: it only asks that the edit be in
+  # the right file, which needs no tooling, and running a build can't satisfy it.
   pull_request:
     types: [opened, synchronize, reopened]
 
-  # Push is what covers the pre-PR case: a commit straight onto a feature branch or
-  # master, which no pull_request event ever sees. Path-scoped to the only files that
-  # can trip either rule, so unrelated pushes do not spin up a runner.
+  # Push covers commits straight onto a feature branch or master, which no pull_request event
+  # sees. The paths are the only files either rule looks at.
   #
-  # No feedback loop: build-on-merge.yml commits these exact artifacts, but it pushes
-  # with the GITHUB_TOKEN and token pushes do not fire push events. The actor guard on
-  # the job below is a second belt in case that ever changes.
+  # No feedback loop: build-on-merge.yml commits these exact artifacts, but with the
+  # GITHUB_TOKEN, and token pushes don't fire push events. The actor check on the job is a
+  # backup in case that ever changes.
   push:
     paths:
       - 'Assembler/**'
@@ -59,8 +53,8 @@ concurrency:
 jobs:
   guard:
     runs-on: ubuntu-latest
-    # Never police the build's own artifact commits -- those are output-only BY DESIGN,
-    # which is precisely what rule 1 forbids for humans.
+    # Skip the build's own commits: they're output-only on purpose, which is exactly what
+    # rule 1 forbids for people.
     if: github.actor != 'github-actions[bot]'
 
     steps:
@@ -70,10 +64,9 @@ jobs:
         with:
           fetch-depth: 0
 
-      # For a fork PR the head commit lives in the fork. fetch-depth 0 pulls
-      # refs/pull/<n>/merge, whose second parent IS that head, so it is normally present
-      # already -- but pr-verify.yml fetches it explicitly and this mirrors that, because
-      # a missing head object here would fail the run rather than degrade.
+      # A fork PR's head commit lives in the fork. fetch-depth 0 pulls refs/pull/<n>/merge,
+      # whose second parent is that head, so it's usually here already. We fetch it anyway,
+      # like pr-verify.yml does, because a missing head object would fail the run.
       - name: Fetch PR head
         if: github.event_name == 'pull_request'
         shell: bash
@@ -81,8 +74,8 @@ jobs:
           git fetch --no-tags origin \
             "+refs/pull/${{ github.event.number }}/head:refs/remotes/pr/head" || true
 
-      # Resolve the two refs to diff, per event. For a PR this is the base branch tip
-      # and the PR head; for a push it is the range that was pushed.
+      # The two refs to diff: the base branch tip and the PR head for a PR, the pushed range
+      # for a push.
       - name: Resolve diff range
         id: range
         shell: bash
@@ -100,15 +93,15 @@ jobs:
 
           case "$EVENT" in
             pull_request)
-              # actions/checkout leaves the PR head at refs/remotes/pull/<n>/merge's
-              # second parent; the head SHA itself is fetched by the full-depth clone.
+              # The head SHA is the merge ref's second parent, which the full-depth
+              # clone already has.
               base="$PR_BASE_SHA"; head="$PR_HEAD_SHA"
               ;;
             push)
               base="$PUSH_BEFORE"; head="$PUSH_AFTER"
-              # A brand-new branch reports before=000...0, and a force-push can report a
-              # commit that is no longer reachable. Neither is diffable, so fall back to
-              # the merge base with the default branch: "what does this branch add".
+              # A new branch reports before=000...0, and a force-push can report a commit
+              # that's no longer reachable. We can't diff either, so fall back to the merge
+              # base with the default branch, which asks what this branch adds.
               if [ "$base" = "0000000000000000000000000000000000000000" ] || ! have "$base"; then
                 git fetch --no-tags origin "$DEFAULT_BRANCH" >/dev/null 2>&1 || true
                 base="origin/$DEFAULT_BRANCH"
@@ -131,21 +124,20 @@ jobs:
           echo "head=$head" >> "$GITHUB_OUTPUT"
           echo "Comparing $base...$head"
 
-      # The escape hatch. Rule 1 cannot distinguish a hand-edit from a deliberate
-      # regeneration (see the script header), so the innocent case declares itself.
+      # The escape hatch. Rule 1 can't tell a hand-edit from a deliberate regeneration (see
+      # the script header), so the innocent case declares itself.
       #
-      # Checked over EVERY commit message in the range, not just head_commit: a push of
-      # several commits should not need the token on whichever one happens to be last.
-      # Checked here rather than inside the script so the override is visible in the log
-      # even on runs that would have passed anyway.
+      # We check every commit message in the range, not just the head commit, so a push of
+      # several commits doesn't need the token on whichever one happens to be last. It's
+      # checked here rather than in the script so the override shows in the log even on runs
+      # that would have passed anyway.
       #
-      # The PR title arrives via env, never interpolated into the script body -- it is
-      # attacker-controlled text on a fork PR. grep -F, no eval: it is only ever data.
+      # The PR title comes in through env and never gets interpolated into the script, since
+      # on a fork PR it's attacker-controlled text. grep -F, no eval.
       #
-      # Case-folded via `tr` rather than `grep -i` deliberately: `grep -i` SIGABRTs on
-      # Git Bash's GNU grep 3.0 (with or without -F), so an -i here would be a flag that
-      # cannot be tested on the maintainer's machine -- it would appear to work in CI and
-      # be unverifiable locally. `tr '[:upper:]' '[:lower:]'` behaves identically in both.
+      # Lowercased with `tr` rather than `grep -i`, because `grep -i` SIGABRTs on Git Bash's
+      # GNU grep 3.0 (with or without -F). It would work in CI and be untestable on the
+      # maintainer's machine.
       - name: Check for the override token
         id: skiptoken
         if: steps.range.outputs.skip != 'true'
