@@ -2,35 +2,35 @@
 
 ### What is this?
 
-This folder contains the shared cleaning-pattern catalogs consumed by winapp2ool's [UWPBuilder](https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/modules/uwpbuilder/readme.md) and [EntryBuilder](https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/modules/entrybuilder/readme.md) modules. When a source entry in either module declares an embedded browser data folder, the generator expands the entry's selected scaffolds from these catalogs into concrete FileKeys such that one curated catalog of Chromium cleaning patterns covers every app that needs them. 
+This folder holds the shared cleaning-pattern catalogs used by winapp2ool's [UWPBuilder](https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/modules/uwpbuilder/readme.md) and [EntryBuilder](https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/modules/entrybuilder/readme.md) modules. When an entry in either one declares an embedded browser data folder, the generator turns the scaffolds that entry selects into real FileKeys. That way one curated catalog of Chromium cleaning patterns covers every app that embeds Chromium.
 
 ### What is a scaffold?
 
-A scaffold is a named group of FileKey templates. Each catalog section defines one scaffold:
+A scaffold is a named group of FileKey templates. Each catalog section defines one:
 
 ```ini
 [WebViewScaffold: WebCookies]
 FileKeyBase=<WebViewRoot>\*\Network|Cookies*;Device Bound Sessions*
 ```
 
-The section name format is `[WebViewScaffold: Name]` in `webview.ini`, `[QtWebEngineScaffold: Name]` in `qtwebengine.ini`, and `[ElectronScaffold: Name]` in `electron.ini`. Each `FileKeyBase=` line is a FileKey template; the family placeholder is substituted by the consuming module once per root the entry declares.
+Sections are named `[WebViewScaffold: Name]` in `webview.ini`, `[QtWebEngineScaffold: Name]` in `qtwebengine.ini`, and `[ElectronScaffold: Name]` in `electron.ini`. Each `FileKeyBase=` line is a FileKey template, and the module reading it fills in the family's placeholder once for each root the entry declares.
 
-The three families each define a root differently, and getting this wrong is the most common way to write a scaffold that silently matches nothing:
+Each family means something different by a root, and getting that wrong is the most common way to write a scaffold that quietly matches nothing:
 
 | Family | Placeholder | What the root names |
 | :- | :- | :- |
-| WebView2 | `<WebViewRoot>` | The folder containing the profiles (`...\EBWebView`). Profile-scoped templates use `<WebViewRoot>\*\`.
-| QtWebEngine | `<QtWebEngineRoot>` | One profile directory, segment included (`...\QtWebEngine\Default`) |
-| Electron | `<ElectronRoot>` | One profile directory, which is the app's `userData` folder (`%AppData%\Signal`). |
+| WebView2 | `<WebViewRoot>` | The folder holding the profiles (`...\EBWebView`). Profile-level templates use `<WebViewRoot>\*\` |
+| QtWebEngine | `<QtWebEngineRoot>` | One profile folder, profile name included (`...\QtWebEngine\Default`) |
+| Electron | `<ElectronRoot>` | One profile folder, which is the app's `userData` folder (`%AppData%\Signal`) |
 
-Two families have a second placeholder, declared separately because it can't be inferred from the first:
+Two families have a second placeholder, declared separately because it can't be worked out from the first:
 
 * `<ElectronUpdaterRoot>`: the electron-updater download cache (`%LocalAppData%\signal-updater`)
 * `<QtWebEngineCacheRoot>`: the folder holding the profile's HTTP `Cache\`, which Qt keeps apart from the profile (`%LocalAppData%\VideoKeeper\cache\QtWebEngine\Default`)
 
 A template whose placeholder has no declared root is dropped.
 
-Placeholders match in any case. They share the `<Name>` spelling of the builders' variables but are substituted as text before variable expansion, so a `<Package>` or `<Root>` inside a declared root expands along with the template. The old `%WebViewRoot%` spelling and its siblings (and UWPBuilder's old `%Package%`) are refused: a template holding one, even with its closing `%` missing, is dropped with a warning naming the new spelling, and the build fails:
+Placeholders match in any case. They're spelled like the builders' `<Name>` variables, but they're filled in as plain text before variables expand, so a `<Package>` or `<Root>` inside a declared root expands along with the rest of the template. The old `%WebViewRoot%` spelling and its siblings (and UWPBuilder's old `%Package%`) are refused. A template holding one, even with its closing `%` missing, is dropped with a warning naming the new spelling, and the build fails:
 
 ```
 `%ElectronRoot%` in [ElectronScaffold: Caches].FileKeyBase is now spelled `<ElectronRoot>`; template dropped
@@ -38,34 +38,34 @@ Placeholders match in any case. They share the `<Name>` spelling of the builders
 
 ### How do entries select scaffolds?
 
-An entry opts a family in by declaring its root key; without it, no scaffold keys are emitted for that family:
+An entry turns a family on by declaring its root key. Without one, that family adds nothing to the entry:
 
 | Consumer     | Opt-in key                          | Selection keys                                                                                    |
 | :-           | :-                                  | :-                                                                                                |
 | UWPBuilder   | `WebViewPath=` / `QtWebEnginePath=` / `QtWebEngineCachePath=` / `ElectronRoot=` / `ElectronUpdaterRoot=` | `WebViewScaffolds=`, `QtWebEngineScaffolds=`, `ElectronScaffolds=`, each with a matching `Exclude...Scaffolds=` |
 | EntryBuilder | `WebViewRoot=` / `QtWebEngineRoot=` / `QtWebEngineCacheRoot=` / `ElectronRoot=` / `ElectronUpdaterRoot=` | The same selection key names as UWPBuilder |
 
-Root keys are repeatable. To declare several roots, number them:
+Root keys can repeat. To declare several roots, number them:
 
 ```ini
 ElectronRoot1=%AppData%\Notion
 ElectronRoot2=%AppData%\Notion\partitions\*
 ```
 
-The selection contract is identical in every module and every family:
+Selection works the same way in both modules and every family:
 
-* With no selection keys, an opted-in entry receives that family's default set (below)
-* `...Scaffolds=` **replaces** the default set with the listed scaffolds
-* `Exclude...Scaffolds=` **subtracts** from the selected set
-* The sentinel `All` (case-insensitive) expands to the entire catalog **except the legacy tier**. `All` is reserved and cannot be used as a scaffold name
-* `...Scaffolds=All` + `Exclude...Scaffolds=X,Y` to delete "everything except X and Y" 
+* With no selection keys, an entry that turned a family on gets that family's default set (below)
+* `...Scaffolds=` replaces the default set with the scaffolds it lists. An empty `...Scaffolds=` selects none
+* `Exclude...Scaffolds=` takes scaffolds out of whatever is selected
+* `All` (in any case) means the whole catalog except the legacy tier. No scaffold can be named `All`
+* `...Scaffolds=All` with `Exclude...Scaffolds=X,Y` gives you everything except X and Y
 * A legacy scaffold is generated only when named, alone or beside `All`: `WebViewScaffolds=All,LegacyTelemetry`
 
-The host-risk scaffolds (`WebCookies`, `WebStorage`, `WebHistory`, `WebSession`, `LoginData`) remove data an application may treat as primary user state, such as logged-in sessions and saved passwords. They are never in a default set, but `All` includes them, so an entry that selects `All` excludes the ones it must keep.
+The host-risk scaffolds (`WebCookies`, `WebStorage`, `WebHistory`, `WebSession`, `LoginData`) delete data an app may treat as the user's own, such as logged-in sessions and saved passwords. No default set includes them, but `All` does, so an entry that selects `All` has to exclude the ones its app needs to keep.
 
 ### The legacy tier
 
-A section carrying `Tier=Legacy` stays in the catalog but is withheld from `All`:
+A section carrying `Tier=Legacy` stays in the catalog but is left out of `All`:
 
 ```ini
 [WebViewScaffold: LegacyWebHistory]
@@ -73,7 +73,7 @@ Tier=Legacy
 FileKeyBase=<WebViewRoot>\*|shortcuts*
 ```
 
-It holds patterns that modern hosts no longer write, but that older hosts may.
+The legacy tier holds patterns that current hosts no longer write but older ones may.
 
 ### Catalog contents
 
@@ -85,13 +85,13 @@ Defaults in **bold**, legacy tier in *italics*
 
 `electron.ini` currently defines: **AppLogs**, **Caches**, MediaDRM, PrivacySandbox, Security, **StorageQuota**, **Telemetry**, TempFiles, **UpdaterCache**, WebCookies, WebStorage.
 
-Note that the QtWebEngine default set (bolded above) is wider than the WebView one. `StorageQuota` and `VisitedLinks` are separate default-on scaffolds there rather than members of the host-risk `WebStorage` / `WebHistory` sets, because the hand-written QtWebEngine entries the catalog replaces treated both as routine cleaning. The catalog header explains the reasoning for each tier decision.
+QtWebEngine's default set is wider than WebView's. `StorageQuota` and `VisitedLinks` are their own default-on scaffolds there instead of being part of the host-risk `WebStorage` and `WebHistory`, because the hand-written QtWebEngine entries the catalog replaced treated both as routine cleaning. The catalog's header explains each tier decision.
 
 ### Notes for contributors
 
-* Adding a section to the catalog enables it in both modules automatically and it will automatically be included in scaffolds invoking `All`, unless it carries `Tier=Legacy`
-* A catalog's engine family is read from its section headers, not its filename, and both modules are pointed at this whole folder rather than at individual files. A section header whose family no module consumes triggers a warning.
-* Renaming a scaffold breaks every source entry that selects or excludes it by name
+* A new catalog section reaches both modules on the next build, and `All` includes it unless it carries `Tier=Legacy`
+* A catalog's engine family comes from its section headers, not its file name, and both modules read this whole folder rather than single files. A section header naming a family neither module reads gets a warning
+* Renaming a scaffold breaks every entry that selects or excludes it by name
 
 # Files
 
@@ -99,4 +99,4 @@ Note that the QtWebEngine default set (bolded above) is wider than the WebView o
 | :-                                                                                                                                | :-                                                                                   |
 | [webview.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/Scaffolds/webview.ini)             | The scaffold catalog for embedded WebView2 / EBWebView data folders                  |
 | [qtwebengine.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/Scaffolds/qtwebengine.ini)     | The scaffold catalog for embedded QtWebEngine data folders                           |
-| [electron.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/Scaffolds/electron.ini)           | The scaffold catalog for Electron application data folders                            |
+| [electron.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/Scaffolds/electron.ini)           | The scaffold catalog for Electron application data folders                           |

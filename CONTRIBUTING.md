@@ -1,16 +1,14 @@
 # Contributing to Winapp2.ini
 
-This guide covers how to add and update entries in winapp2.ini under the current build workflow.
+This guide covers how to add, update and retire winapp2.ini entries.
 
 ---
 
 ## How Winapp2.ini is maintained
 
-Winapp2.ini is no longer edited directly. It is assembled from the source files in the `Assembler/` directory by [winapp2ool](https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/Readme.md), and building and publishing are automated. See [How Winapp2.ini is built](README.md#how-winapp2ini-is-built).
+Nobody edits winapp2.ini directly anymore. [winapp2ool](https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/Readme.md) builds it from the source files in the `Assembler/` folder, and the building and publishing are automated. See [How Winapp2.ini is built](README.md#how-winapp2ini-is-built).
 
-**All contributions must target only those source files, not any `Winapp2.ini` file directly.**
-
-See [What happens after you open a PR](#what-happens-after-you-open-a-pr).
+**Contributions go in those source files, never in a built winapp2.ini.** [What happens after you open a PR](#what-happens-after-you-open-a-pr) explains the checks that run on yours.
 
 ---
 
@@ -47,17 +45,17 @@ See [What happens after you open a PR](#what-happens-after-you-open-a-pr).
 | Add, update, or remove an entry for a power-user or aggressive operation | `Winapp3/Winapp3.ini` |
 | Fix an entry that already exists in winapp2.ini | Find its source file first. See [Finding the source of an existing entry](#finding-the-source-of-an-existing-entry) |
 | Retire an entry for software that no longer exists | Move it from its source file to `Winapp3/Archived entries.ini`. See [Retiring an entry](#retiring-an-entry) |
-| Report a flavor-specific issue | Open an issue, or edit the appropriate flavor file in `Assembler/Sources/Flavors/<FlavorName>`. The `<FlavorName>` is simply the name of the tool whose flavor you want to modify: `CCleaner`, `CCleaner7`, `BleachBit`, `SystemNinja`,`Tron`, or `FluentCleaner` |
+| Report a flavor-specific issue | Open an issue, or edit that flavor's files in `Assembler/Sources/Flavors/<FlavorName>`, where `<FlavorName>` is the tool the flavor is for: `CCleaner`, `CCleaner7`, `BleachBit`, `SystemNinja`, `Tron` or `FluentCleaner` |
 
-All base entries live in `Assembler/Sources/EntryBuilder/<letter>.ini`. Standard winapp2.ini syntax is valid there. The folder name refers to the winapp2ool module that processes it, and an optional shorthand exists but is never required. The files under `Assembler/Generated/` are build artifacts regenerated from these sources on every build; do not edit them. See [EntryBuilder entries](#entrybuilder-entries).
+Every base entry lives in `Assembler/Sources/EntryBuilder/<letter>.ini`, and standard winapp2.ini syntax works there. The folder is named after the winapp2ool module that processes it, which also offers a shorthand you never have to use. The files under `Assembler/Generated/` are build artifacts, regenerated from these sources on every build, so don't edit them. See [EntryBuilder entries](#entrybuilder-entries).
 
-Editing a build artifact instead of its source is an easy mistake to make, but it is a mistake. Your committed changes will be silently destroyed when the next build regenerates the artifact from the unmodified source files. CI checks for this: if your PR changes a file under `Assembler/Generated/`, or a published `winapp2.ini` or `diff.txt` file, without also changing the source file that produces it, the **generated artifact guard** fails and names the source file you should have edited instead. See [What happens after you open a PR](#what-happens-after-you-open-a-pr).
+Editing a build artifact instead of its source is an easy mistake to make. The next build regenerates the artifact from the unchanged source, and your change silently disappears. CI catches this: if your PR changes a file under `Assembler/Generated/`, or a published file in `Releases/` (or one of its old copies), without changing the source that produces it, the **generated artifact guard** fails and names the source file to edit instead. See [What happens after you open a PR](#what-happens-after-you-open-a-pr).
 
 ---
 
 ## Finding the source of an existing entry
 
-Winapp2.ini is assembled from several source file sets and generators, so many entries do not exist verbatim anywhere in this repository. Searching for a generated entry by name may find nothing. To locate the source of an entry you want to change:
+Winapp2.ini is built from several sets of source files and generators, so many entries don't appear word for word anywhere in this repository, and searching for a generated entry by name may find nothing. To find the source of an entry you want to change:
 
 | If the entry... | Its source is |
 | :- | :- |
@@ -66,7 +64,7 @@ Winapp2.ini is assembled from several source file sets and generators, so many e
 | Appears in only one flavor of winapp2.ini | Added by that flavor: `Assembler/Sources/Flavors/<FlavorName>/*_additions.ini`. See [Flavor corrections](#flavor-corrections) |
 | Anything else | `Assembler/Sources/EntryBuilder/<letter>.ini`, where `<letter>` is the first letter of the entry name |
 
-**Search tip:** use GitHub's repository search for the entry name without the trailing ` *]`. A base entry matches twice: its source in `Assembler/Sources/EntryBuilder/` (edit this one) and its regenerated artifact in `Assembler/Generated/` (never edit this one). If only an artifact or a built winapp2.ini matches, the entry is generated. Search for a distinctive fragment of one of its FileKey or RegKey paths to find the generator source.
+**Search tip:** search the repository on GitHub for the entry name without the trailing ` *]`. A base entry turns up twice: in its source in `Assembler/Sources/EntryBuilder/` (edit this one) and in its regenerated artifact in `Assembler/Generated/` (never this one). If only an artifact or a built winapp2.ini matches, the entry is generated. Search for a distinctive piece of one of its FileKey or RegKey paths to find the source it was generated from.
 
 ---
 
@@ -81,16 +79,15 @@ Winapp2.ini is assembled from several source file sets and generators, so many e
 | A web browser | A browser definition | `Assembler/Sources/BrowserBuilder/chromium.ini` or `gecko.ini` |
 | An aggressive operation aimed at power users | A Winapp3 entry | `Winapp3/Winapp3.ini` |
 
-When in doubt, write a standard entry and place it in the appropriate `<letter>.ini` file in `Assembler/Sources/EntryBuilder`.
+When in doubt, write a standard entry in the right `<letter>.ini` file in `Assembler/Sources/EntryBuilder`.
 
 ### 2. Find what to clean
 
-Install the app, use it normally for a while, and do whatever produces the data you want gone: open files, browse around, sign in, run several times, etc. Identify the location of this data on disk. Be careful to make sure that this data isn't comingled with important data such as application configuration.
+Install the app, use it normally for a while, and do whatever makes the data you want gone: open files, browse around, sign in, run it a few times. Then find where that data lives on disk. Make sure it isn't mixed in with data that matters, such as the app's configuration.
 
 ### 3. Write the entry
 
-Open the right source file, find the alphabetical spot for your entry, and write it. Follow the [Standard entries](#standard-entries), [UWP
-entries](#uwp-entries), or [Browser entries](#browser-entries) section depending on what you're adding. Again, when in doubt, always create a standard entry. 
+Open the right source file, find your entry's alphabetical spot, and write it, following [Standard entries](#standard-entries), [UWP entries](#uwp-entries) or [Browser entries](#browser-entries). When in doubt, write a standard entry.
 
 ### 4. Validate
 
@@ -98,14 +95,14 @@ See [Verifying your work](#verifying-your-work).
 
 ### 5. Submit
 
-Open a PR against `master`. 
+Open a PR against `master`.
 
 ---
 
 ## Updating an existing entry
 
 1. [Locate the entry's source](#finding-the-source-of-an-existing-entry).
-2. Make your change in that source file. If the entry lives in `Assembler/Sources/EntryBuilder/`, recall that standard winapp2.ini syntax is still valid there. See [EntryBuilder entries](#entrybuilder-entries).
+2. Make your change in that source file. Standard winapp2.ini syntax works in `Assembler/Sources/EntryBuilder/` (see [EntryBuilder entries](#entrybuilder-entries)).
 3. [Validate](#verifying-your-work).
 4. Open a PR describing what changed and why (e.g. "version X moved its cache to a new location").
 
@@ -113,11 +110,11 @@ Open a PR against `master`.
 
 ## Retiring an entry
 
-Entries for software that is no longer available are moved to the archive at `Winapp3/Archived entries.ini` rather than deleted, preserving them for users who still run the software.
+Entries for software that's no longer available move to the archive at `Winapp3/Archived entries.ini` instead of being deleted, so people still running the software can keep using them.
 
-1. Remove the entry from its source file.
-2. Add it to `Winapp3/Archived entries.ini` in alphabetical order, written in standard winapp2.ini syntax. A base entry written in standard syntax can be moved as-is from its `Assembler/Sources/EntryBuilder/` source file. If the entry is generated (BrowserBuilder, UWPBuilder, or EntryBuilder shorthand), archive the generated form by copying it from the artifact under `Assembler/Generated/` and adding a `Skip=` key to its source section.
-3. In your PR, note why the software has been archived (e.g. the vendor site is gone or a live service has been discontinued).
+1. Take the entry out of the build. If it's written in standard syntax, remove it from its source file. If it's generated (BrowserBuilder, UWPBuilder, or EntryBuilder shorthand), add a `Skip=` key to its source section instead.
+2. Add it to `Winapp3/Archived entries.ini` in alphabetical order, in standard winapp2.ini syntax. An entry already in standard syntax moves as is. For a generated entry, copy its generated form from the artifact under `Assembler/Generated/`.
+3. Say in your PR why the software is being archived (the vendor's site is gone, a live service shut down, and so on).
 
 ---
 
@@ -125,31 +122,31 @@ Entries for software that is no longer available are moved to the archive at `Wi
 
 ### Software availability
 
-Entries are generally accepted for any software currently available for download. Direct vendor downloads are preferred; entries for software only available through download aggregators (e.g. Softonic, Uptodown) will be accepted, but entries are periodically audited, and software no longer available from its original vendor may be moved to the archive at `Winapp3/Archived entries.ini` (see [Retiring an entry](#retiring-an-entry)).
+We accept entries for any software that can currently be downloaded. Downloads straight from the vendor are preferred. Software that's only available from download aggregators (Softonic, Uptodown and so on) is accepted too, but entries get audited now and then, and software its original vendor no longer offers may move to the archive at `Winapp3/Archived entries.ini` (see [Retiring an entry](#retiring-an-entry)).
 
 ### Categorization
 
-- **Games** and directly gaming-related software (launchers, modding tools, ancillary utilities, etc.) must use `Section=Games`.
-- **Web browsers** are primarily generated entries. Their categorization is handled in the `BrowserInfo` section for that browser (see [Browser entries](#browser-entries)).
-- **Everything else** should use the most appropriate `LangSecRef`. Prefer `LangSecRef` over `Section` when a standard CCleaner category fits. See the table in [Standard entries](#standard-entries) for valid values.
+- Games, and software directly tied to games (launchers, modding tools, companion utilities and so on), must use `Section=Games`.
+- Web browser entries are mostly generated, and a browser's category is set in its `BrowserInfo` section (see [Browser entries](#browser-entries)).
+- Everything else uses the best-fitting `LangSecRef`. Prefer `LangSecRef` over `Section` whenever one of CCleaner's standard categories fits. The table in [Standard entries](#standard-entries) lists the valid values.
 
 ### Safety
 
-Entries should clean transient, rebuildable data such as caches, logs, temporary files, recently-used lists or similar. Don't target settings, configurations, or anything a user would expect to survive a clean.
+Entries should clean data that's temporary or gets rebuilt on its own, such as caches, logs, temporary files and recently used lists. Don't target settings, configuration, or anything a user would expect to survive a clean.
 
 ---
 
 ## Standard entries
 
-Standard entries cover desktop (Win32) applications that are not web browsers and do not have UWP versions. They use standard winapp2.ini syntax and live in `Assembler/Sources/EntryBuilder/`.
+Standard entries cover desktop (win32) applications that aren't web browsers and don't have a UWP version. They're written in standard winapp2.ini syntax and live in `Assembler/Sources/EntryBuilder/`.
 
 ### Where to edit
 
-Each file in `Assembler/Sources/EntryBuilder/` contains entries whose names begin with a particular letter. Add your entry to the file matching the first letter of the entry name. Numbers and symbols go in `#.ini`.
+Each file in `Assembler/Sources/EntryBuilder/` holds the entries whose names start with one letter. Add yours to the file for its first letter. Numbers and symbols go in `#.ini`.
 
 ### Entry name
 
-Entry names must end with ` *]`: a space, an asterisk, and a closing bracket. This trailing ` *` is required.
+Entry names must end with ` *]` (a space, an asterisk and a closing bracket).
 
 ```ini
 [Application Name *]
@@ -157,21 +154,21 @@ Entry names must end with ` *]`: a space, an asterisk, and a closing bracket. Th
 
 ### Style rules
 
-Run WinappDebug on your entry before submitting to catch style and syntax issues. Many common issues can be automatically repaired by WinappDebug. 
+Run WinappDebug on your entry before you submit it. It catches style and syntax problems, and repairs many of them itself.
 
 | Rule | Detail |
 | :- | :- |
-| **Alphabetical order** | Entries must be sorted alphabetically within the file. Numbers and symbols sort before letters. |
-| **Key order** | Within each entry: categorization → detection → warnings → deletion. Within a group, keys of the same type come before keys of a different type in alphabetical order by key name (Detect before DetectFile), and keys of the same type are sorted numerically by their index. |
-| **Key numbering** | Keys of the same type are numbered sequentially starting from 1 with no gaps (`FileKey1`, `FileKey2`, ...). `Detect` and `DetectFile` may omit the `1` in the case that there's only a single key. `FileKey`, `RegKey`, and `ExcludeKey` always have numbers, even when there is only one |
-| **No blank lines within an entry** | A single blank line separates entries from each other. No blank lines inside an entry. Winapp2ool will automatically remove blank lines from inside entries. |
-| **No trailing whitespace** | Lines must not have trailing spaces or tabs. |
-| **Use environment variables** | All filesystem paths must use environment variables. Never use hardcoded drive letters. |
-| **Comments are welcome where helpful** | A comment is a line beginning with `;` placed directly above an entry. Use one to record context future maintainers will need, such as why an unusual path is targeted. Comments live permanently in the source files but are stripped from the generated artifacts and the final winapp2.ini. |
+| **Alphabetical order** | Entries are sorted alphabetically within the file. Numbers and symbols sort before letters. |
+| **Key order** | Within an entry: categorization, then detection, then warnings, then deletion. Within each group, key types go in alphabetical order (`Detect` before `DetectFile`), and keys of one type go in order of their number. |
+| **Key numbering** | Keys of one type are numbered from 1 with no gaps (`FileKey1`, `FileKey2`, ...). A lone `Detect` or `DetectFile` can leave off the `1`. `FileKey`, `RegKey` and `ExcludeKey` are always numbered, even when there's only one. |
+| **No blank lines within an entry** | One blank line goes between entries, and none inside one. winapp2ool removes blank lines inside entries on its own. |
+| **No trailing whitespace** | Lines must not end in spaces or tabs. |
+| **Use environment variables** | Every filesystem path starts with an environment variable. Never hardcode a drive letter. |
+| **Comments are welcome where helpful** | A comment is a line starting with `;` directly above an entry. Use one for context a future maintainer will need, such as why an unusual path is targeted. Comments stay in the source files, but they're stripped from the generated artifacts and the published winapp2.ini. |
 
 ### Valid `LangSecRef` values
 
-LangSecRef values are defined by CCleaner v6.39 and some (but not all) are supported by other tools. Values marked "CCleaner only" are not supported by other tools and will display the number instead of the CCleaner section heading. 
+These are the `LangSecRef` values CCleaner v6.39 defines. Other tools support some of them, but not all. A tool that doesn't support a value marked "CCleaner only" shows the number instead of a section name.
 
 | LangSecRef | CCleaner section | Notes |
 | :- | :- | :- |
@@ -208,7 +205,7 @@ LangSecRef values are defined by CCleaner v6.39 and some (but not all) are suppo
 
 **Categorization** 
 
-Required (exactly one). Defines the UI category the entry appears under.
+Required, exactly one. Sets the category the entry appears under in the cleaner.
 
 ###### Examples
 
@@ -222,19 +219,13 @@ Section=Games
 
 **Detection** 
 
-At least one Detect or DetectFile key is required. 
+At least one `Detect` or `DetectFile` is required.
 
-Detection keys control whether or not an entry is displayed to the user. If at least one detection key matches a path, file, or registry key on the current system, the entry is displayed. 
+Detection keys decide whether the entry is shown. If any one of them matches a registry key, folder or file on the system, the entry appears.
 
-Scope detection keys to the target application as tightly as possible to avoid false positives. You may wish to capture individual versions or all of them, depending on the scope of the entry.
+Scope detection to the application as tightly as you can, to avoid false positives. Depending on the entry, you may want to match one version or all of them.
 
-The last path segment of a `DetectFile` accepts wildcards. 
-
-Nested wildcards are not supported by `DetectFile` in any tool except winapp2ool. 
-
-`Detect` (registry) paths do not support wildcards. 
-
-System Ninja does not support wildcards anywhere within a `DetectFile`.
+The last segment of a `DetectFile` path can hold wildcards. A wildcard earlier in the path works only in winapp2ool, and System Ninja doesn't support wildcards anywhere in a `DetectFile`. `Detect` (registry) paths don't support wildcards at all.
 
 ###### Examples
 
@@ -247,9 +238,9 @@ DetectFile2=%LocalAppData%\Vendor\AppName\AppVersion\App.exe
 
 **Warnings** 
 
-Optional. Shows a message when the cleaning routine moves from unchecked to checked in the UI. Many users skip them, so keep warnings short and specific.
+Optional. Shows a message when the user checks the entry in the cleaner. Plenty of people click straight past them, so keep warnings short and specific.
 
-Not supported by System Ninja or R-Wipe&Clean
+System Ninja and R-Wipe&Clean don't support them.
 
 ```ini
 Warning=This will delete your saved session data.
@@ -257,7 +248,7 @@ Warning=This will delete your saved session data.
 
 **Deletion** 
 
-At least one required. Use `FileKey` for filesystem paths and `RegKey` for registry paths.
+At least one is required. Use `FileKey` for files and folders, and `RegKey` for the registry.
 
 ###### FileKey Example 
 ```ini
@@ -267,9 +258,9 @@ FileKey3=%LocalAppData%\App\OldVersions|*|REMOVESELF
 ```
 
 - A `|` separates the path from the pattern.
-- Multiple patterns in one key: `FileKey1=%Path%|file1.log;file2.log;*.tmp`
-- `RECURSE` deletes matching files in all subdirectories. In CCleaner, also deletes empty subdirectories when provided `*.*` 
-- `REMOVESELF` does the same as RECURSE, but always removes empty subdirectories left behind. Implies RECURSE. Will delete the parent folder if it is empty when the clean completes.
+- One key can hold several patterns: `FileKey1=%Path%|file1.log;file2.log;*.tmp`
+- `RECURSE` deletes matching files in every subfolder too. In CCleaner, with `*.*`, it also deletes the empty subfolders.
+- `REMOVESELF` does what `RECURSE` does, and always removes the empty subfolders it leaves behind, along with the folder itself if it's empty when the clean finishes. It implies `RECURSE`.
 
 ###### RegKey Example
 ```ini
@@ -277,13 +268,13 @@ RegKey1=HKCU\Software\App\RecentFiles
 RegKey2=HKCU\Software\App\Settings|LastOpenedPath
 ```
 
-A `|value` suffix deletes only that named value, not the key itself. 
+A `|value` suffix deletes only that named value, not the whole key.
 
-`RegKey` does not support wildcards.
+`RegKey` doesn't support wildcards.
 
 **Exclusions** 
 
-Optional. Preserves specific files or registry keys from deletion. Prefer tightening deletion keys over adding exclusions.
+Optional. Keeps specific files or registry keys from being deleted. Tightening the deletion keys is better than adding exclusions.
 
 ```ini
 ExcludeKey1=FILE|%AppData%\App\|important.db
@@ -291,11 +282,11 @@ ExcludeKey2=PATH|%AppData%\App\|*.cfg
 ExcludeKey3=REG|HKCU\Software\App\Preserve
 ```
 
-- `FILE` excludes a specific named file from deletion
-- `PATH` excludes files matching a wildcard pattern; covers the directory and all subdirectories
-- `REG` excludes a registry key and all values and subkeys beneath it 
+- `FILE` keeps one named file
+- `PATH` keeps the files matching a pattern, in the folder and all its subfolders
+- `REG` keeps a registry key and every value and subkey under it
 
-`ExcludeKey` has no `RECURSE` or `REMOVESELF` equivalent. Subdirectories are covered by use of the `PATH` flag.
+`ExcludeKey` has no `RECURSE` or `REMOVESELF`, because `PATH` already covers subfolders.
 
 ### Complete example
 
@@ -310,11 +301,11 @@ RegKey1=HKCU\Software\Example\ExampleApp\RecentFiles
 
 ### Environment variables
 
-All filesystem paths must use environment variables. Never use hardcoded drive letters.
+Every filesystem path starts with one of these. Never hardcode a drive letter.
 
-Variables marked with \* check both 64-bit and 32-bit locations on 64-bit systems.
+Variables marked with \* check both the 64-bit and the 32-bit location on 64-bit Windows.
 
-Variables marked "CCleaner only" do not expand to anything in other tools and will not work with them. Avoid using CCleaner-only variables in submissions.
+Variables marked "CCleaner only" expand to nothing in other tools, so a path using one doesn't work there. Avoid them in submissions.
 
 | Variable | Windows Vista–11 path | Notes |
 | :- | :- | :- |
@@ -346,54 +337,54 @@ Variables marked "CCleaner only" do not expand to anything in other tools and wi
 
 ### Keys not accepted in contributions
 
-The following keys are valid CCleaner-only syntax but are not used in winapp2.ini and should not appear in submitted entries.
+These keys are valid CCleaner syntax, but winapp2.ini doesn't use them, so leave them out of your entries.
 
 | Key | Notes |
 | :- | :- |
-| `Default` | Controls whether an entry is enabled by default in CCleaner. All winapp2.ini entries are opt-in. |
-| `DetectOS` | Limits an entry to specific Windows versions by kernel number. CCleaner only. |
-| `SpecialDetect` | Uses CCleaner's internal application detection patterns. CCleaner only. Deprecated. |
+| `Default` | Whether CCleaner turns the entry on by default. Every winapp2.ini entry is opt-in. EntryBuilder and UWPBuilder warn about it and ignore it. |
+| `DetectOS` | Limits an entry to certain Windows versions, by kernel number. CCleaner only. |
+| `SpecialDetect` | Uses CCleaner's built-in detection for an application. CCleaner only, and deprecated. EntryBuilder and UWPBuilder refuse it. |
 
 ---
 
 ## Browser entries
 
-Web browser entries are generated automatically by winapp2ool's BrowserBuilder module. **Do not add browser entries manually to `Assembler/Sources/EntryBuilder/`.** Instead, edit the files in `Assembler/Sources/BrowserBuilder/`.
+winapp2ool's BrowserBuilder module generates web browser entries. **Don't add browser entries by hand to `Assembler/Sources/EntryBuilder/`.** Edit the files in `Assembler/Sources/BrowserBuilder/` instead.
 
 ### How BrowserBuilder works
 
-BrowserBuilder reads two files, `chromium.ini` and `gecko.ini`, and generates a cleaning entry for every browser/category combination described in them. Each browser is a `[BrowserInfo: Browser Name]` section. Each cleaning category (Caches, Cookies, History, etc.) is an `[EntryScaffold: Category Name]` section. BrowserBuilder produces one entry per browser per category.
+BrowserBuilder reads `chromium.ini` and `gecko.ini` and generates an entry for every combination of browser and cleaning category they describe. Each browser is a `[BrowserInfo: Browser Name]` section, and each category (Caches, Cookies, History and so on) is an `[EntryScaffold: Category Name]` section.
 
-After generating the base entries, BrowserBuilder applies corrections from the browser flavor files to handle cases where the generated output is wrong or incomplete for specific browsers.
+After generating the entries, BrowserBuilder applies the correction files in the same folder, for the browsers where the generated output is wrong or incomplete.
 
 ### Adding a new browser
 
-To add a new Chromium-based browser, add a `[BrowserInfo: Browser Name]` section to `chromium.ini`. For a Gecko-based browser, add to `gecko.ini`. Place the section alphabetically by browser name within the file.
+To add a Chromium-based browser, add a `[BrowserInfo: Browser Name]` section to `chromium.ini`. For a Gecko-based one, add it to `gecko.ini`. Keep the sections in alphabetical order by browser name.
 
 **Required keys**
 
 | Key | Purpose |
 | :- | :- |
-| `Section=` | The CCleaner section name for all generated entries for this browser. Use the format `Browser Name Web Browser` to group entries under their own section. Sections beginning with a number will fail to display correctly in CCleaner. Prepend them with a `.` eg. `.360 Secure Web Browser`|
-| `UserDataPath=` | The filesystem path to the directory containing the browser's user profile data. For Chromium browsers this is the `User Data` folder. For Gecko browsers this is the `Profiles` folder. This path is also used to generate a `DetectFile` for every entry. |
+| `Section=` | The section every generated entry for this browser goes in. Use `Browser Name Web Browser` to give the browser its own section. CCleaner doesn't display a section starting with a number properly, so put a `.` in front of one: `.360 Secure Web Browser` |
+| `UserDataPath=` | The folder holding the browser's profile data: `User Data` for a Chromium browser, `Profiles` for a Gecko one. BrowserBuilder also makes every entry's `DetectFile` from it. |
 
 **Optional keys**
 
 | Key | Purpose |
 | :- | :- |
-| `RegistryRoot=` | The registry root key for this browser. Multiple values can be provided on separate lines. If omitted, RegKeys won't be created and EntryScaffolds carrying a `RequiresRegistryRoot` key will skip this browser. |
-| `TruncateDetect=` | Provide this key (any value) to strip `\User Data\` from the generated `DetectFile`. Required when the `UserDataPath` contains a wildcard in the direct parent directory name. This value appears boolean but it is not, provide this key if and only if you want the DetectFile truncated.  |
-| `Skip=` | Provide this key (any value) to exclude this browser from generation. Used to retire support without losing the configuration. This value appears boolean but it is not, provide this key if and only if you want the entry skipped |
+| `RegistryRoot=` | The browser's registry root. Without one, no RegKeys are generated, and scaffolds with a `RequiresRegistryRoot` key skip the browser. |
+| `TruncateDetect=` | Include this key to make the generated `DetectFile` the folder above `UserDataPath` (dropping `User Data`). You need it when that folder's name has a wildcard in it. It looks like a true/false setting but isn't: any value, or none, turns it on, so include it only when you want it. |
+| `Skip=` | Include this key to leave the browser out of generation without deleting its definition, which is how we retire a browser. Like `TruncateDetect`, any value, or none, turns it on. |
 
-Multiple `UserDataPath=` and `RegistryRoot=` values are supported; list them as separate keys.
+`UserDataPath=` and `RegistryRoot=` can each appear more than once. A `BrowserInfo` section can also declare variables: any key it doesn't reserve declares one, and its `UserDataPath=` and `RegistryRoot=` values use it as `<Name>`. See [Variables](https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/modules/browserbuilder/readme.md#variables) in the BrowserBuilder readme.
 
 **Style rules**
 
 | Rule | Detail |
 | :- | :- |
-| **Section name format** | Must be `[BrowserInfo: Browser Name]` exactly. |
-| **Alphabetical order** | Sections must be sorted alphabetically by browser name within the file. |
-| **No trailing whitespace** | Lines must not have trailing spaces or tabs. |
+| **Section name format** | Write it as `[BrowserInfo: Browser Name]`. BrowserBuilder accepts any case and a missing space, but keep to this form. |
+| **Alphabetical order** | Sections are sorted alphabetically by browser name within the file. |
+| **No trailing whitespace** | Lines must not end in spaces or tabs. |
 
 **Chromium example**
 
@@ -412,9 +403,9 @@ UserDataPath=%LocalAppData%\RegistryLess\Browser\User Data
 
 **TruncateDetect Example**
 
-When a TruncateDetect key is provided, BrowserBuilder drops the last directory in the generated DetectFile to avoid problems with the CCleaner `DetectFile` parser. 
+With `TruncateDetect`, BrowserBuilder drops the last folder from the generated `DetectFile`, which avoids a problem in CCleaner's `DetectFile` parser.
 
-Note: `DetectFile` keys containing a wildcard generated with TruncateDetect are still incompatible with System Ninja due to System Ninja not supporting wildcards in `DetectFile`.
+A truncated `DetectFile` that still has a wildcard doesn't work in System Ninja, unless the System Ninja flavor replaces it.
 ```
 [BrowserInfo: Brave]
 Section=Brave Web Browser
@@ -432,39 +423,39 @@ DetectFile=%LocalAppData%\BraveSoftware\Brave-Browser*
 
 **Gecko-specific variables**
 
-Gecko's `gecko.ini` supports an additional inferred variable in `EntryScaffold` patterns:
+`gecko.ini` has one more token for `EntryScaffold` templates:
 
-- `<LocalUserDataPath>`: Gecko profile user data is stored in a folder located within `%AppData%`. Cache data is stored in a folder by the same name in `%LocalAppData%`. The `%LocalAppData%` path is inferred from `<UserDataPath>`. A Chromium (`chromium.ini`) template that uses it fails the build.  
+- `<LocalUserDataPath>`: Gecko browsers keep profile data in a folder under `%AppData%`, and the cache in a folder of the same name under `%LocalAppData%`. BrowserBuilder works out the `%LocalAppData%` folder from `<UserDataPath>`. A Chromium (`chromium.ini`) template that uses it fails the build.
 
-This is handled automatically and requires no action from contributors adding a Gecko browser.
+You don't need to do anything about it when you add a Gecko browser.
 
 ### Applying corrections to generated browser entries
 
-Generated entries aren't always right for every browser. The correction files let you fix or extend individual entries without touching the scaffolds.
+Generated entries aren't right for every browser. The correction files fix or extend single entries without touching the scaffolds.
 
-Section names in correction files must exactly match the generated entry name, which follows the pattern `Browser Name Category *` (e.g. `Brave Caches *`).
+A section name in a correction file must match the generated entry's name exactly, which is `Browser Name Category *` (e.g. `Brave Caches *`).
 
-BrowserBuilder corrections use the same Flavorize winapp2ool module as the tool-specific flavors. These files live in `/Assembler/Sources/BrowserBuilder/`
+The corrections are applied by the same Flavorize module the tool flavors use. The files live in `Assembler/Sources/BrowserBuilder/`.
 
 **When to use each file**
 
 | File | Use when |
 | :- | :- |
-| 1. `browser_section_removals.ini` | An entire generated entry does not apply to a specific browser.
-| 2. `browser_name_removals.ini` | A specific key name should be removed from a browser's entry. Number-sensitive match, key numbers must match. (eg. `FileKey3=` won't remove `FileKey1=`)|
-| 3. `browser_value_removals.ini` | A specific key value is wrong for a browser regardless of which numbered key it appears on. Write the key with the target value; the number you give it is irrelevant. (eg. FileKey=some\path|* will remove any FileKey whose value is some\path|*)|
-| 4. `browser_section_replacements.ini` | The generated entry for a browser is so different from the default that it needs to be replaced entirely. |
-| 5. `browser_key_replacements.ini` | A specific key needs a different value for a browser (exact name and section match). |
-| 6. `browser_additions.ini` | A browser needs extra keys beyond what the scaffold generates, or needs an entirely new entry that BrowserBuilder does not produce. |
+| 1. `browser_section_removals.ini` | A whole generated entry doesn't apply to a browser. |
+| 2. `browser_name_removals.ini` | A key should be removed from a browser's entry by name. The number counts: `FileKey3=` won't remove `FileKey1=`. |
+| 3. `browser_value_removals.ini` | A key's value is wrong for a browser, whatever number the key has. Write the key with that value; the number you give it doesn't matter (`FileKey=some\path\|*` removes any FileKey whose value is `some\path\|*`). |
+| 4. `browser_section_replacements.ini` | A browser's generated entry is so far off that it needs replacing outright. |
+| 5. `browser_key_replacements.ini` | A key needs a different value for one browser (matched by exact name and section). |
+| 6. `browser_additions.ini` | A browser needs keys the scaffold doesn't generate, or a whole entry BrowserBuilder doesn't make. |
 
 **Style rules for correction files**
 
 | Rule | Detail |
 | :- | :- |
-| **Section name must match exactly** | The section name must match the generated entry name precisely, including the ` *]` suffix. |
-| **Include a comment** | Add a brief comment above each correction explaining why it is needed. A comment is a line which begins with `;` and appears directly above an entry. |
-| **Keys only in the right files** | `browser_section_removals.ini` ignores key content. Only the section name matters. `browser_name_removals.ini` ignores key values. Only the name matters. Follow each file's rules. |
-| **No trailing whitespace** | Lines must not have trailing spaces or tabs. |
+| **Section name must match exactly** | The section name matches the generated entry's name exactly, ` *]` included. |
+| **Include a comment** | Put a short comment above each correction saying why it's needed. |
+| **Keys only in the right files** | `browser_section_removals.ini` ignores keys: only the section name matters. `browser_name_removals.ini` ignores values: only the key name matters. |
+| **No trailing whitespace** | Lines must not end in spaces or tabs. |
 
 **Addition example**
 
@@ -476,7 +467,7 @@ FileKey1=%LocalAppData%\Example\ExampleBrowser\CrashReports|*|REMOVESELF
 
 **Section removal example**
 
-Section removals are performed on a name-only basis and need not contain any keys. Any provided keys will be ignored. 
+Section removals go by name alone, so the section needs no keys, and any it has are ignored.
 
 ```ini
 ; Example Browser does not support pinned tabs
@@ -485,38 +476,47 @@ Section removals are performed on a name-only basis and need not contain any key
 
 ### Adding new EntryScaffolds
 
-Adding a new `EntryScaffold` (a new cleaning category applied across all browsers) is possible. New scaffolds must be consistent: if the data exists across all browsers, the scaffold should generate correct entries for all of them, or corrections must be provided for browsers where it does not apply.
+You can add a new `EntryScaffold`, which is a new cleaning category for every browser. It has to fit all of them: if the data exists in every browser, the scaffold should generate correct entries for each, and any browser it doesn't fit needs a correction.
 
-Every `EntryScaffold` section name must follow the format `[EntryScaffold: Category Name]`. The category name is appended to the browser name: `[EntryScaffold: Example Category]` produces entries named `Browser Name Example Category *`.
+Name it `[EntryScaffold: Category Name]`. The category name goes after the browser name, so `[EntryScaffold: Example Category]` makes entries named `Browser Name Example Category *`.
 
 **Keys**
 
 | Key | Purpose |
 | :- | :- |
-| `FileKeyBase=` | A FileKey template holding exactly one kind of file token (`<UserDataPath>`, `<UserDataParent>` or `<LocalUserDataPath>`). BrowserBuilder substitutes it and adds the result as a numbered `FileKey` in the generated entry. Multiple values are supported; list them as separate keys. |
-| `RegKeyBase=` | A RegKey template, which must hold `<RegistryRoot>`. BrowserBuilder substitutes it and adds the result as a numbered `RegKey`, once per root. Multiple values are supported. |
-| `RequiresRegistryRoot=` | BrowserBuilder skips this scaffold for any browser without a `RegistryRoot=` key. |
+| `FileKeyBase=` | A FileKey template holding exactly one kind of file token (`<UserDataPath>`, `<UserDataParent>` or `<LocalUserDataPath>`). BrowserBuilder fills it in and adds the result to the entry as a numbered `FileKey`. Repeat the key for more templates. |
+| `RegKeyBase=` | A RegKey template, which must hold `<RegistryRoot>`. BrowserBuilder fills it in and adds one numbered `RegKey` per root. Can repeat. |
+| `RequiresRegistryRoot=` | BrowserBuilder skips this scaffold for any browser with no `RegistryRoot=`. |
 
 A scaffold with neither `FileKeyBase=` nor `RegKeyBase=` produces no output.
 
 **Tokens**
 
-Each token resolves to a value from the browser's `BrowserInfo` section. Tokens match in any case. These four are the whole vocabulary: a scaffold can't declare its own.
+Each token is filled in from the browser's `BrowserInfo` section, and tokens match in any case. A scaffold can also declare its own variables: any key it doesn't reserve declares one, which its templates use as `<Name>` (see [Variables](https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/modules/browserbuilder/readme.md#variables) in the BrowserBuilder readme).
 
 | Token | Available in | Expands to |
 | :- | :- | :- |
-| `<UserDataPath>` | `FileKeyBase` | The browser's user data directory, as declared by `UserDataPath=` in its `BrowserInfo` section. |
-| `<UserDataParent>` | `FileKeyBase` | The parent directory of `<UserDataPath>`. For Chromium browsers, also generates a second FileKey with the path mirrored under `%ProgramFiles%`. |
-| `<LocalUserDataPath>` | `FileKeyBase` (Gecko only) | The cache directory inferred from `<UserDataPath>` by substituting `%LocalAppData%` for `%AppData%`. |
-| `<RegistryRoot>` | `RegKeyBase` | The browser's registry root path, as declared by `RegistryRoot=` in its `BrowserInfo` section. Expands once per `RegistryRoot=` value, producing one `RegKey` per root. |
+| `<UserDataPath>` | `FileKeyBase` | The browser's user data folder, from `UserDataPath=` in its `BrowserInfo` section. |
+| `<UserDataParent>` | `FileKeyBase` | The folder above `<UserDataPath>`. For Chromium browsers it also generates a second FileKey with the same path under `%ProgramFiles%`. |
+| `<LocalUserDataPath>` | `FileKeyBase` (Gecko only) | The cache folder, made from `<UserDataPath>` by swapping `%AppData%` for `%LocalAppData%`. |
+| `<RegistryRoot>` | `RegKeyBase` | The browser's registry root, from `RegistryRoot=` in its `BrowserInfo` section. It's filled in once per `RegistryRoot=`, giving one `RegKey` per root. |
 
-A template may also hold an inline list, such as `<UserDataPath>\*\<Cache,Code Cache>|*|REMOVESELF`, which produces one key per value.
+A template can also hold an inline list, such as `<UserDataPath>\*\<Cache,Code Cache>|*|REMOVESELF`, which makes one key per value.
 
-The build fails, naming the template, when a `FileKeyBase=` has no file token, mixes two kinds of file token, or uses `<RegistryRoot>`; when a `RegKeyBase=` has no `<RegistryRoot>` or uses a file token; when a Chromium template uses `<LocalUserDataPath>`; when any other `<Name>` token appears; when an inline list has no values (`<,>`); and when a bracket is empty, stray or nested (`<>`, `<UserDataPath>>`, `<<UserDataPath>,z>`). That template is dropped, and the rest of the scaffold still builds.
+The build fails, naming the template, when:
 
-`UserDataPath=` and `RegistryRoot=` values in a `BrowserInfo` section are literal paths. One holding `<` or `>` is skipped with a warning, and the build fails.
+- a `FileKeyBase=` has no file token, mixes two kinds of file token, or uses `<RegistryRoot>`
+- a `RegKeyBase=` has no `<RegistryRoot>`, or uses a file token
+- a Chromium template uses `<LocalUserDataPath>`
+- a `<Name>` token is neither one of the four above nor one of the scaffold's variables
+- an inline list has no values (`<,>`)
+- a bracket is empty, stray or nested (`<>`, `<UserDataPath>>`, `<<UserDataPath>,z>`)
 
-Older versions of winapp2ool spelled these tokens `%UserDataPath%`, `%BrowserPath%`, `%LocalDataPath%` and `%RegistryRoot%`. That spelling is no longer accepted: a template that uses it is dropped with a warning naming the new spelling, and the build fails. Two were renamed as well: `%BrowserPath%` is now `<UserDataParent>`, since it is the folder above the user data folder rather than the browser's install folder, and `%LocalDataPath%` is now `<LocalUserDataPath>`.
+That template is dropped, and the rest of the scaffold still builds.
+
+A `UserDataPath=` or `RegistryRoot=` value can use its browser's variables and inline lists, but not the four tokens. A value with a malformed bracket, an empty list, one of the tokens, or a variable its browser doesn't declare is skipped with a warning, and the build fails.
+
+Older versions of winapp2ool spelled these tokens `%UserDataPath%`, `%BrowserPath%`, `%LocalDataPath%` and `%RegistryRoot%`. That spelling no longer works: a template using it is dropped with a warning naming the new spelling, and the build fails. Two were renamed along the way. `%BrowserPath%` is now `<UserDataParent>`, since it's the folder above the user data folder, not the browser's install folder, and `%LocalDataPath%` is now `<LocalUserDataPath>`.
 
 **Example**
 
@@ -546,11 +546,11 @@ RegKey1=HKCU\Software\ExampleBrowser\ExampleKey
 
 ## UWP entries
 
-UWP entries cover Universal Windows Platform applications generally installed from the Microsoft Store. They are generated by winapp2ool's UWPBuilder module and live in `Assembler/Sources/UWPBuilder/AppInfo/`.
+UWP entries cover Universal Windows Platform apps, which usually come from the Microsoft Store. winapp2ool's UWPBuilder module generates them from the definitions in `Assembler/Sources/UWPBuilder/AppInfo/`.
 
 ### How UWPBuilder works
 
-UWPBuilder reads `Assembler/Sources/UWPBuilder/UWP.ini` (the baseline cleaning scaffold applied to every UWP app) alongside all 27 alphabetical AppInfo files. For each application, it generates a complete winapp2.ini entry by combining the scaffold's `FileKeyBase` patterns with app-specific keys, substituting the app's package folder path wherever `<Package>` appears.
+UWPBuilder reads `Assembler/Sources/UWPBuilder/UWP.ini` (the baseline scaffold every UWP app gets) and the 27 AppInfo files. For each app it builds a complete winapp2.ini entry from the scaffold's `FileKeyBase` templates and the app's own keys, filling in the app's package folder wherever `<Package>` appears.
 
 ```ini
 [EntryScaffold: UWP App]
@@ -561,61 +561,70 @@ FileKeyBase=<Package>\SystemAppData\Helium|*.log*
 FileKeyBase=<Package>\TempState|*|REMOVESELF
 ```
 
-The baseline scaffold above targets the standard UWP storage locations present in nearly every UWP application:
+The scaffold targets the storage locations nearly every UWP app has:
 - `\AC\`: Application cache
 - `\Settings\*.log*`: Settings logs
 - `\SystemAppData\Helium\*.log*`: Helium logs
 - `\TempState\`: Temporary state
 
-Likewise, it also creates one `DetectFile` per provided package.  
+It also makes one `DetectFile` per package.
 
-UWPBuilder adds app-specific keys after the scaffold keys.
+UWPBuilder adds the app's own keys after the scaffold's, and the lint pass then sorts them.
 
 ### Where to edit
 
-Add your entry to `Assembler/Sources/UWPBuilder/AppInfo/<letter>.ini`, where `<letter>` is the first letter of the application name. Numbers and symbols go in `#.ini`.
+Add your entry to `Assembler/Sources/UWPBuilder/AppInfo/<letter>.ini`, for the first letter of the app's name. Numbers and symbols go in `#.ini`.
 
 ### Finding the package folder name
 
-The package folder name is the value for the `Package=` key. It is the name of the application's folder under `%LocalAppData%\Packages\`. You can find it by:
+The `Package=` value is the name of the app's folder under `%LocalAppData%\Packages\`. To find it, either:
 
-- Browsing `%LocalAppData%\Packages\` in Explorer and looking for a folder matching the application name.
-- Running `Get-AppxPackage | Where-Object {$_.Name -like "*AppNameHere*"}` in PowerShell. The `PackageFamilyName` field gives you the folder name.
+- Open `%LocalAppData%\Packages\` in Explorer and look for a folder named like the app.
+- Run `Get-AppxPackage | Where-Object {$_.Name -like "*AppNameHere*"}` in PowerShell. The `PackageFamilyName` field is the folder name.
 
-For multi-package applications, list each package folder separately as `Package1=`, `Package2=`, etc.
+For an app with several packages, give each one its own numbered key, one folder name per key:
+
+```ini
+Package1=Vendor.AppCore_abc123
+Package2=Vendor.AppService_def456
+```
+
+Don't list several packages in one key. `Package=` is never split on commas, so `Package=Vendor.AppCore_abc123,Vendor.AppService_def456` becomes one package with a comma in its name.
 
 ### Style rules
 
 | Rule | Detail |
 | :- | :- |
-| **Section name format** | Must be `[Application Name *]` the trailing ` *` is required. This is the name that the generated entry will have. |
-| **Alphabetical order** | Entries must be sorted alphabetically within the file. |
-| **Categorization** | Exactly one of `LangSecRef=` or `Section=` is required. Use `Section=Games` for games and gaming-related apps. |
-| **Package key** | At least one `Package=` key is required. Single-package apps use `Package=`. Multi-package apps use `Package1=`, `Package2=`, etc. |
-| **No trailing whitespace** | Lines must not have trailing spaces or tabs. |
-| **No blank lines within an entry** | A single blank line separates entries from each other. |
+| **Section name format** | `[Application Name *]`, with the trailing ` *`. The generated entry gets this name. |
+| **Alphabetical order** | Entries are sorted alphabetically within the file. |
+| **Categorization** | Exactly one of `LangSecRef=` or `Section=`. Games and gaming apps use `Section=Games`. |
+| **Package key** | At least one. An app with one package uses `Package=`, and one with several uses `Package1=`, `Package2=` and so on. |
+| **No trailing whitespace** | Lines must not end in spaces or tabs. |
+| **No blank lines within an entry** | One blank line goes between entries, and none inside one. |
 
 ### Supported keys
 
 | Key | Required | Purpose |
 | :- | :- | :- |
-| `Package=` | Yes (at least one) | Package folder name under `%LocalAppData%\Packages\`. |
+| `Package=` | Yes (at least one) | The package folder's name under `%LocalAppData%\Packages\`. |
 | `LangSecRef=` or `Section=` | Yes (exactly one) | Categorization. |
-| `Detect=`, `Detect1`, `Detect2=`, ... | No | Additional registry detection criteria. Variables are expanded and the keys renumbered. |
-| `DetectFile=` | No | Additional filesystem detection criteria. Useful for hybrid win32+UWP apps. Each package folder is always generated as a `DetectFile` due to the root UWP.ini's scaffold containing `DetectFileBase=<Package>`  |
-| `FileKeyBase=` | No | App-specific FileKey templates using `<Package>` or `<Package[N]>` variables. Added after the scaffold keys. This is a stylistic choice only, and providing a `FileKey` will also work. |
-| `FileKey=` | No | Standard winapp2.ini FileKey targeting win32 or non-package locations. Can also use `<Package>` variables. This is a stylistic choice only, and providing a `FileKeyBase` will also work. |
-| `RegKey=` | No | Standard winapp2.ini RegKey. Variables are expanded and the keys renumbered. |
-| `ExcludeKey=` | No | Standard winapp2.ini ExcludeKey. Can use `<Package>` variables. |
-| `Skip=` | No | Provide this key (any value) to exclude the app from generation without removing its configuration. This value appears boolean but it is not, provide this key if and only if you want the entry skipped |
+| `Detect=`, `Detect1`, `Detect2=`, ... | No | More registry detection. Variables are expanded and the keys renumbered. |
+| `DetectFile=` | No | More filesystem detection, useful for an app with both a win32 and a UWP version. Every package folder already gets a `DetectFile`, from the `DetectFileBase=<Package>` in `UWP.ini`. |
+| `FileKeyBase=` | No | App-specific FileKey templates using `<Package>` or `<Package[N]>`, added after the scaffold's keys. `FileKey=` works exactly the same way; which you use is a matter of style. |
+| `FileKey=` | No | A standard winapp2.ini FileKey, for win32 paths or anything else outside the package. It can use `<Package>` too. `FileKeyBase=` works exactly the same way. |
+| `RegKey=` | No | A standard winapp2.ini RegKey. Variables are expanded and the keys renumbered. |
+| `ExcludeKey=` | No | A standard winapp2.ini ExcludeKey. It can use `<Package>`. |
+| `Skip=` | No | Include this key to leave the app out of generation without deleting its definition. It looks like a true/false setting but isn't: any value, or none, turns it on. |
+
+UWPBuilder takes a few more keys (`Warning=`, and the keys for embedded browser scaffolds), and any key it doesn't reserve declares a variable. The [UWPBuilder readme](https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/modules/uwpbuilder/readme.md) covers them all.
 
 ### The `<Package>` variable
 
-In `FileKeyBase=`, `FileKey=`, `DetectFile=` and `ExcludeKey=` values, `<Package>` expands to the package's full path, `%LocalAppData%\Packages\` followed by the `Package=` value, in the generated output.
+In `FileKeyBase=`, `FileKey=`, `DetectFile=` and `ExcludeKey=` values, `<Package>` becomes the package's full path: `%LocalAppData%\Packages\` followed by the `Package=` value.
 
-For multi-package apps, `<Package>` expands to each of the packages. Use `<Package[1]>`, `<Package[2]>`, etc. to target a specific package, counted in the order the `Package` keys appear. An index past the number of packages drops the key with a warning.
+In an app with several packages, `<Package>` makes a copy of the key for each one. `<Package[1]>`, `<Package[2]>` and so on pick a single package. They count the `Package` keys in the order they appear in the section, not by the number in the key's name, so keep `Package1=`, `Package2=` and so on in order. An index past the last package drops the key with a warning.
 
-Older versions of winapp2ool spelled these `%Package%` and `%Package1%`, `%Package2%`. That spelling is no longer accepted: a key that uses it is dropped with a warning naming the new spelling, and the build fails. Since `%...%` is how winapp2.ini writes environment variables, a mistyped `%Package%` used to pass into the output looking like a real path.
+Older versions of winapp2ool spelled these `%Package%`, `%Package1%` and `%Package2%`. That spelling no longer works: a key using it is dropped with a warning naming the new spelling, and the build fails. Since winapp2.ini writes environment variables as `%...%`, a mistyped `%Package%` used to reach the output looking like a real path.
 
 ### Single-package example
 
@@ -671,11 +680,11 @@ FileKey11=%LocalAppData%\Packages\Vendor.AppService_def456\TempState|*|REMOVESEL
 FileKey12=%ProgramData%\Vendor\AppService\Logs|*
 ```
 
-This generates `DetectFile` entries for both packages. The scaffold is applied once per package. `<Package[2]>` targets only the second package in the app-specific `FileKey`.
+Both packages get a `DetectFile`, and the scaffold is applied once per package. `<Package[2]>` puts the `LocalState\Logs` key under the second package only.
 
 ### Hybrid win32 + UWP example
 
-Some applications have both a traditional desktop (Win32) installer and a Microsoft Store (UWP) release. Winapp2.ini bundles these into a single entry generated through the UWP process. Win32-targeted paths use `FileKey=` alongside the package-targeted `FileKeyBase=` entries.
+Some apps have both a desktop (win32) installer and a Microsoft Store (UWP) release. Winapp2.ini puts both in one entry, generated by UWPBuilder. The desktop paths use `FileKey=` next to the package's `FileKeyBase=` keys.
 
 ###### UWP AppInfo Input
 ```ini
@@ -707,71 +716,71 @@ FileKey7=%LocalAppData%\Vendor\HybridApp\Logs|*.log
 
 ## EntryBuilder entries
 
-EntryBuilder is the winapp2ool module that turns the base entry sources in `Assembler/Sources/EntryBuilder/<letter>.ini` into the artifacts in `Assembler/Generated/`. Every base entry lives in an EntryBuilder source file. Standard winapp2.ini syntax passes through generation unchanged, so for most contributions the folder is simply where base entries live; an optional shorthand DSL is additionally available.
+EntryBuilder is the winapp2ool module that turns the base entry sources in `Assembler/Sources/EntryBuilder/<letter>.ini` into the artifacts in `Assembler/Generated/`. Every base entry lives in one of those source files. Standard winapp2.ini syntax passes through generation unchanged, so for most contributions the folder is just where base entries live. There's also an optional shorthand.
 
-**You do not need to learn the shorthand to contribute.**
+**You don't need to learn the shorthand to contribute.**
 
-- **Adding an entry?** Write a standard entry in `Assembler/Sources/EntryBuilder/<letter>.ini`. When in doubt, always contribute standard syntax. If shorthand would benefit the entry, maintainers will help convert it during review.
-- **Fixing an existing entry?** Edit its source in `Assembler/Sources/EntryBuilder/`, in standard syntax. Any valid winapp2.ini key passes through EntryBuilder unchanged. Leave any shorthand keys you don't recognize as they are rather than rewriting them.
-- **Want to use the shorthand?** Welcome, but never required. The [EntryBuilder readme](https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/modules/entrybuilder/readme.md) documents the full DSL: list variables with `<Name>` token fan-out, and scaffold families for applications embedding WebView2 or QtWebEngine.
+- **Adding an entry?** Write a standard entry in `Assembler/Sources/EntryBuilder/<letter>.ini`. If shorthand would help it, a maintainer can convert it during review.
+- **Fixing an existing entry?** Edit its source in `Assembler/Sources/EntryBuilder/`, in standard syntax. Any valid winapp2.ini key passes through EntryBuilder unchanged. Leave shorthand keys you don't recognize as they are.
+- **Want to use the shorthand?** Go ahead. The [EntryBuilder readme](https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/modules/entrybuilder/readme.md) documents all of it: list variables that fan out through `<Name>` tokens, and scaffold families for apps that embed WebView2, QtWebEngine or Electron.
 
 ### The Scaffolds directory
 
-`Assembler/Sources/Scaffolds/` holds shared catalogs of cleaning patterns (`webview.ini`, `qtwebengine.ini`) drawn on by EntryBuilder and UWPBuilder. A change to a scaffold catalog affects every entry that uses it. Open an issue before editing these files.
+`Assembler/Sources/Scaffolds/` holds the shared catalogs of cleaning patterns (`webview.ini`, `qtwebengine.ini`, `electron.ini`) that EntryBuilder and UWPBuilder draw on. A change to a catalog affects every entry that uses it, so open an issue before editing these files.
 
 ---
 
 ## Winapp3.ini
 
-`Winapp3/Winapp3.ini` is an extension to winapp2.ini for power users. It uses identical syntax to standard winapp2.ini entries. Entries target operations that are more aggressive, broader in scope, or otherwise carry a higher risk of unintended data loss than entries in the main database. Users should understand what an entry does before enabling it.
+`Winapp3/Winapp3.ini` is an extension to winapp2.ini for power users, written in the same syntax. Its entries are more aggressive, broader, or otherwise riskier than the main database's, and users should understand an entry before turning it on.
 
-Contributions to Winapp3.ini are subject to additional scrutiny. Entries must be clearly scoped, accurately described, and appropriate for a knowing power user. Include a `Warning=` key for entries that could affect application functionality.
+Winapp3.ini contributions get a closer look. An entry must be clearly scoped, accurately described, and suitable for a power user who knows what they're doing. Give a `Warning=` to any entry that could stop an application working properly.
 
-Edit `Winapp3/Winapp3.ini` directly. The same style rules as standard entries apply.
+Edit `Winapp3/Winapp3.ini` directly. The standard entry style rules apply.
 
 ---
 
 ## Flavor corrections
 
-Flavors are custom builds of winapp2.ini with certain tweaks applied to make it more compatible with particular tools. 
+Flavors are builds of winapp2.ini adjusted to work better with a particular tool.
 
-Each flavor is built by applying a set of Transmute operations (structured changes in the form of additions, removals, and substitutions) to the base file. Correction files for each flavor live in `Assembler/Sources/Flavors/<FlavorName>/`. If you find a flavor-specific problem or shortcoming, you can submit changes to these files or open an issue.
+Each flavor is made by applying Transmute operations (additions, removals and replacements) to the base file, from the correction files in `Assembler/Sources/Flavors/<FlavorName>/`. If you find a problem only one flavor has, you can change these files or open an issue.
 
-Each flavor directory contains the same six file types:
+Each flavor folder has the same six files, some of them empty:
 
 | File | What it does |
 | :- | :- |
-| `*_section_removals.ini` | Removes entire entries from the flavor output. |
-| `*_name_removals.ini` | Removes specific keys from entries by key name (number-sensitive). |
-| `*_value_removals.ini` | Removes specific keys from entries by exact value match (number-insensitive). |
-| `*_section_replacements.ini` | Replaces entire entries in the flavor output. |
-| `*_key_replacements.ini` | Replaces specific keys in entries. |
-| `*_additions.ini` | Adds new entries or appends keys to existing entries. |
+| `*_section_removals.ini` | Removes whole entries. |
+| `*_name_removals.ini` | Removes keys by name (the number counts). |
+| `*_value_removals.ini` | Removes keys by exact value (the number doesn't count). |
+| `*_section_replacements.ini` | Replaces whole entries. |
+| `*_key_replacements.ini` | Replaces keys. |
+| `*_additions.ini` | Adds entries, or adds keys to existing entries. |
 
-Corrections are applied in the order listed above. The same style rules apply as for the equivalent browser correction files: section names must exactly match the target entry name. Comments are helpful in the flavor files and will not be compiled into the final winapp2.ini.
+They're applied in the order above. As in the browser correction files, a section name must match its target entry's name exactly. Comments are welcome in the flavor files, and none of them reach the published winapp2.ini.
 
-Some flavor files also contain sections named `[*]` or `[*Map: label]`. These are Transmute global operations: rules applied against every entry in the file rather than one named section (for example, remapping browser `Section=` values to their CCleaner `LangSecRef` numbers across all generated browser entries). Leave these sections alone unless you understand how they work. See the [Transmute readme](https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/modules/transmute/readme.md) for the full specification.
+Some flavor files also have sections named `[*]`, `[*Map: label]` or `[*Name: label]`. These are Transmute global operations: rules that apply to every entry in the file, or to every entry a filter picks, instead of one named section. For example, the CCleaner flavor's `[*Map:]` rules move each browser's generated `Section=` to its CCleaner `LangSecRef`. Leave these alone unless you know how they work. The [Transmute readme](https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/modules/transmute/readme.md) has the full specification.
 
 ---
 
 ## How to submit
 
-**Pull request:** The preferred method. Fork the repository, make your changes to the appropriate source files in `Assembler/`, `Winapp3/`, or wherever relevant, and open a pull request against the `master` branch. Describe what changed and why.
+**Pull request:** the preferred way. Fork the repository, make your changes to the right source files (in `Assembler/`, `Winapp3/`, or wherever they belong), and open a pull request against `master`. Say what changed and why.
 
-**No git experience?** You can contribute entirely from your browser: navigate to the source file on GitHub, click the pencil icon ("Edit this file"), make your change, and choose "Propose changes". GitHub creates the fork and the pull request for you. Most contributions are single-file edits, and this workflow handles them fine.
+**No git experience?** You can contribute entirely in your browser. Open the source file on GitHub, click the pencil icon ("Edit this file"), make your change, and choose "Propose changes". GitHub makes the fork and the pull request for you. Most contributions edit a single file, and this handles them fine.
 
-**Issue:** If you found a problem but aren't comfortable making the change yourself, an issue works just as well. Include enough detail (application name, affected paths, what is wrong or missing) for maintainers to act on it.
+**Issue:** if you found a problem but don't want to make the change yourself, an issue works just as well. Give enough detail (the application's name, the paths involved, what's wrong or missing) for a maintainer to act on it.
 
 ### What to include in your PR
 
-Commit source files only. Do not include build outputs:
+Commit source files only. Leave out build output:
 
-- anything under `Releases/`, which holds every published flavor of `winapp2.ini` and its changelog, or their older copies (`Winapp2.ini` and `diff.txt` at the root and in the `Non-CCleaner` folder)
-- anything under `Assembler/Generated/`: every file there opens with a header saying `DO NOT EDIT THIS FILE DIRECTLY` and naming its source
+- anything under `Releases/`, which holds every published flavor of winapp2.ini and its changelog, and their old copies (`Winapp2.ini` and `diff.txt` at the root and in the `Non-CCleaner` folder)
+- anything under `Assembler/Generated/`. Every file there opens with a `DO NOT EDIT THIS FILE DIRECTLY` header naming its source
 
-The build regenerates all of these files from your source change after it merges.
+The build regenerates all of them from your source change once it's merged.
 
-The reliable way to do this is to stage your source files by name:
+The reliable way to do that is to stage your source files by name:
 
 ```
 git add "Assembler/Sources/EntryBuilder/A.ini"
@@ -780,17 +789,17 @@ git commit -m "add an entry for Example App"
 
 Avoid `git add -A` and `git add .`.
 
-If you [ran the full build](#verifying-your-work) to check your work, your working copy now contains 55 regenerated artifacts plus all seven rebuilt published outputs. 
+If you [ran the full build](#verifying-your-work) to check your work, your working copy also holds the rebuilt files: the artifacts under `Assembler/Generated/`, every published file in `Releases/`, and their old copies. `git restore` puts them back.
 
-The [generated artifact guard](#what-happens-after-you-open-a-pr) will tell you, and `git restore` on the files it names will fix it
+Watch for the files in `Releases/` in particular. The [generated artifact guard](#what-happens-after-you-open-a-pr) doesn't flag them when a source file changed too, and if they were merged, the next build would find them already up to date and publish no release or changelog for your change.
 
 ### Verifying your work
 
-This is entirely optional, and you can open a PR without doing any of it. CI builds your PR and reports back, and a maintainer reviews it either way. 
+This is entirely optional, and you can open a PR without doing any of it. CI builds your PR and reports back, and a maintainer reviews it either way.
 
-Everything below requires [winapp2ool](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2ool.exe).
+Everything below needs [winapp2ool](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2ool.exe).
 
-If you edited a generator's source files, regenerate its output before linting. In every case, finish by running WinappDebug on the file in the last column:
+If you edited a generator's source files, regenerate its output first. Either way, finish by running WinappDebug on the file in the last column:
 
 | You edited | Generate with | Menu path | File to lint |
 | :- | :- | :- | :- |
@@ -798,40 +807,39 @@ If you edited a generator's source files, regenerate its output before linting. 
 | `Assembler/Sources/BrowserBuilder/...` | [BrowserBuilder](https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/modules/browserbuilder/readme.md) | `6` (Entry Lab), then `1` | `browsers.ini` |
 | `Assembler/Sources/UWPBuilder/AppInfo/<letter>.ini` | [UWPBuilder](https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/modules/uwpbuilder/readme.md) | `6` (Entry Lab), then `2` | `uwp.ini` |
 
-Each builder's README covers usage in depth.
+Each builder's readme covers it in depth.
 
-Launch Winapp2ool and input 1 to open [WinappDebug](https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/modules/winappdebug/README.md). Point it at the file from the table above. A single source file or generated output works directly; you do not need a built winapp2.ini. Make any corrections necessary (or allow WinappDebug to make them if possible) such that your entries do not cause any errors. 
-WinappDebug is a static analysis tool that catches and repairs a wide variety of style and syntax issues in winapp2.ini. See the WinappDebug README (linked above) for usage guidance.   
+Launch winapp2ool and enter 1 to open [WinappDebug](https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/modules/winappdebug/README.md), then point it at the file from the table above. A single source file or generated output works as is; you don't need a built winapp2.ini. Fix whatever it reports (or let WinappDebug repair what it can) until your entries cause no errors. WinappDebug catches and repairs a wide range of style and syntax problems in winapp2.ini, and its readme explains how to use it.
 
 #### Running the full build
 
-CI runs this on every PR, but you can run it locally too
+CI runs this on every PR, but you can run it locally too.
 
-1. Clone the repo. The build script runs from the `Assembler/` directory and finds and places each flavor of winapp2.ini via relative paths; it will fail without the surrounding directory structure.
+1. Clone the repo. The build script runs from the `Assembler/` folder and finds its inputs and outputs by relative path, so it fails without the rest of the repository around it.
 2. Make your changes to the source files.
-3. Run `& '.\build winapp2.ps1'` from PowerShell in `Assembler/`. If you get an execution policy error, run `Set-ExecutionPolicy -Scope Process RemoteSigned`. A clone already contains the `winapp2ool.exe` the script needs.
+3. Run `& '.\build winapp2.ps1'` from PowerShell in `Assembler/`. If you get an execution policy error, run `Set-ExecutionPolicy -Scope Process RemoteSigned` first. A clone already has the `winapp2ool.exe` the script needs.
 4. Open the built `Releases/winapp2.ini` (each flavor is written to `Releases/` under its release name, such as `winapp2-ccleaner.ini`) and check that your entry is there and looks the way you expected.
-5. Optionally, drop the built `winapp2.ini` into a cleaning tool and scan with it to confirm your entry targets what you expected and nothing else. Then run the clean and verify that what should survive did.
+5. Optionally, load the built `winapp2.ini` into a cleaning tool and scan with it, to confirm your entry targets what you meant and nothing else. Then run the clean and check that what should have survived did.
 
-The build rewrites all 55 artifacts under `Assembler/Generated/` and all seven published output files in your working copy. Rather than cleaning that up afterwards, [stage your source files by name](#what-to-include-in-your-pr) and ignore the rest.
+The build rewrites the artifacts under `Assembler/Generated/` and the published files in your working copy. Rather than cleaning that up afterwards, [stage your source files by name](#what-to-include-in-your-pr) and ignore the rest.
 
-`& '.\build winapp2.ps1' -Verify` is the maintainer-side variant: it builds nothing, regenerating every artifact into a scratch folder and byte-comparing against the committed `Assembler/Generated/` files instead, and failing on any mismatch. CI runs it automatically on every push to catch artifacts that have drifted from their sources (e.g. bad generator output).
+`& '.\build winapp2.ps1' -Verify` is the maintainers' version. It builds nothing: it regenerates every artifact into a scratch folder, byte-compares the result against the committed files in `Assembler/Generated/`, and fails on any difference. CI runs it after every build, and whenever the committed `winapp2ool.exe` changes, to catch artifacts that no longer match their sources.
 
 ---
 
 ## What happens after you open a PR
 
-Three automated checks run against your pull request. None needs anything from you beyond the PR itself, and a maintainer always reviews your change.
+Three automated checks run on your pull request. None of them needs anything from you beyond the PR itself, and a maintainer always reviews your change.
 
 ### The maintainer-paths guard
 
-Runs on every PR. It fails if your PR changes a file that only the maintainer changes: anything under `winapp2ool/` except Markdown files, `Assembler/winapp2ool.exe`, the build script in `Assembler/`, or anything under `.github/`. Those files are either shipped to winapp2ool users or run by the build with write access, so they only change through the maintainer. Entry contributions live under `Assembler/` and `Winapp3/` and never trip it. If you think one of those files needs a change, open an issue describing it.
+Runs on every PR from a fork. It fails if your PR changes a file only the maintainer changes: anything under `winapp2ool/` except Markdown files, `Assembler/winapp2ool.exe`, the PowerShell scripts in `Assembler/`, or anything under `.github/`. Those files either ship to winapp2ool users or run in the build with write access, so they change only through the maintainer. Entry contributions live under `Assembler/` and `Winapp3/` and never trip it. If you think one of those files needs a change, open an issue describing it.
 
 ### The generated artifact guard
 
-Runs on every PR. It checks one thing: that you edited sources rather than build output. It runs in a few seconds 
+Runs on every PR, in a few seconds. It checks one thing: that you edited sources rather than build output.
 
-It fails if your PR changes a generated file without changing the source that produces it. When it fails, it marks the offending files directly in the **Files changed** tab, each with a message naming the source file to edit instead:
+It fails if your PR changes a generated file without changing the source that produces it. When it fails, it marks the files right in the **Files changed** tab, each with a message naming the source file to edit instead:
 
 > `Assembler/Generated/EntryBuilder/A.ini` generated by EntryBuilder; edit `Assembler/Sources/EntryBuilder/A.ini` instead
 
@@ -839,14 +847,14 @@ To fix it, move your edit into the named source file and `git restore` the gener
 
 ### The PR build
 
-If your PR touches anything under `Assembler/`, a bot builds winapp2.ini twice: once from `master` alone, then again with your change merged in, and posts a single comment that it updates on each push. It tells you one of:
+If your PR changes anything under `Assembler/` other than Markdown files, a bot builds winapp2.ini twice, once from `master` alone and once with your change merged in, and posts one comment that it updates on each push. It tells you one of these:
 
-- **The PR builds cleanly**, followed by the changelog your change produces. When it fits in the comment, the changelog is the verbose one, which prints every added, removed and modified entry in full. Read it as a description of what your change does to the published file, and check it matches what you intended. The workflow run's `pr-verify-report` artifact holds the plain and verbose changelog for every flavor.
-- **The build failed**, with the output showing where. Usually a syntax error in an edited source file.
-- **The PR no longer merges cleanly** with `master`, which you fix by updating your branch.
+- **The PR builds cleanly**, followed by the changelog your change produces. When it fits in the comment, it's the verbose changelog, which prints every added, removed and modified entry in full. Read it as a description of what your change does to the published file, and check that it's what you meant. The workflow run's `pr-verify-report` artifact holds the plain and verbose changelogs for every flavor.
+- **The build failed**, with the output showing where. Usually that's a syntax error in a source file you edited.
+- **The PR no longer merges cleanly** with `master`. Update your branch to fix it.
 
-PRs that only touch `Winapp3/` get no build comment. `Winapp3.ini` is not assembled by the build, so there is nothing to build. That is expected, not a problem with your PR.
+PRs that only touch `Winapp3/` get no build comment. The build doesn't assemble `Winapp3.ini`, so there's nothing to build, and that's expected.
 
 ### After merge
 
-You don't need to do anything else. The [daily build](README.md#how-winapp2ini-is-built) picks your change up from the sources and publishes it, typically within a day of your merge.
+You don't need to do anything else. The [daily build](README.md#how-winapp2ini-is-built) picks your change up from the sources and publishes it, usually within a day of the merge.

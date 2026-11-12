@@ -1,21 +1,26 @@
-# System Ninja Flavor Transmutation Rules 
+# System Ninja Flavor Transmutation Rules
 
-### What is this? 
+### What is this?
 
-This folder contains the set of Transmutation rules required by Winapp2ool to produce the [System Ninja flavor](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-systemninja.rules) of Winapp2.ini 
+This folder holds the Transmutation rules winapp2ool uses to make the [System Ninja flavor](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-systemninja.rules) of winapp2.ini.
 
-These rules produce `winapp2-systemninja.rules`, published as [`Releases/winapp2-systemninja.rules`](https://github.com/MoscaDotTo/Winapp2/blob/master/Releases/winapp2-systemninja.rules).
+They produce `winapp2-systemninja.rules`, published as [`Releases/winapp2-systemninja.rules`](https://github.com/MoscaDotTo/Winapp2/blob/master/Releases/winapp2-systemninja.rules).
 
-### What changes are made to create the System Ninja flavor? 
+### What changes are made to create the System Ninja flavor?
 
-System Ninja does not support wildcards in `DetectFile` keys. The System Ninja flavor is created by removing `DetectFile` keys containing wildcards and replacing them with ones which do not. This enables System Ninja to properly utilize many Winapp2.ini cleaning rules which it otherwise would not.  
+System Ninja doesn't support wildcards in `DetectFile` keys. Each `[*Map:]` rule in `sn_key_replacements.ini` replaces one wildcard `DetectFile` with one or more that don't need it, so System Ninja can use those entries. Most of the rules are for browsers, where one rule fixes every generated entry for that browser, and the rest are for a few games and apps.
 
-# Files 
-| File                                                                                                                                                    | Description                                                                                                          |
-| :-                                                                                                                                                      | :-                                                                                                                   |
-| [sn_additions.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/Flavors/SystemNinja/sn_additions.ini)                       | Contains the set of entries and keys which are added to the base Winapp2.ini to create the System Ninja flavor       |
-| [sn_key_replacements.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/Flavors/SystemNinja/sn_key_replacements.ini)         | Contains the set of key replacement values made to the base Winapp2.ini to create the System Ninja flavor            |
-| [sn_name_removals.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/Flavors/SystemNinja/sn_name_removals.ini)               | Contains the set of keys to be removed by their name from the base Winapp2.ini to create the System Ninja flavor     |
-| [sn_section_removals.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/Flavors/SystemNinja/sn_section_removals.ini)         | Contains the set of sections to be removed by their name from the base Winapp2.ini to create the System Ninja flavor | 
-| [sn_section_replacements.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/Flavors/SystemNinja/sn_section_replacements.ini) | Contains the set of section replacements made to the base Winapp2.ini to create the System Ninja flavor              | 
-| [sn_value_removals.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/Flavors/SystemNinja/sn_value_removals.ini)             | Contains the set of key values to be removed from the base Winapp2.ini to create the System Ninja flavor             | 
+Work on this flavor is ongoing, and some entries still carry `DetectFile` keys with wildcards and will not work.
+
+The flavor also removes every entry's `LangSecRef` and `Section` key, with a global `[*]` rule in `sn_name_removals.ini`. System Ninja doesn't do anything with these keys.
+
+# Files
+
+| File | Description |
+| :- | :- |
+| [sn_additions.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/Flavors/SystemNinja/sn_additions.ini) | Entries and keys added to the base winapp2.ini |
+| [sn_key_replacements.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/Flavors/SystemNinja/sn_key_replacements.ini) | Keys whose values are replaced, including the `DetectFile` `[*Map:]` rules |
+| [sn_name_removals.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/Flavors/SystemNinja/sn_name_removals.ini) | Keys removed by name, including the `[*]` rule that removes categories |
+| [sn_section_removals.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/Flavors/SystemNinja/sn_section_removals.ini) | Entries removed entirely |
+| [sn_section_replacements.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/Flavors/SystemNinja/sn_section_replacements.ini) | Entries replaced entirely |
+| [sn_value_removals.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/Flavors/SystemNinja/sn_value_removals.ini) | Keys removed by value |

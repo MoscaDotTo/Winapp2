@@ -1,25 +1,26 @@
-# BrowserBuilder 
+# BrowserBuilder
 
 ### What is this?
 
-This folder contains the set of files needed by Winapp2ool to generate entries for web browsers, including the separate rulesets for both Chromium and Gecko and the Transmutation rules required to correct or augment them.  
+This folder holds the files winapp2ool uses to generate entries for web browsers: one ruleset for Chromium and one for Gecko, plus the Transmutation rules that correct or extend what they generate. The build writes the result to `Assembler/Generated/BrowserBuilder/browsers.ini`.
 
 ### Why are web browser entries generated now?
 
-Web browsers are a particularly complex and fast evolving ecosystem. In order to provide consistent support across a larger number of web browsers, the Browser Builder system takes in some general information about the browsers and applies this information to a set of "Entry Scaffolds." This results in a consistent set of cleaning rules applied across all browsers for a particular engine and allows changes to be made across all browsers with less cognitive effort and no need to manually edit dozens of different browser configurations. 
+There are a lot of browsers, and they change fast. BrowserBuilder takes a little information about each one (where it keeps its data, its registry key, which section it goes in) and applies it to a set of "entry scaffolds", so every browser on an engine gets the same cleaning rules. A fix to a scaffold reaches every browser on the next build.
 
-### Why are there Transmutation rules? 
+### Why are there Transmutation rules?
 
-The generation process is not perfect, it is meant only to establish the most consistent possible baseline for the set of all browser entries and reduce the effort required to maintain them. Variations in features and implementations between browsers sometimes necessitate that generated content be added to, subtracted from, or modified in order to better fit its purpose. 
+Generation gives every browser the same baseline, but browsers aren't all the same. One lacks a feature, another keeps some data somewhere else, a third needs something extra. The Transmutation rules add to, remove from, or change the generated entries for those browsers.
 
-# Files 
-| File                                                                                                                                                                 | Description                                                                                        |
-| :-                                                                                                                                                                   | :-                                                                                                 |
-| [chromium.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/BrowserBuilder/chromium.ini)                                         | Contains the generative rulesets and browser information for Chromium browsers                     | 
-| [gecko.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/BrowserBuilder/gecko.ini)                                               | Contains the generative rulesets and browser information for Gecko browsers                        |
-| [browser_additions.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/BrowserBuilder/browser_additions.ini)                       | Contains the set of entries and keys which are added to the set of generated browser entries       |
-| [browser_key_replacements.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/BrowserBuilder/browser_key_replacements.ini)         | Contains the set of key replacement values made to the set of generated browser entries            |
-| [browser_name_removals.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/BrowserBuilder/browser_name_removals.ini)               | Contains the set of keys to be removed by their name from the set of generated browser entries     |
-| [browser_section_removals.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/BrowserBuilder/browser_section_removals.ini)         | Contains the set of sections to be removed by their name from the set of generated browser entries | 
-| [browser_section_replacements.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/BrowserBuilder/browser_section_replacements.ini) | Contains the set of section replacements made to the set of generated browser entries              | 
-| [browser_value_removals.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/BrowserBuilder/browser_value_removals.ini)             | Contains the set of key values to be removed from the set of generated browser entries             | 
+# Files
+
+| File | Description |
+| :- | :- |
+| [chromium.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/BrowserBuilder/chromium.ini) | The Chromium browser definitions and the scaffolds applied to them |
+| [gecko.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/BrowserBuilder/gecko.ini) | The Gecko browser definitions and the scaffolds applied to them |
+| [browser_additions.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/BrowserBuilder/browser_additions.ini) | Entries and keys added to the generated browser entries |
+| [browser_key_replacements.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/BrowserBuilder/browser_key_replacements.ini) | Keys whose values are replaced in the generated entries |
+| [browser_name_removals.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/BrowserBuilder/browser_name_removals.ini) | Keys removed by name from the generated entries |
+| [browser_section_removals.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/BrowserBuilder/browser_section_removals.ini) | Generated entries removed entirely |
+| [browser_section_replacements.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/BrowserBuilder/browser_section_replacements.ini) | Generated entries replaced entirely |
+| [browser_value_removals.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/BrowserBuilder/browser_value_removals.ini) | Keys removed by value from the generated entries |
