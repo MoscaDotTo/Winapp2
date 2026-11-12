@@ -162,7 +162,7 @@ UWPBuilder\
     └── ...
 ```
 
-Splitting `AppInfo\` by letter is only a convention to keep the files manageable. UWPBuilder combines every `*.ini` file in the folder, whatever it's called.
+Splitting `AppInfo\` by letter is a convention to keep the files manageable, and UWPBuilder combines every `*.ini` file in the folder, whatever it's called. This repository enforces it, though. `-split` files each entry by the first character of its name, not by the file it was written in, so CI fails a pull request that puts an app in the wrong letter's file.
 
 ## UWP.ini: the entry scaffold
 

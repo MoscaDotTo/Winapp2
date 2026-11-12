@@ -44,3 +44,5 @@ The [UWPBuilder readme](https://github.com/MoscaDotTo/Winapp2/blob/master/winapp
 | :- | :- |
 | [UWP.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Sources/UWPBuilder/UWP.ini) | The entry scaffold: the DetectFile and FileKey templates every generated app gets |
 | [AppInfo](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/UWPBuilder/AppInfo) | 27 definition files split by first letter, one section per app |
+
+Put each app in the `AppInfo` file for the first character of its section name, or `#.ini` if that isn't a letter. A pull request that puts one in the wrong file fails the [generated artifact guard](https://github.com/MoscaDotTo/Winapp2/blob/master/CONTRIBUTING.md#the-generated-artifact-guard), which names the file it belongs in.

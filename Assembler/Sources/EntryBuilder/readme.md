@@ -55,3 +55,5 @@ Every winapp2.ini entry that isn't a browser or UWP entry. Most are written in p
 | :- | :- |
 | `#.ini` | Entries for applications whose names start with a number or symbol |
 | `A.ini` through `Z.ini` | Entries for applications whose names start with that letter |
+
+A pull request that puts an entry in the wrong letter's file fails the [generated artifact guard](https://github.com/MoscaDotTo/Winapp2/blob/master/CONTRIBUTING.md#the-generated-artifact-guard), which names the file it belongs in.

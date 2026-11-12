@@ -124,7 +124,7 @@ The build artifacts under [Assembler/Generated](Assembler/Generated) are committ
 
 | Check | What it does |
 | :- | :- |
-| **Generated artifact guard** | Fails a change that edits build output without touching the source that produces it, and names the file you should have edited |
+| **Generated artifact guard** | Fails a change that edits build output without touching the source that produces it, or that puts an entry in the wrong letter's source file, and names the file you should have edited |
 | **PR verify** | Builds winapp2.ini from `master`, then again with the pull request merged, and comments either the changelog the pull request would produce or the stage where it broke the build |
 | **Artifact drift** | Regenerates every artifact into a scratch folder and compares it byte for byte with what's committed, which catches generator output changing when it shouldn't |
 | **Binary parity** | Checks that the committed winapp2ool.exe still matches the source beside it. Otherwise every published file would come from code that isn't in the repository |
