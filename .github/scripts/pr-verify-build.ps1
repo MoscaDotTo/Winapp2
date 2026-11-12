@@ -1,21 +1,19 @@
 <#
 .SYNOPSIS
-    PR-verify mechanism for winapp2.ini: build master, merge the PR, build again,
-    and emit a report bundle describing whether the PR breaks the build and what it
-    changes in the output.
+    PR verify for winapp2.ini: build master, merge the PR, build again, and write a
+    report saying whether the PR breaks the build and what it changes in the output.
 
 .DESCRIPTION
-    Drives Assembler\build winapp2.ps1 twice around a merge.
-    Preserve the seven flavor files the baseline build published to Releases\, hard
-    reset, merge the PR head, restore those seven to Releases\ as the "previous"
-    baseline, then build again. The build script's own Backup-Files stage copies each
-    Releases\ file to a .old file and its changelog stage diffs .old vs the freshly
-    built file, so the changelogs the second build writes to Releases\ are exactly
-    what the PR changes. The deprecated copies the build also writes outside Releases\
-    feed nothing, so the harness ignores them.
+    Runs Assembler\build winapp2.ps1 twice around a merge. We save the seven flavor
+    files the baseline build published to Releases\, hard reset, merge the PR head, put
+    those seven back in Releases\ as the previous version, and build again. The build
+    script's Backup-Files stage copies each Releases\ file to a .old file and its
+    changelog stage diffs .old against the new build, so the changelogs the second build
+    writes to Releases\ are exactly what the PR changes. Nothing reads the deprecated
+    copies the build also writes outside Releases\, so we ignore them.
 
 .PARAMETER BaseSha
-    The PR base commit (github.event.pull_request.base.sha) -- master.
+    The PR base commit on master (github.event.pull_request.base.sha).
 
 .PARAMETER HeadSha
     The PR head commit (github.event.pull_request.head.sha) to merge in.
@@ -24,15 +22,15 @@
     The PR number, written verbatim into the report bundle.
 
 .PARAMETER ReportDir
-    Directory into which to write the report (created if absent). Receives
-    status.txt, report.md, pr-number.txt, winapp2ool.log (when present), the
-    build transcripts, the collected diff.txt files, and a -verbose diff per flavor
-    that prints every added, removed and modified entry in full.
+    The folder to write the report into (created if missing). It gets status.txt,
+    report.md, pr-number.txt, winapp2ool.log (when there is one), the build transcripts,
+    each flavor's changelog, and a -verbose diff per flavor that prints every added,
+    removed and modified entry in full.
 
 .NOTES
-    Always exits 0 on a completed verification (including a broken PR build)
-    the outcome lives in status.txt so the downstream comment job always fires.
-    A nonzero exit means the harness failed.
+    Exits 0 on every completed verification, a broken PR build included. The outcome
+    goes in status.txt, so the comment job always runs. A nonzero exit means the
+    harness itself failed.
 #>
 
 [CmdletBinding()]
@@ -44,10 +42,9 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-# We drive git and the build as native commands and branch on their exit codes
-# ($LASTEXITCODE) -- a nonzero git merge (conflict) or a failed build is expected
-# control flow, not a harness error. Keep PS 7.3+ from promoting those exits to
-# thrown terminating errors, which would bypass our merge_conflict/build_failed paths.
+# A merge conflict or a failed build is a verdict about the PR, not a harness error, and
+# we branch on $LASTEXITCODE for both. PS 7.3+ would otherwise throw on those exits and
+# skip our merge_conflict and build_failed paths.
 $PSNativeCommandUseErrorActionPreference = $false
 
 # GitHub comment bodies cap at 65536 chars
@@ -60,7 +57,7 @@ $BuildScript = Join-Path $Assembler 'build winapp2.ps1'
 $Exe = Join-Path $Assembler 'winapp2ool.exe'
 
 if (-not (Test-Path $BuildScript)) { throw "build script missing: $BuildScript" }
-if (-not (Test-Path $Exe)) { throw "winapp2ool.exe missing from Assembler -- the committed Release build should stage it there" }
+if (-not (Test-Path $Exe)) { throw "winapp2ool.exe missing from Assembler; a Release build stages it there, and it should be committed" }
 
 New-Item -ItemType Directory -Force -Path $ReportDir | Out-Null
 Set-Content -Path (Join-Path $ReportDir 'pr-number.txt') -Value $PrNumber -NoNewline
@@ -79,22 +76,20 @@ $Outputs = @(
 )
 
 function Invoke-Git {
-    # Print git's output to the host (never into the pipeline) so this function's
-    # only return value is the exit code -- otherwise callers testing `-ne 0` would
-    # be comparing git's stdout lines, not its exit status.
+    # git's output goes to the host, never the pipeline, so the exit code is the only
+    # thing we return. Otherwise a caller testing `-ne 0` would be comparing git's
+    # stdout lines.
     param([Parameter(ValueFromRemainingArguments)][string[]]$GitArgs)
     & git @GitArgs 2>&1 | Out-Host
     return $LASTEXITCODE
 }
 
 function Invoke-Build {
-    # Run the committed build script as a child process from Assembler so its
-    # `exit N` propagates cleanly; capture the console transcript for the report.
+    # A child process, so the build script's `exit N` lands in $LASTEXITCODE.
     param([string]$TranscriptPath)
     Push-Location $Assembler
     try {
-        # Tee to the transcript for the report; Out-Host keeps the passthrough copy
-        # off the pipeline so only the exit code is returned (see Invoke-Git).
+        # Out-Host keeps the passthrough copy off the pipeline (see Invoke-Git).
         & pwsh -NoProfile -File $BuildScript *>&1 | Tee-Object -FilePath $TranscriptPath | Out-Host
         return $LASTEXITCODE
     } finally {
@@ -103,10 +98,9 @@ function Invoke-Build {
 }
 
 function Complete-Verification {
-    # Write status + report body, copy the winapp2ool log if present, and stop.
-    # ExitCode stays 0 for every verdict about the PR itself (including a broken PR
-    # build) so the comment job treats the run as a completed verification. Pass 1
-    # only when the harness -- not the PR -- is what failed, so the run goes red.
+    # ExitCode stays 0 for every verdict about the PR, a broken PR build included, so the
+    # comment job treats the run as a completed verification. Pass 1 only when the harness
+    # failed rather than the PR, so the run goes red.
     param([string]$Status, [string]$ReportMarkdown, [int]$ExitCode = 0)
     Set-Content -Path (Join-Path $ReportDir 'status.txt') -Value $Status -NoNewline
     Set-Content -Path (Join-Path $ReportDir 'report.md') -Value $ReportMarkdown
@@ -147,10 +141,10 @@ $baselineTranscript = Join-Path $ReportDir 'baseline-build.log'
 Write-Host ">> Baseline build (master)"
 if ((Invoke-Build -TranscriptPath $baselineTranscript) -ne 0) {
     $body = @"
-🛠 **Baseline build of master failed.**
+**The baseline build of master failed.**
 
-This is **not** caused by this PR: master itself does not currently build on the
-runner. A maintainer needs to look into it before this PR can be verified.
+This isn't caused by this PR. Master itself doesn't build on the runner right now, and
+a maintainer needs to look into it before this PR can be verified.
 
 Failing tail of the baseline build:
 
@@ -177,10 +171,9 @@ foreach ($o in $Outputs) {
 Write-Host ">> Resetting tree and merging head $HeadSha"
 if ((Invoke-Git reset --hard $BaseSha) -ne 0) { throw 'cannot reset before merge' }
 Invoke-Git clean -fdx | Out-Null
-# `merge --no-ff` writes a commit, and a fresh runner checkout has no committer
-# identity -- without one git refuses before it ever looks at the trees. Supply it
-# per-invocation with -c rather than mutating the repo's config, so this script
-# behaves identically when a maintainer runs it against a real local clone.
+# `merge --no-ff` writes a commit, and a fresh runner checkout has no committer identity,
+# so git refuses before it ever looks at the trees. We pass one with -c instead of setting
+# the repo's config, so the script leaves a maintainer's local clone alone.
 $mergeOutput = (& git -c 'user.name=winapp2 pr-verify' `
                       -c 'user.email=pr-verify@users.noreply.github.com' `
                       merge --no-edit --no-ff $HeadSha 2>&1 | Out-String)
@@ -196,7 +189,7 @@ if ($mergeExit -ne 0) {
     if ($conflicted) {
         Invoke-Git merge --abort | Out-Null
         $body = @"
- **This PR does not merge cleanly into master.**
+**This PR doesn't merge cleanly into master.**
 
 The verify build was skipped. Rebase or merge the latest master into your branch to
 resolve the conflicts, then push again.
@@ -205,7 +198,7 @@ resolve the conflicts, then push again.
     }
 
     $body = @"
-🛠 **PR-verify could not merge this PR, and it is not a conflict.**
+**PR verify couldn't merge this PR, and it isn't a conflict.**
 
 The merge failed before git compared the branches, so this is a CI problem rather
 than something wrong with the PR. A maintainer needs to look at the run.
@@ -297,7 +290,7 @@ if (-not $baseDiffText) { $baseDiffText = '(no base diff was produced)' }
 $truncNote = ''
 if ($baseDiffText.Length -gt $CommentCharBudget) {
     $baseDiffText = $baseDiffText.Substring(0, $CommentCharBudget)
-    $truncNote = "`n`n_…base diff truncated: full diff.txt files, and verbose ones showing every added and removed entry in full, are attached to the workflow run._"
+    $truncNote = "`n`n_…base diff truncated. The full changelogs, and verbose ones showing every added and removed entry in full, are attached to the workflow run._"
 }
 
 $body = @"

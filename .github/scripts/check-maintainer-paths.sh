@@ -13,17 +13,17 @@
 #   Assembler/winapp2ool.exe       run by build-on-merge.yml with a write token
 #   Assembler/*.ps1                the build script, run the same way
 #   .github/**                     the workflows and the scripts they run
-#   Releases/**, and the old         the published winapp2.ini files and changelogs. The
-#   Winapp2.ini/diff.txt copies      build writes them, and its publish gate compares the new
-#   at the root and in               build against them: a PR that commits rebuilt copies
-#   Non-CCleaner/                    makes the next build find nothing changed, so that
-#                                    change gets no release and no changelog. The generated-
-#                                    artifact guard lets them through when a source changed too.
+#   Releases/**, and the old       the published winapp2.ini files and changelogs. The
+#   Winapp2.ini/diff.txt copies    build writes them, and its publish gate compares the new
+#   at the root and in             build against them: a PR that commits rebuilt copies
+#   Non-CCleaner/                  makes the next build find nothing changed, so that
+#                                  change gets no release and no changelog. The generated-
+#                                  artifact guard lets them through when a source changed too.
 #
 # A change to any of these in a PR from a fork or a non-member fails. Unlike the
-# generated-artifact guard there is deliberately no override token: the PR author controls
-# the PR title and commit messages, so a token would let exactly the change this exists to
-# catch bypass it.
+# generated-artifact guard there's no override token, because the PR author controls the
+# PR title and commit messages and could use it to wave through exactly the change this
+# exists to catch.
 #
 # Usage:
 #   check-maintainer-paths.sh <base-ref> <head-ref>   # diff two refs
@@ -56,7 +56,7 @@ $f" ;;
       protected="$protected
 $f"; published=1 ;;
     Assembler/*.ps1)
-      # Only the top level: scripts in flavor folders aren't run by the build
+      # Only the top level. The build doesn't run scripts in flavor folders.
       [ "${f#Assembler/*/}" = "$f" ] && protected="$protected
 $f" ;;
   esac

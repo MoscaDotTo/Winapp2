@@ -42,7 +42,7 @@ foreach ($required in $exe, $sig, $keySource, $versionFile) {
 
 if ($failures.Count -eq 0) {
 
-    # The key list is the initializer of TrustedUpdateKeys; each key is 64 bytes, so 88 base64 characters
+    # The keys are TrustedUpdateKeys' initializer. Each is 64 bytes, so 88 base64 characters.
     $source = Get-Content -LiteralPath $keySource -Raw
     $initializer = [regex]::Match($source, '(?s)TrustedUpdateKeys\s+As[^\r\n]*?=\s*New\s+String\(\)\s*\{(.*?)\}').Groups[1].Value
     $keys = [regex]::Matches($initializer, '"([A-Za-z0-9+/]{86}==)"') | ForEach-Object { $_.Groups[1].Value }
