@@ -791,7 +791,7 @@ Avoid `git add -A` and `git add .`.
 
 If you [ran the full build](#verifying-your-work) to check your work, your working copy also holds the rebuilt files: the artifacts under `Assembler/Generated/`, every published file in `Releases/`, and their old copies. `git restore` puts them back.
 
-Watch for the files in `Releases/` in particular. The [generated artifact guard](#what-happens-after-you-open-a-pr) doesn't flag them when a source file changed too, and if they were merged, the next build would find them already up to date and publish no release or changelog for your change.
+Watch for the files in `Releases/` in particular. If they were merged, the next build would find them already up to date and publish no release or changelog for your change, so the [maintainer-paths guard](#the-maintainer-paths-guard) fails any PR that includes them.
 
 ### Verifying your work
 
@@ -833,7 +833,7 @@ Three automated checks run on your pull request. None of them needs anything fro
 
 ### The maintainer-paths guard
 
-Runs on every PR from a fork. It fails if your PR changes a file only the maintainer changes: anything under `winapp2ool/` except Markdown files, `Assembler/winapp2ool.exe`, the PowerShell scripts in `Assembler/`, or anything under `.github/`. Those files either ship to winapp2ool users or run in the build with write access, so they change only through the maintainer. Entry contributions live under `Assembler/` and `Winapp3/` and never trip it. If you think one of those files needs a change, open an issue describing it.
+Runs on every PR from a fork. It fails if your PR changes a file only the maintainer changes: anything under `winapp2ool/` except Markdown files, `Assembler/winapp2ool.exe`, the PowerShell scripts in `Assembler/`, anything under `.github/`, or the published files (anything under `Releases/`, and the old `Winapp2.ini` and `diff.txt` copies). Those files either ship to winapp2ool users, run in the build with write access, or are written only by the build, so they change only through the maintainer or the build. Entry contributions live under `Assembler/` and `Winapp3/` and never trip it. If you think one of those files needs a change, open an issue describing it.
 
 ### The generated artifact guard
 

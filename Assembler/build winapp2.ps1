@@ -28,6 +28,8 @@
     combine, no flavors, no comparison. The root is winapp2ool-relative (leading
     backslash, e.g. '\Parity\Source'). Paired with -ToolPath this is how CI runs
     two different winapp2ool binaries over the same sources and diffs the results.
+    Only the root's BrowserBuilder, UWPBuilder and EntryBuilder folders are cleared
+    first; anything else in the root is left alone.
 
 .PARAMETER ToolPath
     Use this winapp2ool.exe instead of the one beside this script. Directory args
@@ -616,7 +618,12 @@ try {
     # not part of the question and their staleness must not fail the run.
     if ($GenerateTo) {
         $target = Join-Path $PSScriptRoot $GenerateTo.TrimStart('\')
-        if (Test-Path $target) { Remove-Item $target -Recurse -Force }
+        # Clear only the builders' folders, so a tracked file beside them survives
+        # (-GenerateTo '\Generated' used to delete Generated\readme.md)
+        foreach ($builder in 'BrowserBuilder', 'UWPBuilder', 'EntryBuilder') {
+            $folder = Join-Path $target $builder
+            if (Test-Path $folder) { Remove-Item $folder -Recurse -Force }
+        }
         if (-not (Build-Artifacts -OutputRoot $GenerateTo)) { exit 1 }
         Write-Host "`nArtifacts generated into $target" -ForegroundColor Green
         exit 0
