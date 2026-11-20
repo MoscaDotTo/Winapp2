@@ -2,15 +2,9 @@
 
 ### What is Winapp2.ini?
 
-**Winapp2.ini** is a community-maintained database of declarative cleaning routines for Windows. It maps individual applications and system components to their transient data: temporary files, caches, logs, recently used lists, and so on. It started in [2010](https://community.ccleaner.com/t/winapp2-ini-additions/40035) and has lived on GitHub since 2016. Most of the cleaning tools that support it bundle it or fetch it on demand, so plenty of the people using it never see this repository (welcome!). Winapp2.ini is rebuilt every day, and a new version is published whenever its content changes.
+**Winapp2.ini** is a community maintained database of declarative cleaning routines for Windows. It maps individual applications and system components to their transient data such as temporary files, caches, logs, recently used lists, and more, offering an  inspectable system that can be audited and safely customized to suit individual needs. It functions as an extension of the applications with which it is compatible, enabling it to update independently of them and granting users greater freedom to choose and modify their tools.
 
-Winapp2.ini works with CCleaner (*including* CCleaner 7), BleachBit, System Ninja, Avira System Speedup, R-Wipe&Clean, HDCleaner, FluentCleaner, and Reg Organizer. It comes in seven variants, called *flavors*, each tailored to what its tool supports and each with its own changelog.
-
-### Why Winapp2.ini?
-
-A lot of cleaning tools sweep whole drives for file types they think are junk. Winapp2.ini names its targets instead. Every entry lists the exact paths it cleans and the application they belong to, so you can read what an entry deletes before it runs, and change it if it doesn't suit you.
-
-Winapp2.ini is an extension to the cleaners that read it, so it updates on its own schedule instead of waiting for theirs. That also means you can switch tools, or versions of a tool, without losing your cleaning rules.
+Winapp2.ini works with FluentCleaner, BleachBit, CCleaner (*including* CCleaner 7), System Ninja, Avira System Speedup, R-Wipe&Clean, HDCleaner, and Reg Organizer. It comes in additional variants, called *flavors*, each tailored to a particular tool's features or limitations. 
 
 ### Will this help make my computer faster?
 **Probably not.** On modern systems there's little speed to gain from this kind of cleaning. Over-cleaning caches can even *slow* things down, by forcing apps to rebuild data they could have reused.
@@ -25,10 +19,12 @@ That said, there are still plenty of good reasons to clean:
 
 ### What are flavors?
 
-A flavor is winapp2.ini with one tool's changes applied. The build makes every flavor from each new winapp2.ini, so your flavor is as current as the base file even when the copy your cleaner shipped with isn't. Each one is meant as a drop-in replacement for that copy.
+A flavor is winapp2.ini with a special set of changes applied to improve compatability with a specifc tool, and to replace the version shipped with that tool (if applicable). Flavors are built automatically alongside the base winapp2.ini file, so they're up to date with the latest winapp2.ini even if the copy shipped with that application isn't.
+
+##
 
 ### Disclaimer
-Winapp2.ini is provided as-is and without warranty. Its whole purpose is to delete files, folders, and registry keys from your system, automatically and potentially irreversibly, so be careful with it and back up anything that matters. We recommend managing your local copy with winapp2ool, which can show you the changelog between your copy and the latest. Read it before you update.
+Winapp2.ini is provided as-is and without warranty. Understand that its intent is to enable you to delete files, folders, and registry keys off of your system in a way that is programmatic and potentially irreversible. Please exercise caution and take appropriate backups where relevant while using winapp2.ini. It is advised you use winapp2ool to manage your local copy of winapp2.ini, as it can provide bespoke changelogs which should be read carefully to fully understand the scope of changes made between versions.
 
 ---
 
@@ -45,9 +41,9 @@ Winapp2.ini is provided as-is and without warranty. Its whole purpose is to dele
 
 # [Quick Start](#quick-start)
 1. Download [winapp2ool.exe](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2ool.exe)
-    - Open the winapp2ool settings and pick your tool's flavor. The default is the base flavor, which suits any program without a flavor of its own.
+    - Open the winapp2ool settings and pick your tool's flavor. The default is the base flavor. 
 2. Follow the [installation guide](INSTALL.md) for your cleaner application.
-3. Use winapp2ool to keep your copy up to date, and trimmed to the entries your machine needs.
+3. Use winapp2ool to keep your copy up to date and trimmed.
 
 ---
 
@@ -61,36 +57,52 @@ The winapp2ool and flavor links below download from the [latest release](https:/
 | [Winapp2.ini](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2.ini)                                        | The base winapp2.ini, with nothing removed or changed. [Latest changelog](https://github.com/MoscaDotTo/Winapp2/blob/master/Releases/changelog-base.txt).
 | [CCleaner winapp2.ini](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-ccleaner.ini)                      | The CCleaner flavor, which fits better into its UI. [Latest changelog](https://github.com/MoscaDotTo/Winapp2/blob/master/Releases/changelog-ccleaner.txt).
 | [CCleaner 7 winapp2.ini](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-ccleaner7.ini)                   | The CCleaner 7 flavor, converted to the entry format CCleaner 7 requires. You don't install this file by hand: winapp2ool downloads it and patches it into `ccleaner.ini` for you (see [CCleaner 7](INSTALL.md#ccleaner-7)). [Latest changelog](https://github.com/MoscaDotTo/Winapp2/blob/master/Releases/changelog-ccleaner7.txt).
-| [BleachBit winapp2.ini](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-bleachbit.ini)                    | The BleachBit flavor, **for BleachBit 5 and older only.** It removes the registry exclusions those versions' sanity checker rejects. BleachBit 6 and newer handle them fine, so use the base winapp2.ini with those. [Latest changelog](https://github.com/MoscaDotTo/Winapp2/blob/master/Releases/changelog-bleachbit.txt).
+| [BleachBit winapp2.ini](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-bleachbit.ini)                    | The BleachBit flavor, **for BleachBit 5 and older only.** It removes the registry exclusions those versions' sanity checker rejects. BleachBit 6+ users should use the base winapp2.ini. [Latest changelog](https://github.com/MoscaDotTo/Winapp2/blob/master/Releases/changelog-bleachbit.txt).
 | [System Ninja winapp2.rules](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-systemninja.rules)           | The System Ninja flavor, which replaces keys System Ninja can't run with ones it can. [Latest changelog](https://github.com/MoscaDotTo/Winapp2/blob/master/Releases/changelog-systemninja.txt).
 | [Tron winapp2.ini](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-tron.ini)                              | The Tron flavor, which carries the changes Tron makes to its own winapp2.ini. [Latest changelog](https://github.com/MoscaDotTo/Winapp2/blob/master/Releases/changelog-tron.txt).
-| [FluentCleaner winapp2.ini](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-fluentcleaner.ini)            | The FluentCleaner flavor, matching the edits FluentCleaner makes to the copy it ships. [Latest changelog](https://github.com/MoscaDotTo/Winapp2/blob/master/Releases/changelog-fluentcleaner.txt).
+| [FluentCleaner winapp2.ini](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-fluentcleaner.ini)            | The FluentCleaner flavor,  which carries the changes FluentCleaner makes to its own winapp2.ini. [Latest changelog](https://github.com/MoscaDotTo/Winapp2/blob/master/Releases/changelog-fluentcleaner.txt).
 | [Winapp3.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/Winapp3.ini)                                   | An extension for an extension, with entries for power users. *Do **not** use this file if you don't know what you're doing. Some of its entries are very aggressive and can do real damage to your file system.*
-| [Assembler](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler)                                                         | The sources every published file above is built from, and the build script that drives them. Contributions go here. See [How Winapp2.ini is built](#how-winapp2ini-is-built).
+| [Assembler](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler)                                                         | The sources from which every published file above is built, and the build script that drives them. Contributions go here. See [How Winapp2.ini is built](#how-winapp2ini-is-built).
 
 ---
 
 # [Installation & Configuration](INSTALL.md)
 
-Pick your cleaner to see how to install and configure winapp2.ini for it:
+Pick your cleaner below to see how to install and configure winapp2.ini for it.
 
-[CCleaner Classic](INSTALL.md#ccleaner-classic) &middot; [CCleaner 7](INSTALL.md#ccleaner-7) &middot; [BleachBit](INSTALL.md#bleachbit) &middot; [System Ninja](INSTALL.md#system-ninja) &middot; [Avira System Speedup](INSTALL.md#avira-system-speedup) &middot; [Tron](INSTALL.md#tron) &middot; [R-Wipe & Clean](INSTALL.md#r-wipe--clean) &middot; [HDCleaner](INSTALL.md#hdcleaner) &middot; [FluentCleaner](INSTALL.md#fluentcleaner) &middot; [Reg Organizer](INSTALL.md#reg-organizer)
+It is strongly recommended that you keep a copy of [winapp2ool.exe](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2ool.exe) in the same folder as winapp2.ini to help keep it up to date. 
 
-Whatever cleaner you use, we strongly recommend keeping a copy of [winapp2ool.exe](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2ool.exe) in the same folder as winapp2.ini to help keep it up to date.
+##
+### [FluentCleaner](INSTALL.md#fluentcleaner) 
+##
+### [BleachBit](INSTALL.md#bleachbit) 
+##
+### [CCleaner Classic](INSTALL.md#ccleaner-classic) 
+##
+### [CCleaner 7](INSTALL.md#ccleaner-7) 
+##
+### [Tron](INSTALL.md#tron) 
+##
+### [System Ninja](INSTALL.md#system-ninja) 
+##
+### [Reg Organizer](INSTALL.md#reg-organizer)
+##
+### [Avira System Speedup](INSTALL.md#avira-system-speedup) 
+##
+### [HDCleaner](INSTALL.md#hdcleaner)
+##
+### [R-Wipe & Clean](INSTALL.md#r-wipe--clean) 
+##
 
 ---
 
 # [Contributing](#contributing)
 
-###### This section is for people who want to contribute to the project. You do not need to read or understand this in order to use winapp2.ini.
-
-Contributions go to the source files under [Assembler](Assembler), never to the published files the build makes from them. [Our contributor guidelines](CONTRIBUTING.md) cover where each kind of entry lives, the syntax rules for each, and what the automated checks will tell you after you open a pull request. Editing in the GitHub web interface is enough for most contributions. You never need to run the build or generate an output file yourself.
+To add, update, or remove an entry, see [our contributor guidelines](CONTRIBUTING.md).
 
 ---
 
 # [Custom content](#custom-content)
-
-###### This section is for people who may want to modify winapp2.ini for their system. You do not need to read or understand this in order to use winapp2.ini.
 
 Winapp2.ini doesn't cover non-English system configurations or portable software out of the box. If you need them, keep your own entries in a `custom.ini` file and use winapp2ool's [Transmute](winapp2ool/modules/transmute/readme.md) in `Add` mode to apply them to each new winapp2.ini. For a portable browser, [BrowserBuilder](winapp2ool/modules/browserbuilder/readme.md) can generate the entries from your own install's path.
 
@@ -100,10 +112,7 @@ Winapp2ool 1.6 replaced the Merge feature with Transmute. If you used `custom.in
 
 # [How Winapp2.ini is built](#how-winapp2ini-is-built)
 
-###### This section is for people who maintain winapp2.ini or are interested in the technical details of how it is maintained. You do not need to read or understand this in order to use winapp2.ini. 
-
-
-Nobody edits the published winapp2.ini files in this repository by hand. The build publishes them to [Releases](Releases), each under the name it carries on the GitHub release. Every one of them, and every changelog beside it, is generated from the sources in [Assembler](Assembler) by [winapp2ool](winapp2ool/Readme.md), a console application we maintain alongside the database. Its readme covers the tool itself, and each stage below links the readme for the module that runs it.
+Winapp2.ini is generated from the sources in [Assembler](Assembler) by [winapp2ool](winapp2ool/Readme.md). The build publishes them to [Releases](Releases), each under the name it carries on the GitHub release. 
 
 ### Build pipeline
 
@@ -111,9 +120,9 @@ Each build runs four stages, driven by [`build winapp2.ps1`](Assembler/build%20w
 
 | Stage | What runs | What it does |
 | :- | :- | :- |
-| Generate | [EntryBuilder](winapp2ool/modules/entrybuilder/readme.md) | Expands the per-letter [base entry sources](Assembler/Sources/EntryBuilder) into artifacts. Sources can use a shorthand DSL and the shared scaffold catalogs |
+| Generate | [EntryBuilder](winapp2ool/modules/entrybuilder/readme.md) | Expands the per-letter [base entry sources](Assembler/Sources/EntryBuilder) into artifacts. Sources can use an optional shorthand DSL and shared scaffold catalogs for webviews |
 | | [BrowserBuilder](winapp2ool/modules/browserbuilder/readme.md) | Produces one entry per browser per cleaning category, crossing [browser declarations](Assembler/Sources/BrowserBuilder) with the templates that apply to their engine |
-| | [UWPBuilder](winapp2ool/modules/uwpbuilder/readme.md) | Generates Microsoft Store entries from [package declarations](Assembler/Sources/UWPBuilder), with the same scaffold catalogs |
+| | [UWPBuilder](winapp2ool/modules/uwpbuilder/readme.md) | Generates Microsoft Store entries from [package declarations](Assembler/Sources/UWPBuilder) |
 | Merge | [Combine](winapp2ool/modules/combine/readme.md) | Joins the generated artifacts into one file in strict mode, which fails the build if two artifacts use the same entry name |
 | Lint | [WinappDebug](winapp2ool/modules/winappdebug/README.md) | Checks the merged file's syntax and style, and saves its own corrections |
 | Publish | [Flavorizer](winapp2ool/modules/transmute/Flavorizer/readme.md), [WinappDebug](winapp2ool/modules/winappdebug/README.md), and [Diff](winapp2ool/modules/diff/readme.md) | Applies each flavor's ruleset to make the six other variants and lints each one, then writes a changelog against the previously published version for every output whose content changed, and publishes both to [Releases](Releases) |
@@ -131,5 +140,3 @@ The build artifacts under [Assembler/Generated](Assembler/Generated) are committ
 | **Update signature** | Checks that copies of winapp2ool already out there will accept the committed update: its signature has to verify, and `version.txt` has to match the exe |
 | **Maintainer paths guard** | Fails a pull request from outside the project that touches winapp2ool's source, its committed exe, the build scripts, or the workflows |
 | **Daily build and release** | Rebuilds from current sources. When the content changed, it commits the result and cuts a tagged release with every flavor and changelog attached |
-
-Every build restamps the version line, so the daily build ignores that line when it decides whether the content changed. Otherwise an untouched rebuild would look like a change and publish an empty changelog every day.
