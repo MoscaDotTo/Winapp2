@@ -1,23 +1,405 @@
 Beginning Diff
-Diff:  version 260730 ->  version 260915
+Diff:  version 260915 ->  version 261121
 
  Entry removals:
 
  - 0 removed without replacement
 
- Added entries:
+ Modified entries:
 
-     Eagle Animation * has been added
+     1Browser Web Storage * has been modified
 
- 1 novel entry added
- Total diff time: 00:00:00.0891131
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\1browser\1browser\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\1browser\1browser\User Data\*\IndexedDB|*|REMOVESELF
+
+     360 Secure Browser Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%AppData%\360se6\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%AppData%\360se6\User Data\*\IndexedDB|*|REMOVESELF
+
+     AOL Shield Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\AOL\AOL Shield\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\AOL\AOL Shield\User Data\*\IndexedDB|*|REMOVESELF
+
+     Arc Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\Packages\TheBrowserCompany.Arc_ttt1ap7aakyb4\LocalCache\Local\Arc\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\Packages\TheBrowserCompany.Arc_ttt1ap7aakyb4\LocalCache\Local\Arc\User Data\*\IndexedDB|*|REMOVESELF
+
+     Avast Secure Browser Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\Avast Software\Browser\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\Avast Software\Browser\User Data\*\IndexedDB|*|REMOVESELF
+
+     AVG Secure Browser Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\AVG\Browser\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\AVG\Browser\User Data\*\IndexedDB|*|REMOVESELF
+
+     Avira Secure Browser Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\Avira\Browser\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\Avira\Browser\User Data\*\IndexedDB|*|REMOVESELF
+
+     Brave Origin Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\IndexedDB|*|REMOVESELF
+
+     Brave Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\BraveSoftware\Brave-Browser*\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\BraveSoftware\Brave-Browser*\User Data\*\IndexedDB|*|REMOVESELF
+
+     BriskBard Web Storage * has been modified
+
+       Modified 2 FileKeys
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\BriskBard\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\BriskBard\*\IndexedDB|*|REMOVESELF
+       FileKey9 has been modified, replacing 1 old key
+              + New: FileKey9=%LocalAppData%\BriskBard\WebView\UserData\EBWebView\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey9=%LocalAppData%\BriskBard\WebView\UserData\EBWebView\*\IndexedDB|*|REMOVESELF
+
+     BrowserOS Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\BrowserOS\BrowserOS\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\BrowserOS\BrowserOS\User Data\*\IndexedDB|*|REMOVESELF
+
+     CCleaner Browser Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\CCleaner Browser\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\CCleaner Browser\User Data\*\IndexedDB|*|REMOVESELF
+
+     Cent Browser Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\CentBrowser\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\CentBrowser\User Data\*\IndexedDB|*|REMOVESELF
+
+     Chromium Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\Chromium\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\Chromium\User Data\*\IndexedDB|*|REMOVESELF
+
+     Coc Coc Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\CocCoc\Browser\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\CocCoc\Browser\User Data\*\IndexedDB|*|REMOVESELF
+
+     Comet Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\Perplexity\Comet\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\Perplexity\Comet\User Data\*\IndexedDB|*|REMOVESELF
+
+     Comodo Dragon Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\Comodo\Dragon\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\Comodo\Dragon\User Data\*\IndexedDB|*|REMOVESELF
+
+     Cromite Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\Cromite\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\Cromite\User Data\*\IndexedDB|*|REMOVESELF
+
+     DuckDuckGo Web Storage * has been modified
+
+       Modified 2 FileKeys
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*\IndexedDB|*|REMOVESELF
+       FileKey9 has been modified, replacing 1 old key
+              + New: FileKey9=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnvironment\EBWebView\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey9=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnvironment\EBWebView\*\IndexedDB|*|REMOVESELF
+
+     Ecosia Browser Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\EcosiaBrowser\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\EcosiaBrowser\User Data\*\IndexedDB|*|REMOVESELF
+
+     Epic Privacy Browser Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\Epic Privacy Browser\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\Epic Privacy Browser\User Data\*\IndexedDB|*|REMOVESELF
+
+     FlashPeak SlimJet Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\Slimjet\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\Slimjet\User Data\*\IndexedDB|*|REMOVESELF
+
+     Genspark Browser Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\GensparkSoftware\Genspark-Browser\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\GensparkSoftware\Genspark-Browser\User Data\*\IndexedDB|*|REMOVESELF
+
+     Ghost Browser Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\GhostBrowser\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\GhostBrowser\User Data\*\IndexedDB|*|REMOVESELF
+
+     Google Chrome Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\Google\Chrome*\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\Google\Chrome*\User Data\*\IndexedDB|*|REMOVESELF
+
+     Helium Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\imput\Helium\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\imput\Helium\User Data\*\IndexedDB|*|REMOVESELF
+
+     Iridium Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\Iridium\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\Iridium\User Data\*\IndexedDB|*|REMOVESELF
+
+     Jatter Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\Jatter\Jatter\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\Jatter\Jatter\User Data\*\IndexedDB|*|REMOVESELF
+
+     Maxthon Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\Maxthon\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\Maxthon\User Data\*\IndexedDB|*|REMOVESELF
+
+     Microsoft Edge Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\Microsoft\Edge*\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\Microsoft\Edge*\User Data\*\IndexedDB|*|REMOVESELF
+
+     NAVER Whale Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\Naver\Naver Whale\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\Naver\Naver Whale\User Data\*\IndexedDB|*|REMOVESELF
+
+     Norton Neo Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\NEO\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\NEO\User Data\*\IndexedDB|*|REMOVESELF
+
+     Norton Secure Browser Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\Norton\Browser\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\Norton\Browser\User Data\*\IndexedDB|*|REMOVESELF
+
+     Opera GX Web Storage * has been modified
+
+       Modified 2 FileKeys
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%AppData%\Opera Software\Opera GX*\_side_profiles\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%AppData%\Opera Software\Opera GX*\_side_profiles\*\IndexedDB|*|REMOVESELF
+       FileKey9 has been modified, replacing 1 old key
+              + New: FileKey9=%AppData%\Opera Software\Opera GX*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey9=%AppData%\Opera Software\Opera GX*\IndexedDB|*|REMOVESELF
+
+     Opera Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%AppData%\Opera Software\Opera*\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%AppData%\Opera Software\Opera*\*\IndexedDB|*|REMOVESELF
+
+     QQBrowser Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\Tencent\QQBrowser\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\Tencent\QQBrowser\User Data\*\IndexedDB|*|REMOVESELF
+
+     Samsung Internet Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\Samsung\Internet\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\Samsung\Internet\User Data\*\IndexedDB|*|REMOVESELF
+
+     Shift Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\Shift\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\Shift\User Data\*\IndexedDB|*|REMOVESELF
+
+     Sigma Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\Sigma\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\Sigma\User Data\*\IndexedDB|*|REMOVESELF
+
+     Sleipnir Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%AppData%\Fenrir Inc\Sleipnir5\setting\modules\ChromiumViewer\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%AppData%\Fenrir Inc\Sleipnir5\setting\modules\ChromiumViewer\*\IndexedDB|*|REMOVESELF
+
+     Supermium Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\Supermium\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\Supermium\User Data\*\IndexedDB|*|REMOVESELF
+
+     Thorium Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\Thorium\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\Thorium\User Data\*\IndexedDB|*|REMOVESELF
+
+     UC Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\UC\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\UC\User Data\*\IndexedDB|*|REMOVESELF
+
+     Ulaa Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\Zoho\Ulaa\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\Zoho\Ulaa\User Data\*\IndexedDB|*|REMOVESELF
+
+     Vivaldi Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\Vivaldi\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\Vivaldi\User Data\*\IndexedDB|*|REMOVESELF
+
+     Wavebox Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\Waveboxapp\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\Waveboxapp\User Data\*\IndexedDB|*|REMOVESELF
+
+     Yandex Web Storage * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\Yandex\YandexBrowser\User Data\*\IndexedDB\http*|*|REMOVESELF
+              - Old: FileKey1=%LocalAppData%\Yandex\YandexBrowser\User Data\*\IndexedDB|*|REMOVESELF
+ 47 modified entries
+ Total diff time: 00:00:00.0950446
 
  Diff Summary
-   Net entry count change: 4067 → 4068 (+1)
-   Modified entries: 0
+   Net entry count change: 4068 → 4068 (+0)
+   Modified entries: 47
+    ~ 50 updated keys replaced 50 old keys across 47 entries
    Removed entries: 0
     - 0 entries have been removed without replacement
-   Added entries: 1
-    + 1 novel entry (without merged content)
+   Added entries: 0
    
 Diff complete
