@@ -45,6 +45,8 @@ Public Module uwpbuildermainmenu
                 Sub() changeFileParams(UWPFile2, UWPBuilderModuleSettingsChanged, NameOf(UWPBuilder), NameOf(UWPFile2), NameOf(UWPBuilderModuleSettingsChanged), "Save target")) _
             .AddDispatchedOption("Choose scaffolds directory", "Select the shared scaffold catalog directory",
                 Sub() changeFileParams(UWPFile3, UWPBuilderModuleSettingsChanged, NameOf(UWPBuilder), NameOf(UWPFile3), NameOf(UWPBuilderModuleSettingsChanged), "Scaffolds directory")) _
+            .AddDispatchedOption("Choose archive folder", "Select where archived.ini, the entries marked Archive=, is written",
+                Sub() changeFileParams(UWPArchiveFile, UWPBuilderModuleSettingsChanged, NameOf(UWPBuilder), NameOf(UWPArchiveFile), NameOf(UWPBuilderModuleSettingsChanged), "Archive folder")) _
             .AddBlank() _
             .AddDispatchedToggle("output splitting", "writing per-letter files into the save target's directory", UWPBuilderSplitOutput,
                 Sub() toggleModuleSetting("Split output", NameOf(UWPBuilder), GetType(uwpbuildersettings), NameOf(UWPBuilderSplitOutput), NameOf(UWPBuilderModuleSettingsChanged))) _
@@ -52,6 +54,7 @@ Public Module uwpbuildermainmenu
             .AddColoredFileInfo("Current source directory:    ", UWPFile1.Dir, ConsoleColor.DarkYellow) _
             .AddColoredFileInfo("Current save target:         ", If(UWPBuilderSplitOutput, UWPFile2.Dir, UWPFile2.Path()), ConsoleColor.Yellow) _
             .AddColoredFileInfo("Current scaffolds directory: ", UWPFile3.Dir, ConsoleColor.DarkYellow) _
+            .AddColoredFileInfo("Current archive folder:      ", ArchiveFolderText(UWPArchiveFile), ConsoleColor.DarkYellow) _
             .AddBlank(UWPBuilderModuleSettingsChanged) _
             .AddDispatchedResetOpt(NameOf(UWPBuilder), UWPBuilderModuleSettingsChanged,
                 Sub() resetModuleSettings(NameOf(UWPBuilder), AddressOf InitDefaultUWPBuilderSettings))

@@ -105,17 +105,17 @@ Public Module UWPBuilder
         "WEBVIEWSCAFFOLDS", "EXCLUDEWEBVIEWSCAFFOLDS",
         "QTWEBENGINESCAFFOLDS", "EXCLUDEQTWEBENGINESCAFFOLDS",
         "ELECTRONSCAFFOLDS", "EXCLUDEELECTRONSCAFFOLDS",
-        "SKIP", "SKIPUWPFILEKEYS", "DEFAULT", "WARNING"
+        "SKIP", "ARCHIVE", "SKIPUWPFILEKEYS", "DEFAULT", "WARNING"
     }
 
     ''' <summary>
-    ''' The keys that mean something with no value: <c> Skip= </c>, <c> SkipUWPFileKeys= </c>,
-    ''' and the scaffold selections and exclusions, where an empty list selects or excludes
-    ''' nothing. <see cref="parseAppInfo"/> drops any other key with no value, which would
-    ''' otherwise give an empty key or path.
+    ''' The keys that mean something with no value: <c> Skip= </c>, <c> Archive= </c>,
+    ''' <c> SkipUWPFileKeys= </c>, and the scaffold selections and exclusions, where an empty
+    ''' list selects or excludes nothing. <see cref="parseAppInfo"/> drops any other key with no
+    ''' value, which would otherwise give an empty key or path.
     ''' </summary>
     Private ReadOnly ValueOptionalKeys As String() = {
-        "SKIP", "SKIPUWPFILEKEYS",
+        "SKIP", "ARCHIVE", "SKIPUWPFILEKEYS",
         "WEBVIEWSCAFFOLDS", "EXCLUDEWEBVIEWSCAFFOLDS",
         "QTWEBENGINESCAFFOLDS", "EXCLUDEQTWEBENGINESCAFFOLDS",
         "ELECTRONSCAFFOLDS", "EXCLUDEELECTRONSCAFFOLDS"
@@ -214,6 +214,12 @@ Public Module UWPBuilder
         ''' <see cref="parseAppInfo"/> when the entry has no package or no category.
         ''' </summary>
         Public ShouldSkip As Boolean
+
+        ''' <summary>
+        ''' Indicates whether the entry declared <c> Archive= </c>, so it goes to the archive
+        ''' output instead of the live one. It means nothing when <see cref="ShouldSkip"/> is set.
+        ''' </summary>
+        Public ShouldArchive As Boolean
 
         ''' <summary>
         ''' Indicates whether to leave out the scaffold <c> FileKeyBase= </c> templates from
@@ -388,6 +394,7 @@ Public Module UWPBuilder
             Warnings = New List(Of String)
             DetectOS = ""
             ShouldSkip = False
+            ShouldArchive = False
             SkipUWPFileKeys = False
             WebViewPaths = New List(Of String)
             WebViewScaffoldNames = New List(Of String)
@@ -411,9 +418,10 @@ Public Module UWPBuilder
     End Structure
 
     ''' <summary>
-    ''' Binds the <c> -1f </c> / <c> -1d </c> through <c> -3f </c> / <c> -3d </c> arguments to <see cref="UWPFile1"/>,
-    ''' <see cref="UWPFile2"/> and <see cref="UWPFile3"/>, starting from the default settings
-    ''' rather than any saved ones, then runs the build
+    ''' Binds the <c> -1f </c> / <c> -1d </c> through <c> -4f </c> / <c> -4d </c> arguments to <see cref="UWPFile1"/>,
+    ''' <see cref="UWPFile2"/>, <see cref="UWPFile3"/> and <see cref="UWPArchiveFile"/> (alias
+    ''' <c> archive </c>, the folder for <c> archived.ini </c>), starting from the default
+    ''' settings rather than any saved ones, then runs the build
     ''' </summary>
     '''
     ''' <remarks>
@@ -433,6 +441,7 @@ Public Module UWPBuilder
         spec.WithFile(1, UWPFile1) _
             .WithFile(2, UWPFile2) _
             .WithFile(3, UWPFile3) _
+            .WithFile(4, UWPArchiveFile, "archive") _
             .WithFlag("-split", Sub() UWPBuilderSplitOutput = Not UWPBuilderSplitOutput) _
             .Parse()
 
@@ -507,6 +516,9 @@ Public Module UWPBuilder
     ''' <see cref="remotedebugGuarded"/>, and writes it under <see cref="ArtifactHeader.Text"/>'s
     ''' header, either to <see cref="UWPFile2"/> or, with <see cref="UWPBuilderSplitOutput"/>, via
     ''' <see cref="LetterSplitOutput.WriteSplitOutput"/> as one file per <c> AppInfo </c> letter.
+    ''' An entry that declared <c> Archive= </c> goes instead to the archive output, which
+    ''' <see cref="ArchiveOutput.WriteArchive"/> normalizes and writes to
+    ''' <see cref="UWPArchiveFile"/>'s folder.
     ''' </summary>
     '''
     ''' <param name="templateIni">
@@ -581,11 +593,21 @@ Public Module UWPBuilder
             gLog(appsMsg)
 
             Dim outputFile = iniFile.Empty(UWPFile2.Dir, UWPFile2.Name)
+            Dim archiveFile = iniFile.Empty(UWPArchiveFile.Dir, winapp2file.ArchiveFileName)
 
             For Each app In apps
 
                 Dim entrySection = generateUWPEntry(app, scaffoldFileKeys, scaffoldDetectFiles, scaffoldSet, menuOutput)
-                outputFile.AddSection(entrySection)
+
+                If app.ShouldArchive Then
+
+                    archiveFile.AddSection(entrySection)
+
+                Else
+
+                    outputFile.AddSection(entrySection)
+
+                End If
 
                 ' Typo backstop: variables declared on the entry but never referenced by any
                 ' <token> in any expanded key. This is what replaces the parser's former
@@ -601,7 +623,7 @@ Public Module UWPBuilder
 
             Next
 
-            Dim generatedMsg = $"Generated {outputFile.Count} UWP entries"
+            Dim generatedMsg = $"Generated {outputFile.Count} UWP entries and {archiveFile.Count} archived entries"
             menuOutput.AddColoredLine(generatedMsg, ConsoleColor.Yellow)
             gLog($" {generatedMsg}")
 
@@ -617,6 +639,8 @@ Public Module UWPBuilder
                 outputFile.OverwriteToFile(header & outputFile.ToString())
 
             End If
+
+            WriteArchive(archiveFile, UWPArchiveFile.Dir, NameOf(UWPBuilder), UWPBuilderSources, menuOutput)
 
             gLog("UWP builder files processed successfully")
 
@@ -750,7 +774,12 @@ Public Module UWPBuilder
     ''' through <see cref="VariableExpander.ResolveAll"/> before returning. A key other than
     ''' <c> Package= </c> or <c> Warning= </c> holding a retired token is dropped through
     ''' <see cref="refuseRetiredToken"/>. A single-valued key that repeats (<c> DetectOS= </c>,
-    ''' <c> LangSecRef= </c>, a scaffold selection list) keeps its last value.
+    ''' <c> LangSecRef= </c>, a scaffold selection list) keeps its last value. <br /><br />
+    '''
+    ''' <c> Archive= </c>, with any value or none, sets <c> ShouldArchive </c>. A structural skip
+    ''' still wins over it. <c> Archive=False </c>, or <c> Archive= </c> beside <c> Skip= </c>, is
+    ''' refused through <see cref="ArchiveOutput.RefuseArchive"/>: the entry is skipped and the
+    ''' run fails.
     ''' </summary>
     '''
     ''' <param name="appSection">
@@ -769,6 +798,8 @@ Public Module UWPBuilder
                                   menuOutput As MenuSection) As UWPAppInfo
 
         Dim app As New UWPAppInfo(appSection.Name)
+        Dim skipDeclared = False
+        Dim archiveValue As String = Nothing
 
         For Each key In appSection.Keys
 
@@ -834,7 +865,12 @@ Public Module UWPBuilder
 
                 Case "EXCLUDEKEY", "EXCLUDEKEYBASE" : app.ExcludeKeys.Add(key.Value)
 
-                Case "SKIP" : app.ShouldSkip = True
+                Case "SKIP"
+
+                    app.ShouldSkip = True
+                    skipDeclared = True
+
+                Case "ARCHIVE" : archiveValue = key.Value
 
                 Case "SKIPUWPFILEKEYS" : app.SkipUWPFileKeys = True
 
@@ -933,6 +969,20 @@ Public Module UWPBuilder
             app.ShouldSkip = True
 
         Next
+
+        If archiveValue IsNot Nothing Then
+
+            If RefuseArchive($"[{app.Name}]", archiveValue, skipDeclared, menuOutput) Then
+
+                app.ShouldSkip = True
+
+            Else
+
+                app.ShouldArchive = Not app.ShouldSkip
+
+            End If
+
+        End If
 
         If Not bothCategories Then Return app
 

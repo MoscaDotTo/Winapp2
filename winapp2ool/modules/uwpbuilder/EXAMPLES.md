@@ -473,5 +473,5 @@ FileKey4=%LocalAppData%\Packages\Hazel.Weather_123abc\TempState|*|REMOVESELF
 **Explanation**
 - `[Hazel Notes *]` was skipped entirely because it has no `Package=` key
 - `[Hazel Weather *]` was generated with warnings. The conflicting `Section=` was thrown away in favor of `LangSecRef`. `Author=` isn't a key UWPBuilder knows, so it declared a variable, and since nothing uses `<Author>`, the unused-variable check flagged it as a possible typo. It doesn't appear in the output
-- `[Hazel Legacy *]` was skipped **without a warning**: `Skip` takes effect whenever it's present, so `Skip=False` skips just like `Skip=True`
+- `[Hazel Legacy *]` was skipped **without a warning**: `Skip` takes effect whenever it's present, so `Skip=False` skips just like `Skip=True`. To retire an app that's gone, `Archive=` sends it to `archived.ini` instead (see the readme's [Archive](readme.md#archive) section)
 - Only one of the three sections became an entry

@@ -37,6 +37,7 @@ Apps that ship both a UWP package and a win32 install keep both sets of keys in 
    - [Root placeholders in AppInfo keys](#root-placeholders-in-appinfo-keys)
    - [Variables](#variables)
    - [Skip and SkipUWPFileKeys](#skip-and-skipuwpfilekeys)
+   - [Archive](#archive)
 9. [WebView Scaffolds](#webview-scaffolds)
    - [Opting in](#opting-in)
    - [Selecting scaffolds](#selecting-scaffolds)
@@ -100,16 +101,17 @@ Every worked example runs the first command. Only the AppInfo section it reads c
 | Choose source directory | Select the directory holding `UWP.ini` and `AppInfo\` | Default: current directory |
 | Choose save target | Select where to save the generated entries | Default: `uwp.ini`. With output splitting on, only its folder is used |
 | Choose scaffolds directory | Select the folder holding the shared scaffold catalogs | Default: current directory |
+| Choose archive folder | Select the folder `archived.ini` is written to | None by default. See [Archive](#archive) |
 | Toggle output splitting | Write per-letter files into the save target's folder instead of one file | Off by default. The menu equivalent of `-split` |
 | Reset Settings | Restore all settings to their defaults | Only shown when settings have been changed |
 
-Below the options, the menu shows the current source directory, save target and scaffolds directory. With output splitting on, the save target line shows only the folder.
+Below the options, the menu shows the current source directory, save target, scaffolds directory and archive folder. With output splitting on, the save target line shows only the folder.
 
 ---
 
 # Command-Line Arguments
 
-UWPBuilder is invoked as `winapp2ool -uwpbuilder`. It takes three directory arguments, an output file name and one toggle.
+UWPBuilder is invoked as `winapp2ool -uwpbuilder`. It takes four directory arguments, an output file name and one toggle.
 
 ### File Selection
 
@@ -119,6 +121,7 @@ UWPBuilder is invoked as `winapp2ool -uwpbuilder`. It takes three directory argu
 | `-2d path` | Set the directory the output is saved to | Current directory |
 | `-2f name` | Set the output file name | `uwp.ini` |
 | `-3d path` | Set the shared scaffold directory | Current directory |
+| `-4d path` (also `-archived path`) | Set the folder `archived.ini` is written to. See [Archive](#archive) | None |
 
 Paths can be absolute, or relative to the working directory with a leading backslash (`-1d \Sources\UWPBuilder`).
 
@@ -230,6 +233,7 @@ Any other key name declares a [variable](#variables), so an unfamiliar key is ne
 | `ExcludeKeyBase=` | An ExcludeKey template; same as `ExcludeKey=` | |
 | `RegKeyBase=` | A RegKey template; same as `RegKey=` | |
 | `Skip` | Leaves this app out of the output | Takes effect whenever the key is there; see below |
+| `Archive` | Sends this app to `archived.ini` instead of the output | The value is a reason, never written out. See [Archive](#archive) |
 | `SkipUWPFileKeys` | Leaves out the scaffold `FileKeyBase=` templates for this entry only | Takes effect whenever the key is there; see below. Detection is unaffected |
 | `WebViewRoot=` (alias `WebViewPath=`) | Declares an embedded WebView2/EBWebView data root, opting the entry into [WebView scaffolds](#webview-scaffolds) | Can repeat, numbered or not. `<Package>` is expanded |
 | `WebViewScaffolds=` | Comma-separated list of scaffolds to use instead of the default set | `All` selects the whole catalog except the legacy tier |
@@ -340,8 +344,27 @@ Skip=False
 
 still skips the entry. Add the key only when you want its effect, and delete it to turn the effect off.
 
-- `Skip`: leaves the app out of the output. Use it to drop support for an app without deleting its definition
+- `Skip`: leaves the app out of the output. Use it to set an app aside without deleting its definition. To retire an app that's gone, use [Archive](#archive)
 - `SkipUWPFileKeys`: leaves out the baseline `FileKeyBase=` templates from `UWP.ini` for this entry, and generates everything else as usual. See [Example 7](EXAMPLES.md#example-7-secondary-entries-with-skipuwpfilekeys)
+
+## Archive
+
+`Archive=` sends the app to the archive instead of the output. It's built exactly like a live entry, then written to `archived.ini` in the archive folder (`-4d`, or **Choose archive folder** in the menu). The value is a reason for whoever reads the source, and UWPBuilder never writes it out. A bare `Archive=` archives too:
+
+```ini
+[Hazel Legacy *]
+Archive=Delisted from the Store
+Package=Hazel.Legacy_abc123
+LangSecRef=3021
+```
+
+To bring the app back, delete the `Archive=` line.
+
+- `archived.ini` is one file, never split, even with `-split`. Given an archive folder, UWPBuilder always writes it, with only its header when nothing is archived.
+- With no archive folder, archived apps go to neither output, and the run warns with their count and fails with exit code 1.
+- An archived app and a live one can't share a name: they meet when the `AppInfo\` files are combined, the first is kept and the run fails.
+- An app that can't be built (no `Package=`, no category) is skipped with its usual warning, `Archive=` or not.
+- `Archive=False` is refused, since deleting the line is how an app comes back, and so is `Archive=` beside `Skip`. Either way the app isn't built and the run fails.
 
 ---
 
@@ -492,7 +515,10 @@ This isn't an ordinary validation warning. It means an AppInfo value or a scaffo
 |:-|:-|
 | "UWP.ini not found or empty in: {dir}" | The source directory has no readable `UWP.ini`. Nothing is generated, and the run fails with exit code 1 |
 | "No app definitions found in: {dir}" | The `AppInfo\` subdirectory is missing or empty, or has no readable sections. Nothing is generated, and the run fails with exit code 1 |
-| "[{name}].{key} has no value; key dropped" | A key that needs a value was left empty. Only `Skip=`, `SkipUWPFileKeys=` and the scaffold lists mean something with no value |
+| "[{name}].{key} has no value; key dropped" | A key that needs a value was left empty. Only `Skip=`, `Archive=`, `SkipUWPFileKeys=` and the scaffold lists mean something with no value |
+| "[{name}] declares Archive=False; delete the Archive line to keep the entry live. The entry isn't built" | `Archive=False` doesn't un-archive. The app isn't built and the run fails with exit code 1 |
+| "[{name}] declares both Skip and Archive; keep one of them. The entry isn't built" | The app isn't built and the run fails with exit code 1 |
+| "N archived entries left out of the output: no archive folder was given (-4d, or -3d for BrowserBuilder)" | Some apps declare `Archive=` but no archive folder was set. They're in neither output, and the run fails with exit code 1 |
 | "Duplicate AppInfo section [{name}] at {file} line {n} ignored; keeping the first definition, in {file}" | Two AppInfo sections share a name (in any case), in one file or in two. Files are read in name order, and only the first definition is used. The output is still written, but the run fails with exit code 1 |
 | "Unexpected section in template file: [{name}]" | `UWP.ini` has a section that isn't an `[EntryScaffold: ...]` |
 | "Unexpected key in scaffold [{name}]: {key}" | An `[EntryScaffold: ...]` section has a key other than `DetectFileBase=` or `FileKeyBase=` |

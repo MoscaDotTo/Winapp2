@@ -59,6 +59,16 @@ Option Strict On
 ''' </description>
 ''' </item>
 '''
+''' <item>
+''' <b><c> UWPArchiveFile </c></b>
+''' <description>
+''' Archive folder: where <c> archived.ini </c>, the entries whose AppInfo sections declare
+''' <c> Archive= </c>, is written. Only the <c> Dir </c> of this chooser is used. It's empty by
+''' default, meaning no archive folder: a run with archived entries then leaves them out and
+''' fails.
+''' </description>
+''' </item>
+'''
 ''' </list>
 '''
 ''' </summary>
@@ -87,6 +97,12 @@ Public Module uwpbuildersettings
     Public Property UWPFile3 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "", "")
 
     ''' <summary>
+    ''' The folder <c> archived.ini </c> is written to, or an empty <c> Dir </c> for none. Only
+    ''' the <c> Dir </c> property is used.
+    ''' </summary>
+    Public Property UWPArchiveFile As iniFileChooser = New iniFileChooser("", winapp2file.ArchiveFileName, mustExist:=False)
+
+    ''' <summary>
     ''' Indicates whether output is written as per-letter artifact files
     ''' (<c> #.ini </c>, <c> A.ini </c> ... <c> Z.ini </c>) in the save target's directory,
     ''' bucketed by each entry name's first character, instead of a single output file.
@@ -111,6 +127,7 @@ Public Module uwpbuildersettings
         UWPFile1 = New iniFileChooser(Environment.CurrentDirectory, "", "")
         UWPFile2 = New iniFileChooser(Environment.CurrentDirectory, "uwp.ini", "uwp.ini", mustExist:=False)
         UWPFile3 = New iniFileChooser(Environment.CurrentDirectory, "", "")
+        UWPArchiveFile = New iniFileChooser("", winapp2file.ArchiveFileName, mustExist:=False)
         UWPBuilderSplitOutput = False
         UWPBuilderModuleSettingsChanged = False
         SaveModule(NameOf(UWPBuilder), GetType(uwpbuildersettings))
