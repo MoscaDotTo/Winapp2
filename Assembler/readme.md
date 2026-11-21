@@ -10,7 +10,9 @@ Put a copy of winapp2ool in this folder and run `& '.\build winapp2.ps1'` from P
 
 The script regenerates the committed build artifacts in [Generated](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Generated): the base entries from the [EntryBuilder](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/EntryBuilder) sources, plus BrowserBuilder's and UWPBuilder's output (EntryBuilder and UWPBuilder also read the shared cleaning-pattern catalogs in [Scaffolds](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/Scaffolds)). One strict Combine pass joins them into the base winapp2.ini, and each flavor is made from that. Every flavor and its changelog goes to [Releases](https://github.com/MoscaDotTo/Winapp2/tree/master/Releases) at the repository root, under the name it has on each GitHub release. Nothing in this folder is published.
 
-`& '.\build winapp2.ps1' -Verify` builds nothing. It regenerates every artifact into a scratch folder, byte-compares the result against the committed files under `Generated\`, and fails if anything differs.
+Entries marked `Archive=` in the sources go to [Archived](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Archived) instead, one `archived.ini` per generator. A second strict Combine joins those into the archive, which goes to `Releases` as `archived.ini` with its own changelog. The build fails if an entry name is in both winapp2.ini and the archive.
+
+`& '.\build winapp2.ps1' -Verify` builds nothing. It regenerates every artifact into scratch folders, byte-compares the result against the committed files under `Generated\` and `Archived\`, and fails if anything differs.
 
 ### Contributions
 
@@ -23,6 +25,7 @@ Changes to winapp2.ini or its flavors go in the files under `Sources\`, never in
 | [`build winapp2.ps1`](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/build%20winapp2.ps1) | The build script. Builds the base winapp2.ini and every flavor |
 | [`Sources\`](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources) | Everything written by hand. This is the only place to make changes |
 | [`Generated\`](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Generated) | Everything the build writes for itself. Never edit these files |
+| [`Archived\`](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Archived) | The entries marked `Archive=`, one `archived.ini` per generator. The build writes these too. Never edit them |
 
 ## Sources\
 
@@ -62,3 +65,4 @@ It isn't one to one. CCleaner 7 and FluentCleaner are both built with the CClean
 | `Flavors\BleachBit` | `winapp2-bleachbit.ini` |
 | `Flavors\Tron` | `winapp2-tron.ini` |
 | `Flavors\SystemNinja` | `winapp2-systemninja.rules` |
+| none (the entries marked `Archive=`, from `Archived\`) | `archived.ini` |

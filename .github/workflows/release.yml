@@ -16,9 +16,9 @@
 # that, because it sees nothing changed. Dispatching this workflow releases master as it stands:
 # the bundle comes from master's committed Releases/ files and Assembler/winapp2ool.exe, staged
 # by the same script build-on-merge.yml uses (.github/scripts/release-assets.ps1), and the
-# version is the highest "; Version:" stamp across master's seven Releases/ data files. It
-# refuses when the latest release already has that version, since all we'd get is a duplicate
-# release with an empty changelog.
+# version is the highest "; Version:" stamp across master's Releases/ data files (every
+# flavor and archived.ini). It refuses when the latest release already has that version,
+# since all we'd get is a duplicate release with an empty changelog.
 name: winapp2.ini release
 
 on:

@@ -1,5 +1,6 @@
-# Artifact drift check: does Assembler/Generated still match what the generators produce
-# from their sources, and does the committed winapp2ool.exe still produce it byte for byte?
+# Artifact drift check: do Assembler/Generated and Assembler/Archived still match what the
+# generators produce from their sources, and does the committed winapp2ool.exe still produce
+# them byte for byte?
 #
 # This is the only workflow that runs `build winapp2.ps1 -Verify`. A full build (pr-verify.yml,
 # build-on-merge.yml) regenerates Generated in place before combining, so it never notices
@@ -77,8 +78,9 @@ jobs:
           # string keeps the normal behavior for push and dispatch.
           ref: ${{ github.event_name == 'workflow_run' && 'master' || '' }}
 
-      # -Verify regenerates every artifact into Assembler/Verify and byte-compares it against
-      # the committed Assembler/Generated, exiting 1 on drift and keeping the scratch folder.
+      # -Verify regenerates every artifact into Assembler/Verify and Assembler/VerifyArchived and
+      # byte-compares them against the committed Assembler/Generated and Assembler/Archived,
+      # exiting 1 on drift and keeping the scratch folders.
       # We run it as a child process so the script's `exit N` lands in $LASTEXITCODE.
       - name: Characteristic test (build winapp2.ps1 -Verify)
         shell: pwsh
@@ -96,6 +98,7 @@ jobs:
           name: artifact-drift-failure
           path: |
             Assembler/Verify/**
+            Assembler/VerifyArchived/**
             Assembler/winapp2ool.log
           if-no-files-found: ignore
           retention-days: 7

@@ -4,12 +4,12 @@
     report saying whether the PR breaks the build and what it changes in the output.
 
 .DESCRIPTION
-    Runs Assembler\build winapp2.ps1 twice around a merge. We save the seven flavor
-    files the baseline build published to Releases\, hard reset, merge the PR head, put
-    those seven back in Releases\ as the previous version, and build again. The build
-    script's Backup-Files stage copies each Releases\ file to a .old file and its
-    changelog stage diffs .old against the new build, so the changelogs the second build
-    writes to Releases\ are exactly what the PR changes. Nothing reads the deprecated
+    Runs Assembler\build winapp2.ps1 twice around a merge. We save every flavor
+    file and archived.ini the baseline build published to Releases\, hard reset, merge
+    the PR head, put them back in Releases\ as the previous version, and build
+    again. The build script's Backup-Files stage copies each Releases\ file to a .old file
+    and its changelog stage diffs .old against the new build, so the changelogs the second
+    build writes to Releases\ are exactly what the PR changes. Nothing reads the deprecated
     copies the build also writes outside Releases\, so we ignore them.
 
 .PARAMETER BaseSha
@@ -62,9 +62,10 @@ if (-not (Test-Path $Exe)) { throw "winapp2ool.exe missing from Assembler; a Rel
 New-Item -ItemType Directory -Force -Path $ReportDir | Out-Null
 Set-Content -Path (Join-Path $ReportDir 'pr-number.txt') -Value $PrNumber -NoNewline
 
-# The seven published flavor files, relative to the repo root, paired with the flavor
-# label and the changelog the build script publishes beside each one. Order matches
-# build winapp2.ps1's Backup-Files / changelog stages.
+# Each published flavor file and the archive, relative to the repo root, paired with
+# a label and the changelog the build script publishes beside each one. Order matches
+# build winapp2.ps1's Backup-Files / changelog stages. The archive is here so a PR that
+# archives an entry shows both halves of the move: out of Base, into Archive.
 $Outputs = @(
     @{ Flavor = 'Base';          Output = 'Releases\winapp2.ini';               Diff = 'Releases\changelog-base.txt' }
     @{ Flavor = 'CCleaner';      Output = 'Releases\winapp2-ccleaner.ini';      Diff = 'Releases\changelog-ccleaner.txt' }
@@ -73,6 +74,7 @@ $Outputs = @(
     @{ Flavor = 'FluentCleaner'; Output = 'Releases\winapp2-fluentcleaner.ini'; Diff = 'Releases\changelog-fluentcleaner.txt' }
     @{ Flavor = 'Tron';          Output = 'Releases\winapp2-tron.ini';          Diff = 'Releases\changelog-tron.txt' }
     @{ Flavor = 'SystemNinja';   Output = 'Releases\winapp2-systemninja.rules'; Diff = 'Releases\changelog-systemninja.txt' }
+    @{ Flavor = 'Archive';       Output = 'Releases\archived.ini';              Diff = 'Releases\changelog-archived.txt' }
 )
 
 function Invoke-Git {
@@ -155,7 +157,7 @@ $(Get-Tail $baselineTranscript)
     Complete-Verification -Status 'baseline_failed' -ReportMarkdown $body
 }
 
-# --- 2. Preserve the seven baseline outputs --------------------------------------
+# --- 2. Preserve the baseline outputs --------------------------------------------
 $baselineSave = Join-Path $ReportDir '_baseline'
 New-Item -ItemType Directory -Force -Path $baselineSave | Out-Null
 foreach ($o in $Outputs) {

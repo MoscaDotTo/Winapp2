@@ -3,12 +3,12 @@
 # Generated-artifact guard: did this change edit a build output without editing the source
 # that produces it?
 #
-# `Assembler/build winapp2.ps1` generates every .ini under Assembler/Generated/, the 14
-# published files in Releases/ (seven flavor files and their changelogs), and their
-# deprecated copies (the seven old Winapp2.ini/diff.txt pairs at the root and under
-# Non-CCleaner/). Before the 2026-11 layout move the generated files lived under
-# Assembler/Entries/, and we still treat those paths as generated because a branch made
-# before the move lists them in its diff. Hand-editing any of these looks like it worked,
+# `Assembler/build winapp2.ps1` generates every .ini under Assembler/Generated/ and
+# Assembler/Archived/, the published files in Releases/ (each flavor, archived.ini and their
+# changelogs), and their deprecated copies (the old Winapp2.ini/diff.txt pairs at the root and
+# under Non-CCleaner/, and Winapp3/Archived entries.ini). Before the 2026-11
+# layout move the generated files lived under Assembler/Entries/, and we still treat those
+# paths as generated because a branch made before the move lists them in its diff. Hand-editing any of these looks like it worked,
 # since the file on disk says what you wanted. Then the next daily build regenerates it from
 # the untouched source and the edit is gone. Nothing fails, the edit just disappears, and you
 # find out from tomorrow's changelog instead of from CI today. This script makes it a red X
@@ -30,6 +30,9 @@
 #        Assembler/Generated/UWPBuilder/<L>.ini   <- Assembler/Sources/UWPBuilder/AppInfo/<L>.ini (1:1 by letter)
 #        Assembler/Generated/BrowserBuilder/*     <- Assembler/Sources/BrowserBuilder/**
 #        any other Assembler/Generated/UWPBuilder/* <- Assembler/Sources/UWPBuilder/**
+#        Assembler/Archived/**                    <- any of the three builders' sources
+#      (The archive takes entries marked Archive= from all three builders, so a source
+#      edit to any of them can move it.)
 #      A changed artifact whose own source is untouched gets flagged even when some
 #      unrelated source changed, which catches a correct source edit plus a stray
 #      hand-edit somewhere else in Generated/.
@@ -45,9 +48,9 @@
 #      changes Z.ini alongside A.ini, which rule 2 would flag. check-source-letters.sh fails
 #      any such entry in the same workflow.
 #
-# The aggregate published files (Releases/ and the deprecated Winapp2.ini, diff.txt and
-# Non-CCleaner/** copies) only get rule 1. Any source anywhere can move them, so there's no
-# narrower source to ask for.
+# The aggregate published files (Releases/ and the deprecated Winapp2.ini, diff.txt,
+# Non-CCleaner/** and Winapp3/Archived entries.ini copies) only get rule 1. Any source
+# anywhere can move them, so there's no narrower source to ask for.
 #
 # Known limitation: rule 1 can't tell a hand-edit from a deliberate regeneration. "Output
 # moved, source didn't" has two innocent causes besides the oopsie: seeding a new artifact
@@ -101,6 +104,8 @@ gen_uwp_letters=""  # bare letters of Generated/UWPBuilder/<L>.ini
 gen_browsers=0
 gen_uwp=""          # other Generated/UWPBuilder files (and the pre-move Entries/UWP/)
 gen_other=""        # other Generated/ files + the published aggregates
+gen_archived=""     # Assembler/Archived/ files
+gen_archive_copy=0  # Winapp3/Archived entries.ini, kept out of gen_other because of its space
 gen_count=0
 
 # Build inputs touched.
@@ -168,14 +173,19 @@ while IFS= read -r f; do
       esac ;;
     'Assembler/Generated/'*|'Assembler/Entries/'*)
       gen_count=$((gen_count + 1)); gen_other="$gen_other $f" ;;
-    # The 14 release data files, named one by one so nothing else in Releases/ counts.
-    'Releases/winapp2.ini'|'Releases/winapp2-ccleaner.ini'|'Releases/winapp2-ccleaner7.ini'|'Releases/winapp2-bleachbit.ini'|'Releases/winapp2-fluentcleaner.ini'|'Releases/winapp2-tron.ini'|'Releases/winapp2-systemninja.rules')
+    # The archive tree: each builder's archived.ini. Before the Assembler/ catch-all below.
+    'Assembler/Archived/'*)
+      gen_count=$((gen_count + 1)); gen_archived="$gen_archived $f" ;;
+    # The release data files, named one by one so nothing else in Releases/ counts.
+    'Releases/winapp2.ini'|'Releases/winapp2-ccleaner.ini'|'Releases/winapp2-ccleaner7.ini'|'Releases/winapp2-bleachbit.ini'|'Releases/winapp2-fluentcleaner.ini'|'Releases/winapp2-tron.ini'|'Releases/winapp2-systemninja.rules'|'Releases/archived.ini')
       gen_count=$((gen_count + 1)); gen_other="$gen_other $f" ;;
-    'Releases/changelog-base.txt'|'Releases/changelog-ccleaner.txt'|'Releases/changelog-ccleaner7.txt'|'Releases/changelog-bleachbit.txt'|'Releases/changelog-fluentcleaner.txt'|'Releases/changelog-tron.txt'|'Releases/changelog-systemninja.txt')
+    'Releases/changelog-base.txt'|'Releases/changelog-ccleaner.txt'|'Releases/changelog-ccleaner7.txt'|'Releases/changelog-bleachbit.txt'|'Releases/changelog-fluentcleaner.txt'|'Releases/changelog-tron.txt'|'Releases/changelog-systemninja.txt'|'Releases/changelog-archived.txt')
       gen_count=$((gen_count + 1)); gen_other="$gen_other $f" ;;
     # Their deprecated copies, published until the deprecation window closes.
     'Winapp2.ini'|'diff.txt'|'Non-CCleaner/'*'Winapp2.ini'|'Non-CCleaner/'*'Winapp2.rules'|'Non-CCleaner/'*'diff.txt')
       gen_count=$((gen_count + 1)); gen_other="$gen_other $f" ;;
+    'Winapp3/Archived entries.ini')
+      gen_count=$((gen_count + 1)); gen_archive_copy=1 ;;
 
     # ---- per-artifact sources.
     # The bare Assembler/EntryBuilder/, BrowserBuilder/ and UWP/ patterns are the pre-move
@@ -268,10 +278,20 @@ if [ "$src_count" -eq 0 ]; then
       "generated by UWPBuilder; edit the sources in Assembler/Sources/UWPBuilder/ instead"
     note "- \`$f\` <- \`Assembler/Sources/UWPBuilder/\`"
   done
+  for f in $gen_archived; do
+    annotate "$f" \
+      "generated from the entries marked Archive= in the builders' sources; archive or restore an entry there instead"
+    note "- \`$f\` <- the entries marked \`Archive=\` in \`Assembler/Sources/\` (EntryBuilder, UWPBuilder, BrowserBuilder)"
+  done
   for f in $gen_other; do
     annotate "$f" "build output; edit the sources under Assembler/ instead"
     note "- \`$f\` <- the build (\`Assembler/build winapp2.ps1\`)"
   done
+  if [ "$gen_archive_copy" -eq 1 ]; then
+    annotate "Winapp3/Archived entries.ini" \
+      "build output; archive an entry by adding Archive=<reason> to it in its source under Assembler/Sources/ instead"
+    note "- \`Winapp3/Archived entries.ini\` <- the build (\`Assembler/build winapp2.ps1\`)"
+  fi
 
 elif [ "$global" -eq 1 ]; then
   # No rule 2: a global input can move artifacts whose own per-letter source is untouched.
@@ -316,6 +336,14 @@ else
       fi
     done
   fi
+  if [ -n "$gen_archived" ] && [ -z "$src_entrybuilder" ] && [ "$src_browserbuilder" -eq 0 ] && [ "$src_uwp" -eq 0 ]; then
+    fail=1; orphans=1
+    for f in $gen_archived; do
+      annotate "$f" \
+        "changed, but no EntryBuilder, UWPBuilder or BrowserBuilder source did, so the next build will overwrite this edit"
+      note "- \`$f\` changed, but no source under \`Assembler/Sources/EntryBuilder/\`, \`UWPBuilder/\` or \`BrowserBuilder/\` did"
+    done
+  fi
   if [ -n "$gen_uwp" ] && [ "$src_uwp" -eq 0 ]; then
     fail=1; orphans=1
     for f in $gen_uwp; do
@@ -352,9 +380,10 @@ if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
     echo
     printf '%s' "$summary"
     echo
-    echo "Everything under \`Assembler/Generated/\`, the published files in \`Releases/\`, and"
-    echo "their old \`Winapp2.ini\` and \`diff.txt\` copies are **build output**, produced by"
-    echo "\`Assembler/build winapp2.ps1\`. Edit the sources and let the build write the output."
+    echo "Everything under \`Assembler/Generated/\` and \`Assembler/Archived/\`, the published files"
+    echo "in \`Releases/\`, and their old copies (\`Winapp2.ini\`, \`diff.txt\`, \`Winapp3/Archived entries.ini\`)"
+    echo "are **build output**, produced by \`Assembler/build winapp2.ps1\`. Edit the sources and let"
+    echo "the build write the output. To retire an entry, add \`Archive=<reason>\` to it in its source."
     echo
     echo "If you committed regenerated output on purpose, put \`[regen]\` or"
     echo "\`[skip-generated-check]\` in the commit message or PR title to override."

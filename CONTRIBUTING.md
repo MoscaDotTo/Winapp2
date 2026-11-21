@@ -18,7 +18,7 @@ Nobody edits winapp2.ini directly anymore. [winapp2ool](https://github.com/Mosca
 2. [Finding the source of an existing entry](#finding-the-source-of-an-existing-entry)
 3. [Adding your first entry](#adding-your-first-entry)
 4. [Updating an existing entry](#updating-an-existing-entry)
-5. [Retiring an entry](#retiring-an-entry)
+5. [Archiving an entry](#archiving-an-entry)
 6. [General rules](#general-rules)
 7. [Standard entries](#standard-entries)
 8. [Browser entries](#browser-entries)
@@ -44,12 +44,12 @@ Nobody edits winapp2.ini directly anymore. [winapp2ool](https://github.com/Mosca
 | Add a browser entry; Update or remove a generated browser entry | `Assembler/Sources/BrowserBuilder/browser_*.ini` |
 | Add, update, or remove an entry for a power-user or aggressive operation | `Winapp3/Winapp3.ini` |
 | Fix an entry that already exists in winapp2.ini | Find its source file first. See [Finding the source of an existing entry](#finding-the-source-of-an-existing-entry) |
-| Retire an entry for software that no longer exists | Move it from its source file to `Winapp3/Archived entries.ini`. See [Retiring an entry](#retiring-an-entry) |
+| Archive an entry and remove it from the mainline winapp2.ini | Add `Archive=<reason>` to the entry in its source file. See [Archiving an entry](#archiving-an-entry) |
 | Report a flavor-specific issue | Open an issue, or edit that flavor's files in `Assembler/Sources/Flavors/<FlavorName>`, where `<FlavorName>` is the tool the flavor is for: `CCleaner`, `CCleaner7`, `BleachBit`, `SystemNinja`, `Tron` or `FluentCleaner` |
 
-Every base entry lives in `Assembler/Sources/EntryBuilder/<letter>.ini`, and standard winapp2.ini syntax works there. The folder is named after the winapp2ool module that processes it, which also offers a shorthand you never have to use. The files under `Assembler/Generated/` are build artifacts, regenerated from these sources on every build, so don't edit them. See [EntryBuilder entries](#entrybuilder-entries).
+Every base entry lives in `Assembler/Sources/EntryBuilder/<letter>.ini`, and standard winapp2.ini syntax works there. The folder is named after the winapp2ool module that processes it, which also offers a shorthand you never have to use. The files under `Assembler/Generated/` and `Assembler/Archived/` are build artifacts, regenerated from these sources on every build, so don't edit them. See [EntryBuilder entries](#entrybuilder-entries).
 
-Editing a build artifact instead of its source is an easy mistake to make. The next build regenerates the artifact from the unchanged source, and your change silently disappears. CI catches this: if your PR changes a file under `Assembler/Generated/`, or a published file in `Releases/` (or one of its old copies), without changing the source that produces it, the **generated artifact guard** fails and names the source file to edit instead. See [What happens after you open a PR](#what-happens-after-you-open-a-pr).
+Editing a build artifact instead of its source is an easy mistake to make. The next build regenerates the artifact from the unchanged source, and your change silently disappears. CI catches this: if your PR changes a file under `Assembler/Generated/` or `Assembler/Archived/`, or a published file in `Releases/` (or one of its old copies), without changing the source that produces it, the **generated artifact guard** fails and names the source file to edit instead. See [What happens after you open a PR](#what-happens-after-you-open-a-pr).
 
 ---
 
@@ -108,13 +108,30 @@ Open a PR against `master`.
 
 ---
 
-## Retiring an entry
+## Archiving an entry
 
-Entries for software that's no longer available move to the archive at `Winapp3/Archived entries.ini` instead of being deleted, so people still running the software can keep using them.
+Entries for software that's no longer available move to the archive instead of being deleted. The archive is published beside winapp2.ini as `archived.ini` on every [release](https://github.com/MoscaDotTo/Winapp2/releases/latest), with its own changelog.
 
-1. Take the entry out of the build. If it's written in standard syntax, remove it from its source file. If it's generated (BrowserBuilder, UWPBuilder, or EntryBuilder shorthand), add a `Skip=` key to its source section instead.
-2. Add it to `Winapp3/Archived entries.ini` in alphabetical order, in standard winapp2.ini syntax. An entry already in standard syntax moves as is. For a generated entry, copy its generated form from the artifact under `Assembler/Generated/`.
-3. Say in your PR why the software is being archived (the vendor's site is gone, a live service shut down, and so on).
+To archive an entry, add an `Archive=` line to it in its source file, with the reason as its value. The entry stays where it is:
+
+```ini
+[LEGO Universe *]
+Archive=Discontinued (2012)
+
+Section=Games
+DetectFile=%LocalAppData%\LEGO Software\LEGO Universe
+FileKey1=%LocalAppData%\LEGO Software\LEGO Universe\Log Files|*
+```
+
+The build then sends it to `archived.ini` instead of winapp2.ini. This works the same way in all three sets of sources:
+
+- in an EntryBuilder source (`Assembler/Sources/EntryBuilder/<letter>.ini`), on the entry
+- in a UWPBuilder source (`Assembler/Sources/UWPBuilder/AppInfo/<letter>.ini`), on the app's section
+- in BrowserBuilder (`chromium.ini` or `gecko.ini`), on the browser's `BrowserInfo` section, which archives every entry generated for that browser
+
+To bring an archived entry back, delete its `Archive=` line.
+
+An archived entry keeps its name, so it can't share one with a live entry anywhere in winapp2.ini: the build fails if it does. Never edit `Assembler/Archived/`, `Releases/archived.ini` or the old copy at `Winapp3/Archived entries.ini`. They're all build output, written from the sources on every build.
 
 ---
 
@@ -122,7 +139,7 @@ Entries for software that's no longer available move to the archive at `Winapp3/
 
 ### Software availability
 
-We accept entries for any software that can currently be downloaded. Downloads straight from the vendor are preferred. Software that's only available from download aggregators (Softonic, Uptodown and so on) is accepted too, but entries get audited now and then, and software its original vendor no longer offers may move to the archive at `Winapp3/Archived entries.ini` (see [Retiring an entry](#retiring-an-entry)).
+We accept entries for any software that can currently be downloaded. Downloads straight from the vendor are preferred. Software that's only available from download aggregators (Softonic, Uptodown and so on) is accepted too, but entries get audited now and then, and software its original vendor no longer offers may be archived with an `Archive=` line in its source (see [Archiving an entry](#archiving-an-entry)).
 
 ### Categorization
 
@@ -775,8 +792,8 @@ Some flavor files also have sections named `[*]`, `[*Map: label]` or `[*Name: la
 
 Commit source files only. Leave out build output:
 
-- anything under `Releases/`, which holds every published flavor of winapp2.ini and its changelog, and their old copies (`Winapp2.ini` and `diff.txt` at the root and in the `Non-CCleaner` folder)
-- anything under `Assembler/Generated/`. Every file there opens with a `DO NOT EDIT THIS FILE DIRECTLY` header naming its source
+- anything under `Releases/`, which holds every published flavor of winapp2.ini, the archive, and their changelogs, and their old copies (`Winapp2.ini` and `diff.txt` at the root and in the `Non-CCleaner` folder, and `Winapp3/Archived entries.ini`)
+- anything under `Assembler/Generated/` or `Assembler/Archived/`. Every file there opens with a header naming its source and saying not to edit it
 
 The build regenerates all of them from your source change once it's merged.
 
@@ -789,7 +806,7 @@ git commit -m "add an entry for Example App"
 
 Avoid `git add -A` and `git add .`.
 
-If you [ran the full build](#verifying-your-work) to check your work, your working copy also holds the rebuilt files: the artifacts under `Assembler/Generated/`, every published file in `Releases/`, and their old copies. `git restore` puts them back.
+If you [ran the full build](#verifying-your-work) to check your work, your working copy also holds the rebuilt files: the artifacts under `Assembler/Generated/` and `Assembler/Archived/`, every published file in `Releases/`, and their old copies. `git restore` puts them back.
 
 Watch for the files in `Releases/` in particular. If they were merged, the next build would find them already up to date and publish no release or changelog for your change, so the [maintainer-paths guard](#the-maintainer-paths-guard) fails any PR that includes them.
 
@@ -821,9 +838,9 @@ CI runs this on every PR, but you can run it locally too.
 4. Open the built `Releases/winapp2.ini` (each flavor is written to `Releases/` under its release name, such as `winapp2-ccleaner.ini`) and check that your entry is there and looks the way you expected.
 5. Optionally, load the built `winapp2.ini` into a cleaning tool and scan with it, to confirm your entry targets what you meant and nothing else. Then run the clean and check that what should have survived did.
 
-The build rewrites the artifacts under `Assembler/Generated/` and the published files in your working copy. Rather than cleaning that up afterwards, [stage your source files by name](#what-to-include-in-your-pr) and ignore the rest.
+The build rewrites the artifacts under `Assembler/Generated/` and `Assembler/Archived/` and the published files in your working copy. Rather than cleaning that up afterwards, [stage your source files by name](#what-to-include-in-your-pr) and ignore the rest.
 
-`& '.\build winapp2.ps1' -Verify` is the maintainers' version. It builds nothing: it regenerates every artifact into a scratch folder, byte-compares the result against the committed files in `Assembler/Generated/`, and fails on any difference. CI runs it after every build, and whenever the committed `winapp2ool.exe` changes, to catch artifacts that no longer match their sources.
+`& '.\build winapp2.ps1' -Verify` is the maintainers' version. It builds nothing: it regenerates every artifact into a scratch folder, byte-compares the result against the committed files in `Assembler/Generated/` and `Assembler/Archived/`, and fails on any difference. CI runs it after every build, and whenever the committed `winapp2ool.exe` changes, to catch artifacts that no longer match their sources.
 
 ---
 

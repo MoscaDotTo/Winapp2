@@ -8,17 +8,17 @@
       * build-on-merge.yml stages the bundle right after the daily build commits;
       * release.yml's workflow_dispatch recovery path stages it from master's committed files.
 
-    The 14 release data files live in Releases\ under the names they carry on the release
-    (winapp2ool's WinappFlavorInfo names the same assets). They are named one by one, never
-    globbed, so nothing else that lands in Releases\ becomes an asset or a gate input by accident.
-    winapp2ool.exe is the fifteenth asset.
+    The release data files live in Releases\ under the names they carry on the release
+    (winapp2ool's WinappFlavorInfo names the flavors; archived.ini is the Downloader's
+    archive link). They are named one by one, never globbed, so nothing else that lands in
+    Releases\ becomes an asset or a gate input by accident. The release also carries winapp2ool.exe.
 
     Defines:
-      $ReleaseDataFiles   the seven flavor files ("published" files: the release gate's input)
-      $ReleaseChangelogs  the seven changelogs
-      $ReleaseFiles       all 14, as repo-relative paths (Releases/<name>)
+      $ReleaseDataFiles   every flavor file and archived.ini ("published" files: the release gate's input)
+      $ReleaseChangelogs  their changelogs
+      $ReleaseFiles       both lists, as repo-relative paths (Releases/<name>)
       Get-ReleaseVersion  the highest "; Version:" stamp across the given files
-      New-ReleaseBundle   copies the 15 assets plus version.txt and commit.txt into a folder
+      New-ReleaseBundle   copies the assets plus version.txt and commit.txt into a folder
 #>
 
 $ReleaseDataFiles = @(
@@ -29,6 +29,7 @@ $ReleaseDataFiles = @(
     'winapp2-fluentcleaner.ini'
     'winapp2-tron.ini'
     'winapp2-systemninja.rules'
+    'archived.ini'
 )
 
 $ReleaseChangelogs = @(
@@ -39,6 +40,7 @@ $ReleaseChangelogs = @(
     'changelog-fluentcleaner.txt'
     'changelog-tron.txt'
     'changelog-systemninja.txt'
+    'changelog-archived.txt'
 )
 
 $ReleaseFiles = @($ReleaseDataFiles + $ReleaseChangelogs | ForEach-Object { "Releases/$_" })
@@ -64,7 +66,7 @@ function Get-ReleaseVersion {
 function New-ReleaseBundle {
     <#
     .SYNOPSIS
-        Stages the release assets in Destination: each of the 14 release data files under its
+        Stages the release assets in Destination: each release data file under its
         own name, Assembler/winapp2ool.exe as winapp2ool.exe, and the version.txt and commit.txt
         that release.yml reads. A missing asset throws: 1.8 clients download every flavor from
         the latest release, so a release without one would 404 that flavor for all of them.

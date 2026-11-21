@@ -3,7 +3,7 @@
     Builds winapp2.ini and its various flavors using winapp2ool.
 
 .DESCRIPTION
-    This script requires winapp2ool v1.8.9811.20779 or newer, and refuses to run an older one:
+    This script requires winapp2ool v1.8.9821.22100 or newer, and refuses to run an older one:
     Creates backups, regenerates the committed build artifacts under Generated\
     (base entries from Sources\EntryBuilder into Generated\EntryBuilder, browser entries
     into Generated\BrowserBuilder, UWP entries into Generated\UWPBuilder), merges them
@@ -12,14 +12,19 @@
     then copied to their old paths for the deprecation window ($script:DeprecatedPublishPaths).
     Generator stages read the shared scaffold catalogs from the Sources\Scaffolds directory.
 
+    Entries marked Archive= in the sources go to Archived\ instead, one archived.ini per
+    builder. A second strict Combine joins those into archived.ini, which is linted with
+    -archive, checked against winapp2.ini for shared names, and published with its own
+    changelog like a flavor.
+
     With -Verify, no build is performed: all artifacts are instead regenerated into
-    a scratch directory and byte-compared against the committed Generated\ artifacts,
+    scratch directories and byte-compared against the committed Generated\ and Archived\ artifacts,
     exiting nonzero on any drift. This is the characteristic test used to prove the
     committed artifacts match their sources
 
 .PARAMETER Verify
-    Regenerate all artifacts into Verify\ and byte-compare them against the
-    committed artifacts under Generated\ instead of building. Exits 0 when every
+    Regenerate all artifacts into Verify\ and VerifyArchived\ and byte-compare each against
+    its committed tree (Generated\, Archived\) instead of building. Exits 0 when every
     artifact matches, 1 on any drift (the scratch output is retained for
     inspection on failure).
 
@@ -29,7 +34,12 @@
     backslash, e.g. '\Parity\Source'). Paired with -ToolPath this is how CI runs
     two different winapp2ool binaries over the same sources and diffs the results.
     Only the root's BrowserBuilder, UWPBuilder and EntryBuilder folders are cleared
-    first; anything else in the root is left alone.
+    first; anything else in the root is left alone. Needs -ArchiveTo.
+
+.PARAMETER ArchiveTo
+    With -GenerateTo, the root the builders write their archived.ini files into, cleared
+    the same way (e.g. '\Archived'). It must sit outside the -GenerateTo root, so an
+    archive can never land in a tree the strict Combine reads.
 
 .PARAMETER ToolPath
     Use this winapp2ool.exe instead of the one beside this script. Directory args
@@ -38,7 +48,7 @@
 
 .NOTES
     Author: Hazel Ward
-    Version 20260930
+    Version 20261121
     Copyright 2026
 #>
 
@@ -46,6 +56,7 @@
 param(
     [switch]$Verify,
     [string]$GenerateTo,
+    [string]$ArchiveTo,
     [string]$ToolPath
 )
 
@@ -262,6 +273,8 @@ $script:DeprecatedPublishPaths = @{
     'winapp2-fluentcleaner.ini' = @{ Data = '..\Non-CCleaner\FluentCleaner\Winapp2.ini'; Changelog = '..\Non-CCleaner\FluentCleaner\diff.txt' }
     'winapp2-tron.ini'          = @{ Data = '..\Non-CCleaner\Tron\Winapp2.ini';          Changelog = '..\Non-CCleaner\Tron\diff.txt' }
     'winapp2-systemninja.rules' = @{ Data = '..\Non-CCleaner\SystemNinja\Winapp2.rules'; Changelog = '..\Non-CCleaner\SystemNinja\diff.txt' }
+    # The archive never had a changelog at its old path
+    'archived.ini'              = @{ Data = '..\Winapp3\Archived entries.ini';           Changelog = $null }
 }
 # ---- End of the deprecation window -----------------------------------------------------------
 
@@ -284,7 +297,7 @@ function Publish-Flavor {
     $oldDir = Split-Path $old.Data
     if (-not (Test-Path $oldDir)) { New-Item -ItemType Directory -Force -Path $oldDir | Out-Null }
     Copy-Item "$releases\$DataFile" $old.Data -Force
-    if ($HaveDiff) { Copy-Item "$releases\$Changelog" $old.Changelog -Force }
+    if ($HaveDiff -and $old.Changelog) { Copy-Item "$releases\$Changelog" $old.Changelog -Force }
 }
 
 function Backup-Files {
@@ -298,7 +311,11 @@ function Backup-Files {
         @{Source = "..\Releases\winapp2-fluentcleaner.ini"; Dest = "winapp2-fc.old"}
         @{Source = "..\Releases\winapp2-systemninja.rules"; Dest = "winapp2-sn.old"}
         @{Source = "..\Releases\winapp2-tron.ini"; Dest = "winapp2-tron.old"}
+        @{Source = "..\Releases\archived.ini"; Dest = "archived.old"}
     )
+
+    # A baseline left over from an interrupted run would stand in for a missing published file
+    Remove-Item 'archived.old' -Force -ErrorAction SilentlyContinue
 
     foreach ($backup in $backups) {
         if (Test-Path $backup.Source) {
@@ -308,24 +325,25 @@ function Backup-Files {
 }
 
 function Build-Artifacts {
-    param([string]$OutputRoot)
+    # Each builder writes its live output under OutputRoot and its archived.ini under ArchiveRoot
+    param([string]$OutputRoot, [string]$ArchiveRoot)
 
     Write-Step "Generating browser entries"
     if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-browserbuilder', '-1d', '\Sources\BrowserBuilder', `
-        '-2d', "$OutputRoot\BrowserBuilder", '-2f', 'browsers.ini' `
+        '-2d', "$OutputRoot\BrowserBuilder", '-2f', 'browsers.ini', '-3d', "$ArchiveRoot\BrowserBuilder" `
         -ErrorMessage "Failed to generate browser entries" -RequiredDirs @(Join-Path $PSScriptRoot 'Sources\BrowserBuilder'))) { return $false }
 
     Write-Step "Generating UWP entries"
     if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-uwpbuilder', '-split', '-1d', '\Sources\UWPBuilder', `
         '-2d', "$OutputRoot\UWPBuilder", `
-        '-3d', '\Sources\Scaffolds' `
+        '-3d', '\Sources\Scaffolds', '-4d', "$ArchiveRoot\UWPBuilder" `
         -ErrorMessage "Failed to generate UWP entries" `
         -RequiredDirs @((Join-Path $PSScriptRoot 'Sources\UWPBuilder'), (Join-Path $PSScriptRoot 'Sources\Scaffolds')))) { return $false }
 
     Write-Step "Generating base entries from EntryBuilder sources"
     if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-entrybuilder', '-split', '-1d', '\Sources\EntryBuilder', `
         '-2d', "$OutputRoot\EntryBuilder", `
-        '-3d', '\Sources\Scaffolds' `
+        '-3d', '\Sources\Scaffolds', '-4d', "$ArchiveRoot\EntryBuilder" `
         -ErrorMessage "Failed to generate EntryBuilder entries" `
         -RequiredDirs @((Join-Path $PSScriptRoot 'Sources\EntryBuilder'), (Join-Path $PSScriptRoot 'Sources\Scaffolds')))) { return $false }
 
@@ -335,7 +353,7 @@ function Build-Artifacts {
 function Build-MainFile {
     Write-Step "Building winapp2.ini, please wait"
 
-    if (-not (Build-Artifacts -OutputRoot '\Generated')) { return $false }
+    if (-not (Build-Artifacts -OutputRoot '\Generated' -ArchiveRoot '\Archived')) { return $false }
 
     Write-Step "Merging entry artifacts"
     if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-combine', '-strict', '-1d', '\Generated', '-3f', 'Winapp2.ini' `
@@ -360,6 +378,76 @@ function Build-MainFile {
 
     Publish-Flavor -Built 'Winapp2.ini' -DataFile 'winapp2.ini' -Changelog 'changelog-base.txt' -HaveDiff $haveDiff
     Write-Host "Winapp2.ini built" -ForegroundColor Green
+
+    return $true
+}
+
+function Get-SectionNames {
+    param([string]$Path)
+
+    return @(Get-Content -LiteralPath $Path | Where-Object { $_ -match '^\[(.+)\]\s*$' } | ForEach-Object { $Matches[1] })
+}
+
+function Test-ArchiveNames {
+    <#
+    .SYNOPSIS
+        Fails when an entry name is both live and archived.
+
+    .DESCRIPTION
+        EntryBuilder and UWPBuilder each catch a live and an archived entry of one name inside
+        their own sources, but nothing else sees across builders: an archived EntryBuilder entry
+        named like a generated browser entry would otherwise ship in both files.
+    #>
+    param([string]$Live, [string]$Archive)
+
+    $liveNames = New-Object 'System.Collections.Generic.HashSet[string]' ([StringComparer]::OrdinalIgnoreCase)
+    foreach ($name in Get-SectionNames $Live) { [void]$liveNames.Add($name) }
+
+    $both = @(Get-SectionNames $Archive | Where-Object { $liveNames.Contains($_) })
+    if ($both.Count -eq 0) { return $true }
+
+    Write-ErrorMsg "$($both.Count) entry name(s) are in both $Live and $Archive. An entry is either live or archived:"
+    $both | ForEach-Object { Write-Host "  [$_]" -ForegroundColor Red }
+    return $false
+}
+
+function Build-Archive {
+    Write-Step "Building archived.ini"
+
+    Remove-Item 'archived.ini' -Force -ErrorAction SilentlyContinue
+
+    # Build-MainFile's generators already wrote one archived.ini per builder under Archived\
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-combine', '-strict', '-1d', '\Archived', '-3f', 'archived.ini' `
+        -ErrorMessage "Failed to merge the archive artifacts" -RequiredDirs @(Join-Path $PSScriptRoot 'Archived'))) { return $false }
+
+    # Combine exits 0 when it finds nothing to combine
+    if (-not (Test-Path 'archived.ini')) {
+        Write-ErrorMsg "Merging the archive artifacts produced no archived.ini"
+        return $false
+    }
+
+    Write-Step "Performing static analysis on the archive and saving corrections"
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-debug', '-archive', '-usedate', '-c', '-opti', '-1f', 'archived.ini', '-3f', 'archived.ini' `
+        -ErrorMessage "Failed archive analysis")) { return $false }
+
+    Write-Step "Checking that no entry is both live and archived"
+    if (-not (Test-ArchiveNames -Live 'Winapp2.ini' -Archive 'archived.ini')) { return $false }
+
+    if (-not (Test-ContentChanged 'archived.ini' 'archived.old')) {
+        Write-Host "archived.ini is unchanged since the last build - not republishing" -ForegroundColor Yellow
+        return $true
+    }
+
+    Write-Step "Creating changelog"
+    $haveDiff = Test-Path 'archived.old'
+    if ($haveDiff) {
+        if (-not (Invoke-Changelog -Old 'archived.old' -New 'archived.ini')) { return $false }
+    } else {
+        Write-Host "No previous build found, skipping changelog" -ForegroundColor Yellow
+    }
+
+    Publish-Flavor -Built 'archived.ini' -DataFile 'archived.ini' -Changelog 'changelog-archived.txt' -HaveDiff $haveDiff
+    Write-Host "archived.ini built" -ForegroundColor Green
 
     return $true
 }
@@ -544,46 +632,59 @@ function Build-SystemNinjaFlavor {
     return $true
 }
 
+function Compare-ArtifactTree {
+    # Returns one line per difference between a committed tree and its regeneration
+    param([string]$Committed, [string]$Scratch)
+
+    $name = Split-Path $Committed -Leaf
+    $drift = @()
+
+    foreach ($file in Get-ChildItem $Committed -Filter '*.ini' -Recurse -File) {
+        $rel = $file.FullName.Substring($Committed.Length + 1)
+        $counterpart = Join-Path $Scratch $rel
+        if (-not (Test-Path $counterpart)) {
+            $drift += "missing from regeneration: $name\$rel"
+            continue
+        }
+        if ((Get-FileHash $file.FullName).Hash -ne (Get-FileHash $counterpart).Hash) {
+            $drift += "content drift: $name\$rel"
+        }
+    }
+
+    foreach ($file in Get-ChildItem $Scratch -Filter '*.ini' -Recurse -File) {
+        $rel = $file.FullName.Substring($Scratch.Length + 1)
+        if (-not (Test-Path (Join-Path $Committed $rel))) {
+            $drift += "not present in committed artifacts: $name\$rel"
+        }
+    }
+
+    return $drift
+}
+
 function Test-Artifacts {
     Write-Step "Regenerating artifacts into scratch for characteristic testing"
 
     $scratch = Join-Path $PSScriptRoot 'Verify'
-    if (Test-Path $scratch) { Remove-Item $scratch -Recurse -Force }
-
-    if (-not (Build-Artifacts -OutputRoot '\Verify')) { return $false }
-
-    Write-Step "Comparing regenerated artifacts against committed artifacts under Generated"
-
-    $entriesDir = Join-Path $PSScriptRoot 'Generated'
-    $drift = @()
-
-    foreach ($file in Get-ChildItem $entriesDir -Filter '*.ini' -Recurse -File) {
-        $rel = $file.FullName.Substring($entriesDir.Length + 1)
-        $counterpart = Join-Path $scratch $rel
-        if (-not (Test-Path $counterpart)) {
-            $drift += "missing from regeneration: $rel"
-            continue
-        }
-        if ((Get-FileHash $file.FullName).Hash -ne (Get-FileHash $counterpart).Hash) {
-            $drift += "content drift: $rel"
-        }
+    $archiveScratch = Join-Path $PSScriptRoot 'VerifyArchived'
+    foreach ($dir in $scratch, $archiveScratch) {
+        if (Test-Path $dir) { Remove-Item $dir -Recurse -Force }
     }
 
-    foreach ($file in Get-ChildItem $scratch -Filter '*.ini' -Recurse -File) {
-        $rel = $file.FullName.Substring($scratch.Length + 1)
-        if (-not (Test-Path (Join-Path $entriesDir $rel))) {
-            $drift += "not present in committed artifacts: $rel"
-        }
-    }
+    if (-not (Build-Artifacts -OutputRoot '\Verify' -ArchiveRoot '\VerifyArchived')) { return $false }
+
+    Write-Step "Comparing regenerated artifacts against committed artifacts under Generated and Archived"
+
+    $drift = @(Compare-ArtifactTree -Committed (Join-Path $PSScriptRoot 'Generated') -Scratch $scratch)
+    $drift += @(Compare-ArtifactTree -Committed (Join-Path $PSScriptRoot 'Archived') -Scratch $archiveScratch)
 
     if ($drift.Count -gt 0) {
-        Write-ErrorMsg "Artifact drift detected - committed artifacts under Generated do not match their sources"
+        Write-ErrorMsg "Artifact drift detected - committed artifacts under Generated or Archived do not match their sources"
         $drift | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }
-        Write-Host "Regenerated artifacts retained in $scratch for inspection" -ForegroundColor Yellow
+        Write-Host "Regenerated artifacts retained in $scratch and $archiveScratch for inspection" -ForegroundColor Yellow
         return $false
     }
 
-    Remove-Item $scratch -Recurse -Force
+    Remove-Item $scratch, $archiveScratch -Recurse -Force
     Write-Host "All committed artifacts match their sources" -ForegroundColor Green
     return $true
 }
@@ -595,6 +696,8 @@ function Remove-TemporaryFiles {
         'winapp2*.old',
         'winapp2*.ini',
         'winapp2.rules',
+        'archived*.ini',
+        'archived.old',
         'diff.txt',
         'diffsummary.txt'
     )
@@ -616,16 +719,33 @@ try {
     # Generate-and-stop. Deliberately does NOT compare against Generated\: the caller is
     # diffing two generated trees against each other, so the committed artifacts are
     # not part of the question and their staleness must not fail the run.
+    if ($ArchiveTo -and -not $GenerateTo) {
+        Write-ErrorMsg "-ArchiveTo only goes with -GenerateTo"
+        exit 1
+    }
+
     if ($GenerateTo) {
-        $target = Join-Path $PSScriptRoot $GenerateTo.TrimStart('\')
+        if (-not $ArchiveTo) {
+            Write-ErrorMsg "-GenerateTo needs -ArchiveTo, the root for the archived entries (e.g. -GenerateTo '\Generated' -ArchiveTo '\Archived')"
+            exit 1
+        }
+        $target = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot $GenerateTo.TrimStart('\'))).TrimEnd('\')
+        $archiveTarget = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot $ArchiveTo.TrimStart('\'))).TrimEnd('\')
+        if ($archiveTarget -eq $target -or $archiveTarget.StartsWith("$target\", [StringComparison]::OrdinalIgnoreCase) -or
+            $target.StartsWith("$archiveTarget\", [StringComparison]::OrdinalIgnoreCase)) {
+            Write-ErrorMsg "-ArchiveTo and -GenerateTo must not overlap: the strict Combine would read the archive as live entries"
+            exit 1
+        }
         # Clear only the builders' folders, so a tracked file beside them survives
         # (-GenerateTo '\Generated' used to delete Generated\readme.md)
-        foreach ($builder in 'BrowserBuilder', 'UWPBuilder', 'EntryBuilder') {
-            $folder = Join-Path $target $builder
-            if (Test-Path $folder) { Remove-Item $folder -Recurse -Force }
+        foreach ($root in $target, $archiveTarget) {
+            foreach ($builder in 'BrowserBuilder', 'UWPBuilder', 'EntryBuilder') {
+                $folder = Join-Path $root $builder
+                if (Test-Path $folder) { Remove-Item $folder -Recurse -Force }
+            }
         }
-        if (-not (Build-Artifacts -OutputRoot $GenerateTo)) { exit 1 }
-        Write-Host "`nArtifacts generated into $target" -ForegroundColor Green
+        if (-not (Build-Artifacts -OutputRoot $GenerateTo -ArchiveRoot $ArchiveTo)) { exit 1 }
+        Write-Host "`nArtifacts generated into $target and $archiveTarget" -ForegroundColor Green
         exit 0
     }
 
@@ -638,6 +758,7 @@ try {
     Backup-Files
 
     if (-not (Build-MainFile)) { exit 1 }
+    if (-not (Build-Archive)) { exit 1 }
     if (-not (Build-CCCleanerFlavor)) { exit 1 }
     if (-not (Build-CCleaner7Flavor)) { exit 1 }
     if (-not (Build-FluentCleanerFlavor)) { exit 1 }

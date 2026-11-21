@@ -88,8 +88,10 @@ jobs:
           # still writes during the deprecation window.
           $outputs = @(
             'Assembler/Generated'
+            'Assembler/Archived'
             $ReleaseFiles
             'Winapp2.ini'; 'diff.txt'
+            'Winapp3/Archived entries.ini'
             'Non-CCleaner/Winapp2.ini'; 'Non-CCleaner/diff.txt'
             'Non-CCleaner/BleachBit/Winapp2.ini'; 'Non-CCleaner/BleachBit/diff.txt'
             'Non-CCleaner/CCleaner7/Winapp2.ini'; 'Non-CCleaner/CCleaner7/diff.txt'
@@ -150,7 +152,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'push to master failed; is the branch protected against the Actions token?' }
           $sha = (git rev-parse HEAD).Trim()
 
-          # The 14 Releases files under their own names, plus winapp2ool.exe.
+          # Every Releases file under its own name, plus winapp2ool.exe.
           New-ReleaseBundle -Destination (Join-Path $env:RUNNER_TEMP 'release-bundle') -Version $version -Sha $sha
 
           "released=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append

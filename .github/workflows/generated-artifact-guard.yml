@@ -42,6 +42,7 @@ on:
       - 'diff.txt'
       - 'Non-CCleaner/**'
       - 'Releases/**'
+      - 'Winapp3/Archived entries.ini'
       - '.github/workflows/generated-artifact-guard.yml'
       - '.github/scripts/check-generated-sources.sh'
       - '.github/scripts/check-source-letters.sh'

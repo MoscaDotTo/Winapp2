@@ -49,6 +49,25 @@ The [EntryBuilder readme](https://github.com/MoscaDotTo/Winapp2/blob/master/wina
 
 Every winapp2.ini entry that isn't a browser or UWP entry. Most are written in plain winapp2.ini syntax, and some have been converted to the shorthand.
 
+Archived entries live here too, marked with an `Archive=` line.
+
+### Archived entries
+
+An entry with an `Archive=` key goes to the archive instead of winapp2.ini. EntryBuilder writes it to [`Assembler/Archived/EntryBuilder/archived.ini`](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Archived), and the build publishes the archive as `archived.ini` on every release. The value is the reason it was archived. A bare `Archive=` archives too.
+
+We put the line directly under the section header, followed by a blank line:
+
+```ini
+[LEGO Universe *]
+Archive=Discontinued (2012)
+
+Section=Games
+DetectFile=%LocalAppData%\LEGO Software\LEGO Universe
+FileKey1=%LocalAppData%\LEGO Software\LEGO Universe\Log Files|*
+```
+
+To retire an entry, add the line. To bring it back, delete it. An archived entry is built and checked like a live one, it stays in its letter's file in alphabetical order, and its name can't match a live entry's. The [EntryBuilder readme](https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/modules/entrybuilder/readme.md#archive) has the details.
+
 # Files
 
 | File | Description |

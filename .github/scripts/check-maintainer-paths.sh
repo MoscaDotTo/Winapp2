@@ -3,8 +3,8 @@
 # Maintainer-paths guard: does a pull request from outside the repository change a file
 # only the maintainer changes?
 #
-# Contributions to winapp2.ini are entry data under Assembler/ and Winapp3/. Everything
-# below is either shipped to users or run with write access:
+# Contributions to winapp2.ini are entry data under Assembler/ and in Winapp3/Winapp3.ini.
+# Everything below is either shipped to users or run with write access:
 #
 #   winapp2ool/**                  the tool's source and the committed exes that deployed
 #                                  clients download and run as their self-update. Old clients
@@ -13,12 +13,14 @@
 #   Assembler/winapp2ool.exe       run by build-on-merge.yml with a write token
 #   Assembler/*.ps1                the build script, run the same way
 #   .github/**                     the workflows and the scripts they run
-#   Releases/**, and the old       the published winapp2.ini files and changelogs. The
-#   Winapp2.ini/diff.txt copies    build writes them, and its publish gate compares the new
-#   at the root and in             build against them: a PR that commits rebuilt copies
-#   Non-CCleaner/                  makes the next build find nothing changed, so that
-#                                  change gets no release and no changelog. The generated-
-#                                  artifact guard lets them through when a source changed too.
+#   Releases/**, and the old       the published winapp2.ini files, the archive and their
+#   Winapp2.ini/diff.txt copies    changelogs. The build writes them, and its publish gate
+#   at the root and in             compares the new build against them: a PR that commits
+#   Non-CCleaner/, and             rebuilt copies makes the next build find nothing changed,
+#   Winapp3/Archived entries.ini   so that change gets no release and no changelog. The
+#                                  generated-artifact guard lets them through when a source
+#                                  changed too. The archive is built from the entries marked
+#                                  Archive= in the sources, so it's no longer edited by hand.
 #
 # A change to any of these in a PR from a fork or a non-member fails. Unlike the
 # generated-artifact guard there's no override token, because the PR author controls the
@@ -52,7 +54,7 @@ while IFS= read -r f; do
     winapp2ool/*.md) ;;
     winapp2ool/*|Assembler/winapp2ool.exe|.github/*) protected="$protected
 $f" ;;
-    Releases/*|Winapp2.ini|diff.txt|Non-CCleaner/*Winapp2.ini|Non-CCleaner/*Winapp2.rules|Non-CCleaner/*diff.txt)
+    Releases/*|Winapp2.ini|diff.txt|Non-CCleaner/*Winapp2.ini|Non-CCleaner/*Winapp2.rules|Non-CCleaner/*diff.txt|'Winapp3/Archived entries.ini')
       protected="$protected
 $f"; published=1 ;;
     Assembler/*.ps1)
@@ -89,12 +91,13 @@ if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
     printf '%s\n' "$protected" | sed '/^$/d; s/^/- `/; s/$/`/'
     echo
     if [ -n "$published" ]; then
-      echo "Files under \`Releases/\`, and the old \`Winapp2.ini\` and \`diff.txt\` copies, are build output that the full build rewrites."
+      echo "Files under \`Releases/\`, and the old \`Winapp2.ini\`, \`diff.txt\` and \`Winapp3/Archived entries.ini\` copies, are build output that the full build rewrites."
       echo "Revert your changes to them and push again. Your source change is enough: the build publishes it after merge."
+      echo "To retire an entry, add \`Archive=<reason>\` to it in its source."
       echo
     fi
     echo "Entry contributions belong under \`Assembler/Sources/\` (the EntryBuilder, BrowserBuilder, UWPBuilder and Scaffolds sources, and the flavor rule sets)"
-    echo "or \`Winapp3/\`. If you think one of these files needs a change, open an issue instead."
+    echo "or \`Winapp3/Winapp3.ini\`. If you think one of these files needs a change, open an issue instead."
   } >> "$GITHUB_STEP_SUMMARY"
 fi
 
