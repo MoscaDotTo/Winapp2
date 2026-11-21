@@ -100,7 +100,7 @@ In the menu, you make the same choices with the mode options and file choosers b
 | Open Flavorizer | Open the Flavorizer sub-module | Runs a series of transmutations in a fixed order |
 | custom | Set the source file name to `custom.ini` | Preset |
 | winapp3.ini | Set the source file name to `winapp3.ini` | Preset |
-| Archived Entries | Set the source file name to `Archived Entries.ini` | Preset |
+| Archived Entries | Set the source file name to `archived.ini` | Preset |
 | browsers.ini | Set the source file name to `browsers.ini` | Preset |
 | uwp.ini | Set the source file name to `uwp.ini` | Preset |
 | Change base file | Choose the file to modify | Default: `winapp2.ini` |
@@ -155,7 +155,7 @@ Each of these sets the source file name to a predefined file. Most of them can b
 |:-|:-|:-
 | -c | Use "custom.ini"           | The suggested name for a file of your own additions
 | -w | Use "winapp3.ini"          | winapp2.ini entries that may break applications. Use at your own risk!
-| -a | Use "Archived Entries.ini" | winapp2.ini entries removed because the applications they target are no longer available
+| -a | Use "archived.ini"         | winapp2.ini entries removed because the applications they target are no longer available
 | -b | Use "browsers.ini"         | BrowserBuilder's default output file
 | -u | Use "uwp.ini"              | UWPBuilder's default output file
 

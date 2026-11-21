@@ -25,7 +25,8 @@ Imports System.Text
 ''' <c> &lt;RegistryRoot&gt; </c> becomes for a Chromium and a Gecko browser, the Opera GX side
 ''' profile shapes, case-insensitive and <c> $ </c>-safe matching, inline lists, and the
 ''' templates the builder refuses (each dropped once, with a failing exit code), including the
-''' retired <c> %...% </c> spellings
+''' retired <c> %...% </c> spellings. Also covers a BrowserInfo's <c> Archive= </c> key and its
+''' <c> archived.ini </c> output.
 ''' </summary>
 <TestClass()> Public Class BrowserBuilderTests
 
@@ -1166,6 +1167,234 @@ Imports System.Text
         Assert.AreEqual(1, RunBuild(misspelled & "[BrowserInfo: ]" & vbCrLf & Brave & Backups, Nothing, output))
         StringAssert.Contains(output, "[Brave Bookmark Backups *]")
         Assert.IsFalse(output.Contains("[Chrome "), output)
+
+    End Sub
+
+    ' ----- Archive= -----
+
+    ''' <summary>
+    ''' Runs BrowserBuilder's command line over a scratch source directory holding
+    ''' <paramref name="chromium"/> as <c> chromium.ini </c> and any <paramref name="extraFiles"/>,
+    ''' and returns the exit code it leaves. Every setting it touches is restored.
+    ''' </summary>
+    '''
+    ''' <param name="chromium">The text of <c> chromium.ini </c></param>
+    '''
+    ''' <param name="output">Set to the text of <c> browsers.ini </c>, or <c> Nothing </c></param>
+    '''
+    ''' <param name="archive">Set to the text of <c> archived.ini </c> in the archive folder, or <c> Nothing </c></param>
+    '''
+    ''' <param name="extraFiles">Further source files by name, such as <c> browser_additions.ini </c>, or <c> Nothing </c></param>
+    '''
+    ''' <param name="archiveArgs">
+    ''' The archive folder arguments. <c> {archive} </c> in them stands for the scratch archive
+    ''' folder.
+    ''' </param>
+    Private Shared Function RunArchiveBuild(chromium As String,
+                                            ByRef output As String,
+                                            ByRef archive As String,
+                                            extraFiles As Dictionary(Of String, String),
+                                            ParamArray archiveArgs As String()) As Integer
+
+        Dim dir = IO.Path.Combine(IO.Path.GetTempPath(), $"winapp2ool-bbarchive-{Guid.NewGuid():N}")
+        Dim sourceDir = IO.Path.Combine(dir, "Sources")
+        Dim outDir = IO.Path.Combine(dir, "Out")
+        Dim archiveDir = IO.Path.Combine(dir, "Archived")
+        Dim saved = {winapp2ool.BuilderFile1, winapp2ool.BuilderFile2, winapp2ool.BuilderArchiveFile}
+        Dim savedSuppress = winapp2ool.SuppressOutput
+        Dim savedExitCode = Environment.ExitCode
+
+        Try
+
+            IO.Directory.CreateDirectory(sourceDir)
+            IO.File.WriteAllText(IO.Path.Combine(sourceDir, "chromium.ini"), chromium)
+            If extraFiles IsNot Nothing Then
+                For Each extra In extraFiles
+                    IO.File.WriteAllText(IO.Path.Combine(sourceDir, extra.Key), extra.Value)
+                Next
+            End If
+
+            winapp2ool.BuilderFile1 = New winapp2ool.iniFileChooser(Environment.CurrentDirectory, "", "")
+            winapp2ool.BuilderFile2 = New winapp2ool.iniFileChooser(Environment.CurrentDirectory, "browsers.ini", mustExist:=False)
+            winapp2ool.BuilderArchiveFile = New winapp2ool.iniFileChooser("", "archived.ini", mustExist:=False)
+            winapp2ool.SuppressOutput = True
+            Environment.ExitCode = 0
+
+            Dim args = {"-1d", sourceDir, "-2d", outDir, "-2f", "browsers.ini"}.Concat(archiveArgs.Select(Function(a) a.Replace("{archive}", archiveDir))).ToArray()
+            setCmdLineArgs(AddressOf winapp2ool.BrowserBuilder.handleCmdLine, args)
+
+            Dim outPath = IO.Path.Combine(outDir, "browsers.ini")
+            Dim archivePath = IO.Path.Combine(archiveDir, "archived.ini")
+            output = If(IO.File.Exists(outPath), IO.File.ReadAllText(outPath), Nothing)
+            archive = If(IO.File.Exists(archivePath), IO.File.ReadAllText(archivePath), Nothing)
+
+            Return Environment.ExitCode
+
+        Finally
+
+            winapp2ool.BuilderFile1 = saved(0)
+            winapp2ool.BuilderFile2 = saved(1)
+            winapp2ool.BuilderArchiveFile = saved(2)
+            winapp2ool.SuppressOutput = savedSuppress
+            Environment.ExitCode = savedExitCode
+            IO.Directory.Delete(dir, recursive:=True)
+
+        End Try
+
+    End Function
+
+    ''' <summary>
+    ''' Every entry generated for a browser with <c> Archive= </c> goes to <c> archived.ini </c>
+    ''' in the folder slot 3 names, and only there
+    ''' </summary>
+    <TestMethod()> Public Sub Archive_RoutesEveryEntryOfTheBrowser()
+
+        Dim output As String = Nothing
+        Dim archive As String = Nothing
+        Dim prefs = "[EntryScaffold: Prefs]" & vbCrLf & "RegKeyBase=<RegistryRoot>\Prefs" & vbCrLf
+
+        Assert.AreEqual(0, RunArchiveBuild(Chrome & "Archive=Discontinued" & vbCrLf & Brave & Backups & prefs, output, archive, Nothing, "-3d", "{archive}"))
+
+        StringAssert.Contains(output, "[Brave Bookmark Backups *]")
+        Assert.IsFalse(output.Contains("[Chrome "), output)
+        Assert.IsTrue(archive.StartsWith("; # of entries: 2" & vbCrLf & "; archived.ini is a build artifact generated by winapp2ool's BrowserBuilder.", StringComparison.Ordinal), archive)
+        StringAssert.Contains(archive, "[Chrome Bookmark Backups *]")
+        StringAssert.Contains(archive, "[Chrome Prefs *]")
+        Assert.IsFalse(archive.Contains("Brave"), archive)
+
+    End Sub
+
+    ''' <summary> The correction files reach an archived browser's entries as they would a live one's </summary>
+    <TestMethod()> Public Sub Archive_GetsTheCorrections()
+
+        Dim output As String = Nothing
+        Dim archive As String = Nothing
+        Dim additions As New Dictionary(Of String, String) From {
+            {"browser_additions.ini", "[Chrome Bookmark Backups *]" & vbCrLf & "FileKey=%LocalAppData%\Google\Chrome\Extra|*.tmp" & vbCrLf}
+        }
+
+        Assert.AreEqual(0, RunArchiveBuild(Chrome & "Archive" & vbCrLf & Brave & Backups, output, archive, additions, "-archived", "{archive}"))
+        StringAssert.Contains(archive, "%LocalAppData%\Google\Chrome\Extra|*.tmp")
+        Assert.IsFalse(output.Contains("Extra"), output)
+
+    End Sub
+
+    ''' <summary>
+    ''' An entry only <c> browser_additions.ini </c> creates follows its browser into the
+    ''' archive, by the browser's name followed by a space. One belonging to no browser stays live.
+    ''' </summary>
+    <TestMethod()> Public Sub Archive_TakesTheBrowsersAdditionsOnlyEntries()
+
+        Dim output As String = Nothing
+        Dim archive As String = Nothing
+        Dim additions As New Dictionary(Of String, String) From {
+            {"browser_additions.ini",
+             "[Chrome History Backups *]" & vbCrLf & "Section=Google Chrome" & vbCrLf & "DetectFile=%LocalAppData%\Google\Chrome" & vbCrLf & "FileKey1=%LocalAppData%\Google\Chrome\Backups|*.bak" & vbCrLf & vbCrLf &
+             "[Chromebook Helper *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%LocalAppData%\Chromebook" & vbCrLf & "FileKey1=%LocalAppData%\Chromebook|*.log" & vbCrLf}
+        }
+
+        Assert.AreEqual(0, RunArchiveBuild(Chrome & "Archive=Discontinued" & vbCrLf & Brave & Backups, output, archive, additions, "-3d", "{archive}"))
+
+        StringAssert.Contains(archive, "[Chrome History Backups *]")
+        Assert.IsFalse(output.Contains("[Chrome History Backups *]"), output)
+        StringAssert.Contains(output, "[Chromebook Helper *]")
+        Assert.IsFalse(archive.Contains("Chromebook"), archive)
+
+    End Sub
+
+    ''' <summary>
+    ''' An added entry belongs to the longest browser name it starts with, so archiving
+    ''' <c> Opera </c> leaves <c> Opera GX </c>'s entries live, and a skipped browser still
+    ''' claims its own
+    ''' </summary>
+    <TestMethod()> Public Sub OwnerIsArchived_UsesTheLongestBrowserName()
+
+        Dim browsers As New Dictionary(Of String, Boolean)(StringComparer.OrdinalIgnoreCase) From {
+            {"Opera", True}, {"Opera GX", False}, {"Opera Neon", False}
+        }
+
+        Assert.IsTrue(winapp2ool.BrowserBuilder.ownerIsArchived("Opera Extra *", browsers))
+        Assert.IsTrue(winapp2ool.BrowserBuilder.ownerIsArchived("opera extra *", browsers))
+        Assert.IsFalse(winapp2ool.BrowserBuilder.ownerIsArchived("Opera GX Extra *", browsers))
+        Assert.IsFalse(winapp2ool.BrowserBuilder.ownerIsArchived("Opera Neon Extra *", browsers))
+        Assert.IsFalse(winapp2ool.BrowserBuilder.ownerIsArchived("Operator *", browsers))
+
+    End Sub
+
+    ''' <summary> A bare <c> Archive </c> line archives the browser without failing the run </summary>
+    <TestMethod()> Public Sub BareArchive_ArchivesTheBrowser()
+
+        Dim browser As winapp2ool.BrowserInfo = Nothing
+
+        Assert.AreEqual(0, ExitCodeAfter(Sub() browser = winapp2ool.BrowserBuilder.parseBrowserInfo(Sections(Chrome & "Archive" & vbCrLf)(0), New winapp2ool.MenuSection)))
+        Assert.IsTrue(browser.ShouldArchive)
+        Assert.IsFalse(browser.ShouldSkip)
+
+    End Sub
+
+    ''' <summary> <c> Archive=False </c> builds nothing for the browser and fails the run </summary>
+    <TestMethod()> Public Sub ArchiveFalse_IsRefused()
+
+        Dim output As String = Nothing
+        Dim archive As String = Nothing
+
+        Assert.AreEqual(1, RunArchiveBuild(Chrome & "Archive=FALSE" & vbCrLf & Brave & Backups, output, archive, Nothing, "-3d", "{archive}"))
+        Assert.IsFalse(output.Contains("[Chrome "), output)
+        Assert.IsFalse(archive.Contains("[Chrome "), archive)
+
+    End Sub
+
+    ''' <summary> <c> Skip </c> and <c> Archive </c> on one browser build neither and fail the run </summary>
+    <TestMethod()> Public Sub SkipAndArchive_AreRefused()
+
+        Dim output As String = Nothing
+        Dim archive As String = Nothing
+
+        Assert.AreEqual(1, RunArchiveBuild(Chrome & "Skip" & vbCrLf & "Archive=Gone" & vbCrLf & Brave & Backups, output, archive, Nothing, "-3d", "{archive}"))
+        Assert.IsFalse(output.Contains("[Chrome "), output)
+        Assert.IsFalse(archive.Contains("[Chrome "), archive)
+
+    End Sub
+
+    ''' <summary>
+    ''' A scaffold that skips the browser for having no registry root wins over
+    ''' <c> Archive= </c>, without failing the run
+    ''' </summary>
+    <TestMethod()> Public Sub StructuralSkip_BeatsArchive()
+
+        Dim output As String = Nothing
+        Dim archive As String = Nothing
+        Dim prefs = "[EntryScaffold: Prefs]" & vbCrLf & "RequiresRegistryRoot" & vbCrLf & "RegKeyBase=<RegistryRoot>\Prefs" & vbCrLf
+
+        Assert.AreEqual(0, RunArchiveBuild(Chrome & Brave & "Archive=Gone" & vbCrLf & prefs, output, archive, Nothing, "-3d", "{archive}"))
+        StringAssert.Contains(output, "[Chrome Prefs *]")
+        Assert.IsFalse(output.Contains("Brave"), output)
+        Assert.IsFalse(archive.Contains("["), archive)
+
+    End Sub
+
+    ''' <summary> With no archive folder, an archived browser's entries reach neither output and the run fails </summary>
+    <TestMethod()> Public Sub NoArchiveFolder_DropsArchivedEntriesAndFails()
+
+        Dim output As String = Nothing
+        Dim archive As String = Nothing
+
+        Assert.AreEqual(1, RunArchiveBuild(Chrome & "Archive=Gone" & vbCrLf & Brave & Backups, output, archive, Nothing))
+        StringAssert.Contains(output, "[Brave Bookmark Backups *]")
+        Assert.IsFalse(output.Contains("[Chrome "), output)
+        Assert.IsNull(archive)
+
+    End Sub
+
+    ''' <summary> Given an archive folder, a run with nothing archived still writes a header-only <c> archived.ini </c> </summary>
+    <TestMethod()> Public Sub NothingArchived_WritesHeaderOnlyArchive()
+
+        Dim output As String = Nothing
+        Dim archive As String = Nothing
+
+        Assert.AreEqual(0, RunArchiveBuild(Chrome & Brave & Backups, output, archive, Nothing, "-3d", "{archive}"))
+        Assert.IsTrue(archive.StartsWith("; # of entries: 0" & vbCrLf, StringComparison.Ordinal), archive)
+        Assert.IsFalse(archive.Contains("["), archive)
 
     End Sub
 

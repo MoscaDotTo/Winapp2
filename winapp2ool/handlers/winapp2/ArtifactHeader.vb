@@ -39,20 +39,25 @@ Public Module ArtifactHeader
     Public Const RepoUrl As String = "https://github.com/MoscaDotTo/Winapp2"
 
     ''' <summary>
+    ''' The folder holding every generator's sources, relative to the repository root
+    ''' </summary>
+    Public Const GeneratorSources As String = "Assembler/Sources"
+
+    ''' <summary>
     ''' EntryBuilder's source folder, relative to the repository root
     ''' </summary>
-    Public Const EntryBuilderSources As String = "Assembler/Sources/EntryBuilder"
+    Public Const EntryBuilderSources As String = GeneratorSources & "/EntryBuilder"
 
     ''' <summary>
     ''' BrowserBuilder's source folder, relative to the repository root
     ''' </summary>
-    Public Const BrowserBuilderSources As String = "Assembler/Sources/BrowserBuilder"
+    Public Const BrowserBuilderSources As String = GeneratorSources & "/BrowserBuilder"
 
     ''' <summary>
     ''' UWPBuilder's source folder, relative to the repository root. It holds <c> UWP.ini </c>
     ''' and the <c> AppInfo </c> folder.
     ''' </summary>
-    Public Const UWPBuilderSources As String = "Assembler/Sources/UWPBuilder"
+    Public Const UWPBuilderSources As String = GeneratorSources & "/UWPBuilder"
 
     ''' <summary>
     ''' UWPBuilder's per-letter AppInfo folder, relative to the repository root
@@ -128,8 +133,8 @@ Public Module ArtifactHeader
     ''' </param>
     '''
     ''' <param name="description">
-    ''' A line saying what the artifact holds, written below the source link. Only per-letter
-    ''' artifacts have one. <br /><br />
+    ''' A line saying what the artifact holds, written below the source link. Per-letter
+    ''' artifacts and the archive have one. <br /><br />
     ''' Optional, Default: <c> "" </c> (no line)
     ''' </param>
     Public Function Text(fileName As String,

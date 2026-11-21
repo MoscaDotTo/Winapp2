@@ -76,6 +76,14 @@ Public Module browserbuildersettings
     Public Property BuilderFile2 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "browsers.ini", mustExist:=False)
 
     ''' <summary>
+    ''' The folder <c> archived.ini </c>, the entries of every browser whose BrowserInfo declares
+    ''' <c> Archive= </c>, is written to. An empty <c> Dir </c>, the default, means none: a run
+    ''' with archived entries then leaves them out and fails. Only the <c> Dir </c> property is
+    ''' used.
+    ''' </summary>
+    Public Property BuilderArchiveFile As iniFileChooser = New iniFileChooser("", winapp2file.ArchiveFileName, mustExist:=False)
+
+    ''' <summary>
     ''' Indicates whether the module settings have been modified from their defaults
     ''' </summary>
     Public Property BrowserBuilderModuleSettingsChanged As Boolean = False
@@ -89,6 +97,7 @@ Public Module browserbuildersettings
 
         BuilderFile1.ResetParams()
         BuilderFile2.ResetParams()
+        BuilderArchiveFile.ResetParams()
         BrowserBuilderModuleSettingsChanged = False
         SaveModule(NameOf(BrowserBuilder), GetType(browserbuildersettings))
 

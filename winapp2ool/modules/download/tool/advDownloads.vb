@@ -18,7 +18,7 @@
 Option Strict On
 
 ''' <summary>
-''' A sub menu of the Downloader module for advanced users, offering winapp3.ini and Archived entries.ini
+''' A sub menu of the Downloader module for advanced users, offering winapp3.ini and archived.ini
 ''' </summary>
 Public Module advDownloads
 
@@ -35,9 +35,9 @@ Public Module advDownloads
                     downloadFile.Name = "winapp3.ini"
                     download(downloadFile, wa3link)
                 End Sub) _
-            .AddDispatchedOption("Archived entries.ini", "Entries for old or discontinued software",
+            .AddDispatchedOption("archived.ini", "Entries for old or discontinued software",
                 Sub()
-                    downloadFile.Name = "Archived entries.ini"
+                    downloadFile.Name = winapp2file.ArchiveFileName
                     download(downloadFile, archivedLink)
                 End Sub)
 

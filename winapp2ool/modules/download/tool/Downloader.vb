@@ -64,9 +64,10 @@ Module Downloader
     Public ReadOnly Property wa3link As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/Winapp3.ini"
 
     ''' <summary>
-    ''' The web address of archived entries.ini 
+    ''' The web address of <c> archived.ini </c>, the archive of retired entries, in the latest
+    ''' release
     ''' </summary>
-    Public ReadOnly Property archivedLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/Archived%20entries.ini"
+    Public ReadOnly Property archivedLink As String = winapp2file.LatestDownloadUrl & winapp2file.ArchiveFileName
 
     ''' <summary> 
     ''' The web address of the winapp2ool ReadMe file 
@@ -94,7 +95,7 @@ Module Downloader
     ''' <item><c> 2 </c> or <c> winapp2ool </c>: winapp2ool.exe</item>
     ''' <item><c> 3 </c> or <c> readme </c>: the winapp2ool README, saved as readme.txt</item>
     ''' <item><c> 4 </c> or <c> winapp3 </c>: winapp3.ini</item>
-    ''' <item><c> 5 </c> or <c> archived </c>: Archived entries.ini</item>
+    ''' <item><c> 5 </c> or <c> archived </c>: archived.ini</item>
     ''' </list>
     ''' </remarks>
     Public Sub handleCmdLine()
@@ -122,7 +123,7 @@ Module Downloader
                             downloadFile.Name = "winapp3.ini"
                         Case "5", "ARCHIVED"
                             fileLink = archivedLink
-                            downloadFile.Name = "Archived entries.ini"
+                            downloadFile.Name = winapp2file.ArchiveFileName
                         Case Else
                             printValidArgsExit($"Unknown argument: {arg}")
                     End Select

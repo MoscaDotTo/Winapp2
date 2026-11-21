@@ -20,8 +20,8 @@ Option Strict On
 Imports System.Text
 
 ''' <summary>
-''' Tests for the survival of the version comment and the flavor line across the
-''' <c> iniFile </c> to <c> winapp2file </c> round trip. Diff reads the version off the
+''' Tests for the survival of the version comment, the flavor line and the archive marker across
+''' the <c> iniFile </c> to <c> winapp2file </c> round trip. Diff reads the version off the
 ''' first comment of the file <see cref="winapp2ool.winapp2file.ToIni"/> returns to build its header
 ''' </summary>
 <TestClass()> Public Class Winapp2FileVersionTests
@@ -230,6 +230,57 @@ Imports System.Text
             Assert.AreEqual("; # of entries: 2", lines(1))
 
         Next
+
+    End Sub
+
+    ''' <summary>
+    ''' The archive marker survives repeated round trips, in any case, and gives the archive's
+    ''' header: the marker as its third line, how to add the archive, and its own links
+    ''' </summary>
+    <TestMethod()> Public Sub ArchiveMarkerSurvivesRepeatedRoundTrips()
+
+        Dim first As New winapp2ool.winapp2file(MakeIni(WithPreambleLine("; archive: Retired winapp2.ini entries")))
+        Assert.IsTrue(first.IsArchive)
+
+        Dim third As New winapp2ool.winapp2file(New winapp2ool.winapp2file(first.ToIni()).ToIni())
+        Assert.IsTrue(third.IsArchive, "ToIni dropped the archive marker")
+        Assert.IsFalse(third.Flavor.HasValue)
+
+        Dim text = third.ToWinapp2String()
+        Dim lines = text.Split({vbCrLf}, StringSplitOptions.None)
+        Assert.AreEqual(winapp2ool.winapp2file.ArchiveMarkerLine, lines(2))
+        StringAssert.Contains(text, ";   winapp2ool -transmute -1f winapp2.ini -2f archived.ini -3f winapp2.ini" & vbCrLf)
+        StringAssert.Contains(text, ";   https://github.com/MoscaDotTo/Winapp2/releases/latest/download/archived.ini" & vbCrLf)
+        StringAssert.Contains(text, ";   https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources" & vbCrLf)
+        StringAssert.Contains(text, "/blob/master/CONTRIBUTING.md")
+        Assert.IsFalse(text.Contains("; Flavor:"))
+        Assert.IsFalse(text.Contains("in every flavor"))
+
+    End Sub
+
+    ''' <summary> A file without the marker gets none, from its header or from a round trip </summary>
+    <TestMethod()> Public Sub UnmarkedFileGainsNoMarker()
+
+        Dim wa2 As New winapp2ool.winapp2file(New winapp2ool.winapp2file(MakeIni(WithPreambleLine("; Flavor: Tron"))).ToIni())
+
+        Assert.IsFalse(wa2.IsArchive)
+        Assert.IsFalse(wa2.ToWinapp2String().Contains("; Archive:"))
+
+    End Sub
+
+    ''' <summary>
+    ''' The archive's header keeps the version and the entry count as its first two lines
+    ''' </summary>
+    <TestMethod()> Public Sub ArchiveHeaderStartsWithVersionAndCount()
+
+        Dim wa2 As New winapp2ool.winapp2file(MakeIni(VersionedFile))
+        wa2.IsArchive = True
+
+        Dim lines = wa2.ToWinapp2String().Split({vbCrLf}, StringSplitOptions.None)
+
+        Assert.AreEqual("; Version: 260219", lines(0))
+        Assert.AreEqual("; # of entries: 2", lines(1))
+        Assert.AreEqual(winapp2ool.winapp2file.ArchiveMarkerLine, lines(2))
 
     End Sub
 

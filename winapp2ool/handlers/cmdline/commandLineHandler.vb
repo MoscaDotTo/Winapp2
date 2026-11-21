@@ -78,12 +78,12 @@ Public Module commandLineHandler
         addModule("3", "transmute", 3, AddressOf Transmute.handleCmdLine)
         addModule("4", "diff", 3, AddressOf Diff.HandleCmdLine)
         addModule("5", "ccdebug", 3, AddressOf CCiniDebug.handleCmdlineArgs)
-        addModule("6", "browserbuilder", 2, AddressOf BrowserBuilder.handleCmdLine)
+        addModule("6", "browserbuilder", 3, AddressOf BrowserBuilder.handleCmdLine)
         addModule("7", "combine", 3, AddressOf Combine.handleCmdLine)
         addModule("8", "download", 3, AddressOf Downloader.handleCmdLine)
         addModule("9", "flavorize", 9, AddressOf Flavorizer.handleCmdLine)
-        addModule("10", "uwpbuilder", 3, AddressOf UWPBuilder.handleCmdLine)
-        addModule("11", "entrybuilder", 3, AddressOf EntryBuilder.handleCmdLine)
+        addModule("10", "uwpbuilder", 4, AddressOf UWPBuilder.handleCmdLine)
+        addModule("11", "entrybuilder", 4, AddressOf EntryBuilder.handleCmdLine)
         addModule("12", "cc7patcher", 5, AddressOf CC7Patcher.handleCmdLine)
 
         Return configs

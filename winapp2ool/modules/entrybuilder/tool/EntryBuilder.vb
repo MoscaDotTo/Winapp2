@@ -79,7 +79,11 @@ Imports System.IO
 ''' <c> ExcludeQtWebEngineScaffolds= </c>, <c> ElectronRoot= </c>,
 ''' <c> ElectronUpdaterRoot= </c>, <c> ElectronScaffolds= </c>,
 ''' <c> ExcludeElectronScaffolds= </c>, <c> FileKeyBase= </c>, <c> RegKeyBase= </c>,
-''' <c> ExcludeKeyBase= </c>, <c> Skip= </c>. <br /><br />
+''' <c> ExcludeKeyBase= </c>, <c> Skip= </c>, <c> Archive= </c>. <br /><br />
+'''
+''' An entry with <c> Archive= </c> is built like any other and then written to
+''' <c> archived.ini </c> in <see cref="EntryBuilderArchiveFile"/>'s folder instead of the live
+''' output (see <see cref="ArchiveOutput"/>). <br /><br />
 '''
 ''' Scaffolds are loaded from one shared scaffold <em>directory</em> (typically
 ''' <c> Assembler\Sources\Scaffolds </c>) via <see cref="ScaffoldCatalogs.LoadCatalogDirectory"/>, which
@@ -139,16 +143,17 @@ Public Module EntryBuilder
         "WEBVIEWSCAFFOLDS", "EXCLUDEWEBVIEWSCAFFOLDS",
         "QTWEBENGINESCAFFOLDS", "EXCLUDEQTWEBENGINESCAFFOLDS",
         "ELECTRONSCAFFOLDS", "EXCLUDEELECTRONSCAFFOLDS",
-        "SKIP", "DEFAULT", "WARNING"
+        "SKIP", "ARCHIVE", "DEFAULT", "WARNING"
     }
 
     ''' <summary>
-    ''' The keys that mean something with no value: <c> Skip= </c>, and the scaffold selections
-    ''' and exclusions, where an empty list selects or excludes nothing. <see cref="parseEntrySpec"/>
-    ''' drops any other key with no value, which would otherwise give an empty key or path.
+    ''' The keys that mean something with no value: <c> Skip= </c>, <c> Archive= </c>, and the
+    ''' scaffold selections and exclusions, where an empty list selects or excludes nothing.
+    ''' <see cref="parseEntrySpec"/> drops any other key with no value, which would otherwise
+    ''' give an empty key or path.
     ''' </summary>
     Private ReadOnly ValueOptionalKeys As String() = {
-        "SKIP",
+        "SKIP", "ARCHIVE",
         "WEBVIEWSCAFFOLDS", "EXCLUDEWEBVIEWSCAFFOLDS",
         "QTWEBENGINESCAFFOLDS", "EXCLUDEQTWEBENGINESCAFFOLDS",
         "ELECTRONSCAFFOLDS", "EXCLUDEELECTRONSCAFFOLDS"
@@ -456,6 +461,12 @@ Public Module EntryBuilder
         Public ShouldSkip As Boolean
 
         ''' <summary>
+        ''' Indicates whether the entry declared <c> Archive= </c>, so it goes to the archive
+        ''' output instead of the live one. It means nothing when <see cref="ShouldSkip"/> is set.
+        ''' </summary>
+        Public ShouldArchive As Boolean
+
+        ''' <summary>
         ''' Indicates whether <see cref="inferRootDetection"/> added a <c> Detect=&lt;Root&gt; </c>
         ''' or <c> DetectFile=&lt;Root&gt; </c> for this entry from its <c> Root </c> variable.
         ''' The run statistics count these entries.
@@ -515,6 +526,7 @@ Public Module EntryBuilder
             ElectronScaffoldsKeyPresent = False
             ExcludedElectronScaffolds = New List(Of String)
             ShouldSkip = False
+            ShouldArchive = False
             RootDetectionInferred = False
             Variables = New VariableSet
             NestedVariableRefs = 0
@@ -577,8 +589,11 @@ Public Module EntryBuilder
         ''' <summary> Total sections read from the combined source directory </summary>
         Public SourceSections As Integer
 
-        ''' <summary> Sections that produced an output entry (were not skipped) </summary>
+        ''' <summary> Sections that produced an output entry (were not skipped), archived ones included </summary>
         Public EntriesGenerated As Integer
+
+        ''' <summary> Generated entries that declared <c> Archive= </c> </summary>
+        Public EntriesArchived As Integer
 
         ''' <summary> Sections skipped as structurally invalid or explicitly marked <c> Skip= </c> </summary>
         Public EntriesSkipped As Integer
@@ -746,7 +761,8 @@ Public Module EntryBuilder
     ''' <summary>
     ''' Handles the command-line arguments for <c> EntryBuilder </c>, starting from the default
     ''' settings rather than any saved ones, then runs <see cref="initEntryBuilder"/>. File slot 1 is the source directory, slot 2 the save
-    ''' target and slot 3 the shared scaffold directory.
+    ''' target, slot 3 the shared scaffold directory and slot 4 (alias <c> archive </c>) the
+    ''' archive folder.
     ''' </summary>
     '''
     ''' <remarks>
@@ -766,6 +782,7 @@ Public Module EntryBuilder
         spec.WithFile(1, EntryBuilderFile1) _
             .WithFile(2, EntryBuilderFile2) _
             .WithFile(3, EntryBuilderFile3) _
+            .WithFile(4, EntryBuilderArchiveFile, "archive") _
             .WithFlag("-split", Sub() EntryBuilderSplitOutput = Not EntryBuilderSplitOutput) _
             .Parse()
 
@@ -825,7 +842,10 @@ Public Module EntryBuilder
     ''' per non-skipped entry, renders the run statistics, normalizes the result through
     ''' <see cref="remotedebugGuarded"/>, and writes it with a do-not-edit header, either to
     ''' <see cref="EntryBuilderFile2"/> or, with <see cref="EntryBuilderSplitOutput"/>, via
-    ''' <see cref="LetterSplitOutput.WriteSplitOutput"/>. Also warns about declared variables nothing references.
+    ''' <see cref="LetterSplitOutput.WriteSplitOutput"/>. An entry that declared <c> Archive= </c>
+    ''' goes instead to the archive output, which <see cref="ArchiveOutput.WriteArchive"/>
+    ''' normalizes and writes to <see cref="EntryBuilderArchiveFile"/>'s folder. Also warns about
+    ''' declared variables nothing references.
     ''' </summary>
     '''
     ''' <param name="sourceIni">
@@ -878,10 +898,12 @@ Public Module EntryBuilder
             Dim stats As New EntryBuilderStats With {
                 .SourceSections = sourceIni.Count,
                 .EntriesGenerated = entries.Count,
+                .EntriesArchived = entries.Where(Function(e) e.ShouldArchive).Count(),
                 .EntriesSkipped = sourceIni.Count - entries.Count
             }
 
             Dim outputFile = iniFile.Empty(EntryBuilderFile2.Dir, EntryBuilderFile2.Name)
+            Dim archiveFile = iniFile.Empty(EntryBuilderArchiveFile.Dir, winapp2file.ArchiveFileName)
 
             For Each spec In entries
 
@@ -902,7 +924,16 @@ Public Module EntryBuilder
                 If spec.RootDetectionInferred Then stats.InferredRootEntries += 1
 
                 Dim entrySection = generateEntry(spec, catalog, qtCatalog, electronCatalog, stats, menuOutput)
-                outputFile.AddSection(entrySection)
+
+                If spec.ShouldArchive Then
+
+                    archiveFile.AddSection(entrySection)
+
+                Else
+
+                    outputFile.AddSection(entrySection)
+
+                End If
 
                 ' Abstraction payoff: an interdependent symbol table (variables referencing
                 ' other variables) is the maintainer's signal that a declaration block has
@@ -942,7 +973,7 @@ Public Module EntryBuilder
 
             Next
 
-            Dim generatedMsg = $"Generated {outputFile.Count} entries"
+            Dim generatedMsg = $"Generated {outputFile.Count} entries and {archiveFile.Count} archived entries"
             menuOutput.AddColoredLine(generatedMsg, ConsoleColor.Yellow)
             gLog($" {generatedMsg}")
 
@@ -960,6 +991,8 @@ Public Module EntryBuilder
                 outputFile.OverwriteToFile(header & outputFile.ToString())
 
             End If
+
+            WriteArchive(archiveFile, EntryBuilderArchiveFile.Dir, NameOf(EntryBuilder), EntryBuilderSources, menuOutput)
 
             gLog("EntryBuilder source files processed successfully")
 
@@ -1017,6 +1050,7 @@ Public Module EntryBuilder
         menuOutput.AddColoredLine("Entries", ConsoleColor.Cyan)
         menuOutput.AddColoredLine(statLine("Source sections read:", stats.SourceSections), ConsoleColor.White)
         menuOutput.AddColoredLine(statLine("Generated:", stats.EntriesGenerated), ConsoleColor.Green)
+        menuOutput.AddColoredLine(statLine("Archived:", stats.EntriesArchived), ConsoleColor.DarkGray)
         menuOutput.AddColoredLine(statLine("Skipped:", stats.EntriesSkipped), If(stats.EntriesSkipped > 0, ConsoleColor.Yellow, ConsoleColor.DarkGray))
         menuOutput.AddColoredLine(statLine("With WebView scaffolds:", stats.EntriesWithScaffolds), ConsoleColor.White)
         menuOutput.AddColoredLine(statLine("With QtWebEngine scaffolds:", stats.EntriesWithQtScaffolds), ConsoleColor.White)
@@ -1170,6 +1204,11 @@ Public Module EntryBuilder
     ''' bare <c> Skip= </c> skips and an empty <c> WebViewScaffolds= </c> selects no scaffolds;
     ''' any other key with no value is dropped with a warning. <br /><br />
     '''
+    ''' <c> Archive= </c>, with any value or none, sets <c> ShouldArchive </c>. A structural skip
+    ''' still wins over it. <c> Archive=False </c>, or <c> Archive= </c> beside <c> Skip= </c>, is
+    ''' refused through <see cref="ArchiveOutput.RefuseArchive"/>: the entry is skipped and the
+    ''' run fails. <br /><br />
+    '''
     ''' Also warns on, and drops, <c> SpecialDetect= </c> and <c> Default= </c>; warns when
     ''' both <c> Section= </c> and <c> LangSecRef= </c> are present, keeping
     ''' <c> LangSecRef= </c>; and warns on missing detection unless the entry is already
@@ -1194,6 +1233,8 @@ Public Module EntryBuilder
                                      menuOutput As MenuSection) As EntrySpec
 
         Dim spec As New EntrySpec(entrySection.Name)
+        Dim skipDeclared = False
+        Dim archiveValue As String = Nothing
 
         For Each key In entrySection.Keys
 
@@ -1275,7 +1316,12 @@ Public Module EntryBuilder
 
                 Case "EXCLUDEELECTRONSCAFFOLDS" : spec.ExcludedElectronScaffolds = splitCsv(key.Value)
 
-                Case "SKIP" : spec.ShouldSkip = True
+                Case "SKIP"
+
+                    spec.ShouldSkip = True
+                    skipDeclared = True
+
+                Case "ARCHIVE" : archiveValue = key.Value
 
                 Case "DEFAULT"
 
@@ -1372,6 +1418,20 @@ Public Module EntryBuilder
             Dim noDetectMsg = $"[{entrySection.Name}] declares no detection (Detect / DetectFile / DetectOS); generated entry will be always-on"
             gLog(noDetectMsg)
             menuOutput.AddWarning(noDetectMsg)
+
+        End If
+
+        If archiveValue IsNot Nothing Then
+
+            If RefuseArchive($"[{entrySection.Name}]", archiveValue, skipDeclared, menuOutput) Then
+
+                spec.ShouldSkip = True
+
+            Else
+
+                spec.ShouldArchive = Not spec.ShouldSkip
+
+            End If
 
         End If
 

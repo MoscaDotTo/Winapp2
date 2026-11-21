@@ -25,7 +25,7 @@ Imports System.Text
 ''' values, and opts the entry into the QtWebEngine family on its own. The substitution engine itself
 ''' is covered by <see cref="ScaffoldCatalogsTests"/>; these tests cover the parser and generator around it.
 ''' Also covers the refusal of the retired <c> %...Root% </c> spellings, which leaves
-''' <c> %Package% </c> alone.
+''' <c> %Package% </c> alone, and the <c> Archive= </c> key and its <c> archived.ini </c> output.
 ''' </summary>
 <TestClass()> Public Class EntryBuilderTests
 
@@ -397,6 +397,274 @@ Imports System.Text
             IO.Directory.Delete(dir, recursive:=True)
 
         End Try
+
+    End Sub
+
+    ' ----- Archive= -----
+
+    ''' <summary> A whole source entry with no Archive= key, live in every run below </summary>
+    Private Const LiveEntry As String = "[Alpha App *]" & vbCrLf &
+                                        "LangSecRef=3021" & vbCrLf &
+                                        "DetectFile=%LocalAppData%\Alpha" & vbCrLf &
+                                        "FileKey=%LocalAppData%\Alpha|*.log" & vbCrLf
+
+    ''' <summary> Returns a whole source entry named <paramref name="name"/> carrying <paramref name="archiveLine"/> </summary>
+    ''' <param name="name">The entry's name, without the trailing <c> * </c></param>
+    ''' <param name="archiveLine">The entry's <c> Archive </c> line, without its line break</param>
+    Private Shared Function ArchivedEntry(name As String, archiveLine As String) As String
+
+        Return $"[{name} *]" & vbCrLf &
+               "LangSecRef=3021" & vbCrLf &
+               $"DetectFile=%LocalAppData%\{name}" & vbCrLf &
+               $"FileKey=%LocalAppData%\{name}|*.log" & vbCrLf &
+               archiveLine & vbCrLf
+
+    End Function
+
+    ''' <summary>
+    ''' Runs EntryBuilder's command line over a scratch source directory holding
+    ''' <paramref name="sources"/>, writing a single output file, and returns the exit code it
+    ''' leaves. Every setting it touches is restored.
+    ''' </summary>
+    '''
+    ''' <param name="sources">Each source file's name and text</param>
+    '''
+    ''' <param name="liveText">Set to the text of <c> entrybuilder.ini </c>, or <c> Nothing </c></param>
+    '''
+    ''' <param name="archiveText">Set to the text of <c> archived.ini </c> in the archive folder, or <c> Nothing </c></param>
+    '''
+    ''' <param name="outFiles">Set to the names of every file the run wrote in the output folder</param>
+    '''
+    ''' <param name="archiveArgs">
+    ''' The archive folder arguments. <c> {archive} </c> in them stands for the scratch archive
+    ''' folder.
+    ''' </param>
+    Private Shared Function RunArchiveBuild(sources As Dictionary(Of String, String),
+                                            ByRef liveText As String,
+                                            ByRef archiveText As String,
+                                            ByRef outFiles As List(Of String),
+                                            ParamArray archiveArgs As String()) As Integer
+
+        Dim dir = IO.Path.Combine(IO.Path.GetTempPath(), $"winapp2ool-ebarchive-{Guid.NewGuid():N}")
+        Dim sourceDir = IO.Path.Combine(dir, "Sources")
+        Dim outDir = IO.Path.Combine(dir, "Out")
+        Dim archiveDir = IO.Path.Combine(dir, "Archived")
+        Dim saved = {winapp2ool.EntryBuilderFile1, winapp2ool.EntryBuilderFile2, winapp2ool.EntryBuilderFile3, winapp2ool.EntryBuilderArchiveFile}
+        Dim savedSplit = winapp2ool.EntryBuilderSplitOutput
+        Dim savedSuppress = winapp2ool.SuppressOutput
+        Dim savedExitCode = Environment.ExitCode
+
+        Try
+
+            IO.Directory.CreateDirectory(sourceDir)
+            IO.Directory.CreateDirectory(IO.Path.Combine(dir, "Scaffolds"))
+            For Each source In sources
+                IO.File.WriteAllText(IO.Path.Combine(sourceDir, source.Key), source.Value)
+            Next
+
+            winapp2ool.SuppressOutput = True
+            Environment.ExitCode = 0
+
+            Dim args = {"-1d", sourceDir, "-2d", outDir, "-3d", IO.Path.Combine(dir, "Scaffolds")}.Concat(archiveArgs.Select(Function(a) a.Replace("{archive}", archiveDir))).ToArray()
+            setCmdLineArgs(AddressOf winapp2ool.EntryBuilder.handleCmdLine, args)
+
+            Dim livePath = IO.Path.Combine(outDir, "entrybuilder.ini")
+            Dim archivePath = IO.Path.Combine(archiveDir, "archived.ini")
+            liveText = If(IO.File.Exists(livePath), IO.File.ReadAllText(livePath), Nothing)
+            archiveText = If(IO.File.Exists(archivePath), IO.File.ReadAllText(archivePath), Nothing)
+            outFiles = If(IO.Directory.Exists(outDir), IO.Directory.GetFiles(outDir).Select(Function(f) IO.Path.GetFileName(f)).ToList(), New List(Of String))
+
+            Return Environment.ExitCode
+
+        Finally
+
+            winapp2ool.EntryBuilderFile1 = saved(0)
+            winapp2ool.EntryBuilderFile2 = saved(1)
+            winapp2ool.EntryBuilderFile3 = saved(2)
+            winapp2ool.EntryBuilderArchiveFile = saved(3)
+            winapp2ool.EntryBuilderSplitOutput = savedSplit
+            winapp2ool.SuppressOutput = savedSuppress
+            Environment.ExitCode = savedExitCode
+            IO.Directory.Delete(dir, recursive:=True)
+
+        End Try
+
+    End Function
+
+    ''' <summary>
+    ''' An entry with <c> Archive= </c> goes to <c> archived.ini </c> in the folder slot 4 names,
+    ''' built like a live entry and without the Archive key, and only there
+    ''' </summary>
+    <TestMethod()> Public Sub Archive_RoutesToTheArchiveFile()
+
+        Dim live As String = Nothing
+        Dim archive As String = Nothing
+        Dim outFiles As List(Of String) = Nothing
+        Dim sources As New Dictionary(Of String, String) From {{"A.ini", LiveEntry & ArchivedEntry("Retired App", "Archive=Discontinued (2012)")}}
+
+        Assert.AreEqual(0, RunArchiveBuild(sources, live, archive, outFiles, "-4d", "{archive}"))
+
+        StringAssert.Contains(live, "[Alpha App *]")
+        Assert.IsFalse(live.Contains("Retired App"), live)
+        Assert.IsTrue(archive.StartsWith("; # of entries: 1" & vbCrLf & "; archived.ini is a build artifact generated by winapp2ool's EntryBuilder.", StringComparison.Ordinal), archive)
+        StringAssert.Contains(archive, "[Retired App *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%LocalAppData%\Retired App" & vbCrLf & "FileKey1=%LocalAppData%\Retired App|*.log")
+        Assert.IsFalse(archive.Contains("Alpha App"), archive)
+        Assert.IsFalse(archive.Contains(vbLf & "Archive"), archive)
+        Assert.IsFalse(archive.Contains("Discontinued"), archive)
+
+    End Sub
+
+    ''' <summary> The <c> archive </c> alias sets slot 4 too, with a leading <c> \ </c> read against the working directory </summary>
+    <TestMethod()> Public Sub Archive_AliasResolvesAgainstTheWorkingDirectory()
+
+        Dim dir = IO.Path.Combine(IO.Path.GetTempPath(), $"winapp2ool-ebcwd-{Guid.NewGuid():N}")
+        Dim savedCwd = Environment.CurrentDirectory
+        Dim live As String = Nothing
+        Dim archive As String = Nothing
+        Dim outFiles As List(Of String) = Nothing
+        Dim sources As New Dictionary(Of String, String) From {{"A.ini", LiveEntry & ArchivedEntry("Retired App", "Archive=Gone")}}
+
+        Try
+
+            IO.Directory.CreateDirectory(dir)
+            Environment.CurrentDirectory = dir
+
+            Assert.AreEqual(0, RunArchiveBuild(sources, live, archive, outFiles, "-archived", "\Arc\EntryBuilder"))
+            StringAssert.Contains(IO.File.ReadAllText(IO.Path.Combine(dir, "Arc", "EntryBuilder", "archived.ini")), "[Retired App *]")
+
+        Finally
+
+            Environment.CurrentDirectory = savedCwd
+            IO.Directory.Delete(dir, recursive:=True)
+
+        End Try
+
+    End Sub
+
+    ''' <summary> A bare <c> Archive= </c> archives the entry without a warning </summary>
+    <TestMethod()> Public Sub BareArchive_ArchivesTheEntry()
+
+        Dim log As List(Of String) = Nothing
+        Dim exitCode As Integer
+        Dim spec = ParseLogged(ArchivedEntry("Retired App", "Archive="), log, exitCode)
+
+        Assert.IsTrue(spec.ShouldArchive)
+        Assert.IsFalse(spec.ShouldSkip)
+        Assert.AreEqual(0, exitCode)
+        Assert.IsFalse(log.Any(Function(l) l.Contains("no value")), "Got: " & String.Join(" | ", log))
+
+    End Sub
+
+    ''' <summary> <c> Archive=False </c>, in any case, builds nothing and fails the run, telling the author to delete the line </summary>
+    <TestMethod()> Public Sub ArchiveFalse_IsRefused()
+
+        For Each value In {"False", "false", " FALSE "}
+
+            Dim log As List(Of String) = Nothing
+            Dim exitCode As Integer
+            Dim spec = ParseLogged(ArchivedEntry("Retired App", "Archive=" & value), log, exitCode)
+
+            Assert.IsTrue(spec.ShouldSkip, value)
+            Assert.IsFalse(spec.ShouldArchive, value)
+            Assert.AreEqual(1, exitCode, value)
+            Assert.IsTrue(log.Any(Function(l) l.Contains("[Retired App *] declares Archive=False; delete the Archive line")), "Got: " & String.Join(" | ", log))
+
+        Next
+
+    End Sub
+
+    ''' <summary> <c> Skip= </c> and <c> Archive= </c> on one entry build neither and fail the run </summary>
+    <TestMethod()> Public Sub SkipAndArchive_AreRefused()
+
+        Dim log As List(Of String) = Nothing
+        Dim exitCode As Integer
+        Dim spec = ParseLogged(ArchivedEntry("Retired App", "Archive=Gone") & "Skip" & vbCrLf, log, exitCode)
+
+        Assert.IsTrue(spec.ShouldSkip)
+        Assert.IsFalse(spec.ShouldArchive)
+        Assert.AreEqual(1, exitCode)
+        Assert.IsTrue(log.Any(Function(l) l.Contains("[Retired App *] declares both Skip and Archive")), "Got: " & String.Join(" | ", log))
+
+    End Sub
+
+    ''' <summary> A structural skip wins over <c> Archive= </c>, with its own warning and without failing the run </summary>
+    <TestMethod()> Public Sub StructuralSkip_BeatsArchive()
+
+        Dim log As List(Of String) = Nothing
+        Dim exitCode As Integer
+        Dim spec = ParseLogged("[Retired App *]" & vbCrLf & "FileKey=%LocalAppData%\Retired|*.log" & vbCrLf & "Archive=Gone" & vbCrLf, log, exitCode)
+
+        Assert.IsTrue(spec.ShouldSkip)
+        Assert.IsFalse(spec.ShouldArchive)
+        Assert.AreEqual(0, exitCode)
+        Assert.IsTrue(log.Any(Function(l) l.Contains("No Section or LangSecRef in [Retired App *], skipping")), "Got: " & String.Join(" | ", log))
+
+    End Sub
+
+    ''' <summary>
+    ''' A live and an archived section of one name, in two source files, meet in the source
+    ''' merge: the first is kept live, the repeat is dropped and the run fails
+    ''' </summary>
+    <TestMethod()> Public Sub LiveAndArchivedOfOneName_FailTheRun()
+
+        Dim live As String = Nothing
+        Dim archive As String = Nothing
+        Dim outFiles As List(Of String) = Nothing
+        Dim sources As New Dictionary(Of String, String) From {
+            {"A.ini", LiveEntry},
+            {"B.ini", ArchivedEntry("Alpha App", "Archive=Gone")}
+        }
+
+        Assert.AreEqual(1, RunArchiveBuild(sources, live, archive, outFiles, "-4d", "{archive}"))
+        StringAssert.Contains(live, "[Alpha App *]")
+        Assert.IsFalse(archive.Contains("[Alpha App *]"), archive)
+
+    End Sub
+
+    ''' <summary>
+    ''' With no archive folder, archived entries reach neither output and the run fails, while
+    ''' the live output is still written
+    ''' </summary>
+    <TestMethod()> Public Sub NoArchiveFolder_DropsArchivedEntriesAndFails()
+
+        Dim live As String = Nothing
+        Dim archive As String = Nothing
+        Dim outFiles As List(Of String) = Nothing
+        Dim sources As New Dictionary(Of String, String) From {{"A.ini", LiveEntry & ArchivedEntry("Retired App", "Archive=Gone")}}
+
+        Assert.AreEqual(1, RunArchiveBuild(sources, live, archive, outFiles))
+        StringAssert.Contains(live, "[Alpha App *]")
+        Assert.IsFalse(live.Contains("Retired App"), live)
+        Assert.IsNull(archive)
+        CollectionAssert.AreEqual({"entrybuilder.ini"}, outFiles.ToArray())
+
+    End Sub
+
+    ''' <summary> Given an archive folder, a run with nothing archived still writes a header-only <c> archived.ini </c> </summary>
+    <TestMethod()> Public Sub NothingArchived_WritesHeaderOnlyArchive()
+
+        Dim live As String = Nothing
+        Dim archive As String = Nothing
+        Dim outFiles As List(Of String) = Nothing
+        Dim sources As New Dictionary(Of String, String) From {{"A.ini", LiveEntry}}
+
+        Assert.AreEqual(0, RunArchiveBuild(sources, live, archive, outFiles, "-4d", "{archive}"))
+        Assert.IsTrue(archive.StartsWith("; # of entries: 0" & vbCrLf, StringComparison.Ordinal), archive)
+        Assert.IsFalse(archive.Contains("["), archive)
+
+    End Sub
+
+    ''' <summary> With <c> -split </c>, archived entries still go to the one unsplit <c> archived.ini </c> </summary>
+    <TestMethod()> Public Sub Split_LeavesTheArchiveUnsplit()
+
+        Dim live As String = Nothing
+        Dim archive As String = Nothing
+        Dim outFiles As List(Of String) = Nothing
+        Dim sources As New Dictionary(Of String, String) From {{"A.ini", LiveEntry & ArchivedEntry("Retired App", "Archive=Gone")}}
+
+        Assert.AreEqual(0, RunArchiveBuild(sources, live, archive, outFiles, "-split", "-4d", "{archive}"))
+        Assert.AreEqual(27, outFiles.Count)
+        StringAssert.Contains(archive, "[Retired App *]")
 
     End Sub
 

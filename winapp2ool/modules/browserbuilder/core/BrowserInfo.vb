@@ -71,6 +71,12 @@ Friend Structure BrowserInfo
     Public ShouldSkip As Boolean
 
     ''' <summary>
+    ''' Indicates whether the BrowserInfo declared <c> Archive= </c>, so every entry generated
+    ''' for the browser goes to the archive output instead of the live one
+    ''' </summary>
+    Public ShouldArchive As Boolean
+
+    ''' <summary>
     ''' Creates a new <c> BrowserInfo </c> for a particular browser, with empty lists and
     ''' no section
     ''' </summary>
@@ -87,6 +93,7 @@ Friend Structure BrowserInfo
         TruncateDetect = False
         RegistryRoots = New List(Of String)
         ShouldSkip = False
+        ShouldArchive = False
 
     End Sub
 

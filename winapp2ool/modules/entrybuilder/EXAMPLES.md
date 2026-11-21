@@ -711,4 +711,5 @@ The entry does not appear in `entrybuilder.ini`. Re-enabling it later is a one-l
 **Explanation**
 
 - `Skip=` leaves the entry out whatever its value, so even `Skip=False` skips
+- To retire an entry for software that's gone, use `Archive=` instead, which sends it to `archived.ini` rather than dropping it (see the readme's [Archive](readme.md#archive) section)
 - The run statistics count skipped entries, so a skipped entry still shows up in the totals

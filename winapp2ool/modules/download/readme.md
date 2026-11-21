@@ -8,7 +8,7 @@ Downloader resolves a short name (`winapp2`, `readme`, `winapp3`, etc) to a URL 
 
 ### Why Downloader?
 
-There are several flavors of winapp2.ini, and Downloader knows where each one lives, so you don't have to hunt through the repository for the right file. It is also how winapp2ool updates itself, keeping a backup of the version it replaced. And it fetches `winapp3.ini` and `Archived entries.ini`, which you can fold into a winapp2.ini with Transmute.
+There are several flavors of winapp2.ini, and Downloader knows where each one lives, so you don't have to hunt through the repository for the right file. It is also how winapp2ool updates itself, keeping a backup of the version it replaced. And it fetches `winapp3.ini` and `archived.ini`, the archive of retired entries, which you can fold into a winapp2.ini with Transmute.
 
 ---
 
@@ -114,7 +114,7 @@ The seven winapp2.ini options always download the flavor their label names and i
 | Option | Effect | Notes |
 |:-|:-|:-|
 | Winapp3.ini | Download the extended/potentially unsafe entry database | Not recommended for general use |
-| Archived entries.ini | Download entries for old or discontinued software | Not recommended for general use |
+| archived.ini | Download entries for old or discontinued software | Not recommended for general use |
 
 ---
 
@@ -134,7 +134,7 @@ One run downloads one file. To fetch several, run the command several times.
 | `2` or `winapp2ool` | winapp2ool.exe |
 | `3` or `readme` | readme.txt |
 | `4` or `winapp3` | winapp3.ini |
-| `5` or `archived` | Archived entries.ini |
+| `5` or `archived` | archived.ini |
 
 ## Path Parameters
 
@@ -193,7 +193,7 @@ The active flavor comes from winapp2ool's global settings (**Settings → Change
 | `winapp2ool` | *(not applicable)* | `winapp2ool.exe` |
 | `readme` | *(not applicable)* | `readme.txt` from the CLI, `readme.md` from the menu |
 | `winapp3` | *(not applicable)* | `winapp3.ini` |
-| `archived` | *(not applicable)* | `Archived entries.ini` |
+| `archived` | *(not applicable)* | `archived.ini` |
 
 System Ninja is the only flavor that changes the extension. `-1f` overrides any of these names.
 
@@ -252,7 +252,7 @@ An update never installs an older version, even one with a valid signature. Sinc
 
 ### Winapp3 and Archived Entries
 
-`winapp3.ini` and `Archived entries.ini` are not part of the standard winapp2.ini distribution. They may contain entries that are incomplete, actively dangerous for your system, or written for software that no longer exists. Review them before use.
+`winapp3.ini` and `archived.ini` are not part of the standard winapp2.ini distribution. They may contain entries that are incomplete, actively dangerous for your system, or written for software that no longer exists. Review them before use.
 
 ---
 
@@ -292,13 +292,12 @@ Every winapp2.ini flavor is downloaded from the [latest release](https://github.
 | winapp2.ini (CCleaner 7) | `winapp2-ccleaner7.ini` |
 | winapp2.ini (FluentCleaner) | `winapp2-fluentcleaner.ini` |
 
-Each flavor is saved as `winapp2.ini` (`winapp2.rules` for System Ninja), whatever its asset is called. Everything else is fetched from `github.com/MoscaDotTo/Winapp2` on the `master` branch:
+Each flavor is saved as `winapp2.ini` (`winapp2.rules` for System Ninja), whatever its asset is called. `archived.ini` comes from the latest release too, as the asset of the same name. Everything else is fetched from `github.com/MoscaDotTo/Winapp2` on the `master` branch:
 
 | File | Path in the repository |
 |:-|:-|
 | winapp2ool.exe | `winapp2ool/bin/Release/winapp2ool.exe` |
 | readme | `winapp2ool/Readme.md` |
 | winapp3.ini | `Winapp3/Winapp3.ini` |
-| Archived entries.ini | `Winapp3/Archived entries.ini` |
 
 With **Beta Participation** enabled (main menu → Settings), `winapp2ool.exe` is taken from the `Branch1` branch instead of `master`. No other file is affected by the beta setting.

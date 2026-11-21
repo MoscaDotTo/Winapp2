@@ -47,6 +47,18 @@ Public Class winapp2file
     ''' </summary>
     Public Const LatestDownloadUrl As String = RepoUrl & "/releases/latest/download/"
 
+    ''' <summary>
+    ''' The file name of the archive of retired entries, both as the generators write it and as
+    ''' its release asset
+    ''' </summary>
+    Public Const ArchiveFileName As String = "archived.ini"
+
+    ''' <summary>
+    ''' The preamble line that marks a file as the archive of retired entries. It's fixed, and
+    ''' we match it in any case.
+    ''' </summary>
+    Public Const ArchiveMarkerLine As String = "; Archive: retired winapp2.ini entries"
+
     ' One category list per FileSectionHeaders entry, at the same index
     Private ReadOnly _categories As New List(Of List(Of winapp2entry))
 
@@ -72,6 +84,13 @@ Public Class winapp2file
     ''' told the flavor on the command line sets it.
     ''' </summary>
     Public Property Flavor As WinappFlavor?
+
+    ''' <summary>
+    ''' Indicates whether the file is the archive of retired entries, which its preamble says
+    ''' with <see cref="ArchiveMarkerLine"/>. A marked file gets the archive's header. Only
+    ''' WinappDebug's <c> -archive </c> flag marks a file, and the archive never has a flavor.
+    ''' </summary>
+    Public Property IsArchive As Boolean
 
     ''' <summary>
     ''' The version comment string, e.g. "; Version: 260219". It's <c> ; Version: 000000 </c>
@@ -128,6 +147,8 @@ Public Class winapp2file
         Next
 
         Flavor = ReadFlavor(file)
+
+        IsArchive = ReadArchiveMarker(file)
 
         Version = DetermineVersionString(file, useTodaysDate)
 
@@ -186,6 +207,29 @@ Public Class winapp2file
 
     End Function
 
+    ''' <summary>
+    ''' Returns whether the preamble, read as <see cref="ReadFlavor"/> reads it, holds
+    ''' <see cref="ArchiveMarkerLine"/>
+    ''' </summary>
+    '''
+    ''' <param name="file">A winapp2.ini format <c> iniFile </c></param>
+    Private Shared Function ReadArchiveMarker(file As iniFile) As Boolean
+
+        Dim expectedLine = 1
+
+        For Each comment In file.Comments
+
+            If comment.LineNumber <> expectedLine Then Exit For
+            expectedLine += 1
+
+            If comment.Text.Trim().Equals(ArchiveMarkerLine, StringComparison.OrdinalIgnoreCase) Then Return True
+
+        Next
+
+        Return False
+
+    End Function
+
     Private Shared Function GetCategoryIndex(entry As winapp2entry,
                                              categoryValues As List(Of String)) As Integer
 
@@ -213,11 +257,11 @@ Public Class winapp2file
     ''' <summary>
     ''' Returns all entries as a single <c> iniFile </c> in winapp2.ini order. <br /> <br />
     '''
-    ''' We re-emit the two pieces of preamble state this class carries, the version string and
-    ''' the flavor, as comments on the returned file. Without them a round trip through the
-    ''' winapp2 layer silently resets the version to <c> 000000 </c> and forgets the flavor,
-    ''' since this class' constructor reads both back off <c> iniFile.Comments </c>, and Diff
-    ''' reads the version there too
+    ''' We re-emit the preamble state this class carries, the version string, the flavor and
+    ''' the archive marker, as comments on consecutive lines of the returned file. Without them
+    ''' a round trip through the winapp2 layer silently resets the version to <c> 000000 </c>
+    ''' and forgets what the file is, since this class' constructor reads them back off
+    ''' <c> iniFile.Comments </c>, and Diff reads the version there too
     ''' </summary>
     Public Function ToIni() As iniFile
 
@@ -226,7 +270,11 @@ Public Class winapp2file
         out.Comments.Add(New iniComment(Version, 1))
 
         If Flavor.HasValue Then
-            out.Comments.Add(New iniComment($"; Flavor: {WinappFlavorInfo.Lookup(Flavor.Value).DisplayName}", 2))
+            out.Comments.Add(New iniComment($"; Flavor: {WinappFlavorInfo.Lookup(Flavor.Value).DisplayName}", out.Comments.Count + 1))
+        End If
+
+        If IsArchive Then
+            out.Comments.Add(New iniComment(ArchiveMarkerLine, out.Comments.Count + 1))
         End If
 
         For Each entry In Entries
@@ -327,8 +375,10 @@ Public Class winapp2file
     ''' The header's first two lines, the version and the entry count, are read by the
     ''' updater, Diff and the build, so their format is fixed. A file with a
     ''' <see cref="Flavor"/> gets a <c> ; Flavor: </c> third line, a description and links to
-    ''' its own release assets. One without gets the same header minus those, linking to the
-    ''' latest release.
+    ''' its own release assets. A file marked <see cref="IsArchive"/> gets
+    ''' <see cref="ArchiveMarkerLine"/> as its third line instead, then says what the archive
+    ''' is and how to add it to winapp2.ini, and links its release asset and its sources. Any
+    ''' other file gets the same header minus those, linking to the latest release.
     ''' </summary>
     Public Function ToWinapp2String() As String
 
@@ -337,7 +387,22 @@ Public Class winapp2file
         builder.AppendLine(Version)
         builder.AppendLine(EntryCountLine(Count))
 
-        If Flavor.HasValue Then
+        If IsArchive Then
+
+            builder.AppendLine(ArchiveMarkerLine)
+            builder.AppendLine(";")
+            builder.AppendLine("; These entries were removed from winapp2.ini because the software they clean is discontinued,")
+            builder.AppendLine("; or because they are out of date with their target software.")
+            builder.AppendLine(";")
+            builder.AppendLine("; To add them to your winapp2.ini:")
+            builder.AppendLine($";   winapp2ool -transmute -1f winapp2.ini -2f {ArchiveFileName} -3f winapp2.ini")
+            builder.AppendLine(";")
+            builder.AppendLine("; Latest copy of this file:")
+            builder.AppendLine($";   {LatestDownloadUrl}{ArchiveFileName}")
+            builder.AppendLine("; Its entries come from the generator sources, each marked with an Archive= line:")
+            builder.AppendLine($";   {SourceLink(GeneratorSources, sourceIsFolder:=True)}")
+
+        ElseIf Flavor.HasValue Then
 
             Dim info = WinappFlavorInfo.Lookup(Flavor.Value)
 

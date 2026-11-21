@@ -129,6 +129,23 @@ Public Class IniFileChooserTests
 
     End Sub
 
+    ''' <summary>
+    ''' The builders' archive folders start empty, meaning none is chosen. "Parent folder"
+    ''' there used to throw out of the menu, since <c> Directory.GetParent("") </c> throws.
+    ''' </summary>
+    <TestMethod>
+    Public Sub ParentFolder_WithNoFolderChosen_LeavesTheDirectory()
+
+        Dim chooser As New iniFileChooser("", FileName, mustExist:=False)
+
+        Enter(chooser, "3")
+
+        Assert.AreEqual("", chooser.Dir)
+        Assert.IsFalse(ExitPending)
+        StringAssert.Contains(MenuHeaderText, "no parent folder")
+
+    End Sub
+
     <TestMethod>
     Public Sub DefaultDirectory_WithoutTheFile_StaysOpen()
 

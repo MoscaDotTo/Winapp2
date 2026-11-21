@@ -26,7 +26,8 @@ Imports System.Text
 ''' <c> %Package% </c> and <c> %WebViewRoot% </c> spellings, root substitution in AppInfo keys,
 ''' per-key-class domain classification, the open-vocabulary
 ''' parser and its typo backstops, and the vocabulary shared with EntryBuilder. Also covers the
-''' Electron family's two roots and QtWebEngine's cache root. The expansion engine itself is
+''' Electron family's two roots, QtWebEngine's cache root, and the <c> Archive= </c> key and its
+''' <c> archived.ini </c> output. The expansion engine itself is
 ''' covered by <see cref="VariableExpanderTests"/>; these tests cover the wiring.
 ''' </summary>
 <TestClass()> Public Class UWPBuilderTests
@@ -1261,6 +1262,219 @@ Imports System.Text
             IO.Directory.Delete(sourceDir, recursive:=True)
 
         End Try
+
+    End Sub
+
+    ' ----- Archive= -----
+
+    ''' <summary> Returns an AppInfo section named <paramref name="name"/>, with <paramref name="extraLines"/> after its keys </summary>
+    ''' <param name="name">The entry's name, without the trailing <c> * </c></param>
+    ''' <param name="extraLines">Further lines, each ending in a line break</param>
+    Private Shared Function AppSection(name As String, Optional extraLines As String = "") As String
+
+        Return $"[{name} *]" & vbCrLf &
+               $"Package=Hazel.{name.Replace(" ", "")}_abc" & vbCrLf &
+               "LangSecRef=3021" & vbCrLf &
+               extraLines
+
+    End Function
+
+    ''' <summary>
+    ''' Runs UWPBuilder's command line over a scratch source directory whose <c> AppInfo\ </c>
+    ''' holds <paramref name="appInfo"/>, writing a single <c> uwp.ini </c>, and returns the exit
+    ''' code it leaves. Every setting it touches is restored.
+    ''' </summary>
+    '''
+    ''' <param name="appInfo">Each AppInfo file's name and text</param>
+    '''
+    ''' <param name="liveText">Set to the text of <c> uwp.ini </c>, or <c> Nothing </c></param>
+    '''
+    ''' <param name="archiveText">Set to the text of <c> archived.ini </c> in the archive folder, or <c> Nothing </c></param>
+    '''
+    ''' <param name="archiveArgs">
+    ''' The archive folder arguments. <c> {archive} </c> in them stands for the scratch archive
+    ''' folder.
+    ''' </param>
+    Private Shared Function RunArchiveBuild(appInfo As Dictionary(Of String, String),
+                                            ByRef liveText As String,
+                                            ByRef archiveText As String,
+                                            ParamArray archiveArgs As String()) As Integer
+
+        Dim dir = IO.Path.Combine(IO.Path.GetTempPath(), $"winapp2ool-uwparchive-{Guid.NewGuid():N}")
+        Dim outDir = IO.Path.Combine(dir, "Out")
+        Dim archiveDir = IO.Path.Combine(dir, "Archived")
+        Dim saved = {winapp2ool.UWPFile1, winapp2ool.UWPFile2, winapp2ool.UWPFile3, winapp2ool.UWPArchiveFile}
+        Dim savedSplit = winapp2ool.UWPBuilderSplitOutput
+        Dim savedSuppress = winapp2ool.SuppressOutput
+        Dim savedExitCode = Environment.ExitCode
+
+        Try
+
+            IO.Directory.CreateDirectory(IO.Path.Combine(dir, "AppInfo"))
+            IO.Directory.CreateDirectory(IO.Path.Combine(dir, "Scaffolds"))
+            IO.File.WriteAllText(IO.Path.Combine(dir, "UWP.ini"),
+                "[EntryScaffold: UWP App]" & vbCrLf & "DetectFileBase=<Package>" & vbCrLf & "FileKeyBase=<Package>\TempState|*|REMOVESELF" & vbCrLf)
+            For Each file In appInfo
+                IO.File.WriteAllText(IO.Path.Combine(dir, "AppInfo", file.Key), file.Value)
+            Next
+
+            winapp2ool.SuppressOutput = True
+            Environment.ExitCode = 0
+
+            Dim args = {"-1d", dir, "-2d", outDir, "-3d", IO.Path.Combine(dir, "Scaffolds")}.Concat(archiveArgs.Select(Function(a) a.Replace("{archive}", archiveDir))).ToArray()
+            setCmdLineArgs(AddressOf winapp2ool.UWPBuilder.handleCmdLine, args)
+
+            Dim livePath = IO.Path.Combine(outDir, "uwp.ini")
+            Dim archivePath = IO.Path.Combine(archiveDir, "archived.ini")
+            liveText = If(IO.File.Exists(livePath), IO.File.ReadAllText(livePath), Nothing)
+            archiveText = If(IO.File.Exists(archivePath), IO.File.ReadAllText(archivePath), Nothing)
+
+            Return Environment.ExitCode
+
+        Finally
+
+            winapp2ool.UWPFile1 = saved(0)
+            winapp2ool.UWPFile2 = saved(1)
+            winapp2ool.UWPFile3 = saved(2)
+            winapp2ool.UWPArchiveFile = saved(3)
+            winapp2ool.UWPBuilderSplitOutput = savedSplit
+            winapp2ool.SuppressOutput = savedSuppress
+            Environment.ExitCode = savedExitCode
+            IO.Directory.Delete(dir, recursive:=True)
+
+        End Try
+
+    End Function
+
+    ''' <summary>
+    ''' An app with <c> Archive= </c> goes to <c> archived.ini </c> in the folder slot 4 names,
+    ''' built like a live app and without the Archive key, and only there
+    ''' </summary>
+    <TestMethod()> Public Sub Archive_RoutesToTheArchiveFile()
+
+        Dim live As String = Nothing
+        Dim archive As String = Nothing
+        Dim appInfo As New Dictionary(Of String, String) From {{"A.ini", AppSection("Alpha App") & AppSection("Retired App", "Archive=Delisted" & vbCrLf)}}
+
+        Assert.AreEqual(0, RunArchiveBuild(appInfo, live, archive, "-4d", "{archive}"))
+
+        StringAssert.Contains(live, "[Alpha App *]")
+        Assert.IsFalse(live.Contains("Retired App"), live)
+        Assert.IsTrue(archive.StartsWith("; # of entries: 1" & vbCrLf & "; archived.ini is a build artifact generated by winapp2ool's UWPBuilder.", StringComparison.Ordinal), archive)
+        StringAssert.Contains(archive, "[Retired App *]")
+        StringAssert.Contains(archive, "FileKey1=%LocalAppData%\Packages\Hazel.RetiredApp_abc\TempState|*|REMOVESELF")
+        Assert.IsFalse(archive.Contains(vbLf & "Archive"), archive)
+        Assert.IsFalse(archive.Contains("Delisted"), archive)
+
+    End Sub
+
+    ''' <summary> The <c> archive </c> alias sets slot 4 too </summary>
+    <TestMethod()> Public Sub Archive_AliasSetsTheArchiveFolder()
+
+        Dim live As String = Nothing
+        Dim archive As String = Nothing
+        Dim appInfo As New Dictionary(Of String, String) From {{"A.ini", AppSection("Alpha App") & AppSection("Retired App", "Archive=" & vbCrLf)}}
+
+        Assert.AreEqual(0, RunArchiveBuild(appInfo, live, archive, "-archived", "{archive}"))
+        StringAssert.Contains(archive, "[Retired App *]")
+
+    End Sub
+
+    ''' <summary> A bare <c> Archive= </c> archives the app without a warning </summary>
+    <TestMethod()> Public Sub BareArchive_ArchivesTheApp()
+
+        Dim diags As List(Of String) = Nothing
+        Dim app As winapp2ool.UWPBuilder.UWPAppInfo = Nothing
+
+        Assert.AreEqual(0, ExitCodeAfter(Sub() app = ParseApp(Preamble & "Archive=" & vbCrLf, diags)))
+        Assert.IsTrue(app.ShouldArchive)
+        Assert.IsFalse(app.ShouldSkip)
+        Assert.IsFalse(diags.Any(Function(d) d.Contains("no value")), "Got: " & String.Join(" | ", diags))
+
+    End Sub
+
+    ''' <summary> <c> Archive=False </c>, in any case, builds nothing and fails the run </summary>
+    <TestMethod()> Public Sub ArchiveFalse_IsRefused()
+
+        Dim diags As List(Of String) = Nothing
+        Dim app As winapp2ool.UWPBuilder.UWPAppInfo = Nothing
+
+        Assert.AreEqual(1, ExitCodeAfter(Sub() app = ParseApp(Preamble & "Archive=false" & vbCrLf, diags)))
+        Assert.IsTrue(app.ShouldSkip)
+        Assert.IsFalse(app.ShouldArchive)
+        Assert.IsTrue(diags.Any(Function(d) d.Contains("[Test App *] declares Archive=False; delete the Archive line")), "Got: " & String.Join(" | ", diags))
+
+    End Sub
+
+    ''' <summary> <c> Skip= </c> and <c> Archive= </c> on one app build neither and fail the run </summary>
+    <TestMethod()> Public Sub SkipAndArchive_AreRefused()
+
+        Dim diags As List(Of String) = Nothing
+        Dim app As winapp2ool.UWPBuilder.UWPAppInfo = Nothing
+
+        Assert.AreEqual(1, ExitCodeAfter(Sub() app = ParseApp(Preamble & "Archive=Gone" & vbCrLf & "Skip=" & vbCrLf, diags)))
+        Assert.IsTrue(app.ShouldSkip)
+        Assert.IsFalse(app.ShouldArchive)
+        Assert.IsTrue(diags.Any(Function(d) d.Contains("[Test App *] declares both Skip and Archive")), "Got: " & String.Join(" | ", diags))
+
+    End Sub
+
+    ''' <summary> A structural skip wins over <c> Archive= </c>, with its own warning and without failing the run </summary>
+    <TestMethod()> Public Sub StructuralSkip_BeatsArchive()
+
+        Dim diags As List(Of String) = Nothing
+        Dim app As winapp2ool.UWPBuilder.UWPAppInfo = Nothing
+
+        Assert.AreEqual(0, ExitCodeAfter(Sub() app = ParseApp("[Test App *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "Archive=Gone" & vbCrLf, diags)))
+        Assert.IsTrue(app.ShouldSkip)
+        Assert.IsFalse(app.ShouldArchive)
+        Assert.IsTrue(diags.Any(Function(d) d.Contains("No Package key in [Test App *], skipping")), "Got: " & String.Join(" | ", diags))
+
+    End Sub
+
+    ''' <summary>
+    ''' A live and an archived app of one name, in two AppInfo files, meet in the source merge:
+    ''' the first is kept live, the repeat is dropped and the run fails
+    ''' </summary>
+    <TestMethod()> Public Sub LiveAndArchivedOfOneName_FailTheRun()
+
+        Dim live As String = Nothing
+        Dim archive As String = Nothing
+        Dim appInfo As New Dictionary(Of String, String) From {
+            {"A.ini", AppSection("Alpha App")},
+            {"B.ini", AppSection("Alpha App", "Archive=Gone" & vbCrLf)}
+        }
+
+        Assert.AreEqual(1, RunArchiveBuild(appInfo, live, archive, "-4d", "{archive}"))
+        StringAssert.Contains(live, "[Alpha App *]")
+        Assert.IsFalse(archive.Contains("[Alpha App *]"), archive)
+
+    End Sub
+
+    ''' <summary> With no archive folder, archived apps reach neither output and the run fails </summary>
+    <TestMethod()> Public Sub NoArchiveFolder_DropsArchivedAppsAndFails()
+
+        Dim live As String = Nothing
+        Dim archive As String = Nothing
+        Dim appInfo As New Dictionary(Of String, String) From {{"A.ini", AppSection("Alpha App") & AppSection("Retired App", "Archive=Gone" & vbCrLf)}}
+
+        Assert.AreEqual(1, RunArchiveBuild(appInfo, live, archive))
+        StringAssert.Contains(live, "[Alpha App *]")
+        Assert.IsFalse(live.Contains("Retired App"), live)
+        Assert.IsNull(archive)
+
+    End Sub
+
+    ''' <summary> Given an archive folder, a run with nothing archived still writes a header-only <c> archived.ini </c> </summary>
+    <TestMethod()> Public Sub NothingArchived_WritesHeaderOnlyArchive()
+
+        Dim live As String = Nothing
+        Dim archive As String = Nothing
+        Dim appInfo As New Dictionary(Of String, String) From {{"A.ini", AppSection("Alpha App")}}
+
+        Assert.AreEqual(0, RunArchiveBuild(appInfo, live, archive, "-4d", "{archive}"))
+        Assert.IsTrue(archive.StartsWith("; # of entries: 0" & vbCrLf, StringComparison.Ordinal), archive)
+        Assert.IsFalse(archive.Contains("["), archive)
 
     End Sub
 

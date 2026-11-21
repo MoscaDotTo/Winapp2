@@ -61,9 +61,9 @@ Public Module BrowserBuilder
     Private Const EntryScaffoldPrefix As String = "EntryScaffold:"
 
     ''' <summary>
-    ''' Binds the command-line file arguments to <see cref="BuilderFile1"/> and
-    ''' <see cref="BuilderFile2"/>, starting from the default settings rather than any saved
-    ''' ones, then runs the build
+    ''' Binds the command-line file arguments to <see cref="BuilderFile1"/>,
+    ''' <see cref="BuilderFile2"/> and <see cref="BuilderArchiveFile"/>, starting from the
+    ''' default settings rather than any saved ones, then runs the build
     ''' </summary>
     '''
     ''' <remarks>
@@ -73,6 +73,9 @@ Public Module BrowserBuilder
     ''' <br /> <br /> 
     ''' <c> -2d </c> / <c> -2f </c> <br /> Output file path and name.
     ''' Defaults to <c> browsers.ini </c> in the current directory.
+    ''' <br /> <br />
+    ''' <c> -3d </c> (alias <c> -archived </c>) <br /> The folder <c> archived.ini </c> is
+    ''' written to. None by default.
     ''' </remarks>
     Public Sub handleCmdLine()
 
@@ -81,6 +84,7 @@ Public Module BrowserBuilder
         Dim spec As New CliArgSpec(NameOf(BrowserBuilder))
         spec.WithFile(1, BuilderFile1) _
             .WithFile(2, BuilderFile2) _
+            .WithFile(3, BuilderArchiveFile, "archive") _
             .Parse()
 
         initBrowserBuilder()
@@ -141,6 +145,13 @@ Public Module BrowserBuilder
     ''' <see cref="remotedebugGuarded"/>, and writes it to <see cref="BuilderFile2"/> under a
     ''' <see cref="ArtifactHeader.Text"/>'s header. <see cref="Flavorize"/> sorts the entries and writes the file
     ''' once on its own, without the header, before we lint it and write it again.
+    ''' <br /><br />
+    '''
+    ''' The entries of a browser that declared <c> Archive= </c> are generated and flavorized
+    ''' with the rest, so the corrections reach them as they would a live entry, and are then
+    ''' moved to the archive output, which <see cref="ArchiveOutput.WriteArchive"/> writes to
+    ''' <see cref="BuilderArchiveFile"/>'s folder. An entry only the correction files create
+    ''' goes with it when <see cref="ownerIsArchived"/> says its browser is archived.
     ''' </summary>
     '''
     ''' <param name="chromiumIni">
@@ -161,12 +172,21 @@ Public Module BrowserBuilder
         Using gLogScope("Processing browser builder files")
 
             Dim outputFile = iniFile.Empty(BuilderFile2.Dir, BuilderFile2.Name)
+            Dim archivedNames As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+            Dim browserArchived As New Dictionary(Of String, Boolean)(StringComparer.OrdinalIgnoreCase)
 
-            buildScaffolds(chromiumIni, False, outputFile, output)
+            buildScaffolds(chromiumIni, False, outputFile, archivedNames, browserArchived, output)
             totalChromiumCount = outputFile.Count
 
-            buildScaffolds(geckoIni, True, outputFile, output)
+            buildScaffolds(geckoIni, True, outputFile, archivedNames, browserArchived, output)
             totalGeckoCount = outputFile.Count - totalChromiumCount
+
+            Dim generatedNames As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+            For Each section In outputFile
+
+                generatedNames.Add(section.Name)
+
+            Next
 
             Dim sourceDir = BuilderFile1.Dir
 
@@ -179,16 +199,83 @@ Public Module BrowserBuilder
 
             Flavorize(outputFile, outputFile, output, flavorAdd, flavorSecRem, flavorNameRem, flavorValRem, flavorSecRep, flavorKeyRep)
 
+            Dim archiveFile = iniFile.Empty(BuilderArchiveFile.Dir, winapp2file.ArchiveFileName)
+            Dim toArchive As New List(Of iniSection)
+            Dim additionsArchived = 0
+
+            For Each section In outputFile
+
+                If generatedNames.Contains(section.Name) Then
+
+                    If archivedNames.Contains(section.Name) Then toArchive.Add(section)
+
+                ElseIf ownerIsArchived(section.Name, browserArchived) Then
+
+                    toArchive.Add(section)
+                    additionsArchived += 1
+
+                End If
+
+            Next
+
+            For Each section In toArchive
+
+                archiveFile.AddSection(section)
+                outputFile.RemoveSection(section.Name)
+
+            Next
+
+            If additionsArchived > 0 Then
+
+                Dim additionsMsg = $"Archived {additionsArchived} entries the correction files added for archived browsers"
+                gLog(additionsMsg)
+                output.AddColoredLine(additionsMsg, ConsoleColor.Yellow)
+
+            End If
+
             outputFile = remotedebugGuarded(outputFile, NameOf(BrowserBuilder), output)
 
             Dim header = ArtifactHeader.Text(outputFile.Name, NameOf(BrowserBuilder), outputFile.Count, BrowserBuilderSources, sourceIsFolder:=True)
             outputFile.OverwriteToFile(header & outputFile.ToString())
+
+            WriteArchive(archiveFile, BuilderArchiveFile.Dir, NameOf(BrowserBuilder), BrowserBuilderSources, output)
 
             gLog("Browser builder files processed successfully")
 
         End Using
 
     End Sub
+
+    ''' <summary>
+    ''' Indicates whether an entry the correction files added belongs to an archived browser.
+    ''' An entry belongs to the browser with the longest name it starts with, followed by a
+    ''' space, the way generated entries are named, so archiving <c> Opera </c> leaves
+    ''' <c> Opera GX </c>'s entries alone.
+    ''' </summary>
+    '''
+    ''' <param name="entryName">
+    ''' The added entry's name
+    ''' </param>
+    '''
+    ''' <param name="browserArchived">
+    ''' Every browser's name, and whether it is archived
+    ''' </param>
+    Friend Function ownerIsArchived(entryName As String,
+                                    browserArchived As Dictionary(Of String, Boolean)) As Boolean
+
+        Dim owner = ""
+
+        For Each browserName In browserArchived.Keys
+
+            If Not (browserName.Length > owner.Length AndAlso entryName.StartsWith(browserName & " ", StringComparison.OrdinalIgnoreCase)) Then Continue For
+
+            owner = browserName
+
+        Next
+
+        Return owner.Length > 0 AndAlso browserArchived(owner)
+
+    End Function
 
     ''' <summary>
     ''' Sorts the sections of <paramref name="rulesetFile"/> into <c> BrowserInfo: </c> and
@@ -211,12 +298,22 @@ Public Module BrowserBuilder
     ''' The file receiving the generated entries. A generated name it already holds is dropped.
     ''' </param>
     '''
+    ''' <param name="archivedNames">
+    ''' Receives the name of each entry generated for a browser that declared <c> Archive= </c>
+    ''' </param>
+    '''
+    ''' <param name="browserArchived">
+    ''' Receives every browser's name, skipped ones included, and whether it is archived
+    ''' </param>
+    '''
     ''' <param name="menuOutput">
     ''' The <c> MenuSection </c> accumulating user-visible output for this run
     ''' </param>
     Private Sub buildScaffolds(rulesetFile As iniFile,
                                isGecko As Boolean,
                          ByRef outputFile As iniFile,
+                               archivedNames As HashSet(Of String),
+                               browserArchived As Dictionary(Of String, Boolean),
                          ByRef menuOutput As MenuSection)
 
         Dim browsers As New List(Of BrowserInfo)
@@ -229,6 +326,7 @@ Public Module BrowserBuilder
                 Case nameAfterPrefix(section.Name, BrowserInfoPrefix).Length > 0
 
                     Dim browserInfo As BrowserInfo = parseBrowserInfo(section, menuOutput)
+                    browserArchived(browserInfo.Name) = browserInfo.ShouldArchive
                     If browserInfo.ShouldSkip Then Continue For
                     browsers.Add(browserInfo)
 
@@ -251,7 +349,7 @@ Public Module BrowserBuilder
 
         For Each scaffoldSection In scaffoldSections
 
-            processEntryScaffold(scaffoldSection, browsers, isGecko, outputFile, menuOutput)
+            processEntryScaffold(scaffoldSection, browsers, isGecko, outputFile, menuOutput, archivedNames)
 
         Next
 
@@ -260,8 +358,11 @@ Public Module BrowserBuilder
     ''' <summary>
     ''' Parses a BrowserInfo section into a <see cref="BrowserInfo"/>. The browser's name is
     ''' the header after <c> BrowserInfo: </c>, trimmed. A missing <c> UserDataPath= </c> or
-    ''' <c> Section= </c> warns but doesn't skip the browser. <c> TruncateDetect </c> and
-    ''' <c> Skip </c> take effect by being present, whatever their value. Any other key
+    ''' <c> Section= </c> warns but doesn't skip the browser. <c> TruncateDetect </c>,
+    ''' <c> Skip </c> and <c> Archive </c> take effect by being present, whatever their value,
+    ''' except that <c> Archive=False </c>, or <c> Archive </c> beside <c> Skip </c>, is refused
+    ''' through <see cref="ArchiveOutput.RefuseArchive"/>: the browser is skipped and the run
+    ''' fails. Any other key
     ''' declares one of the browser's variables (see <see cref="declareVariable"/>). Once
     ''' every key is read we resolve the variables, then expand each <c> UserDataPath= </c> and
     ''' <c> RegistryRoot= </c> value into plain paths (see <see cref="expandBrowserValue"/>),
@@ -289,6 +390,8 @@ Public Module BrowserBuilder
         Dim variables As New VariableSet
         Dim pathKeys As New List(Of iniKey)
         Dim rootKeys As New List(Of iniKey)
+        Dim skipDeclared = False
+        Dim archiveValue As String = Nothing
 
         For Each key In browserSection.Keys
 
@@ -302,7 +405,12 @@ Public Module BrowserBuilder
 
                 Case "TRUNCATEDETECT" : browserInfo.TruncateDetect = True
 
-                Case "SKIP" : browserInfo.ShouldSkip = True
+                Case "SKIP"
+
+                    browserInfo.ShouldSkip = True
+                    skipDeclared = True
+
+                Case "ARCHIVE" : archiveValue = key.Value
 
                 Case Else : declareVariable(key, browserSection.Name, variables, menuOutput)
 
@@ -352,6 +460,18 @@ Public Module BrowserBuilder
         menuOutput.AddWarning(noValidSectionErr, condition:=noSection)
         gLog(noUserDataErr, cond:=noUserData)
         gLog(noValidSectionErr, cond:=noSection)
+
+        If archiveValue Is Nothing Then Return browserInfo
+
+        If RefuseArchive($"[{browserSection.Name}]", archiveValue, skipDeclared, menuOutput) Then
+
+            browserInfo.ShouldSkip = True
+
+        Else
+
+            browserInfo.ShouldArchive = Not browserInfo.ShouldSkip
+
+        End If
 
         Return browserInfo
 
@@ -623,11 +743,19 @@ Public Module BrowserBuilder
     ''' <param name="menuOutput">
     ''' The <c> MenuSection </c> accumulating user-visible output for this run
     ''' </param>
+    '''
+    ''' <param name="archivedNames">
+    ''' Receives the name of each entry generated for a browser that declared
+    ''' <c> Archive= </c>. A name <paramref name="outputFile"/> already held isn't added, since
+    ''' that entry was dropped. <br /><br />
+    ''' Optional, Default: <c> Nothing </c> (no names are recorded)
+    ''' </param>
     Friend Sub processEntryScaffold(scaffoldSection As iniSection,
                                     browsers As List(Of BrowserInfo),
                                     isGecko As Boolean,
                               ByRef outputFile As iniFile,
-                              ByRef menuOutput As MenuSection)
+                              ByRef menuOutput As MenuSection,
+                           Optional archivedNames As HashSet(Of String) = Nothing)
 
         Dim scaffoldName As String = nameAfterPrefix(scaffoldSection.Name, EntryScaffoldPrefix)
 
@@ -689,7 +817,12 @@ Public Module BrowserBuilder
 
                 End If
 
+                Dim entryName = $"{browser.Name} {scaffoldName} *"
+                Dim isNewName = Not outputFile.Contains(entryName)
+
                 generateBrowserEntry(browser, scaffoldName, fileKeyBases, regKeyBases, variables, outputFile, isGecko, menuOutput)
+
+                If browser.ShouldArchive AndAlso isNewName AndAlso archivedNames IsNot Nothing Then archivedNames.Add(entryName)
 
             Next
 

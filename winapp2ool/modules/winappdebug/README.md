@@ -116,6 +116,7 @@ Command-line runs always use the default scan settings. Changes you've saved in 
 | `-usedate` | Use today's date (yymmdd) as the version line in the saved file's header, e.g. `; Version: 260724` |
 | `-opti` | Turn on the experimental Optimizations rule (the FileKey merger) for this run |
 | `-keepdefaults` | Leave existing `Default=` keys alone instead of reporting and removing them; see [Default Key Policy](#default-key-policy) |
+| `-archive` | Mark the saved file as `archived.ini`, the archive of retired entries.|
 
 Two of winapp2ool's global flags matter for scripted lint runs. They aren't WinappDebug arguments: they work with any module and can go anywhere on the command line.
 

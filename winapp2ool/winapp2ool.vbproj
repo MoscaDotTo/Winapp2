@@ -192,6 +192,7 @@
     <Compile Include="handlers\winapp2\fileKeyParams\fileKeyParams.vb" />
     <Compile Include="handlers\winapp2\regKeyParams\regKeyParams.vb" />
     <Compile Include="handlers\winapp2\winapp2entry\winapp2entry.vb" />
+    <Compile Include="handlers\winapp2\ArchiveOutput.vb" />
     <Compile Include="handlers\winapp2\ArtifactHeader.vb" />
     <Compile Include="handlers\winapp2\LetterSplitOutput.vb" />
     <Compile Include="handlers\winapp2\winapp2file\winapp2file.vb" />

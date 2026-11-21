@@ -16,7 +16,7 @@ Worked examples for [Downloader](readme.md). The [Common Uses](readme.md#common-
    - [Example 7: Updating winapp2ool in place](#example-7-updating-winapp2ool-in-place)
    - [Example 8: Downloading winapp2ool.exe without updating](#example-8-downloading-winapp2oolexe-without-updating)
 4. [Advanced Downloads](#advanced-downloads)
-   - [Example 9: winapp3.ini and Archived entries.ini](#example-9-winapp3ini-and-archived-entriesini)
+   - [Example 9: winapp3.ini and archived.ini](#example-9-winapp3ini-and-archivedini)
 
 ---
 
@@ -185,7 +185,7 @@ C:\Tools\winapp2\
 **Notes**
 
 - `1` and `winapp2` are interchangeable
-- `-1f` also accepts a leading subdirectory: `-1f "\archive\winapp3.ini"` saves into `archive\` beneath the save directory, creating it if needed. See [Example 9](#example-9-winapp3ini-and-archived-entriesini)
+- `-1f` also accepts a leading subdirectory: `-1f "\archive\winapp3.ini"` saves into `archive\` beneath the save directory, creating it if needed. See [Example 9](#example-9-winapp3ini-and-archivedini)
 
 ---
 
@@ -353,20 +353,20 @@ C:\Tools\winapp2\
 
 ## Advanced Downloads
 
-### Example 9: winapp3.ini and Archived entries.ini
+### Example 9: winapp3.ini and archived.ini
 
 **Context**
 
-You maintain a machine running software that winapp2.ini no longer covers, and you want to fold the archived entries for it into your local database. Transmute's `-w` and `-a` preset flags look for `winapp3.ini` and `Archived Entries.ini` in the source directory.
+You maintain a machine running software that winapp2.ini no longer covers, and you want to fold the archived entries for it into your local database. Transmute's `-w` and `-a` preset flags look for `winapp3.ini` and `archived.ini` in the source directory.
 
 **Intent**
 
-Download both supplementary databases into an `archive\` subdirectory, then merge Archived entries.ini into a local winapp2.ini.
+Download both supplementary databases into an `archive\` subdirectory, then merge archived.ini into a local winapp2.ini.
 
 **Commands**
 ```
 winapp2ool -download winapp3  -1f "\archive\winapp3.ini"
-winapp2ool -download archived -1f "\archive\Archived entries.ini"
+winapp2ool -download archived -1f "\archive\archived.ini"
 winapp2ool -transmute -add -a -2d "C:\Tools\winapp2\archive" -3f winapp2-extended.ini
 ```
 
@@ -376,9 +376,9 @@ Downloading winapp3.ini...
 Download Complete.
 Downloaded winapp3.ini to C:\Tools\winapp2\archive
 
-Downloading Archived entries.ini...
+Downloading archived.ini...
 Download Complete.
-Downloaded Archived entries.ini to C:\Tools\winapp2\archive
+Downloaded archived.ini to C:\Tools\winapp2\archive
 ```
 
 **Result**
@@ -388,10 +388,10 @@ C:\Tools\winapp2\
     winapp2-extended.ini                 (transmute output)
     archive\
         winapp3.ini                        (downloaded)
-        Archived entries.ini               (downloaded)
+        archived.ini                       (downloaded)
 ```
 
 **Explanation**
 - `-1f "\subdir\name"` put both files in `archive\`. The first download created it, since it didn't exist yet
-- `-a` names `Archived Entries.ini` as Transmute's source file, and `-2d` points it at `archive\`. Use `-w` instead to merge winapp3.ini
+- `-a` names `archived.ini` as Transmute's source file, and `-2d` points it at `archive\`. Use `-w` instead to merge winapp3.ini
 - The Transmute step writes to `winapp2-extended.ini`, leaving the original winapp2.ini intact

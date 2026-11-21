@@ -84,15 +84,16 @@ In the menu, set **Choose source directory** and **Choose save target**, then ch
 | Run (default) | Generate browser entries from the configured source directory | Needs `chromium.ini` or `gecko.ini` in the source directory |
 | Choose source directory | Select the directory holding `chromium.ini`, `gecko.ini`, and the flavor correction files | Default: current directory |
 | Choose save target | Select the output file | Default: `browsers.ini` in the current directory |
+| Choose archive folder | Select the folder `archived.ini` is written to | None by default. See [Archiving Discontinued Browsers](#archiving-discontinued-browsers) |
 | Reset Settings | Restore all settings to their defaults | Only shown when settings have been changed |
 
-Below the options, the menu shows the current source directory and save target.
+Below the options, the menu shows the current source directory, save target and archive folder.
 
 ---
 
 # Command-Line Arguments
 
-BrowserBuilder takes two file arguments, the source directory and the output file, and no toggles. The rulesets and flavor files inside the source directory always go by their fixed names.
+BrowserBuilder takes three file arguments, the source directory, the output file and the archive folder, and no toggles. The rulesets and flavor files inside the source directory always go by their fixed names.
 
 ## File Selection
 
@@ -101,6 +102,7 @@ BrowserBuilder takes two file arguments, the source directory and the output fil
 | `-1d path` | Set the source directory holding `chromium.ini`, `gecko.ini`, and the flavor correction files | Current directory |
 | `-2d path` | Set the directory the output is saved to | Current directory |
 | `-2f name` | Set the output file name | `browsers.ini` |
+| `-3d path` (also `-archived path`) | Set the folder `archived.ini` is written to. See [Archiving Discontinued Browsers](#archiving-discontinued-browsers) | None |
 
 ---
 
@@ -131,6 +133,7 @@ Each `BrowserInfo` section describes one browser. The name in its header starts 
 | `RegistryRoot=<path>` | A registry root for the browser | Optional, and can repeat. Fills `<RegistryRoot>` in `RegKeyBase` templates |
 | `TruncateDetect` | Detect on the parent of `UserDataPath` instead | No value needed. For a `UserDataPath` whose parent folder has a wildcard in its name; see [TruncateDetect](#truncatedetect) |
 | `Skip` | Leave this browser out | No value needed. The section is read but produces no entries |
+| `Archive` | Send every entry for this browser to `archived.ini` | No value needed; a value is a reason, never written out. See [Archiving Discontinued Browsers](#archiving-discontinued-browsers) |
 
 ### Example
 
@@ -141,7 +144,7 @@ UserDataPath=%LocalAppData%\Google\Chrome\User Data
 RegistryRoot=HKCU\Software\Google\Chrome
 ```
 
-`Skip` and `TruncateDetect` take effect whenever the key is there, whatever its value. `Skip=False` **still skips** the browser.
+`Skip` and `TruncateDetect` take effect whenever the key is there, whatever its value. `Skip=False` **still skips** the browser. `Archive` does too, except that `Archive=False` is refused (see [Archiving Discontinued Browsers](#archiving-discontinued-browsers)).
 
 Any other key declares one of the browser's [variables](#variables).
 
@@ -317,9 +320,18 @@ The first line counts the file's entries, and the second names the save target. 
 
 Generated output on its own has extras and gaps: entries for features some browsers don't have, and nothing for files only one vendor writes. The flavor files fix both. BrowserBuilder only finds them in the source directory, under their exact names.
 
-### Skipping Discontinued Browsers
+### Skipping a Browser
 
-Add `Skip` to a browser's `BrowserInfo` section to stop generating its entries without deleting the section. If the browser comes back, delete the `Skip` line.
+Add `Skip` to a browser's `BrowserInfo` section to stop generating its entries without deleting the section. To bring them back, delete the `Skip` line.
+
+### Archiving Discontinued Browsers
+
+Add `Archive` to a browser's `BrowserInfo` section to move its entries to the archive. They're still generated and undergo flavorization corrections, then go to `archived.ini` in the archive folder (`-3d`, or **Choose archive folder** in the menu) instead of `browsers.ini`. The value, as in `Archive=Discontinued (2023)`, is an archival reason, and is retained only in the source files. Delete the `Archive` line to restore the entries.
+
+- Every entry the browser generates is archived, and so is any entry `browser_additions.ini` creates under the browser's name, such as `[360 Secure Browser Web Browsing History Backups *]`. An added entry belongs to the browser with the longest name with which it starts, eg. archiving Opera leaves Opera GX's entries alone.
+- `archived.ini` is one file with a do-not-edit header. Given an archive folder, BrowserBuilder always writes it, with only the header when nothing is archived.
+- With no archive folder, the archived entries go to neither file, and the run warns with their count and fails (exit code 1).
+- `Archive=False` is refused and will fail the build. To unarchive, delete the `Archive=` line. 
 
 ### Multiple UserDataPaths
 
@@ -342,7 +354,10 @@ Use `TruncateDetect` when the folder above `UserDataPath` has a wildcard in its 
 | Warning: "No valid UserDataPath key found in [browser]" | The `BrowserInfo` section has no `UserDataPath` key, so the browser's entries get no `DetectFile` and no FileKeys |
 | Warning: "No valid Section key found in [browser]" | The `BrowserInfo` section has no `Section` key, so its entries get an empty `Section=` |
 | Warning: "Skipping [browser] for [scaffold]: scaffold requires RegistryRoot" | The scaffold has `RequiresRegistryRoot` and the browser has no `RegistryRoot`, so that pair produces no entry |
-| A browser is missing from the output entirely | Check its `BrowserInfo` section for `Skip` |
+| A browser is missing from the output entirely | Check its `BrowserInfo` section for `Skip` or `Archive` |
+| Warning: "[BrowserInfo: X] declares Archive=False; delete the Archive line to keep the entry live. The entry wasn't built", and the build failed | `Archive=False` doesn't un-archive a browser. Delete the line |
+| Warning: "[BrowserInfo: X] declares both Skip and Archive; keep one of them. The entry wasn't built", and the build failed | The browser builds nothing until only one of the two lines is present |
+| Warning: "N archived entries left out of the output: no archive folder was given (-4d, or -3d for BrowserBuilder)", and the build failed | A browser declares `Archive` but no archive folder was set, so its entries are in neither file |
 | One entry is missing for one browser | Most likely a `RequiresRegistryRoot` scaffold and a browser with no `RegistryRoot` |
 | A scaffold key is missing from every entry, and the build failed | The template was [refused](#refused-templates). The warning names it and says why |
 | Warning: "[BrowserInfo: X].UserDataPath has no value; skipping it" | An empty `UserDataPath=` or `RegistryRoot=` line. It's ignored, and the build carries on |

@@ -290,9 +290,17 @@ Public Class iniFileChooser
 
     ''' <summary>
     ''' Moves <see cref="Dir"/> up one level, subject to <see cref="MustExist"/> like any other
-    ''' choice. At a drive root there is no parent, so we leave <see cref="Dir"/> as it is.
+    ''' choice. At a drive root there is no parent, so we leave <see cref="Dir"/> as it is. An
+    ''' empty <see cref="Dir"/> (an optional folder nobody has chosen yet) has no parent either.
     ''' </summary>
     Private Sub GoToParent()
+
+        If String.IsNullOrWhiteSpace(Dir) Then
+
+            setNextMenuHeaderText("No folder is chosen yet, so there's no parent folder", printColor:=ConsoleColor.Red)
+            Return
+
+        End If
 
         Dim parent = Directory.GetParent(Dir)
 

@@ -46,6 +46,8 @@ Public Module entryBuilderMainMenu
                 Sub() changeFileParams(EntryBuilderFile2, EntryBuilderModuleSettingsChanged, NameOf(EntryBuilder), NameOf(EntryBuilderFile2), NameOf(EntryBuilderModuleSettingsChanged), "Save target")) _
             .AddDispatchedOption("Choose scaffolds directory", "Select the shared scaffold catalog directory",
                 Sub() changeFileParams(EntryBuilderFile3, EntryBuilderModuleSettingsChanged, NameOf(EntryBuilder), NameOf(EntryBuilderFile3), NameOf(EntryBuilderModuleSettingsChanged), "Scaffolds directory")) _
+            .AddDispatchedOption("Choose archive folder", "Select where to save archived entries",
+                Sub() changeFileParams(EntryBuilderArchiveFile, EntryBuilderModuleSettingsChanged, NameOf(EntryBuilder), NameOf(EntryBuilderArchiveFile), NameOf(EntryBuilderModuleSettingsChanged), "Archive folder")) _
             .AddBlank() _
             .AddDispatchedToggle("output splitting", "writing per-letter files into the save target's directory", EntryBuilderSplitOutput,
                 Sub() toggleModuleSetting("Split output", NameOf(EntryBuilder), GetType(entryBuilderSettings), NameOf(EntryBuilderSplitOutput), NameOf(EntryBuilderModuleSettingsChanged))) _
@@ -53,6 +55,7 @@ Public Module entryBuilderMainMenu
             .AddColoredFileInfo("Current source directory:            ", EntryBuilderFile1.Dir, ConsoleColor.DarkYellow) _
             .AddColoredFileInfo("Current save target:                 ", If(EntryBuilderSplitOutput, EntryBuilderFile2.Dir, EntryBuilderFile2.Path()), ConsoleColor.Yellow) _
             .AddColoredFileInfo("Current scaffolds directory:         ", EntryBuilderFile3.Dir, ConsoleColor.DarkYellow) _
+            .AddColoredFileInfo("Current archive folder:              ", ArchiveFolderText(EntryBuilderArchiveFile), ConsoleColor.DarkYellow) _
             .AddBlank(EntryBuilderModuleSettingsChanged) _
             .AddDispatchedResetOpt(NameOf(EntryBuilder), EntryBuilderModuleSettingsChanged,
                 Sub() resetModuleSettings(NameOf(EntryBuilder), AddressOf InitDefaultEntryBuilderSettings))

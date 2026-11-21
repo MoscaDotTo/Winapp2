@@ -62,6 +62,16 @@ Option Strict On
 ''' </description>
 ''' </item>
 '''
+''' <item>
+''' <b><c> EntryBuilderArchiveFile </c></b>
+''' <description>
+''' Archive folder: where <c> archived.ini </c>, the entries whose sources declare
+''' <c> Archive= </c>, is written. Only the <c> Dir </c> of this chooser is used. It's empty by
+''' default, meaning no archive folder: a run with archived entries then leaves them out and
+''' fails.
+''' </description>
+''' </item>
+'''
 ''' </list>
 '''
 ''' </summary>
@@ -88,6 +98,12 @@ Public Module entryBuilderSettings
     Public Property EntryBuilderFile3 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "", "")
 
     ''' <summary>
+    ''' The folder <c> archived.ini </c> is written to, or an empty <c> Dir </c> for none. Only
+    ''' the <c> Dir </c> property is used.
+    ''' </summary>
+    Public Property EntryBuilderArchiveFile As iniFileChooser = New iniFileChooser("", winapp2file.ArchiveFileName, mustExist:=False)
+
+    ''' <summary>
     ''' Indicates whether output is written as per-letter artifact files
     ''' (<c> #.ini </c>, <c> A.ini </c> ... <c> Z.ini </c>) in the save target's directory,
     ''' bucketed by each entry name's first character, instead of a single output file.
@@ -110,6 +126,7 @@ Public Module entryBuilderSettings
         EntryBuilderFile1 = New iniFileChooser(Environment.CurrentDirectory, "", "")
         EntryBuilderFile2 = New iniFileChooser(Environment.CurrentDirectory, "entrybuilder.ini", "entrybuilder.ini", mustExist:=False)
         EntryBuilderFile3 = New iniFileChooser(Environment.CurrentDirectory, "", "")
+        EntryBuilderArchiveFile = New iniFileChooser("", winapp2file.ArchiveFileName, mustExist:=False)
         EntryBuilderSplitOutput = False
         EntryBuilderModuleSettingsChanged = False
         SaveModule(NameOf(EntryBuilder), GetType(entryBuilderSettings))

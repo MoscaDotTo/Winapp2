@@ -204,11 +204,15 @@ Public Module WinappDebug
     ''' <c> -usedate </c> toggle using the current date in the version string <br />
     ''' <c> -opti </c> enable the experimental Optimizations rule (FileKey merger) for this run <br />
     ''' <c> -keepdefaults </c> preserve existing Default keys instead of removing them (for flavors
-    ''' that deliberately set Default values, such as FluentCleaner)
+    ''' that deliberately set Default values, such as FluentCleaner) <br />
+    ''' <c> -archive </c> mark the saved file as the archive of retired entries, which gives it
+    ''' the archive's header. A flavor flag beside it fails the run.
     ''' </remarks>
     Public Sub HandleLintCmdLine()
 
         InitDefaultLintSettings()
+
+        Dim markArchive = False
 
         Dim spec As New CliArgSpec(NameOf(WinappDebug))
         spec.WithFile(1, winappDebugFile1) _
@@ -217,11 +221,12 @@ Public Module WinappDebug
             .WithFlag("-usedate", Sub() UseCurrentDate = Not UseCurrentDate) _
             .WithFlag("-opti", Sub() lintOpti.turnOn()) _
             .WithFlag("-keepdefaults", Sub() PreserveDefaultKeys = True) _
+            .WithFlag("-archive", Sub() markArchive = True) _
             .Parse()
 
         If cmdargs.Contains("UNIT_TESTING_HALT") Then Return
 
-        InitDebug(FlavorFromCommandLine)
+        InitDebug(FlavorFromCommandLine, markArchive)
 
     End Sub
 
@@ -278,7 +283,16 @@ Public Module WinappDebug
     ''' <c> Nothing </c>, the file keeps its own. Only the command line passes one. <br /><br />
     ''' Optional, Default: <c> Nothing </c>
     ''' </param>
-    Public Sub InitDebug(Optional stampFlavor As WinappFlavor? = Nothing)
+    '''
+    ''' <param name="markArchive">
+    ''' Indicates whether to mark the saved file as the archive of retired entries. A file that
+    ''' would then carry both the marker and a flavor, from the input or from
+    ''' <paramref name="stampFlavor"/>, isn't linted or saved, and the run fails. Only the
+    ''' command line passes it. <br /><br />
+    ''' Optional, Default: <c> False </c>
+    ''' </param>
+    Public Sub InitDebug(Optional stampFlavor As WinappFlavor? = Nothing,
+                         Optional markArchive As Boolean = False)
 
         Dim inputFile = winappDebugFile1.Load(LintModuleSettingsChanged, NameOf(WinappDebug), NameOf(winappDebugFile1), NameOf(LintModuleSettingsChanged))
 
@@ -286,6 +300,21 @@ Public Module WinappDebug
 
         Dim wa2 As New winapp2file(inputFile, UseCurrentDate)
         If stampFlavor.HasValue Then wa2.Flavor = stampFlavor
+        If markArchive Then
+
+            wa2.IsArchive = True
+
+        End If
+
+        If wa2.IsArchive AndAlso wa2.Flavor.HasValue Then
+
+            Dim bothMsg = $"{winappDebugFile1.Name} would be both the archive and the {WinappFlavorInfo.Lookup(wa2.Flavor.Value).DisplayName} flavor; the archive has no flavors, so nothing was linted or saved"
+            gLog(bothMsg)
+            setNextMenuHeaderText(bothMsg, printColor:=ConsoleColor.Red)
+            markRunFailed()
+            Return
+
+        End If
 
         clrConsole()
         gLog("")

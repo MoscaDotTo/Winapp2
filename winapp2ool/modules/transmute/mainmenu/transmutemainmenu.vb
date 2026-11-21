@@ -53,7 +53,7 @@ Public Module transmuteMainMenu
             .AddLine("Preset source file names:") _
             .AddDispatchedOption("custom", "Select 'custom.ini'", Sub() setSourceFileName("custom.ini")) _
             .AddDispatchedOption("winapp3.ini", "Select 'winapp3.ini'", Sub() setSourceFileName("winapp3.ini")) _
-            .AddDispatchedOption("Archived Entries", "Select 'Archived Entries.ini'", Sub() setSourceFileName("Archived Entries.ini")) _
+            .AddDispatchedOption("Archived Entries", "Select 'archived.ini'", Sub() setSourceFileName(winapp2file.ArchiveFileName)) _
             .AddDispatchedOption("browsers.ini", "Select 'browsers.ini'", Sub() setSourceFileName("browsers.ini")) _
             .AddDispatchedOption("uwp.ini", "Select 'uwp.ini'", Sub() setSourceFileName("uwp.ini")) _
             .AddBlank() _

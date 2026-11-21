@@ -21,7 +21,8 @@ Imports System.IO
 
 ''' <summary>
 ''' Tests for which writers put a flavor on the file they save: Flavorizer and WinappDebug
-''' replace it when told one, and keep the input's otherwise
+''' replace it when told one, and keep the input's otherwise. Also covers WinappDebug's
+''' <c> -archive </c> marker, which a file never carries beside a flavor.
 ''' </summary>
 <TestClass()> Public Class FlavorStampTests
 
@@ -42,6 +43,13 @@ Imports System.IO
 
     End Function
 
+    ''' <summary>Returns a small winapp2.ini whose preamble carries the archive marker</summary>
+    Private Shared Function ArchiveText() As String
+
+        Return "; Version: 260219" & vbCrLf & "; # of entries: 1" & vbCrLf & winapp2ool.winapp2file.ArchiveMarkerLine & vbCrLf & vbCrLf & Entries
+
+    End Function
+
     <TestInitialize()> Public Sub MakeScratch()
 
         _dir = Path.Combine(Path.GetTempPath(), $"winapp2ool-flavorstamp-{Guid.NewGuid():N}")
@@ -58,16 +66,18 @@ Imports System.IO
     ''' <summary>Flavorizes a base file naming <paramref name="baseFlavor"/> and returns the saved text</summary>
     ''' <param name="baseFlavor">The base file's flavor line text, or <c> Nothing </c></param>
     ''' <param name="stampFlavor">The flavor to stamp, or <c> Nothing </c></param>
-    Private Function RunFlavorize(baseFlavor As String, stampFlavor As winapp2ool.WinappFlavor?) As String
+    ''' <param name="baseText">The base file's whole text, used in place of <paramref name="baseFlavor"/> when given</param>
+    Private Function RunFlavorize(baseFlavor As String, stampFlavor As winapp2ool.WinappFlavor?, Optional baseText As String = Nothing) As String
 
-        File.WriteAllText(Path.Combine(_dir, "base.ini"), FileText(baseFlavor))
+        File.WriteAllText(Path.Combine(_dir, "base.ini"), If(baseText, FileText(baseFlavor)))
 
         Dim baseFile = winapp2ool.iniFile.FromFile(Path.Combine(_dir, "base.ini"))
         Dim outputFile = winapp2ool.iniFile.Empty(_dir, "out.ini")
 
         winapp2ool.Flavorize(baseFile, outputFile, New winapp2ool.MenuSection, stampFlavor:=stampFlavor)
 
-        Return File.ReadAllText(Path.Combine(_dir, "out.ini"))
+        Dim outPath = Path.Combine(_dir, "out.ini")
+        Return If(File.Exists(outPath), File.ReadAllText(outPath), Nothing)
 
     End Function
 
@@ -97,7 +107,12 @@ Imports System.IO
     ''' </summary>
     ''' <param name="inputFlavor">The input's flavor line text, or <c> Nothing </c></param>
     ''' <param name="flagFlavor">The flavor the command line named, or <c> Nothing </c></param>
-    Private Function RunLint(inputFlavor As String, flagFlavor As winapp2ool.WinappFlavor?) As String
+    ''' <param name="markArchive">Indicates whether to pass <c> -archive </c></param>
+    ''' <param name="inputText">The input's whole text, used in place of <paramref name="inputFlavor"/> when given</param>
+    ''' <returns>The saved text, or <c> Nothing </c> when nothing was saved</returns>
+    Private Function RunLint(inputFlavor As String, flagFlavor As winapp2ool.WinappFlavor?,
+                    Optional markArchive As Boolean = False,
+                    Optional inputText As String = Nothing) As String
 
         Dim savedSuppress = winapp2ool.SuppressOutput
         Dim savedMode = winapp2ool.commandLineHandler.IsCommandLineMode
@@ -109,12 +124,14 @@ Imports System.IO
             winapp2ool.commandLineHandler.IsCommandLineMode = True
             winapp2ool.commandLineHandler.FlavorFromCommandLine = flagFlavor
 
-            File.WriteAllText(Path.Combine(_dir, "in.ini"), FileText(inputFlavor))
+            File.WriteAllText(Path.Combine(_dir, "in.ini"), If(inputText, FileText(inputFlavor)))
 
-            setCmdLineArgs(AddressOf winapp2ool.WinappDebug.HandleLintCmdLine,
-                           {"-1d", _dir, "-1f", "in.ini", "-3d", _dir, "-3f", "out.ini", "-c"})
+            Dim args = {"-1d", _dir, "-1f", "in.ini", "-3d", _dir, "-3f", "out.ini", "-c"}
+            If markArchive Then args = args.Concat({"-archive"}).ToArray()
+            setCmdLineArgs(AddressOf winapp2ool.WinappDebug.HandleLintCmdLine, args)
 
-            Return File.ReadAllText(Path.Combine(_dir, "out.ini"))
+            Dim outPath = Path.Combine(_dir, "out.ini")
+            Return If(File.Exists(outPath), File.ReadAllText(outPath), Nothing)
 
         Finally
 
@@ -167,6 +184,82 @@ Imports System.IO
             winapp2ool.SuppressOutput = savedSuppress
 
         End Try
+
+    End Sub
+
+    ''' <summary>Runs <paramref name="action"/> from a zero exit code and returns the exit code it leaves, restoring the old one</summary>
+    ''' <param name="action">The work to run</param>
+    Private Shared Function ExitCodeAfter(action As Action) As Integer
+
+        Dim savedExitCode = Environment.ExitCode
+
+        Try
+
+            Environment.ExitCode = 0
+            action()
+            Return Environment.ExitCode
+
+        Finally
+
+            Environment.ExitCode = savedExitCode
+
+        End Try
+
+    End Function
+
+    ''' <summary><c> -archive </c> marks the saved file as the archive and gives it the archive's header</summary>
+    <TestMethod()> Public Sub Lint_ArchiveFlagMarksTheFile()
+
+        Dim text As String = Nothing
+
+        Assert.AreEqual(0, ExitCodeAfter(Sub() text = RunLint(Nothing, Nothing, markArchive:=True)))
+        StringAssert.Contains(text, "; # of entries: 1" & vbCrLf & winapp2ool.winapp2file.ArchiveMarkerLine & vbCrLf)
+        Assert.IsFalse(text.Contains("; Flavor:"))
+
+    End Sub
+
+    ''' <summary>A lint of a marked file keeps the marker without being told again</summary>
+    <TestMethod()> Public Sub Lint_KeepsTheFilesMarker()
+
+        StringAssert.Contains(RunLint(Nothing, Nothing, inputText:=ArchiveText()), winapp2ool.winapp2file.ArchiveMarkerLine & vbCrLf)
+
+    End Sub
+
+    ''' <summary><c> -archive </c> beside a flavor flag saves nothing and fails the run</summary>
+    <TestMethod()> Public Sub Lint_ArchiveWithFlavorFlag_IsRefused()
+
+        Dim text As String = "unset"
+
+        Assert.AreEqual(1, ExitCodeAfter(Sub() text = RunLint(Nothing, winapp2ool.WinappFlavor.Base, markArchive:=True)))
+        Assert.IsNull(text)
+
+    End Sub
+
+    ''' <summary>A flavor-flagged lint of a file that carries the marker saves nothing and fails the run</summary>
+    <TestMethod()> Public Sub Lint_FlavorFlagOnMarkedFile_IsRefused()
+
+        Dim text As String = "unset"
+
+        Assert.AreEqual(1, ExitCodeAfter(Sub() text = RunLint(Nothing, winapp2ool.WinappFlavor.CCleaner, inputText:=ArchiveText())))
+        Assert.IsNull(text)
+
+    End Sub
+
+    ''' <summary>A flavor run never gains the marker, from the lint or from Flavorizer</summary>
+    <TestMethod()> Public Sub FlavorRuns_NeverGainTheMarker()
+
+        Assert.IsFalse(RunLint(Nothing, winapp2ool.WinappFlavor.Base).Contains("; Archive:"))
+        Assert.IsFalse(RunFlavorize(Nothing, winapp2ool.WinappFlavor.Tron).Contains("; Archive:"))
+
+    End Sub
+
+    ''' <summary>Flavorizing a marked file with a flavor stamp saves nothing and fails the run</summary>
+    <TestMethod()> Public Sub Flavorize_StampOnMarkedFile_IsRefused()
+
+        Dim text As String = "unset"
+
+        Assert.AreEqual(1, ExitCodeAfter(Sub() text = RunFlavorize(Nothing, winapp2ool.WinappFlavor.Tron, baseText:=ArchiveText())))
+        Assert.IsNull(text)
 
     End Sub
 

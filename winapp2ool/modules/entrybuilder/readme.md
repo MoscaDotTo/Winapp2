@@ -42,6 +42,7 @@ None of it is mandatory. A plain winapp2 entry pasted into a source file comes o
    - [ElectronRoot / ElectronUpdaterRoot / ElectronScaffolds](#electronroot--electronupdaterroot--electronscaffolds)
    - [FileKeyBase / RegKeyBase / ExcludeKeyBase](#filekeybase--regkeybase--excludekeybase)
    - [Skip](#skip)
+   - [Archive](#archive)
 10. [List Variables and Token Expansion](#list-variables-and-token-expansion)
     - [Declaration](#declaration)
     - [Reference](#reference)
@@ -106,6 +107,7 @@ In the menu, you make the same choices with the source, save target and scaffold
 | Choose source directory | Select the directory containing per-letter source files | Only the directory is used; the file name is ignored |
 | Choose save target | Select where to save the generated entries | Default: `entrybuilder.ini` in the current directory. With output splitting on, only its folder is used |
 | Choose scaffolds directory | Select the folder holding the shared scaffold catalogs | Default: current directory |
+| Choose archive folder | Select the folder where `archived.ini` is written | None by default. See [Archive](#archive) |
 | Toggle output splitting | Write per-letter files into the save target's folder instead of one file | Off by default. The menu equivalent of `-split` |
 | Reset Settings | Restore all settings to their defaults | Only shown when settings have been changed |
 
@@ -124,6 +126,7 @@ Each file slot has an index for the `-Nd` (directory) and `-Nf` (file name) argu
 | 1 | Source directory | Current directory (directory only; file name is ignored) |
 | 2 | Save target | `entrybuilder.ini` in current directory |
 | 3 | Shared scaffold directory (only `.Dir` is read, so `-3f` has no effect) | Current directory |
+| 4 | Archive folder, also `-archived` (only `.Dir` is read). See [Archive](#archive) | None |
 
 | Arg | Effect |
 |:-|:-|
@@ -352,13 +355,34 @@ Templates of your own, added to whatever the scaffolds produce. Each works like 
 
 ## Skip
 
-Leaves the entry out of the output. Use it to retire an entry without deleting its definition.
+Leaves the entry out of the output. Use it to set an entry aside without deleting its definition. To retire an entry, use [Archive](#archive) instead.
 
 ```ini
 Skip=
 ```
 
 EntryBuilder ignores the value: a bare `Skip=`, `Skip=True` and even `Skip=False` all skip the entry.
+
+## Archive
+
+Sends the entry to the archive instead of the live output. The entry is parsed, expanded and checked like any other, then written to `archived.ini` in the archive folder (`-4d`, or **Choose archive folder** in the menu). The value is a reason for whomever reads the source, EntryBuilder never writes it anywhere. A bare `Archive=` archives too.
+
+```ini
+[LEGO Universe *]
+Archive=Discontinued (2012)
+
+LangSecRef=3021
+DetectFile=%AppData%\LEGO Universe
+FileKey=%AppData%\LEGO Universe|*.log
+```
+
+To bring the entry back, delete the `Archive=` line.
+
+- `archived.ini` is one file, never split, with the same kind of do-not-edit header as the other output. Given an archive folder, EntryBuilder always writes it, with only the header when nothing is archived.
+- With no archive folder, archived entries go to neither output, and the run warns with their count and fails (exit code 1).
+- An archived entry and a live one can't share a name: the two meet in the source merge, which keeps the first and fails the run.
+- An entry that can't be built is skipped with its usual warning, `Archive=` or not.
+- `Archive=False` is refused, and so is `Archive=` beside `Skip=`. Either way the entry isn't built and the run fails.
 
 ---
 
@@ -496,7 +520,10 @@ Warnings show in the menu output after a run and go to the winapp2ool log. Advis
 | Neither `Section` nor `LangSecRef` declared | Entry **skipped** | `No Section or LangSecRef in [Entry], skipping` |
 | No root keys and no FileKey/RegKey content in any form | Entry **skipped** | `[Entry] declares no WebViewRoot, QtWebEngineRoot, ElectronRoot, FileKeyBase, or RegKeyBase — nothing to emit, skipping` |
 | No detection (after `Root` inference) | Entry emitted, always-on | `[Entry] declares no detection (Detect / DetectFile / DetectOS); generated entry will be always-on` |
-| A key other than `Skip=` or a scaffold list has no value | Key dropped | `[Entry].FileKey has no value; key dropped` |
+| A key other than `Skip=`, `Archive=` or a scaffold list has no value | Key dropped | `[Entry].FileKey has no value; key dropped` |
+| `Archive=False` | Entry **not built**, run fails (exit code 1) | `[Entry] declares Archive=False; delete the Archive line to keep the entry live. The entry isn't built` |
+| Both `Skip=` and `Archive=` | Entry **not built**, run fails (exit code 1) | `[Entry] declares both Skip and Archive; keep one of them. The entry isn't built` |
+| Archived entries and no archive folder | Archived entries left out of both outputs, run fails (exit code 1) | `N archived entries left out of the output: no archive folder was given (-4d, or -3d for BrowserBuilder)` |
 | `Default=` declared | Key dropped | `Default= declared in [Entry]; EntryBuilder never emits Default, ignoring` |
 | `SpecialDetect=` declared | Key dropped | `SpecialDetect is deprecated; key dropped from [Entry]. Replace with Detect or DetectFile` |
 | A key uses a retired `%...Root%` spelling | Key dropped, run fails (exit code 1) | `` `%X%` in [Entry].FileKeyBase is now spelled `<X>`; key dropped `` |

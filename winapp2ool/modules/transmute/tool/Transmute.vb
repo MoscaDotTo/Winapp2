@@ -243,7 +243,7 @@ Public Module Transmute
     '''
     ''' -c              : custom.ini  <br />
     ''' -w              : winapp3.ini <br />
-    ''' -a              : archived entries.ini <br />
+    ''' -a              : archived.ini <br />
     ''' -b              : browsers.ini <br />
     ''' -u              : uwp.ini
     ''' </remarks>
@@ -287,7 +287,7 @@ Public Module Transmute
             .WithFlag("-noglobal", Sub() recognizeGlobals = Not recognizeGlobals) _
             .WithFileAlias("-c", TransmuteFile2, "custom.ini") _
             .WithFileAlias("-w", TransmuteFile2, "winapp3.ini") _
-            .WithFileAlias("-a", TransmuteFile2, "Archived Entries.ini") _
+            .WithFileAlias("-a", TransmuteFile2, winapp2file.ArchiveFileName) _
             .WithFileAlias("-b", TransmuteFile2, "browsers.ini") _
             .WithFileAlias("-u", TransmuteFile2, "uwp.ini") _
         .Parse()
@@ -1299,7 +1299,8 @@ Public Module Transmute
     ''' <param name="stampFlavor">
     ''' The flavor to name in the output's header when <paramref name="isWinapp"/> is
     ''' <c> True </c>. When <c> Nothing </c>, the output keeps the flavor
-    ''' <paramref name="baseFile"/> names, if any. <br /><br />
+    ''' <paramref name="baseFile"/> names, if any. A flavored output of a file marked as the
+    ''' archive is refused: we warn, write nothing and fail the run. <br /><br />
     ''' Optional, Default: <c> Nothing </c>
     ''' </param>
     '''
@@ -1349,6 +1350,17 @@ Public Module Transmute
 
             Dim wf As New winapp2file(baseFile)
             If stampFlavor.HasValue Then wf.Flavor = stampFlavor
+
+            If wf.IsArchive AndAlso wf.Flavor.HasValue Then
+
+                Dim bothMsg = $"{baseFile.Name} is the archive of retired entries, which has no flavors; {outputFile.Name} was not saved"
+                gLog(bothMsg)
+                menuOutput.AddWarning(bothMsg)
+                markRunFailed()
+                Return False
+
+            End If
+
             wf.SortEntries()
             saved = outputFile.OverwriteToFile(wf.ToWinapp2String())
             baseFile = wf.ToIni()

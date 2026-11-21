@@ -44,9 +44,12 @@ Public Module browserbuildermainmenu
                 Sub() changeFileParams(BuilderFile1, BrowserBuilderModuleSettingsChanged, NameOf(BrowserBuilder), NameOf(BuilderFile1), NameOf(BrowserBuilderModuleSettingsChanged), "Source directory")) _
             .AddDispatchedOption("Choose save target", "Select a new location on disk to which generated entries should be saved",
                 Sub() changeFileParams(BuilderFile2, BrowserBuilderModuleSettingsChanged, NameOf(BrowserBuilder), NameOf(BuilderFile2), NameOf(BrowserBuilderModuleSettingsChanged), "Save target")) _
+            .AddDispatchedOption("Choose archive folder", "Select a new location on disk to which archived entries should be saved",
+                Sub() changeFileParams(BuilderArchiveFile, BrowserBuilderModuleSettingsChanged, NameOf(BrowserBuilder), NameOf(BuilderArchiveFile), NameOf(BrowserBuilderModuleSettingsChanged), "Archive folder")) _
             .AddBlank() _
             .AddColoredFileInfo("Current source directory: ", BuilderFile1.Dir, ConsoleColor.DarkYellow) _
             .AddColoredFileInfo("Current save target:      ", BuilderFile2.Path(), ConsoleColor.Yellow) _
+            .AddColoredFileInfo("Current archive folder:   ", ArchiveFolderText(BuilderArchiveFile), ConsoleColor.DarkYellow) _
             .AddBlank(BrowserBuilderModuleSettingsChanged) _
             .AddDispatchedResetOpt(NameOf(BrowserBuilder), BrowserBuilderModuleSettingsChanged,
                 Sub() resetModuleSettings(NameOf(BrowserBuilder), AddressOf InitDefaultBrowserBuilderSettings))
