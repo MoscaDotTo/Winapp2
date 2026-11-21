@@ -68,7 +68,7 @@ The winapp2ool and flavor links below download from the [latest release](https:/
 
 # [Installation & Configuration](INSTALL.md)
 
-Pick your cleaner below to see how to install and configure winapp2.ini for it.
+Select your cleaner below to learn how to install and configure winapp2.ini for it.
 
 It is strongly recommended that you keep a copy of [winapp2ool.exe](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2ool.exe) in the same folder as winapp2.ini to help keep it up to date. 
 
@@ -91,8 +91,7 @@ It is strongly recommended that you keep a copy of [winapp2ool.exe](https://gith
 ##
 ### [HDCleaner](INSTALL.md#hdcleaner)
 ##
-### [R-Wipe & Clean](INSTALL.md#r-wipe--clean) 
-##
+### [R-Wipe & Clean](INSTALL.md#r-wipe--clean)
 
 ---
 
@@ -104,7 +103,7 @@ To add, update, or remove an entry, see [our contributor guidelines](CONTRIBUTIN
 
 # [Custom content](#custom-content)
 
-Winapp2.ini doesn't cover non-English system configurations or portable software out of the box. If you need them, keep your own entries in a `custom.ini` file and use winapp2ool's [Transmute](winapp2ool/modules/transmute/readme.md) in `Add` mode to apply them to each new winapp2.ini. For a portable browser, [BrowserBuilder](winapp2ool/modules/browserbuilder/readme.md) can generate the entries from your own install's path.
+Winapp2.ini doesn't currently cover non-English system configurations or portable software out of the box. If you need them, keep your own entries in a `custom.ini` file and use winapp2ool's [Transmute](winapp2ool/modules/transmute/readme.md) in `Add` mode to apply them to each new winapp2.ini. For a portable browser, [BrowserBuilder](winapp2ool/modules/browserbuilder/readme.md) can generate the entries from your own install's path.
 
 Winapp2ool 1.6 replaced the Merge feature with Transmute. If you used `custom.ini` with Merge, see [Migrating from Merge](winapp2ool/modules/transmute/readme.md#migrating-from-merge) in the Transmute readme.
 
