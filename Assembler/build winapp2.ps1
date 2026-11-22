@@ -57,7 +57,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $script:Winapp2oolPath = $null
-$script:MinimumToolVersion = [version]'1.8.9821.32740'
+$script:MinimumToolVersion = [version]'1.8.9821.40534'
 
 function Write-Step {
     param([string]$Message)
