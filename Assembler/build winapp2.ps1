@@ -10,6 +10,8 @@
     Combine pass, generates tool flavors, and creates a diff for each generated flavor.
     Each flavor and its changelog are published to ..\Releases under their release asset names,
     then copied to their old paths for the deprecation window ($script:DeprecatedPublishPaths).
+    The published files, their changelogs and their old paths are rows of
+    ..\.github\scripts\flavors.csv, loaded through release-assets.ps1 beside it.
     Generator stages read the shared scaffold catalogs from the Sources\Scaffolds directory.
 
     Entries marked Archive= in the sources go to Archived\ instead, one archived.ini per
@@ -257,19 +259,17 @@ function Invoke-Changelog {
 }
 
 # ---- Deprecation window: the old published paths --------------------------------------------
-# Until the window closes, each flavor is copied here after it is published to ..\Releases.
-# Nothing reads these copies: the change gate and the changelog compare against ..\Releases only.
-# Closing the window deletes this table and the block in Publish-Flavor that reads it.
-$script:DeprecatedPublishPaths = @{
-    'winapp2.ini'               = @{ Data = '..\Non-CCleaner\Winapp2.ini';               Changelog = '..\Non-CCleaner\diff.txt' }
-    'winapp2-ccleaner.ini'      = @{ Data = '..\Winapp2.ini';                            Changelog = '..\diff.txt' }
-    'winapp2-bleachbit.ini'     = @{ Data = '..\Non-CCleaner\BleachBit\Winapp2.ini';     Changelog = '..\Non-CCleaner\BleachBit\diff.txt' }
-    'winapp2-ccleaner7.ini'     = @{ Data = '..\Non-CCleaner\CCleaner7\Winapp2.ini';     Changelog = '..\Non-CCleaner\CCleaner7\diff.txt' }
-    'winapp2-fluentcleaner.ini' = @{ Data = '..\Non-CCleaner\FluentCleaner\Winapp2.ini'; Changelog = '..\Non-CCleaner\FluentCleaner\diff.txt' }
-    'winapp2-tron.ini'          = @{ Data = '..\Non-CCleaner\Tron\Winapp2.ini';          Changelog = '..\Non-CCleaner\Tron\diff.txt' }
-    'winapp2-systemninja.rules' = @{ Data = '..\Non-CCleaner\SystemNinja\Winapp2.rules'; Changelog = '..\Non-CCleaner\SystemNinja\diff.txt' }
-    # The archive never had a changelog at its old path
-    'archived.ini'              = @{ Data = '..\Winapp3\Archived entries.ini';           Changelog = $null }
+# Until the window closes, each flavor is copied to the OldData/OldChangelog paths in flavors.csv
+# after it is published to ..\Releases. Nothing reads these copies: the change gate and the
+# changelog compare against ..\Releases only. Closing the window deletes this function, its call
+# in the main block, the block in Publish-Flavor that reads the table, and the two CSV columns.
+function Set-DeprecatedPublishPaths {
+    # flavors.csv holds repo paths with forward slashes, and an empty cell means no old copy
+    $script:DeprecatedPublishPaths = @{}
+    foreach ($row in $PublishedFiles) {
+        $changelog = if ($row.OldChangelog) { '..\' + $row.OldChangelog.Replace('/', '\') } else { $null }
+        $script:DeprecatedPublishPaths[$row.Asset] = @{ Data = '..\' + $row.OldData.Replace('/', '\'); Changelog = $changelog }
+    }
 }
 # ---- End of the deprecation window -----------------------------------------------------------
 
@@ -298,25 +298,52 @@ function Publish-Flavor {
 function Backup-Files {
     Write-Step "Creating backups of existing winapp2.ini files"
 
-    $backups = @(
-        @{Source = "..\Releases\winapp2-ccleaner.ini"; Dest = "winapp2-cc.old"}
-        @{Source = "..\Releases\winapp2.ini"; Dest = "winapp2.old"}
-        @{Source = "..\Releases\winapp2-bleachbit.ini"; Dest = "winapp2-bb.old"}
-        @{Source = "..\Releases\winapp2-ccleaner7.ini"; Dest = "winapp2-cc7.old"}
-        @{Source = "..\Releases\winapp2-fluentcleaner.ini"; Dest = "winapp2-fc.old"}
-        @{Source = "..\Releases\winapp2-systemninja.rules"; Dest = "winapp2-sn.old"}
-        @{Source = "..\Releases\winapp2-tron.ini"; Dest = "winapp2-tron.old"}
-        @{Source = "..\Releases\archived.ini"; Dest = "archived.old"}
-    )
+    foreach ($row in $PublishedFiles) {
+        $source = "..\Releases\$($row.Asset)"
+        $baseline = "$($row.Asset).old"
 
-    # A baseline left over from an interrupted run would stand in for a missing published file
-    Remove-Item 'archived.old' -Force -ErrorAction SilentlyContinue
+        # A baseline left over from an interrupted run would stand in for a missing published file
+        Remove-Item -LiteralPath $baseline -Force -ErrorAction SilentlyContinue
 
-    foreach ($backup in $backups) {
-        if (Test-Path $backup.Source) {
-            Copy-Item $backup.Source $backup.Dest -Force -ErrorAction SilentlyContinue
+        if (Test-Path -LiteralPath $source) {
+            Copy-Item -LiteralPath $source $baseline -Force -ErrorAction SilentlyContinue
         }
     }
+}
+
+function Complete-Flavor {
+    <#
+    .SYNOPSIS
+        Publishes a built file under its flavors.csv row when it differs from the last published
+        one, with a changelog against that baseline (<Asset>.old, from Backup-Files).
+    #>
+    param([string]$Key, [string]$Built)
+
+    $row = @($PublishedFiles | Where-Object { $_.Key -eq $Key })
+    if ($row.Count -ne 1) {
+        Write-ErrorMsg "flavors.csv has $($row.Count) rows for $Key, expected one"
+        return $false
+    }
+    $row = $row[0]
+    $baseline = "$($row.Asset).old"
+
+    if (-not (Test-ContentChanged $Built $baseline)) {
+        Write-Host "$($row.Label) is unchanged since the last build - not republishing" -ForegroundColor Yellow
+        return $true
+    }
+
+    Write-Step "Creating changelog"
+    $haveDiff = Test-Path -LiteralPath $baseline
+    if ($haveDiff) {
+        if (-not (Invoke-Changelog -Old $baseline -New $Built)) { return $false }
+    } else {
+        Write-Host "No previous build found, skipping changelog" -ForegroundColor Yellow
+    }
+
+    Publish-Flavor -Built $Built -DataFile $row.Asset -Changelog $row.Changelog -HaveDiff $haveDiff
+    Write-Host "$($row.Label) built" -ForegroundColor Green
+
+    return $true
 }
 
 function Build-Artifacts {
@@ -355,23 +382,7 @@ function Build-MainFile {
     if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-base', '-debug', '-usedate', '-c', '-opti', '-1f', 'Winapp2.ini', '-3f', 'Winapp2.ini' `
         -ErrorMessage "Failed static analysis")) { return $false }
 
-    if (-not (Test-ContentChanged 'Winapp2.ini' 'winapp2.old')) {
-        Write-Host "Base winapp2.ini is unchanged since the last build - not republishing" -ForegroundColor Yellow
-        return $true
-    }
-
-    Write-Step "Creating changelog"
-    $haveDiff = Test-Path 'winapp2.old'
-    if ($haveDiff) {
-        if (-not (Invoke-Changelog -Old 'winapp2.old' -New 'Winapp2.ini')) { return $false }
-    } else {
-        Write-Host "No previous build found, skipping changelog" -ForegroundColor Yellow
-    }
-
-    Publish-Flavor -Built 'Winapp2.ini' -DataFile 'winapp2.ini' -Changelog 'changelog-base.txt' -HaveDiff $haveDiff
-    Write-Host "Winapp2.ini built" -ForegroundColor Green
-
-    return $true
+    return (Complete-Flavor -Key Base -Built 'Winapp2.ini')
 }
 
 function Get-SectionNames {
@@ -425,23 +436,7 @@ function Build-Archive {
     Write-Step "Checking that no entry is both live and archived"
     if (-not (Test-ArchiveNames -Live 'Winapp2.ini' -Archive 'archived.ini')) { return $false }
 
-    if (-not (Test-ContentChanged 'archived.ini' 'archived.old')) {
-        Write-Host "archived.ini is unchanged since the last build - not republishing" -ForegroundColor Yellow
-        return $true
-    }
-
-    Write-Step "Creating changelog"
-    $haveDiff = Test-Path 'archived.old'
-    if ($haveDiff) {
-        if (-not (Invoke-Changelog -Old 'archived.old' -New 'archived.ini')) { return $false }
-    } else {
-        Write-Host "No previous build found, skipping changelog" -ForegroundColor Yellow
-    }
-
-    Publish-Flavor -Built 'archived.ini' -DataFile 'archived.ini' -Changelog 'changelog-archived.txt' -HaveDiff $haveDiff
-    Write-Host "archived.ini built" -ForegroundColor Green
-
-    return $true
+    return (Complete-Flavor -Key Archive -Built 'archived.ini')
 }
 
 function Build-CCCleanerFlavor {
@@ -463,23 +458,7 @@ function Build-CCCleanerFlavor {
         '-3f', 'winapp2-ccleaner-flavor.ini' `
         -ErrorMessage "Failed CCleaner flavor analysis")) { return $false }
 
-    if (-not (Test-ContentChanged 'winapp2-ccleaner-flavor.ini' 'winapp2-cc.old')) {
-        Write-Host "CCleaner flavor is unchanged since the last build - not republishing" -ForegroundColor Yellow
-        return $true
-    }
-
-    Write-Step "Creating changelog"
-    $haveDiff = Test-Path 'winapp2-cc.old'
-    if ($haveDiff) {
-        if (-not (Invoke-Changelog -Old 'winapp2-cc.old' -New 'winapp2-ccleaner-flavor.ini')) { return $false }
-    } else {
-        Write-Host "No previous build found, skipping changelog" -ForegroundColor Yellow
-    }
-
-    Publish-Flavor -Built 'winapp2-ccleaner-flavor.ini' -DataFile 'winapp2-ccleaner.ini' -Changelog 'changelog-ccleaner.txt' -HaveDiff $haveDiff
-    Write-Host "CCleaner flavor built" -ForegroundColor Green
-
-    return $true
+    return (Complete-Flavor -Key CCleaner -Built 'winapp2-ccleaner-flavor.ini')
 }
 
 function Build-CCleaner7Flavor {
@@ -489,23 +468,7 @@ function Build-CCleaner7Flavor {
         '-2f', 'winapp2-cc7.ini', '-9d', '\Sources\Flavors\CCleaner7' `
         -ErrorMessage "Failed to create CCleaner7 flavor" -RequiredDirs @(Join-Path $PSScriptRoot 'Sources\Flavors\CCleaner7'))) { return $false }
 
-    if (-not (Test-ContentChanged 'winapp2-cc7.ini' 'winapp2-cc7.old')) {
-        Write-Host "CCleaner7 flavor is unchanged since the last build - not republishing" -ForegroundColor Yellow
-        return $true
-    }
-
-    Write-Step "Creating changelog"
-    $haveDiff = Test-Path 'winapp2-cc7.old'
-    if ($haveDiff) {
-        if (-not (Invoke-Changelog -Old 'winapp2-cc7.old' -New 'winapp2-cc7.ini')) { return $false }
-    } else {
-        Write-Host "No previous build found, skipping changelog" -ForegroundColor Yellow
-    }
-
-    Publish-Flavor -Built 'winapp2-cc7.ini' -DataFile 'winapp2-ccleaner7.ini' -Changelog 'changelog-ccleaner7.txt' -HaveDiff $haveDiff
-    Write-Host "CCleaner7 flavor built" -ForegroundColor Green
-
-    return $true
+    return (Complete-Flavor -Key CCleaner7 -Built 'winapp2-cc7.ini')
 }
 
 function Build-FluentCleanerFlavor {
@@ -528,23 +491,7 @@ function Build-FluentCleanerFlavor {
         '-3f', 'winapp2-fluentcleaner.ini' `
         -ErrorMessage "Failed FluentCleaner flavor analysis")) { return $false }
 
-    if (-not (Test-ContentChanged 'winapp2-fluentcleaner.ini' 'winapp2-fc.old')) {
-        Write-Host "FluentCleaner flavor is unchanged since the last build - not republishing" -ForegroundColor Yellow
-        return $true
-    }
-
-    Write-Step "Creating changelog"
-    $haveDiff = Test-Path 'winapp2-fc.old'
-    if ($haveDiff) {
-        if (-not (Invoke-Changelog -Old 'winapp2-fc.old' -New 'winapp2-fluentcleaner.ini')) { return $false }
-    } else {
-        Write-Host "No previous build found, skipping changelog" -ForegroundColor Yellow
-    }
-
-    Publish-Flavor -Built 'winapp2-fluentcleaner.ini' -DataFile 'winapp2-fluentcleaner.ini' -Changelog 'changelog-fluentcleaner.txt' -HaveDiff $haveDiff
-    Write-Host "FluentCleaner flavor built" -ForegroundColor Green
-
-    return $true
+    return (Complete-Flavor -Key FluentCleaner -Built 'winapp2-fluentcleaner.ini')
 }
 
 function Build-BleachBitFlavor {
@@ -552,23 +499,7 @@ function Build-BleachBitFlavor {
         '-3f', 'winapp2-bleachbit-flavor.ini' `
         -ErrorMessage "Failed BleachBit flavor analysis")) { return $false }
 
-    if (-not (Test-ContentChanged 'winapp2-bleachbit-flavor.ini' 'winapp2-bb.old')) {
-        Write-Host "BleachBit flavor is unchanged since the last build - not republishing" -ForegroundColor Yellow
-        return $true
-    }
-
-    Write-Step "Creating changelog"
-    $haveDiff = Test-Path 'winapp2-bb.old'
-    if ($haveDiff) {
-        if (-not (Invoke-Changelog -Old 'winapp2-bb.old' -New 'winapp2-bleachbit-flavor.ini')) { return $false }
-    } else {
-        Write-Host "No previous build found, skipping changelog" -ForegroundColor Yellow
-    }
-
-    Publish-Flavor -Built 'winapp2-bleachbit-flavor.ini' -DataFile 'winapp2-bleachbit.ini' -Changelog 'changelog-bleachbit.txt' -HaveDiff $haveDiff
-    Write-Host "BleachBit flavor built" -ForegroundColor Green
-
-    return $true
+    return (Complete-Flavor -Key BleachBit -Built 'winapp2-bleachbit-flavor.ini')
 }
 
 function Build-TronFlavor {
@@ -582,46 +513,14 @@ function Build-TronFlavor {
         '-3f', 'winapp2-tron-flavor.ini' `
         -ErrorMessage "Failed Tron flavor analysis")) { return $false }
 
-    if (-not (Test-ContentChanged 'winapp2-tron-flavor.ini' 'winapp2-tron.old')) {
-        Write-Host "Tron flavor is unchanged since the last build - not republishing" -ForegroundColor Yellow
-        return $true
-    }
-
-    Write-Step "Creating changelog"
-    $haveDiff = Test-Path 'winapp2-tron.old'
-    if ($haveDiff) {
-        if (-not (Invoke-Changelog -Old 'winapp2-tron.old' -New 'winapp2-tron-flavor.ini')) { return $false }
-    } else {
-        Write-Host "No previous build found, skipping changelog" -ForegroundColor Yellow
-    }
-
-    Publish-Flavor -Built 'winapp2-tron-flavor.ini' -DataFile 'winapp2-tron.ini' -Changelog 'changelog-tron.txt' -HaveDiff $haveDiff
-    Write-Host "Tron flavor built" -ForegroundColor Green
-
-    return $true
+    return (Complete-Flavor -Key Tron -Built 'winapp2-tron-flavor.ini')
 }
 
 function Build-SystemNinjaFlavor {
     if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-sn', '-debug', '-usedate', '-c', '-opti', '-1f', 'winapp2-systemninja-flavor.ini', `
         '-3f', 'Winapp2.rules' -ErrorMessage "Failed System Ninja flavor analysis")) { return $false }
 
-    if (-not (Test-ContentChanged 'Winapp2.rules' 'winapp2-sn.old')) {
-        Write-Host "System Ninja flavor is unchanged since the last build - not republishing" -ForegroundColor Yellow
-        return $true
-    }
-
-    Write-Step "Creating changelog"
-    $haveDiff = Test-Path 'winapp2-sn.old'
-    if ($haveDiff) {
-        if (-not (Invoke-Changelog -Old 'winapp2-sn.old' -New 'Winapp2.rules')) { return $false }
-    } else {
-        Write-Host "No previous build found, skipping changelog" -ForegroundColor Yellow
-    }
-
-    Publish-Flavor -Built 'Winapp2.rules' -DataFile 'winapp2-systemninja.rules' -Changelog 'changelog-systemninja.txt' -HaveDiff $haveDiff
-    Write-Host "System Ninja flavor built" -ForegroundColor Green
-
-    return $true
+    return (Complete-Flavor -Key SystemNinja -Built 'Winapp2.rules')
 }
 
 function Compare-ArtifactTree {
@@ -713,11 +612,11 @@ function Remove-TemporaryFiles {
     Write-Step "Cleaning up"
 
     $filesToRemove = @(
-        'winapp2*.old',
+        '*.ini.old',
+        '*.rules.old',
         'winapp2*.ini',
         'winapp2.rules',
         'archived*.ini',
-        'archived.old',
         'diff.txt',
         'diffsummary.txt'
     )
@@ -750,6 +649,20 @@ try {
         Write-Host "`nCharacteristic test passed" -ForegroundColor Green
         exit 0
     }
+
+    $releaseAssetList = Join-Path $PSScriptRoot '..\.github\scripts\release-assets.ps1'
+    if (-not (Test-Path -LiteralPath $releaseAssetList)) {
+        Write-ErrorMsg "Cannot find the published-file list: $releaseAssetList"
+        exit 1
+    }
+    try {
+        . $releaseAssetList
+    }
+    catch {
+        Write-ErrorMsg "Cannot load the published-file list: $_"
+        exit 1
+    }
+    Set-DeprecatedPublishPaths
 
     Backup-Files
 
