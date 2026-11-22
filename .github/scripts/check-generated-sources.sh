@@ -155,8 +155,10 @@ manifest="$(dirname -- "$0")/flavors.csv"
 [ -f "$manifest" ] || { echo "error: flavor manifest missing: $manifest" >&2; exit 2; }
 release_names="$nl"
 header=1
-while IFS=, read -r _key _label asset changelog _old; do
+# The || test keeps a last row that has no trailing newline.
+while IFS=, read -r _key _label asset changelog _old || [ -n "$_key" ]; do
   if [ "$header" -eq 1 ]; then header=0; continue; fi
+  [ -n "${asset%"$cr"}" ] || continue
   release_names="$release_names${asset%"$cr"}$nl${changelog%"$cr"}$nl"
 done < "$manifest"
 
