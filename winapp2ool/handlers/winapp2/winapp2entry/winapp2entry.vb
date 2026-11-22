@@ -36,18 +36,39 @@ Public Class winapp2entry
     ''' <summary>The starting line number of the source section</summary>
     Public ReadOnly Property LineNum As Integer
 
-    Private ReadOnly _detectOS      As New List(Of iniKey)
-    Private ReadOnly _langSecRef    As New List(Of iniKey)
-    Private ReadOnly _sectionKey    As New List(Of iniKey)
-    Private ReadOnly _specialDetect As New List(Of iniKey)
-    Private ReadOnly _detects       As New List(Of iniKey)
-    Private ReadOnly _detectFiles   As New List(Of iniKey)
-    Private ReadOnly _defaultKey    As New List(Of iniKey)
-    Private ReadOnly _warningKey    As New List(Of iniKey)
-    Private ReadOnly _fileKeys      As New List(Of iniKey)
-    Private ReadOnly _regKeys       As New List(Of iniKey)
-    Private ReadOnly _excludeKeys   As New List(Of iniKey)
-    Private ReadOnly _errorKeys     As New List(Of iniKey)
+    ''' <summary>The index in <c> KeyLists </c> of the bucket for keys of no known type</summary>
+    Public Shared ReadOnly ErrorBucket As Integer = KeyTypes.All.Count
+
+    ' One bucket per key type, indexed by KeyTypeInfo.Order, then the error bucket
+    Private ReadOnly _buckets As List(Of iniKey)() =
+        Enumerable.Range(0, ErrorBucket + 1).Select(Function(i) New List(Of iniKey)).ToArray()
+
+    Private ReadOnly _detectOS      As List(Of iniKey) = bucketNamed("DetectOS")
+    Private ReadOnly _langSecRef    As List(Of iniKey) = bucketNamed("LangSecRef")
+    Private ReadOnly _sectionKey    As List(Of iniKey) = bucketNamed("Section")
+    Private ReadOnly _specialDetect As List(Of iniKey) = bucketNamed("SpecialDetect")
+    Private ReadOnly _detects       As List(Of iniKey) = bucketNamed("Detect")
+    Private ReadOnly _detectFiles   As List(Of iniKey) = bucketNamed("DetectFile")
+    Private ReadOnly _defaultKey    As List(Of iniKey) = bucketNamed("Default")
+    Private ReadOnly _warningKey    As List(Of iniKey) = bucketNamed("Warning")
+    Private ReadOnly _fileKeys      As List(Of iniKey) = bucketNamed("FileKey")
+    Private ReadOnly _regKeys       As List(Of iniKey) = bucketNamed("RegKey")
+    Private ReadOnly _excludeKeys   As List(Of iniKey) = bucketNamed("ExcludeKey")
+    Private ReadOnly _errorKeys     As List(Of iniKey) = _buckets(ErrorBucket)
+
+    Private Function bucketNamed(keyType As String) As List(Of iniKey)
+        Return _buckets(KeyTypes.Find(keyType).Order)
+    End Function
+
+    ' The bucket a key belongs in by its current KeyType
+    Private Function bucketFor(key As iniKey) As List(Of iniKey)
+        Return _buckets(bucketIndexOf(key.KeyType))
+    End Function
+
+    Private Shared Function bucketIndexOf(keyType As String) As Integer
+        Dim info = KeyTypes.Find(keyType)
+        Return If(info Is Nothing, ErrorBucket, info.Order)
+    End Function
 
     ''' <summary>Keys with KeyType "DetectOS". Valid syntax: one key only.</summary>
     Public ReadOnly Property DetectOS As IReadOnlyList(Of iniKey)
@@ -149,18 +170,20 @@ Public Class winapp2entry
     ''' <summary>Indicates whether this entry has any detection key (DetectOS, Detect, DetectFile, or SpecialDetect)</summary>
     Public ReadOnly Property HasDetectionKey As Boolean
         Get
-            Return _detectOS.Count > 0 OrElse _detects.Count > 0 OrElse
-                   _detectFiles.Count > 0 OrElse _specialDetect.Count > 0
+            Return detectionKeyCount() > 0
         End Get
     End Property
 
     ''' <summary>Indicates whether DetectOS is the only detection key type present</summary>
     Public ReadOnly Property HasOnlyDetectOS As Boolean
         Get
-            Return _detectOS.Count > 0 AndAlso
-                   _detects.Count = 0 AndAlso _detectFiles.Count = 0 AndAlso _specialDetect.Count = 0
+            Return _detectOS.Count > 0 AndAlso detectionKeyCount() = _detectOS.Count
         End Get
     End Property
+
+    Private Function detectionKeyCount() As Integer
+        Return KeyTypes.All.Where(Function(t) t.Role = KeyRole.Detection).Sum(Function(t) _buckets(t.Order).Count)
+    End Function
 
     ''' <summary>Indicates whether the entry name ends with the required " *" suffix</summary>
     Public ReadOnly Property HasValidNameSuffix As Boolean
@@ -171,8 +194,7 @@ Public Class winapp2entry
 
     ''' <summary>
     ''' Indicates whether the entry has one kind of categorization key, LangSecRef or Section,
-    ''' but not both and not neither. Several keys of the same kind still pass here;
-    ''' <see cref="SingletonViolations"/> reports those.
+    ''' but not both and not neither. Several keys of the same kind still pass here.
     ''' </summary>
     Public ReadOnly Property HasValidCategorization As Boolean
         Get
@@ -184,21 +206,6 @@ Public Class winapp2entry
     Public ReadOnly Property HasDeletionKey As Boolean
         Get
             Return _fileKeys.Count > 0 OrElse _regKeys.Count > 0
-        End Get
-    End Property
-
-    ''' <summary>
-    ''' All extra keys in singleton buckets: every key after index 0 in DetectOS,
-    ''' LangSecRef, Section, SpecialDetect, Default, and Warning.
-    ''' An empty list means no singleton violations exist.
-    ''' </summary>
-    Public ReadOnly Property SingletonViolations As IReadOnlyList(Of iniKey)
-        Get
-            Dim result As New List(Of iniKey)
-            For Each lst In {_detectOS, _langSecRef, _sectionKey, _specialDetect, _defaultKey, _warningKey}
-                If lst.Count > 1 Then result.AddRange(lst.Skip(1))
-            Next
-            Return result
         End Get
     End Property
 
@@ -243,28 +250,10 @@ Public Class winapp2entry
         LineNum = section.StartingLineNumber
 
         For Each key In section.Keys
-
-            Select Case key.KeyType.ToUpperInvariant()
-                Case "DETECTOS"      : _detectOS.Add(key)
-                Case "LANGSECREF"    : _langSecRef.Add(key)
-                Case "SECTION"       : _sectionKey.Add(key)
-                Case "SPECIALDETECT" : _specialDetect.Add(key)
-                Case "DETECT"        : _detects.Add(key)
-                Case "DETECTFILE"    : _detectFiles.Add(key)
-                Case "DEFAULT"       : _defaultKey.Add(key)
-                Case "WARNING"       : _warningKey.Add(key)
-                Case "FILEKEY"       : _fileKeys.Add(key)
-                Case "REGKEY"        : _regKeys.Add(key)
-                Case "EXCLUDEKEY"    : _excludeKeys.Add(key)
-                Case Else            : _errorKeys.Add(key)
-            End Select
-
+            bucketFor(key).Add(key)
         Next
 
-        KeyLists = New List(Of IReadOnlyList(Of iniKey)) From {
-            _detectOS, _langSecRef, _sectionKey, _specialDetect, _detects, _detectFiles,
-            _defaultKey, _warningKey, _fileKeys, _regKeys, _excludeKeys, _errorKeys
-        }
+        KeyLists = Array.AsReadOnly(Of IReadOnlyList(Of iniKey))(_buckets)
 
     End Sub
 
@@ -276,43 +265,19 @@ Public Class winapp2entry
 
         If key Is Nothing Then argIsNull(NameOf(key)) : Return
 
-        Select Case key.KeyType.ToUpperInvariant()
-            Case "DETECTOS"      : _detectOS.Add(key)
-            Case "LANGSECREF"    : _langSecRef.Add(key)
-            Case "SECTION"       : _sectionKey.Add(key)
-            Case "SPECIALDETECT" : _specialDetect.Add(key)
-            Case "DETECT"        : _detects.Add(key)
-            Case "DETECTFILE"    : _detectFiles.Add(key)
-            Case "DEFAULT"       : _defaultKey.Add(key)
-            Case "WARNING"       : _warningKey.Add(key)
-            Case "FILEKEY"       : _fileKeys.Add(key)
-            Case "REGKEY"        : _regKeys.Add(key)
-            Case "EXCLUDEKEY"    : _excludeKeys.Add(key)
-            Case Else            : _errorKeys.Add(key)
-        End Select
+        bucketFor(key).Add(key)
 
     End Sub
 
     ''' <summary>
-    ''' Returns the 0-based index into <c> KeyLists </c> for the given key type name, or -1 if unrecognized.
+    ''' Returns the 0-based index into <c> KeyLists </c> for the given key type name, or -1 if
+    ''' unrecognized. The name <c> Error </c> gives <see cref="ErrorBucket"/>.
     ''' </summary>
     ''' <param name="keyType">The key type name, e.g. "FileKey"</param>
     Public Shared Function GetBucketIndex(keyType As String) As Integer
-        Select Case keyType.ToUpperInvariant()
-            Case "DETECTOS"      : Return 0
-            Case "LANGSECREF"    : Return 1
-            Case "SECTION"       : Return 2
-            Case "SPECIALDETECT" : Return 3
-            Case "DETECT"        : Return 4
-            Case "DETECTFILE"    : Return 5
-            Case "DEFAULT"       : Return 6
-            Case "WARNING"       : Return 7
-            Case "FILEKEY"       : Return 8
-            Case "REGKEY"        : Return 9
-            Case "EXCLUDEKEY"    : Return 10
-            Case "ERROR"         : Return 11
-            Case Else            : Return -1
-        End Select
+        If keyType IsNot Nothing AndAlso keyType.ToUpperInvariant() = "ERROR" Then Return ErrorBucket
+        Dim info = KeyTypes.Find(keyType)
+        Return If(info Is Nothing, -1, info.Order)
     End Function
 
     ''' <summary>
@@ -331,9 +296,7 @@ Public Class winapp2entry
     ''' to repair broken keys (e.g. fixing a missing "=" restores a valid KeyType).
     ''' </summary>
     Public Sub ReclassifyErrorKeys()
-        Dim toMove = _errorKeys.Where(Function(k)
-            Return GetBucketIndex(k.KeyType) >= 0 AndAlso GetBucketIndex(k.KeyType) <= 10
-        End Function).ToList()
+        Dim toMove = _errorKeys.Where(Function(k) KeyTypes.Find(k.KeyType) IsNot Nothing).ToList()
         For Each k In toMove
             _errorKeys.Remove(k)
             AddKey(k)
@@ -350,20 +313,7 @@ Public Class winapp2entry
 
         If key Is Nothing Then argIsNull(NameOf(key)) : Return
 
-        Select Case key.KeyType.ToUpperInvariant()
-            Case "DETECTOS"      : _detectOS.Remove(key)
-            Case "LANGSECREF"    : _langSecRef.Remove(key)
-            Case "SECTION"       : _sectionKey.Remove(key)
-            Case "SPECIALDETECT" : _specialDetect.Remove(key)
-            Case "DETECT"        : _detects.Remove(key)
-            Case "DETECTFILE"    : _detectFiles.Remove(key)
-            Case "DEFAULT"       : _defaultKey.Remove(key)
-            Case "WARNING"       : _warningKey.Remove(key)
-            Case "FILEKEY"       : _fileKeys.Remove(key)
-            Case "REGKEY"        : _regKeys.Remove(key)
-            Case "EXCLUDEKEY"    : _excludeKeys.Remove(key)
-            Case Else            : _errorKeys.Remove(key)
-        End Select
+        bucketFor(key).Remove(key)
 
     End Sub
 
@@ -383,14 +333,14 @@ Public Class winapp2entry
     End Function
 
     ''' <summary>
-    ''' Renumbers the deletion key buckets (FileKey, RegKey, ExcludeKey) sequentially from 1,
+    ''' Renumbers the always-numbered buckets (FileKey, RegKey, ExcludeKey) sequentially from 1,
     ''' after sorting each bucket by value (case-insensitive).
     ''' </summary>
     Public Sub RenumberKeys()
 
-        RenumberBucket(_fileKeys)
-        RenumberBucket(_regKeys)
-        RenumberBucket(_excludeKeys)
+        For Each t In KeyTypes.All.Where(Function(kt) kt.Numbering = KeyNumbering.Always)
+            RenumberBucket(_buckets(t.Order))
+        Next
 
     End Sub
 

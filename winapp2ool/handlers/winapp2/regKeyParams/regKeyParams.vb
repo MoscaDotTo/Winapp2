@@ -50,6 +50,22 @@ Public Class regKeyParams
 
     End Function
 
+    ''' <summary>
+    ''' Returns a registry hive correctly cased in the form it was written
+    ''' (<c> hkey_current_user </c> gives <c> HKEY_CURRENT_USER </c>, <c> hkcu </c> gives
+    ''' <c> HKCU </c>), or <c> "" </c> when <paramref name="root"/> isn't exactly a hive
+    ''' </summary>
+    '''
+    ''' <param name="root">A registry hive, short or long, in any case</param>
+    Public Shared Function CanonicalRoot(root As String) As String
+
+        ' Every hive name is all capitals
+        If root IsNot Nothing AndAlso ShortRoots.ContainsKey(root) Then Return root.ToUpperInvariant()
+
+        Return ""
+
+    End Function
+
     ''' <summary>The registry path: everything before the pipe, or the whole value if there's no pipe</summary>
     Public ReadOnly Property Path As String
 

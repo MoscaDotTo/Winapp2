@@ -560,15 +560,17 @@ Public Module Trim
         Select Case keys(0).KeyType
 
             Case "FileKey", "ExcludeKey"
-                findStrs = {"%ProgramFiles%", "%CommonAppData%", "%CommonProgramFiles%", "HKLM\Software"}
+                findStrs = {"%ProgramFiles%", "%CommonAppData%", "%CommonProgramFiles%", "HKLM\Software", "HKEY_LOCAL_MACHINE\Software"}
                 replStrs = {"%LocalAppData%\VirtualStore\Program Files*",
                             "%LocalAppData%\VirtualStore\ProgramData",
                             "%LocalAppData%\VirtualStore\Program Files*\Common Files",
+                            "HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE",
                             "HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE"}
 
             Case "RegKey"
-                findStrs = {"HKLM\Software"}
-                replStrs = {"HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE"}
+                findStrs = {"HKLM\Software", "HKEY_LOCAL_MACHINE\Software"}
+                replStrs = {"HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE",
+                            "HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE"}
 
             Case Else
                 Return

@@ -94,6 +94,7 @@
     <Compile Include="FlavorManifestTests.vb" />
     <Compile Include="FlavorStampTests.vb" />
     <Compile Include="IniFileChooserTests.vb" />
+    <Compile Include="KeyTypesTests.vb" />
     <Compile Include="LintOptionsTests.vb" />
     <Compile Include="LintReconcilerTests.vb" />
     <Compile Include="MenuDefaultsTests.vb" />

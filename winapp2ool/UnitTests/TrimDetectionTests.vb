@@ -215,6 +215,20 @@ Imports Microsoft.Win32
     End Sub
 
     ''' <summary>
+    ''' A RegKey spelling the hive <c> HKEY_LOCAL_MACHINE </c> gets its VirtualStore counterpart too
+    ''' </summary>
+    <TestMethod()> Public Sub VirtualStore_LongHiveName_GetsCounterpart()
+
+        Registry.CurrentUser.CreateSubKey($"{VirtualStoreRoot}\{_vsKeyName}").Dispose()
+
+        Dim values = RegKeysAfterTrim($"HKEY_LOCAL_MACHINE\Software\{_vsKeyName}")
+
+        CollectionAssert.Contains(values, $"HKCU\{VirtualStoreRoot}\{_vsKeyName}")
+        Assert.AreEqual(2, values.Count)
+
+    End Sub
+
+    ''' <summary>
     ''' A download asked for in offline mode writes no output and fails the run
     ''' </summary>
     <TestMethod()> Public Sub OfflineDownload_WritesNothingAndFails()

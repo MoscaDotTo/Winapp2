@@ -70,18 +70,6 @@ Public Module WinappDebug
     Public Property lintOpti As lintRule = Rules(14)
 
     ''' <summary>
-    ''' Regex to detect long form registry paths
-    ''' </summary>
-    Private ReadOnly longReg As New Regex("HKEY_(C(URRENT_(USER$|CONFIG$)|LASSES_ROOT$)|LOCAL_MACHINE$|USERS$)",
-                                          RegexOptions.Compiled Or RegexOptions.CultureInvariant)
-
-    ''' <summary>
-    ''' Regex to detect short form registry paths
-    ''' </summary>
-    Private ReadOnly shortReg As New Regex("HK(C(C$|R$|U$)|LM$|U$)",
-                                           RegexOptions.Compiled Or RegexOptions.CultureInvariant)
-
-    ''' <summary>
     ''' Regex to detect valid LangSecRef numbers. It isn't anchored, so it matches a valid
     ''' number anywhere in the value.
     ''' </summary>
@@ -124,10 +112,9 @@ Public Module WinappDebug
         RegexOptions.Compiled Or RegexOptions.CultureInvariant)
 
     ''' <summary>
-    ''' Valid key type names for winapp2.ini entries
+    ''' Valid key type names for winapp2.ini entries, in winapp2.ini key order
     ''' </summary>
-    Private ReadOnly ValidCmds As String() = {"Default", "DetectOS", "DetectFile", "Detect", "ExcludeKey",
-        "FileKey", "LangSecRef", "RegKey", "Section", "SpecialDetect", "Warning"}
+    Private ReadOnly ValidCmds As String() = KeyTypes.All.Select(Function(t) t.Name).ToArray()
 
     ''' <summary>
     ''' Valid <c> SpecialDetect </c> values, properly cased. <c> chkCasing </c> uses these to
@@ -180,9 +167,12 @@ Public Module WinappDebug
     Private ReadOnly NoSlashCheckTypes As New HashSet(Of String)({"RegKey", "Section", "Warning"}, StringComparer.OrdinalIgnoreCase)
 
     ''' <summary>
-    ''' Key types for which environment variable checks apply
+    ''' Key types for which environment variable checks apply: those whose value can hold a
+    ''' filesystem path
     ''' </summary>
-    Private ReadOnly EnVarCheckTypes As New HashSet(Of String)({"FileKey", "ExcludeKey", "DetectFile"}, StringComparer.OrdinalIgnoreCase)
+    Private ReadOnly EnVarCheckTypes As New HashSet(Of String)(
+        KeyTypes.All.Where(Function(t) t.Domain = KeyDomain.Filesystem OrElse t.Domain = KeyDomain.ByFlag).Select(Function(t) t.Name),
+        StringComparer.OrdinalIgnoreCase)
 
     ''' <summary>
     ''' Indicates whether <see cref="InitDebug"/> stamps the version line with today's date
@@ -549,19 +539,14 @@ Public Module WinappDebug
 
             ValidateKeys(result, entry)
 
-            Dim bc = Function(typeName As String) As Integer
-                         Dim idx = winapp2entry.GetBucketIndex(typeName)
-                         Return If(idx >= 0, entry.KeyLists(idx).Count, 0)
-                     End Function
-
-            processKeyList(result, entry, New KeyListSpec("DetectOS", noNumbers:=True, oneOnly:=True), AddressOf voidDelegate)
-            processKeyList(result, entry, New KeyListSpec("LangSecRef", noNumbers:=True, oneOnly:=True), AddressOf voidDelegate)
-            processKeyList(result, entry, New KeyListSpec("Section", noNumbers:=True, oneOnly:=True), AddressOf voidDelegate)
-            processKeyList(result, entry, New KeyListSpec("SpecialDetect", noNumbers:=True, oneOnly:=True), AddressOf voidDelegate)
-            processKeyList(result, entry, New KeyListSpec("Detect", noNumbers:=(bc("Detect") = 1), checkPathValidity:=True, isRegistryPath:=True), AddressOf voidDelegate)
-            processKeyList(result, entry, New KeyListSpec("DetectFile", noNumbers:=(bc("DetectFile") = 1)), Function(k) pDetectFile(result, k))
-            processKeyList(result, entry, New KeyListSpec("Default", noNumbers:=True, oneOnly:=True), AddressOf voidDelegate)
-            processKeyList(result, entry, New KeyListSpec("Warning", noNumbers:=True, oneOnly:=True), AddressOf voidDelegate)
+            processKeyList(result, entry, New KeyListSpec("DetectOS"), AddressOf voidDelegate)
+            processKeyList(result, entry, New KeyListSpec("LangSecRef"), AddressOf voidDelegate)
+            processKeyList(result, entry, New KeyListSpec("Section"), AddressOf voidDelegate)
+            processKeyList(result, entry, New KeyListSpec("SpecialDetect"), AddressOf voidDelegate)
+            processKeyList(result, entry, New KeyListSpec("Detect", checkPathValidity:=True, isRegistryPath:=True), AddressOf voidDelegate)
+            processKeyList(result, entry, New KeyListSpec("DetectFile"), Function(k) pDetectFile(result, k))
+            processKeyList(result, entry, New KeyListSpec("Default"), AddressOf voidDelegate)
+            processKeyList(result, entry, New KeyListSpec("Warning"), AddressOf voidDelegate)
             processKeyList(result, entry, New KeyListSpec("FileKey"), Function(k) pFileKey(result, k))
             processKeyList(result, entry, New KeyListSpec("RegKey", checkPathValidity:=True, isRegistryPath:=True), AddressOf voidDelegate)
             processKeyList(result, entry, New KeyListSpec("ExcludeKey", isExcludeKey:=True), AddressOf voidDelegate, hasFileExcludes, hasRegExcludes)
@@ -883,17 +868,15 @@ Public Module WinappDebug
     End Function
 
     ''' <summary>
-    ''' The per-call configuration for <see cref="processKeyList"/>, holding the behavior that
-    ''' varies by key type.
+    ''' The per-call configuration for <see cref="processKeyList"/>, holding the checks that
+    ''' vary by key type. How the type is numbered comes from <see cref="KeyTypes"/>.
     ''' </summary>
     Private Structure KeyListSpec
 
         ''' <summary>The key type whose bucket is processed</summary>
         Public ReadOnly Property TypeName As String
-        ''' <summary>Indicates whether keys of this type should carry no number</summary>
-        Public ReadOnly Property NoNumbers As Boolean
-        ''' <summary>Indicates whether an entry may hold only one key of this type</summary>
-        Public ReadOnly Property OneOnly As Boolean
+        ''' <summary>The key type's row in <see cref="KeyTypes"/></summary>
+        Public ReadOnly Property Info As KeyTypeInfo
         ''' <summary>Indicates whether each key's path goes through <see cref="chkPathFormatValidity"/></summary>
         Public ReadOnly Property CheckPathValidity As Boolean
         ''' <summary>Indicates whether that path check expects a registry path</summary>
@@ -903,20 +886,15 @@ Public Module WinappDebug
 
         ''' <summary>Creates a new <c> KeyListSpec </c>. Every option defaults to <c> False </c>.</summary>
         ''' <param name="typeName">The key type whose bucket is processed</param>
-        ''' <param name="noNumbers">Indicates whether keys of this type should carry no number</param>
-        ''' <param name="oneOnly">Indicates whether an entry may hold only one key of this type</param>
         ''' <param name="checkPathValidity">Indicates whether to check each key's path</param>
         ''' <param name="isRegistryPath">Indicates whether that path is a registry path</param>
         ''' <param name="isExcludeKey">Indicates whether to run the ExcludeKey checks</param>
         Public Sub New(typeName As String,
-                       Optional noNumbers As Boolean = False,
-                       Optional oneOnly As Boolean = False,
                        Optional checkPathValidity As Boolean = False,
                        Optional isRegistryPath As Boolean = False,
                        Optional isExcludeKey As Boolean = False)
             Me.TypeName = typeName
-            Me.NoNumbers = noNumbers
-            Me.OneOnly = oneOnly
+            Me.Info = KeyTypes.Find(typeName)
             Me.CheckPathValidity = checkPathValidity
             Me.IsRegistryPath = isRegistryPath
             Me.IsExcludeKey = isExcludeKey
@@ -969,6 +947,9 @@ Public Module WinappDebug
 
         If bucket.Count = 0 Then Return
 
+        Dim oneOnly = spec.Info.Numbering = KeyNumbering.Never
+        Dim noNumbers = oneOnly OrElse (spec.Info.Numbering = KeyNumbering.WhenSeveral AndAlso bucket.Count = 1)
+
         Dim curNum = 1
         ' Don't bother allocating the dupe tracker for a bucket holding one key, since there's
         ' nothing to duplicate, or when the user has turned off both the scan and the repair
@@ -983,7 +964,7 @@ Public Module WinappDebug
 
             If spec.CheckPathValidity Then chkPathFormatValidity(result, key, spec.IsRegistryPath)
 
-            If spec.OneOnly AndAlso curNum > 1 AndAlso result.Options.Multi.ShouldScan Then
+            If oneOnly AndAlso curNum > 1 AndAlso result.Options.Multi.ShouldScan Then
                 fullKeyErr(result, key, $"Multiple {key.KeyType} detected.")
                 If result.Options.Multi.fixFormat Then
                     If dupeKeys Is Nothing Then dupeKeys = New List(Of iniKey)
@@ -991,7 +972,7 @@ Public Module WinappDebug
                 End If
             End If
 
-            cFormat(result, key, curNum, seenValues, dupeKeys, spec.NoNumbers)
+            cFormat(result, key, curNum, seenValues, dupeKeys, noNumbers)
 
             If key.typeIs("SpecialDetect") Then chkCasing(result, key, SpecialDetectLookup, SpecialDetectJoined, key.Value)
             fullKeyErr(result, key, "LangSecRef holds an invalid value.", result.Options.Invalid.ShouldScan AndAlso key.typeIs("LangSecRef") AndAlso Not secRefNums.IsMatch(key.Value))
@@ -1200,8 +1181,8 @@ Public Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Splits a key that has no <c> = </c> into a name and a value. The type is the first entry
-    ''' in <paramref name="cmds"/> that the key's name starts with, ignoring case. When the name
+    ''' Splits a key that has no <c> = </c> into a name and a value. The type is the longest name
+    ''' in <see cref="KeyTypes"/> that the key's name starts with, ignoring case. When the name
     ''' spells the type with the same casing, the new name is the type plus any digits that
     ''' follow it (none for types that take no number), and the rest becomes the value. The strip
     ''' is case-sensitive and removes every occurrence, not just the prefix, so with different
@@ -1214,58 +1195,46 @@ Public Module WinappDebug
     ''' A misformatted <c> iniKey </c> to attempt to repair
     ''' </param>
     '''
-    ''' <param name="cmds">
-    ''' An array containing valid winapp2.ini <c> keyTypes </c>
-    ''' </param>
-    '''
     ''' <returns>
     ''' <c> True </c> if the key now has a value, <c> False </c> if no type matched or
     ''' nothing was left for the value
     ''' </returns>
-    Private Function fixMissingEquals(key As iniKey,
-                                      cmds As String()) As Boolean
+    Private Function fixMissingEquals(key As iniKey) As Boolean
 
         gLog("Attempting missing equals repair")
 
-        For Each cmd In cmds
+        Dim info = KeyTypes.FindPrefix(key.Name)
 
-            If Not key.Name.ToUpperInvariant.StartsWith(cmd.ToUpperInvariant) Then Continue For
+        If info Is Nothing Then gLog("Repair failed, key will be removed.") : Return False
 
-            Select Case cmd
+        Dim cmd = info.Name
 
-                ' We don't expect numbers in these keys
-                Case "Default", "DetectOS", "Section", "LangSecRef", "SpecialDetect", "Warning"
+        If info.Numbering = KeyNumbering.Never Then
 
-                    key.Value = key.Name.Replace(cmd, "")
-                    key.Name = cmd
+            key.Value = key.Name.Replace(cmd, "")
+            key.Name = cmd
 
-                Case Else
+        Else
 
-                    Dim newName = cmd
-                    Dim withNums = key.Name.Replace(cmd, "")
+            Dim newName = cmd
+            Dim withNums = key.Name.Replace(cmd, "")
 
-                    For Each c As Char In withNums.ToCharArray
+            For Each c As Char In withNums.ToCharArray
 
-                        If Char.IsNumber(c) Then newName += c : Else Exit For
+                If Char.IsNumber(c) Then newName += c : Else Exit For
 
-                    Next
+            Next
 
-                    key.Value = key.Name.Replace(newName, "")
-                    key.Name = newName
+            key.Value = key.Name.Replace(newName, "")
+            key.Name = newName
 
-            End Select
+        End If
 
-            gLog($"Repair complete. Result: {key.ToString()}")
+        gLog($"Repair complete. Result: {key.ToString()}")
 
-            ' Don't allow valueless keys in winapp2.ini
-            If key.Value.Length = 0 Then gLog("Repair failed, key will be removed.") : Return False
-            Return True
-
-        Next
-
-        ' Return false if no valid command is found
-        gLog("Repair failed, key will be removed.")
-        Return False
+        ' Don't allow valueless keys in winapp2.ini
+        If key.Value.Length = 0 Then gLog("Repair failed, key will be removed.") : Return False
+        Return True
 
     End Function
 
@@ -1297,7 +1266,7 @@ Public Module WinappDebug
             gLog($"Broken Key Found: {key.Name}")
 
             ' If we didn't find a fixable situation, delete the key
-            Dim fixedMsngEq = fixMissingEquals(key, ValidCmds)
+            Dim fixedMsngEq = fixMissingEquals(key)
 
             fullKeyErr(result, key, "Missing '=' detected and repaired in key.", fixedMsngEq)
 
@@ -1547,13 +1516,11 @@ Public Module WinappDebug
         Dim rootStr = getFirstDir(pathPortion)
 
         ' Ensure that registry paths have a valid hive and file paths have either a variable or a drive letter
-        If isRegistry AndAlso Not (shortReg.IsMatch(rootStr) OrElse longReg.IsMatch(rootStr)) Then
+        Dim correctHive = If(isRegistry, regKeyParams.CanonicalRoot(rootStr), "")
 
-            Dim validHives = {"HKCU", "HKLM", "HKCR", "HKU", "HKCC",
-                              "HKEY_CURRENT_USER", "HKEY_LOCAL_MACHINE", "HKEY_CLASSES_ROOT", "HKEY_USERS", "HKEY_CURRENT_CONFIG"}
-            Dim correctHive = validHives.FirstOrDefault(Function(h) h.Equals(rootStr, StringComparison.OrdinalIgnoreCase))
+        If isRegistry AndAlso (correctHive.Length = 0 OrElse Not String.Equals(correctHive, rootStr, StringComparison.Ordinal)) Then
 
-            If correctHive IsNot Nothing Then
+            If correctHive.Length > 0 Then
                 fullKeyErr(result, key, "Incorrect registry root casing.", result.Options.Casing.ShouldScan, result.Options.Casing.fixFormat, key.Value,
                            Function()
                                Dim idx = key.Value.IndexOf(rootStr)
