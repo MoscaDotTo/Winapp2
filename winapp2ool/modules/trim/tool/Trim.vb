@@ -702,7 +702,7 @@ Public Module Trim
     ''' 
     Private Function checkExist(path As String) As Boolean
 
-        Return If(path.StartsWith("HK", StringComparison.InvariantCulture), checkRegExist(path), checkPathExist(path))
+        Return If(path.StartsWith("HK", StringComparison.OrdinalIgnoreCase), checkRegExist(path), checkPathExist(path))
 
     End Function
 
@@ -735,7 +735,8 @@ Public Module Trim
     ''' </summary>
     '''
     ''' <param name="root">
-    ''' The registry hive that contains the key whose existence will be audited 
+    ''' The registry hive that contains the key whose existence will be audited, short or long,
+    ''' in any case
     ''' </param>
     ''' 
     ''' <param name="dir"> 
@@ -747,7 +748,7 @@ Public Module Trim
 
         Try
 
-            Select Case root
+            Select Case regKeyParams.ShortRoot(root)
 
                 Case "HKCU"
 
@@ -758,7 +759,7 @@ Public Module Trim
                     If closeIfOpen(getLMKey(dir)) Then Return True
 
                     ' Support checking for 32bit applications on Win64
-                    dir = root + "\" + dir
+                    dir = "HKLM\" + dir
                     dir = dir.ToUpperInvariant.Replace("HKLM\SOFTWARE", "SOFTWARE\WOW6432Node")
                     Return closeIfOpen(getLMKey(dir))
 
@@ -770,10 +771,14 @@ Public Module Trim
 
                     Return closeIfOpen(getCRKey(dir))
 
+                Case "HKCC"
+
+                    Return closeIfOpen(getCCKey(dir))
+
                 Case Else
 
                     ' Reject malformated keys
-                    gLog($"Your key seems to be malformatted (bad root? - root: {root} - expected 'HKCU','HKLM','HKU' or 'HKCR')")
+                    gLog($"Your key seems to be malformatted (bad root? - root: {root} - expected a registry hive such as HKCU or HKEY_CURRENT_USER)")
                     Return False
 
             End Select

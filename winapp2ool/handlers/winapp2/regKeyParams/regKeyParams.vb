@@ -25,11 +25,30 @@ Option Strict On
 ''' </summary>
 Public Class regKeyParams
 
-    Private Shared ReadOnly ValidRoots As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase) From {
-        "HKCU", "HKLM", "HKCR", "HKU", "HKCC",
-        "HKEY_CURRENT_USER", "HKEY_LOCAL_MACHINE", "HKEY_CLASSES_ROOT",
-        "HKEY_USERS", "HKEY_CURRENT_CONFIG"
+    ''' <summary>Maps each hive spelling, short or long and in any case, to its short form</summary>
+    Private Shared ReadOnly ShortRoots As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase) From {
+        {"HKCU", "HKCU"}, {"HKEY_CURRENT_USER", "HKCU"},
+        {"HKLM", "HKLM"}, {"HKEY_LOCAL_MACHINE", "HKLM"},
+        {"HKCR", "HKCR"}, {"HKEY_CLASSES_ROOT", "HKCR"},
+        {"HKU", "HKU"}, {"HKEY_USERS", "HKU"},
+        {"HKCC", "HKCC"}, {"HKEY_CURRENT_CONFIG", "HKCC"}
     }
+
+    ''' <summary>
+    ''' Returns the short form of a registry hive (<c> HKEY_CURRENT_USER </c> and <c> hkcu </c>
+    ''' both give <c> HKCU </c>), or <c> "" </c> when <paramref name="root"/> isn't a hive
+    ''' </summary>
+    '''
+    ''' <param name="root">A registry hive, short or long, in any case</param>
+    Public Shared Function ShortRoot(root As String) As String
+
+        Dim shortForm As String = Nothing
+
+        If root IsNot Nothing AndAlso ShortRoots.TryGetValue(root, shortForm) Then Return shortForm
+
+        Return ""
+
+    End Function
 
     ''' <summary>The registry path: everything before the pipe, or the whole value if there's no pipe</summary>
     Public ReadOnly Property Path As String
@@ -61,7 +80,7 @@ Public Class regKeyParams
     ''' <summary>Indicates whether <c> Root </c> is a recognized registry hive (short or long form)</summary>
     Public ReadOnly Property HasValidRoot As Boolean
         Get
-            Return ValidRoots.Contains(Root)
+            Return ShortRoots.ContainsKey(Root)
         End Get
     End Property
 

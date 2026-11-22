@@ -143,6 +143,35 @@ Imports Microsoft.Win32
 
     End Sub
 
+    ''' <summary>Returns whether an entry detected by <paramref name="detect"/> survives a trim</summary>
+    ''' <param name="detect">The entry's Detect value</param>
+    Private Shared Function IsKeptByDetect(detect As String) As Boolean
+
+        Dim text = "[Probe *]" & vbCrLf &
+                   "LangSecRef=3021" & vbCrLf &
+                   $"Detect={detect}" & vbCrLf &
+                   "FileKey1=%AppData%\winapp2ool-unit-test-probe|*.*" & vbCrLf
+
+        Return TrimText(text).Count = 1
+
+    End Function
+
+    ''' <summary>
+    ''' Every hive WinappDebug accepts is looked up, in its long form and in any case, and a
+    ''' missing key under one still isn't detected
+    ''' </summary>
+    <TestMethod()> Public Sub Detect_AcceptsEveryHiveSpelling()
+
+        Assert.IsTrue(IsKeptByDetect("HKEY_CURRENT_USER\Software"))
+        Assert.IsTrue(IsKeptByDetect("hkcu\Software"))
+        Assert.IsTrue(IsKeptByDetect("HKEY_LOCAL_MACHINE\SOFTWARE"))
+        Assert.IsTrue(IsKeptByDetect("HKCC\Software"))
+        Assert.IsTrue(IsKeptByDetect("HKEY_CURRENT_CONFIG\Software"))
+        Assert.IsFalse(IsKeptByDetect($"HKEY_CURRENT_USER\Software\winapp2ool-unit-test-missing-{Guid.NewGuid():N}"))
+        Assert.IsFalse(IsKeptByDetect($"HKCC\Software\winapp2ool-unit-test-missing-{Guid.NewGuid():N}"))
+
+    End Sub
+
     ''' <summary>Trims an always-detected entry holding <paramref name="regKey"/> and returns its RegKey values</summary>
     ''' <param name="regKey">The entry's RegKey1 value</param>
     Private Shared Function RegKeysAfterTrim(regKey As String) As List(Of String)

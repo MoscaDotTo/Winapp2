@@ -68,4 +68,16 @@ Module RegistryHelper
         Return Registry.Users.OpenSubKey(subkey)
     End Function
 
+    ''' <summary>Returns the requested key or subkey from the HKEY_CURRENT_CONFIG registry hive</summary>
+    '''
+    ''' <param name="subkey">
+    ''' The path to a subkey in the hive. <c> "" </c> opens the hive's root key. <br /><br />
+    ''' Optional, Default: <c> "" </c>
+    ''' </param>
+    '''
+    ''' <returns>The key, opened read-only, or <c> Nothing </c> if it doesn't exist</returns>
+    Public Function getCCKey(Optional subkey As String = "") As RegistryKey
+        Return Registry.CurrentConfig.OpenSubKey(subkey)
+    End Function
+
 End Module
