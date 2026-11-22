@@ -1234,7 +1234,7 @@ Public Module WinappDebug
             Select Case cmd
 
                 ' We don't expect numbers in these keys
-                Case "Default", "DetectOS", "Section", "LangSecRef", "Section", "SpecialDetect"
+                Case "Default", "DetectOS", "Section", "LangSecRef", "SpecialDetect", "Warning"
 
                     key.Value = key.Name.Replace(cmd, "")
                     key.Name = cmd
