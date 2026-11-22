@@ -94,20 +94,20 @@ In the menu, each file is its own option and **Change Save Directory** sets wher
 
 | Option | Effect | Notes |
 |:-|:-|:-|
-| Winapp2.ini | Download the base (non-CCleaner) winapp2.ini | |
-| CCleaner Winapp2.ini | Download the CCleaner flavor | |
-| CCleaner 7 Winapp2.ini | Download the CCleaner 7 flavor | For installing into `ccleaner.ini`, see [CC7Patcher](../cc7patcher/readme.md) |
-| BleachBit Winapp2.ini | Download the BleachBit flavor | |
-| FluentCleaner Winapp2.ini | Download the FluentCleaner flavor | |
-| System Ninja Winapp2.rules | Download the System Ninja flavor | Saved as `winapp2.rules` |
-| Tron | Download the Tron flavor | |
+| Base winapp2.ini | Download the base flavor | |
+| CCleaner winapp2.ini | Download the CCleaner flavor | |
+| CCleaner 7 winapp2.ini | Download the CCleaner 7 flavor | For installing into `ccleaner.ini`, see [CC7Patcher](../cc7patcher/readme.md) |
+| BleachBit winapp2.ini | Download the BleachBit flavor | |
+| FluentCleaner winapp2.ini | Download the FluentCleaner flavor | |
+| System Ninja winapp2.rules | Download the System Ninja flavor | Saved as `winapp2.rules` |
+| Tron winapp2.ini | Download the Tron flavor | |
 | Winapp2ool | Download the latest winapp2ool.exe | Requires .NET 4.8. Replaces the running executable when the save directory is the current directory. See [Updating Winapp2ool](#updating-winapp2ool) |
 | ReadMe | Download the top-level winapp2ool readme | Saved as `readme.md` |
 | Advanced | Open the Advanced Downloads sub-menu | See [Advanced Downloads](#advanced-downloads) |
 | Change Save Directory | Select a new directory for all downloaded files | Default: current directory |
 | Reset Settings | Restore the save directory to its default | Only shown when the save directory has been changed |
 
-The seven winapp2.ini options always download the flavor their label names and ignore the active flavor setting. Only the command line goes by the active flavor.
+The flavor options always download the flavor their label names and ignore the active flavor setting. Only the command line goes by the active flavor.
 
 ## Advanced Downloads
 

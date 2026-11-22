@@ -358,14 +358,14 @@ Public Module updater
     ''' <param name="dir">The folder holding the local copy. The main menu's update options write there.</param>
     Friend Sub findLocalWinapp2(dir As String)
 
-        For Each name In {"winapp2.ini", "winapp2.rules"}
+        For Each name In WinappFlavorInfo.All.Select(Function(info) info.LocalFileName).Distinct()
 
             Dim localPath = Path.Combine(dir, name)
             If Not File.Exists(localPath) Then Continue For
 
             Dim flavor = readHeaderFlavor(localPath)
             localWa2Name = name
-            localWa2Flavor = If(flavor.HasValue, flavor.Value, If(name = "winapp2.rules", WinappFlavor.SystemNinja, CurrentWinappFlavor))
+            localWa2Flavor = If(flavor.HasValue, flavor.Value, onlyFlavorSavedAs(name))
             Return
 
         Next
@@ -374,6 +374,23 @@ Public Module updater
         localWa2Name = WinappFlavorInfo.Lookup(CurrentWinappFlavor).LocalFileName
 
     End Sub
+
+    ''' <summary>
+    ''' Returns the flavor a local copy naming no flavor belongs to, judging by its file name
+    ''' </summary>
+    '''
+    ''' <param name="name">The local copy's file name</param>
+    '''
+    ''' <returns>
+    ''' The only flavor saved as <paramref name="name"/>, <br />
+    ''' <see cref="CurrentWinappFlavor"/> if several flavors share that name
+    ''' </returns>
+    Private Function onlyFlavorSavedAs(name As String) As WinappFlavor
+
+        Dim matches = WinappFlavorInfo.All.Where(Function(info) info.LocalFileName = name).ToList()
+        Return If(matches.Count = 1, matches(0).Flavor, CurrentWinappFlavor)
+
+    End Function
 
     ''' <summary>
     ''' Returns the flavor a winapp2.ini's header names, reading only the comment lines at the

@@ -321,25 +321,27 @@ Public Module commandLineHandler
     End Sub
 
     ''' <summary>
-    ''' Sets the winapp2 flavor from the flavor flags in <see cref="cmdargs"/>. When more than
-    ''' one flavor flag is given, the one checked last here wins, whatever their order on the
-    ''' command line.
+    ''' Sets the winapp2 flavor from the flavor flags in <see cref="cmdargs"/> and removes every
+    ''' flavor flag from it. When more than one flavor flag is given, we log a warning, and the
+    ''' flag that comes last in <see cref="WinappFlavorInfo.All"/> wins, whatever their order on
+    ''' the command line.
     ''' </summary>
     Public Sub processFlavorArgs()
 
-        handleFlavorArg("-ccleaner", WinappFlavor.CCleaner)
-        handleFlavorArg("-cc", WinappFlavor.CCleaner)
-        handleFlavorArg("-bleachbit", WinappFlavor.BleachBit)
-        handleFlavorArg("-bb", WinappFlavor.BleachBit)
-        handleFlavorArg("-systemninja", WinappFlavor.SystemNinja)
-        handleFlavorArg("-sn", WinappFlavor.SystemNinja)
-        handleFlavorArg("-tron", WinappFlavor.Tron)
-        handleFlavorArg("-base", WinappFlavor.Base)
-        handleFlavorArg("-ncc", WinappFlavor.Base)
-        handleFlavorArg("-ccleaner7", WinappFlavor.CCleaner7)
-        handleFlavorArg("-cc7", WinappFlavor.CCleaner7)
-        handleFlavorArg("-fluentcleaner", WinappFlavor.FluentCleaner)
-        handleFlavorArg("-fc", WinappFlavor.FluentCleaner)
+        Dim found = 0
+
+        For Each info In WinappFlavorInfo.All
+
+            For Each flag In info.CliFlags
+
+                If cmdargs.Contains(flag) Then found += 1
+                handleFlavorArg(flag, info.Flavor)
+
+            Next
+
+        Next
+
+        If found > 1 Then gLog($"Warning: {found} flavor flags were given, using {CurrentWinappFlavor}")
 
     End Sub
 

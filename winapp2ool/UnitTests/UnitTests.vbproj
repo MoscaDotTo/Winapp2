@@ -90,6 +90,8 @@
     <Compile Include="DiffKeyComparisonTests.vb" />
     <Compile Include="DiffPipelineTests.vb" />
     <Compile Include="EntryBuilderTests.vb" />
+    <Compile Include="FlavorFlagTests.vb" />
+    <Compile Include="FlavorManifestTests.vb" />
     <Compile Include="FlavorStampTests.vb" />
     <Compile Include="IniFileChooserTests.vb" />
     <Compile Include="LintOptionsTests.vb" />
@@ -152,6 +154,10 @@
     </None>
     <None Include="Fixtures\WinappDebugOutputs.ini">
       <Link>WinappDebugOutputs.ini</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\.github\scripts\flavors.csv">
+      <Link>flavors.csv</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
