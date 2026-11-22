@@ -1,0 +1,9 @@
+Key,Label,Asset,Changelog,OldData,OldChangelog
+Base,Base,winapp2.ini,changelog-base.txt,Non-CCleaner/Winapp2.ini,Non-CCleaner/diff.txt
+CCleaner,CCleaner,winapp2-ccleaner.ini,changelog-ccleaner.txt,Winapp2.ini,diff.txt
+CCleaner7,CCleaner 7,winapp2-ccleaner7.ini,changelog-ccleaner7.txt,Non-CCleaner/CCleaner7/Winapp2.ini,Non-CCleaner/CCleaner7/diff.txt
+BleachBit,BleachBit,winapp2-bleachbit.ini,changelog-bleachbit.txt,Non-CCleaner/BleachBit/Winapp2.ini,Non-CCleaner/BleachBit/diff.txt
+FluentCleaner,FluentCleaner,winapp2-fluentcleaner.ini,changelog-fluentcleaner.txt,Non-CCleaner/FluentCleaner/Winapp2.ini,Non-CCleaner/FluentCleaner/diff.txt
+Tron,Tron,winapp2-tron.ini,changelog-tron.txt,Non-CCleaner/Tron/Winapp2.ini,Non-CCleaner/Tron/diff.txt
+SystemNinja,System Ninja,winapp2-systemninja.rules,changelog-systemninja.txt,Non-CCleaner/SystemNinja/Winapp2.rules,Non-CCleaner/SystemNinja/diff.txt
+Archive,Archive,archived.ini,changelog-archived.txt,Winapp3/Archived entries.ini,

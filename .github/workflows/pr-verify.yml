@@ -21,6 +21,8 @@ on:
       - '!Assembler/**.md'
       - '.github/workflows/pr-verify.yml'
       - '.github/scripts/pr-verify-build.ps1'
+      - '.github/scripts/flavors.csv'
+      - '.github/scripts/release-assets.ps1'
   # Manual button for testing: supply the two SHAs and a PR number directly.
   workflow_dispatch:
     inputs:

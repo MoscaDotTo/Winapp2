@@ -5,8 +5,9 @@
 #
 # `Assembler/build winapp2.ps1` generates every .ini under Assembler/Generated/ and
 # Assembler/Archived/, the published files in Releases/ (each flavor, archived.ini and their
-# changelogs), and their deprecated copies (the old Winapp2.ini/diff.txt pairs at the root and
-# under Non-CCleaner/, and Winapp3/Archived entries.ini). Before the 2026-11
+# changelogs, all named in .github/scripts/flavors.csv), and their deprecated copies (the
+# old Winapp2.ini/diff.txt pairs at the root and under Non-CCleaner/, and Winapp3/Archived
+# entries.ini). Before the 2026-11
 # layout move the generated files lived under Assembler/Entries/, and we still treat those
 # paths as generated because a branch made before the move lists them in its diff. Hand-editing any of these looks like it worked,
 # since the file on disk says what you wanted. Then the next daily build regenerates it from
@@ -146,6 +147,18 @@ add_why() {
 }
 
 tab=$(printf '\t')
+cr=$(printf '\r')
+nl=$(printf '\nx'); nl=${nl%x}
+
+# Every Asset and Changelog name in the flavor manifest, each between newlines.
+manifest="$(dirname -- "$0")/flavors.csv"
+[ -f "$manifest" ] || { echo "error: flavor manifest missing: $manifest" >&2; exit 2; }
+release_names="$nl"
+header=1
+while IFS=, read -r _key _label asset changelog _old; do
+  if [ "$header" -eq 1 ]; then header=0; continue; fi
+  release_names="$release_names${asset%"$cr"}$nl${changelog%"$cr"}$nl"
+done < "$manifest"
 
 while IFS= read -r f; do
   [ -n "$f" ] || continue
@@ -179,6 +192,14 @@ while IFS= read -r f; do
       src_count=$((src_count + 1)); global=1
       add_why "the build script"
       continue ;;
+    '.github/scripts/flavors.csv')
+      src_count=$((src_count + 1)); global=1
+      add_why "the flavor manifest"
+      continue ;;
+    '.github/scripts/release-assets.ps1')
+      src_count=$((src_count + 1)); global=1
+      add_why "the release asset list"
+      continue ;;
     'winapp2ool/'*)
       src_count=$((src_count + 1)); global=1
       add_why "winapp2ool source"
@@ -204,11 +225,12 @@ while IFS= read -r f; do
     # The archive tree: each builder's archived.ini. Before the Assembler/ catch-all below.
     'Assembler/Archived/'*)
       gen_count=$((gen_count + 1)); gen_archived="$gen_archived $f" ;;
-    # The release data files, named one by one so nothing else in Releases/ counts.
-    'Releases/winapp2.ini'|'Releases/winapp2-ccleaner.ini'|'Releases/winapp2-ccleaner7.ini'|'Releases/winapp2-bleachbit.ini'|'Releases/winapp2-fluentcleaner.ini'|'Releases/winapp2-tron.ini'|'Releases/winapp2-systemninja.rules'|'Releases/archived.ini')
-      gen_count=$((gen_count + 1)); gen_other="$gen_other $f" ;;
-    'Releases/changelog-base.txt'|'Releases/changelog-ccleaner.txt'|'Releases/changelog-ccleaner7.txt'|'Releases/changelog-bleachbit.txt'|'Releases/changelog-fluentcleaner.txt'|'Releases/changelog-tron.txt'|'Releases/changelog-systemninja.txt'|'Releases/changelog-archived.txt')
-      gen_count=$((gen_count + 1)); gen_other="$gen_other $f" ;;
+    # The release data files and their changelogs, matched by exact name so nothing else in
+    # Releases/ counts.
+    'Releases/'*)
+      case "$release_names" in
+        *"$nl${f#Releases/}$nl"*) gen_count=$((gen_count + 1)); gen_other="$gen_other $f" ;;
+      esac ;;
     # Their deprecated copies, published until the deprecation window closes.
     'Winapp2.ini'|'diff.txt'|'Non-CCleaner/'*'Winapp2.ini'|'Non-CCleaner/'*'Winapp2.rules'|'Non-CCleaner/'*'diff.txt')
       gen_count=$((gen_count + 1)); gen_other="$gen_other $f" ;;

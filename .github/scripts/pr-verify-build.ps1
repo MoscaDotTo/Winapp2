@@ -47,6 +47,9 @@ $ErrorActionPreference = 'Stop'
 # skip our merge_conflict and build_failed paths.
 $PSNativeCommandUseErrorActionPreference = $false
 
+# Before any checkout or clean, which swap .github/scripts for the base's or the PR's copy.
+. (Join-Path $PSScriptRoot 'release-assets.ps1')
+
 # GitHub comment bodies cap at 65536 chars
 $CommentCharBudget = 60000
 
@@ -62,20 +65,12 @@ if (-not (Test-Path $Exe)) { throw "winapp2ool.exe missing from Assembler; a Rel
 New-Item -ItemType Directory -Force -Path $ReportDir | Out-Null
 Set-Content -Path (Join-Path $ReportDir 'pr-number.txt') -Value $PrNumber -NoNewline
 
-# Each published flavor file and the archive, relative to the repo root, paired with
-# a label and the changelog the build script publishes beside each one. Order matches
-# build winapp2.ps1's Backup-Files / changelog stages. The archive is here so a PR that
+# Each published file, relative to the repo root, paired with its manifest key and the
+# changelog the build script publishes beside it. The archive is here so a PR that
 # archives an entry shows both halves of the move: out of Base, into Archive.
-$Outputs = @(
-    @{ Flavor = 'Base';          Output = 'Releases\winapp2.ini';               Diff = 'Releases\changelog-base.txt' }
-    @{ Flavor = 'CCleaner';      Output = 'Releases\winapp2-ccleaner.ini';      Diff = 'Releases\changelog-ccleaner.txt' }
-    @{ Flavor = 'BleachBit';     Output = 'Releases\winapp2-bleachbit.ini';     Diff = 'Releases\changelog-bleachbit.txt' }
-    @{ Flavor = 'CCleaner7';     Output = 'Releases\winapp2-ccleaner7.ini';     Diff = 'Releases\changelog-ccleaner7.txt' }
-    @{ Flavor = 'FluentCleaner'; Output = 'Releases\winapp2-fluentcleaner.ini'; Diff = 'Releases\changelog-fluentcleaner.txt' }
-    @{ Flavor = 'Tron';          Output = 'Releases\winapp2-tron.ini';          Diff = 'Releases\changelog-tron.txt' }
-    @{ Flavor = 'SystemNinja';   Output = 'Releases\winapp2-systemninja.rules'; Diff = 'Releases\changelog-systemninja.txt' }
-    @{ Flavor = 'Archive';       Output = 'Releases\archived.ini';              Diff = 'Releases\changelog-archived.txt' }
-)
+$Outputs = @($PublishedFiles | ForEach-Object {
+    @{ Flavor = $_.Key; Output = "Releases\$($_.Asset)"; Diff = "Releases\$($_.Changelog)" }
+})
 
 function Invoke-Git {
     # git's output goes to the host, never the pipeline, so the exit code is the only

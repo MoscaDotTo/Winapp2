@@ -84,20 +84,13 @@ jobs:
 
           # Only the tracked build outputs, never the log or scratch. Every path must exist or be
           # tracked: one unmatched pathspec makes `git add` stage nothing, which would read as
-          # "no changes". The paths after $ReleaseFiles are the old copies build winapp2.ps1
-          # still writes during the deprecation window.
+          # "no changes". $DeprecatedFiles are the old copies build winapp2.ps1 still writes
+          # during the deprecation window.
           $outputs = @(
             'Assembler/Generated'
             'Assembler/Archived'
             $ReleaseFiles
-            'Winapp2.ini'; 'diff.txt'
-            'Winapp3/Archived entries.ini'
-            'Non-CCleaner/Winapp2.ini'; 'Non-CCleaner/diff.txt'
-            'Non-CCleaner/BleachBit/Winapp2.ini'; 'Non-CCleaner/BleachBit/diff.txt'
-            'Non-CCleaner/CCleaner7/Winapp2.ini'; 'Non-CCleaner/CCleaner7/diff.txt'
-            'Non-CCleaner/FluentCleaner/Winapp2.ini'; 'Non-CCleaner/FluentCleaner/diff.txt'
-            'Non-CCleaner/Tron/Winapp2.ini'; 'Non-CCleaner/Tron/diff.txt'
-            'Non-CCleaner/SystemNinja/Winapp2.rules'; 'Non-CCleaner/SystemNinja/diff.txt'
+            $DeprecatedFiles
           )
           git add -- @outputs
           if ($LASTEXITCODE -ne 0) { throw "git add failed (exit $LASTEXITCODE); not committing or releasing" }

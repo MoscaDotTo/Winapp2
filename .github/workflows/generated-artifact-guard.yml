@@ -48,6 +48,8 @@ on:
       - '.github/workflows/generated-artifact-guard.yml'
       - '.github/scripts/check-generated-sources.sh'
       - '.github/scripts/check-source-letters.sh'
+      - '.github/scripts/flavors.csv'
+      - '.github/scripts/release-assets.ps1'
 
   workflow_dispatch:
 

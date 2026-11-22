@@ -3,47 +3,39 @@
     The one list of what a winapp2.ini GitHub release carries, and the code that stages it.
 
 .DESCRIPTION
-    Dot-source this file from the repository root. Both release paths use it, so their asset
-    lists can't drift apart:
+    Dot-source this file from any folder; it finds flavors.csv beside itself. Both release
+    paths use it, so their asset lists can't drift apart:
       * build-on-merge.yml stages the bundle right after the daily build commits;
       * release.yml's workflow_dispatch recovery path stages it from master's committed files.
+    PR verify reads the same rows for its report.
 
-    The release data files live in Releases\ under the names they carry on the release
-    (winapp2ool's WinappFlavorInfo names the flavors; archived.ini is the Downloader's
-    archive link). They are named one by one, never globbed, so nothing else that lands in
-    Releases\ becomes an asset or a gate input by accident. The release also carries winapp2ool.exe.
+    flavors.csv has one row per published file, in release order: its key (the WinappFlavor
+    member name, or Archive), a label for log messages, its release asset, its changelog
+    asset, and its deprecated copies as repo paths with forward slashes (an empty cell means
+    none). winapp2ool's WinappFlavorInfo names the flavors too, and a unit test holds the two
+    together. The release data files live in Releases\ under their asset names. They are
+    named one by one, never globbed, so nothing else that lands in Releases\ becomes an asset
+    or a gate input by accident. The release also carries winapp2ool.exe.
 
     Defines:
+      $PublishedFiles     the rows of flavors.csv
       $ReleaseDataFiles   every flavor file and archived.ini ("published" files: the release gate's input)
       $ReleaseChangelogs  their changelogs
       $ReleaseFiles       both lists, as repo-relative paths (Releases/<name>)
+      $DeprecatedFiles    every deprecated copy, as a repo-relative path
       Get-ReleaseVersion  the highest "; Version:" stamp across the given files
       New-ReleaseBundle   copies the assets plus version.txt and commit.txt into a folder
 #>
 
-$ReleaseDataFiles = @(
-    'winapp2.ini'
-    'winapp2-ccleaner.ini'
-    'winapp2-ccleaner7.ini'
-    'winapp2-bleachbit.ini'
-    'winapp2-fluentcleaner.ini'
-    'winapp2-tron.ini'
-    'winapp2-systemninja.rules'
-    'archived.ini'
-)
+$FlavorManifest = Join-Path $PSScriptRoot 'flavors.csv'
+if (-not (Test-Path -LiteralPath $FlavorManifest)) { throw "flavor manifest missing: $FlavorManifest" }
+$PublishedFiles = @(Import-Csv -LiteralPath $FlavorManifest)
+if ($PublishedFiles.Count -eq 0) { throw "flavor manifest has no rows: $FlavorManifest" }
 
-$ReleaseChangelogs = @(
-    'changelog-base.txt'
-    'changelog-ccleaner.txt'
-    'changelog-ccleaner7.txt'
-    'changelog-bleachbit.txt'
-    'changelog-fluentcleaner.txt'
-    'changelog-tron.txt'
-    'changelog-systemninja.txt'
-    'changelog-archived.txt'
-)
-
+$ReleaseDataFiles = @($PublishedFiles | ForEach-Object { $_.Asset })
+$ReleaseChangelogs = @($PublishedFiles | ForEach-Object { $_.Changelog })
 $ReleaseFiles = @($ReleaseDataFiles + $ReleaseChangelogs | ForEach-Object { "Releases/$_" })
+$DeprecatedFiles = @($PublishedFiles | ForEach-Object { $_.OldData; $_.OldChangelog } | Where-Object { $_ })
 
 function Get-ReleaseVersion {
     <#
