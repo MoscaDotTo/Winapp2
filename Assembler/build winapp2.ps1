@@ -267,8 +267,9 @@ function Set-DeprecatedPublishPaths {
     # flavors.csv holds repo paths with forward slashes, and an empty cell means no old copy
     $script:DeprecatedPublishPaths = @{}
     foreach ($row in $PublishedFiles) {
+        $data = if ($row.OldData) { '..\' + $row.OldData.Replace('/', '\') } else { $null }
         $changelog = if ($row.OldChangelog) { '..\' + $row.OldChangelog.Replace('/', '\') } else { $null }
-        $script:DeprecatedPublishPaths[$row.Asset] = @{ Data = '..\' + $row.OldData.Replace('/', '\'); Changelog = $changelog }
+        $script:DeprecatedPublishPaths[$row.Asset] = @{ Data = $data; Changelog = $changelog }
     }
 }
 # ---- End of the deprecation window -----------------------------------------------------------
@@ -289,6 +290,7 @@ function Publish-Flavor {
 
     # Deprecation window
     $old = $script:DeprecatedPublishPaths[$DataFile]
+    if (-not $old.Data) { return }
     $oldDir = Split-Path $old.Data
     if (-not (Test-Path $oldDir)) { New-Item -ItemType Directory -Force -Path $oldDir | Out-Null }
     Copy-Item "$releases\$DataFile" $old.Data -Force
