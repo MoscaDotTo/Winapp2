@@ -22,8 +22,8 @@ Imports System.Globalization
 ''' <summary>
 ''' Writes a generator's output as 27 per-letter artifact files (<c> #.ini </c>,
 ''' <c> A.ini </c> ... <c> Z.ini </c>), each under an <see cref="ArtifactHeader"/> that links
-''' the one source file of the same letter. EntryBuilder and UWPBuilder use it for their
-''' <c> -split </c> output.
+''' the one source file of the same letter. EntryBuilder uses it for its <c> -split </c>
+''' output.
 ''' </summary>
 Public Module LetterSplitOutput
 

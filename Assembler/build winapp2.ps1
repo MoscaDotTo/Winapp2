@@ -3,11 +3,11 @@
     Builds winapp2.ini and its various flavors using winapp2ool.
 
 .DESCRIPTION
-    This script requires winapp2ool v1.8.9821.22100 or newer, and refuses to run an older one:
+    This script requires winapp2ool v1.8.9821.32740 or newer, and refuses to run an older one:
     Creates backups, regenerates the committed build artifacts under Generated\
-    (base entries from Sources\EntryBuilder into Generated\EntryBuilder, browser entries
-    into Generated\BrowserBuilder, UWP entries into Generated\UWPBuilder), merges them
-    with a single strict-mode Combine pass, generates tool flavors, and creates a diff for each generated flavor.
+    (base entries, Store apps included, from Sources\EntryBuilder into Generated\EntryBuilder,
+    and browser entries into Generated\BrowserBuilder), merges them with a single strict-mode
+    Combine pass, generates tool flavors, and creates a diff for each generated flavor.
     Each flavor and its changelog are published to ..\Releases under their release asset names,
     then copied to their old paths for the deprecation window ($script:DeprecatedPublishPaths).
     Generator stages read the shared scaffold catalogs from the Sources\Scaffolds directory.
@@ -29,8 +29,8 @@
     inspection on failure).
 
 .PARAMETER GenerateTo
-    Regenerate the three generators' artifacts into <root>\Generated\ and <root>\Archived\
-    and stop -- no combine, no flavors, no comparison. The root is winapp2ool-relative
+    Regenerate the two generators' artifacts (EntryBuilder and BrowserBuilder) into
+    <root>\Generated\ and <root>\Archived\ and stop -- no combine, no flavors, no comparison. The root is winapp2ool-relative
     (leading backslash, e.g. '\Parity\Source'), and '\' regenerates the committed trees.
     Paired with -ToolPath this is how CI runs two different winapp2ool binaries over the
     same sources and diffs the results. Only the builders' folders under the two trees
@@ -57,7 +57,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $script:Winapp2oolPath = $null
-$script:MinimumToolVersion = [version]'1.8.9821.22100'
+$script:MinimumToolVersion = [version]'1.8.9821.32740'
 
 function Write-Step {
     param([string]$Message)
@@ -332,13 +332,6 @@ function Build-Artifacts {
         '-2d', "$OutputRoot\BrowserBuilder", '-2f', 'browsers.ini', '-3d', "$ArchiveRoot\BrowserBuilder" `
         -ErrorMessage "Failed to generate browser entries" -RequiredDirs @(Join-Path $PSScriptRoot 'Sources\BrowserBuilder'))) { return $false }
 
-    Write-Step "Generating UWP entries"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-uwpbuilder', '-split', '-1d', '\Sources\UWPBuilder', `
-        '-2d', "$OutputRoot\UWPBuilder", `
-        '-3d', '\Sources\Scaffolds', '-4d', "$ArchiveRoot\UWPBuilder" `
-        -ErrorMessage "Failed to generate UWP entries" `
-        -RequiredDirs @((Join-Path $PSScriptRoot 'Sources\UWPBuilder'), (Join-Path $PSScriptRoot 'Sources\Scaffolds')))) { return $false }
-
     Write-Step "Generating base entries from EntryBuilder sources"
     if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-entrybuilder', '-split', '-1d', '\Sources\EntryBuilder', `
         '-2d', "$OutputRoot\EntryBuilder", `
@@ -393,9 +386,9 @@ function Test-ArchiveNames {
         Fails when an entry name is both live and archived.
 
     .DESCRIPTION
-        EntryBuilder and UWPBuilder each catch a live and an archived entry of one name inside
-        their own sources, but nothing else sees across builders: an archived EntryBuilder entry
-        named like a generated browser entry would otherwise ship in both files.
+        EntryBuilder catches a live and an archived entry of one name inside its own sources,
+        but nothing else sees across builders: an archived EntryBuilder entry named like a
+        generated browser entry would otherwise ship in both files.
     #>
     param([string]$Live, [string]$Archive)
 
@@ -680,7 +673,7 @@ function New-Artifacts {
     }
 
     foreach ($tree in 'Generated', 'Archived') {
-        foreach ($builder in 'BrowserBuilder', 'UWPBuilder', 'EntryBuilder') {
+        foreach ($builder in 'BrowserBuilder', 'EntryBuilder') {
             $folder = Join-Path $target "$tree\$builder"
             if (Test-Path $folder) { Remove-Item $folder -Recurse -Force }
         }

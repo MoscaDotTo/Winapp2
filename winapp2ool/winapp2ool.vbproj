@@ -131,9 +131,6 @@
     <Compile Include="modules\browserbuilder\mainmenu\browserbuildermainmenu.vb" />
     <Compile Include="modules\browserbuilder\settingshandler\browserbuildersettings.vb" />
     <Compile Include="modules\entrylab\mainmenu\entryLabMainMenu.vb" />
-    <Compile Include="modules\uwpbuilder\mainmenu\uwpbuildermainmenu.vb" />
-    <Compile Include="modules\uwpbuilder\settingshandler\uwpbuildersettings.vb" />
-    <Compile Include="modules\uwpbuilder\tool\UWPBuilder.vb" />
     <Compile Include="modules\entrybuilder\mainmenu\entryBuilderMainMenu.vb" />
     <Compile Include="modules\entrybuilder\settingshandler\entryBuilderSettings.vb" />
     <Compile Include="modules\entrybuilder\tool\EntryBuilder.vb" />

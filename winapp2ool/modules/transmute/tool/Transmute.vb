@@ -244,8 +244,7 @@ Public Module Transmute
     ''' -c              : custom.ini  <br />
     ''' -w              : winapp3.ini <br />
     ''' -a              : archived.ini <br />
-    ''' -b              : browsers.ini <br />
-    ''' -u              : uwp.ini
+    ''' -b              : browsers.ini
     ''' </remarks>
     Public Sub handleCmdLine()
 
@@ -289,7 +288,6 @@ Public Module Transmute
             .WithFileAlias("-w", TransmuteFile2, "winapp3.ini") _
             .WithFileAlias("-a", TransmuteFile2, winapp2file.ArchiveFileName) _
             .WithFileAlias("-b", TransmuteFile2, "browsers.ini") _
-            .WithFileAlias("-u", TransmuteFile2, "uwp.ini") _
         .Parse()
 
         Dim options As New TransmuteOptions With {
@@ -302,7 +300,7 @@ Public Module Transmute
 
         If TransmuteFile2.Name.Length = 0 Then
 
-            Dim noSourceMsg = "Transmute requires a source file. Provide one with -2f <name> or a preset flag (-r, -c, -w, -a, -b, -u)"
+            Dim noSourceMsg = "Transmute requires a source file. Provide one with -2f <name> or a preset flag (-r, -c, -w, -a, -b)"
             gLog(noSourceMsg)
             cwl(noSourceMsg)
             Return

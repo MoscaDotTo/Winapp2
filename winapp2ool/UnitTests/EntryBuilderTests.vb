@@ -24,8 +24,10 @@ Imports System.Text
 ''' is parsed, bound to <c> &lt;QtWebEngineCacheRoot&gt; </c> in catalog templates and <c> FileKeyBase= </c>
 ''' values, and opts the entry into the QtWebEngine family on its own. The substitution engine itself
 ''' is covered by <see cref="ScaffoldCatalogsTests"/>; these tests cover the parser and generator around it.
-''' Also covers the refusal of the retired <c> %...Root% </c> spellings, which leaves
-''' <c> %Package% </c> alone, and the <c> Archive= </c> key and its <c> archived.ini </c> output.
+''' Also covers the refusal of the retired <c> %...Root% </c> and <c> %Package% </c> spellings, the
+''' <c> Archive= </c> key and its <c> archived.ini </c> output, and Store apps: <c> Package= </c>,
+''' the <c> &lt;Package&gt; </c> variable and its detection, the Package scaffold family, and the
+''' refusal of UWPBuilder's leftover keys.
 ''' </summary>
 <TestClass()> Public Class EntryBuilderTests
 
@@ -73,6 +75,7 @@ Imports System.Text
             Dim section = winapp2ool.EntryBuilder.generateEntry(spec,
                 New Dictionary(Of String, List(Of String)),
                 qtCatalog,
+                New Dictionary(Of String, List(Of String)),
                 New Dictionary(Of String, List(Of String)),
                 New winapp2ool.EntryBuilder.EntryBuilderStats,
                 menu)
@@ -261,17 +264,38 @@ Imports System.Text
     End Sub
 
     ''' <summary>
-    ''' <c> %Package% </c> is UWPBuilder's retired token and never meant anything here, so
-    ''' EntryBuilder leaves it alone
+    ''' A key still spelled <c> %Package% </c> or <c> %Package2% </c> is dropped with a warning
+    ''' naming the new spelling, and the run fails. <c> Warning= </c> prose is never checked.
     ''' </summary>
-    <TestMethod()> Public Sub RetiredPackageToken_IsNotRefused()
+    <TestMethod()> Public Sub RetiredPackageToken_IsRefused()
 
         Dim log As List(Of String) = Nothing
         Dim exitCode As Integer
-        Dim spec = ParseLogged(Preamble & "FileKey=%Package%\LocalState|*.log" & vbCrLf, log, exitCode)
+        Dim spec = ParseLogged(TwoPackages &
+                               "FileKey=%Package%\LocalState|*.log" & vbCrLf &
+                               "ExcludeKey=FILE|%Package2%\LocalState\|settings.json" & vbCrLf &
+                               "Warning=Replaces the old %Package% spelling" & vbCrLf, log, exitCode)
+
+        Assert.AreEqual(1, exitCode)
+        Assert.AreEqual(0, spec.FileKeys.Count)
+        Assert.AreEqual(0, spec.ExcludeKeys.Count)
+        Assert.AreEqual(1, spec.Warnings.Count)
+        Assert.IsTrue(log.Any(Function(l) l.Contains("is now spelled `<Package>`; key dropped")), "Got: " & String.Join(" | ", log))
+        Assert.IsTrue(log.Any(Function(l) l.Contains("is now spelled `<Package[2]>`; key dropped")), "Got: " & String.Join(" | ", log))
+
+    End Sub
+
+    ''' <summary>
+    ''' A <c> Package= </c> value is used literally, so it isn't checked for retired tokens either
+    ''' </summary>
+    <TestMethod()> Public Sub PackageValue_IsExemptFromTheRetiredTokenCheck()
+
+        Dim log As List(Of String) = Nothing
+        Dim exitCode As Integer
+        Dim spec = ParseLogged("[Store App *]" & vbCrLf & "Package=%Package%Odd_abc123" & vbCrLf & "LangSecRef=3021" & vbCrLf, log, exitCode)
 
         Assert.AreEqual(0, exitCode)
-        CollectionAssert.AreEqual({"%Package%\LocalState|*.log"}, spec.FileKeys)
+        CollectionAssert.AreEqual({"%Package%Odd_abc123"}, spec.Packages)
 
     End Sub
 
@@ -290,6 +314,350 @@ Imports System.Text
         CollectionAssert.AreEqual(
             New List(Of String) From {"%LocalAppData%\VideoKeeper\QtWebEngine\Default\Visited Links|*"},
             fileKeys)
+
+    End Sub
+
+    ' ----- Store apps -----
+
+    ''' <summary> A Store app declaring two packages, so tests can tell the packages apart </summary>
+    Private Const TwoPackages As String = "[Store App *]" & vbCrLf &
+                                          "Package1=Hazel.One_abc123" & vbCrLf &
+                                          "Package2=Hazel.Two_abc123" & vbCrLf &
+                                          "LangSecRef=3021" & vbCrLf
+
+    ''' <summary>
+    ''' The Package family's catalog as it shipped in UWPBuilder's <c> UWP.ini </c>: one
+    ''' <c> Baseline </c> scaffold of four templates
+    ''' </summary>
+    Private Shared Function PackageCatalog() As Dictionary(Of String, List(Of String))
+
+        Return New Dictionary(Of String, List(Of String)) From {
+            {"Baseline", New List(Of String) From {"<Package>\AC|*|RECURSE",
+                                                   "<Package>\Settings|*.log*",
+                                                   "<Package>\SystemAppData\Helium|*.log*",
+                                                   "<Package>\TempState|*|REMOVESELF"}}
+        }
+
+    End Function
+
+    ''' <summary>
+    ''' Parses the first section of <paramref name="text"/> and generates its entry, with empty
+    ''' QtWebEngine and Electron catalogs. We generate even when the parser marks the entry skipped.
+    ''' </summary>
+    '''
+    ''' <param name="text">Literal source ini text for one EntryBuilder entry</param>
+    '''
+    ''' <param name="log">Set to every line parsing and generation wrote to the log</param>
+    '''
+    ''' <param name="webViewCatalog">
+    ''' The WebView scaffold catalog <br /><br />
+    ''' Optional, Default: <c> Nothing </c> <br />
+    ''' an empty catalog
+    ''' </param>
+    '''
+    ''' <param name="packageCatalog">
+    ''' The Package scaffold catalog <br /><br />
+    ''' Optional, Default: <c> Nothing </c> <br />
+    ''' an empty catalog
+    ''' </param>
+    '''
+    ''' <returns>The generated entry section</returns>
+    Private Shared Function GenerateLogged(text As String,
+                                           ByRef log As List(Of String),
+                                           Optional webViewCatalog As Dictionary(Of String, List(Of String)) = Nothing,
+                                           Optional packageCatalog As Dictionary(Of String, List(Of String)) = Nothing) As winapp2ool.iniSection
+
+        Dim menu As New winapp2ool.MenuSection
+        Using cap = winapp2ool.gLogCapture()
+
+            Dim spec = winapp2ool.EntryBuilder.parseEntrySpec(FirstSection(text), menu)
+            Dim section = winapp2ool.EntryBuilder.generateEntry(spec,
+                If(webViewCatalog, New Dictionary(Of String, List(Of String))),
+                New Dictionary(Of String, List(Of String)),
+                New Dictionary(Of String, List(Of String)),
+                If(packageCatalog, New Dictionary(Of String, List(Of String))),
+                New winapp2ool.EntryBuilder.EntryBuilderStats,
+                menu)
+            log = cap.Lines.ToList()
+            Return section
+
+        End Using
+
+    End Function
+
+    ''' <summary>Returns the values of every key of a given type in a section, in key order</summary>
+    '''
+    ''' <param name="section">The generated section to read</param>
+    '''
+    ''' <param name="keyType">The KeyType to collect, matched case-insensitively</param>
+    Private Shared Function ValuesOf(section As winapp2ool.iniSection, keyType As String) As List(Of String)
+
+        Return section.Keys.Where(Function(k) k.KeyType.Equals(keyType, StringComparison.InvariantCultureIgnoreCase)) _
+                           .Select(Function(k) k.Value).ToList()
+
+    End Function
+
+    ''' <summary>
+    ''' <c> &lt;Package&gt; </c> fans a key out once per package, in declaration order, and
+    ''' <c> &lt;Package[2]&gt; </c> picks the second package declared
+    ''' </summary>
+    <TestMethod()> Public Sub Package_FansOutAndIndexes()
+
+        Dim log As List(Of String) = Nothing
+        Dim section = GenerateLogged(TwoPackages &
+                                     "PackageScaffolds=" & vbCrLf &
+                                     "FileKey1=<Package>\LocalState|*.log" & vbCrLf &
+                                     "FileKey2=<Package[2]>\LocalCache|*.tmp" & vbCrLf, log)
+
+        CollectionAssert.AreEqual(
+            New List(Of String) From {"%LocalAppData%\Packages\Hazel.One_abc123\LocalState|*.log",
+                                      "%LocalAppData%\Packages\Hazel.Two_abc123\LocalState|*.log",
+                                      "%LocalAppData%\Packages\Hazel.Two_abc123\LocalCache|*.tmp"},
+            ValuesOf(section, "FileKey"))
+
+    End Sub
+
+    ''' <summary>
+    ''' An index past the package count drops the key with a warning
+    ''' </summary>
+    <TestMethod()> Public Sub PackageIndex_PastTheEnd_WarnsAndDrops()
+
+        Dim log As List(Of String) = Nothing
+        Dim section = GenerateLogged(TwoPackages &
+                                     "PackageScaffolds=" & vbCrLf &
+                                     "FileKey1=<Package>\LocalState|*.log" & vbCrLf &
+                                     "FileKey2=<Package[3]>\LocalState|*.log" & vbCrLf, log)
+
+        Assert.AreEqual(2, ValuesOf(section, "FileKey").Count)
+        Assert.IsTrue(log.Any(Function(l) l.Contains("<Package[3]> is out of range (2 values)")),
+                      "Expected an out-of-range warning, got: " & String.Join(" | ", log))
+
+    End Sub
+
+    ''' <summary>
+    ''' A <c> Package= </c> value holding a bracket warns and stays one package, so the indexes
+    ''' after it don't shift
+    ''' </summary>
+    <TestMethod()> Public Sub PackageWithInlineList_WarnsAndIsNotFannedOut()
+
+        Dim text = "[Store App *]" & vbCrLf &
+                   "Package1=Contoso.<a,b>_abc123" & vbCrLf &
+                   "Package2=Hazel.Two_abc123" & vbCrLf &
+                   "LangSecRef=3021" & vbCrLf &
+                   "PackageScaffolds=" & vbCrLf &
+                   "FileKey=<Package[2]>\LocalState|*.log" & vbCrLf
+
+        Dim log As List(Of String) = Nothing
+        Dim exitCode As Integer
+        Dim spec = ParseLogged(text, log, exitCode)
+
+        CollectionAssert.AreEqual(
+            New List(Of String) From {"%LocalAppData%\Packages\Contoso.<a,b>_abc123",
+                                      "%LocalAppData%\Packages\Hazel.Two_abc123"},
+            spec.Variables.Values("Package"))
+        Assert.IsTrue(log.Any(Function(l) l.Contains("Package is never variable-expanded and the value is used literally")),
+                      "Expected a Package bracket warning, got: " & String.Join(" | ", log))
+
+        Dim section = GenerateLogged(text, log)
+
+        CollectionAssert.AreEqual(
+            New List(Of String) From {"%LocalAppData%\Packages\Hazel.Two_abc123\LocalState|*.log"},
+            ValuesOf(section, "FileKey"))
+
+    End Sub
+
+    ''' <summary>
+    ''' A root declared as <c> &lt;Package&gt;\... </c> resolves in phase 2, yielding one scaffold
+    ''' FileKey per package
+    ''' </summary>
+    <TestMethod()> Public Sub PackageInRoot_YieldsScaffoldFileKeysPerPackage()
+
+        Dim catalog As New Dictionary(Of String, List(Of String)) From {
+            {"Caches", New List(Of String) From {"<WebViewRoot>\*\Cache|*|RECURSE"}}
+        }
+
+        Dim log As List(Of String) = Nothing
+        Dim section = GenerateLogged(TwoPackages &
+                                     "PackageScaffolds=" & vbCrLf &
+                                     "WebViewRoot=<Package>\LocalState\EBWebView" & vbCrLf &
+                                     "WebViewScaffolds=Caches" & vbCrLf, log, webViewCatalog:=catalog)
+
+        CollectionAssert.AreEqual(
+            New List(Of String) From {
+                "%LocalAppData%\Packages\Hazel.One_abc123\LocalState\EBWebView\*\Cache|*|RECURSE",
+                "%LocalAppData%\Packages\Hazel.Two_abc123\LocalState\EBWebView\*\Cache|*|RECURSE"},
+            ValuesOf(section, "FileKey"))
+
+    End Sub
+
+    ''' <summary>
+    ''' A variable declaration may reference <c> &lt;Package&gt; </c>, the reference doesn't count
+    ''' toward the nesting statistic, and <c> Package </c> is never reported as unreferenced
+    ''' </summary>
+    <TestMethod()> Public Sub PackageInVariable_ResolvesAndIsNeverUnreferenced()
+
+        Dim log As List(Of String) = Nothing
+        Dim exitCode As Integer
+        Dim spec = ParseLogged(TwoPackages & "PackageScaffolds=" & vbCrLf & "Cache=<Package[1]>\LocalCache" & vbCrLf & "FileKey=<Cache>|*" & vbCrLf, log, exitCode)
+
+        CollectionAssert.AreEqual(New List(Of String) From {"%LocalAppData%\Packages\Hazel.One_abc123\LocalCache"},
+                                  spec.Variables.Values("Cache"))
+        Assert.AreEqual(0, spec.NestedVariableRefs)
+
+        spec = ParseLogged(TwoPackages & "PackageScaffolds=" & vbCrLf, log, exitCode)
+        Assert.IsTrue(spec.Variables.IsDeclared("Package"))
+        Assert.AreEqual(0, spec.Variables.UnreferencedNames().Count)
+
+    End Sub
+
+    ''' <summary>
+    ''' Each package adds a <c> DetectFile </c>, ahead of the one a <c> Root </c> variable infers
+    ''' and the entry's own
+    ''' </summary>
+    <TestMethod()> Public Sub Package_AddsDetectFilesFirst()
+
+        Dim log As List(Of String) = Nothing
+        Dim section = GenerateLogged(TwoPackages &
+                                     "Root=%LocalAppData%\StoreApp" & vbCrLf &
+                                     "DetectFile=%ProgramFiles%\StoreApp" & vbCrLf &
+                                     "PackageScaffolds=" & vbCrLf &
+                                     "FileKey=<Root>|*.log" & vbCrLf, log)
+
+        CollectionAssert.AreEqual(
+            New List(Of String) From {"%LocalAppData%\Packages\Hazel.One_abc123",
+                                      "%LocalAppData%\Packages\Hazel.Two_abc123",
+                                      "%LocalAppData%\StoreApp",
+                                      "%ProgramFiles%\StoreApp"},
+            ValuesOf(section, "DetectFile"))
+        Assert.IsFalse(log.Any(Function(l) l.Contains("declares no detection")), "Got: " & String.Join(" | ", log))
+
+    End Sub
+
+    ''' <summary>
+    ''' An entry with only <c> Package= </c> and a category is built, with its package detection and
+    ''' the default <c> Baseline </c> scaffold, rather than skipped as having nothing to emit
+    ''' </summary>
+    <TestMethod()> Public Sub PackageOnlyEntry_IsBuilt()
+
+        Dim text = "[BreeZip *]" & vbCrLf & "Package=Hazel.BreeZip_abc123" & vbCrLf & "LangSecRef=3031" & vbCrLf
+
+        Dim log As List(Of String) = Nothing
+        Dim exitCode As Integer
+        Dim spec = ParseLogged(text, log, exitCode)
+
+        Assert.IsFalse(spec.ShouldSkip, "Got: " & String.Join(" | ", log))
+        Assert.AreEqual(0, exitCode)
+
+        Dim section = GenerateLogged(text, log, packageCatalog:=PackageCatalog())
+
+        CollectionAssert.AreEqual({"%LocalAppData%\Packages\Hazel.BreeZip_abc123"}, ValuesOf(section, "DetectFile"))
+        Assert.AreEqual(4, ValuesOf(section, "FileKey").Count)
+
+    End Sub
+
+    ''' <summary>
+    ''' The Package catalog's <c> Baseline </c> yields, for a two-package entry, exactly the keys
+    ''' UWPBuilder produced from <c> UWP.ini </c>'s templates, which it fanned out through the
+    ''' <c> Package </c> variable. The second half runs the same templates through that variable
+    ''' path here, as literal <c> FileKey= </c> values, and compares.
+    ''' </summary>
+    <TestMethod()> Public Sub PackageBaseline_MatchesUWPBuilderOutput()
+
+        Dim log As List(Of String) = Nothing
+        Dim fromCatalog = ValuesOf(GenerateLogged(TwoPackages, log, packageCatalog:=PackageCatalog()), "FileKey")
+
+        CollectionAssert.AreEqual(
+            New List(Of String) From {
+                "%LocalAppData%\Packages\Hazel.One_abc123\AC|*|RECURSE",
+                "%LocalAppData%\Packages\Hazel.Two_abc123\AC|*|RECURSE",
+                "%LocalAppData%\Packages\Hazel.One_abc123\Settings|*.log*",
+                "%LocalAppData%\Packages\Hazel.Two_abc123\Settings|*.log*",
+                "%LocalAppData%\Packages\Hazel.One_abc123\SystemAppData\Helium|*.log*",
+                "%LocalAppData%\Packages\Hazel.Two_abc123\SystemAppData\Helium|*.log*",
+                "%LocalAppData%\Packages\Hazel.One_abc123\TempState|*|REMOVESELF",
+                "%LocalAppData%\Packages\Hazel.Two_abc123\TempState|*|REMOVESELF"},
+            fromCatalog)
+
+        Dim templates = PackageCatalog()("Baseline")
+        Dim asKeys = String.Concat(templates.Select(Function(t, i) $"FileKey{i + 1}={t}" & vbCrLf))
+        Dim fromVariable = ValuesOf(GenerateLogged(TwoPackages & "PackageScaffolds=" & vbCrLf & asKeys, log), "FileKey")
+
+        CollectionAssert.AreEqual(fromVariable, fromCatalog)
+
+    End Sub
+
+    ''' <summary>
+    ''' An empty <c> PackageScaffolds= </c> selects no scaffolds, rather than the default set, and
+    ''' leaves the package detection in place
+    ''' </summary>
+    <TestMethod()> Public Sub EmptyPackageScaffolds_SelectsNone()
+
+        Dim log As List(Of String) = Nothing
+        Dim section = GenerateLogged(TwoPackages &
+                                     "PackageScaffolds=" & vbCrLf &
+                                     "FileKey=<Package[1]>\LocalState|*.log" & vbCrLf, log, packageCatalog:=PackageCatalog())
+
+        CollectionAssert.AreEqual(New List(Of String) From {"%LocalAppData%\Packages\Hazel.One_abc123\LocalState|*.log"},
+                                  ValuesOf(section, "FileKey"))
+        Assert.AreEqual(2, ValuesOf(section, "DetectFile").Count)
+
+    End Sub
+
+    ''' <summary>
+    ''' <c> &lt;Package&gt; </c> expands in RegKeys and ExcludeKeys like any variable
+    ''' </summary>
+    <TestMethod()> Public Sub Package_ExpandsInRegKeysAndExcludeKeys()
+
+        Dim log As List(Of String) = Nothing
+        Dim section = GenerateLogged(TwoPackages &
+                                     "PackageScaffolds=" & vbCrLf &
+                                     "FileKey=<Package>\LocalState|*.log" & vbCrLf &
+                                     "RegKey=HKCU\Software\Hazel|<Package[2]>" & vbCrLf &
+                                     "ExcludeKey=FILE|<Package>\LocalState\|settings.json" & vbCrLf, log)
+
+        CollectionAssert.AreEqual(New List(Of String) From {"HKCU\Software\Hazel|%LocalAppData%\Packages\Hazel.Two_abc123"},
+                                  ValuesOf(section, "RegKey"))
+        CollectionAssert.AreEqual(
+            New List(Of String) From {"FILE|%LocalAppData%\Packages\Hazel.One_abc123\LocalState\|settings.json",
+                                      "FILE|%LocalAppData%\Packages\Hazel.Two_abc123\LocalState\|settings.json"},
+            ValuesOf(section, "ExcludeKey"))
+
+    End Sub
+
+    ''' <summary>
+    ''' UWPBuilder's <c> SkipUWPFileKeys= </c> and its five <c> ...Path= </c> root spellings are
+    ''' dropped with a warning naming the spelling to use, with a value or without, and fail the
+    ''' run rather than becoming unused variables
+    ''' </summary>
+    <TestMethod()> Public Sub UWPBuilderKeys_AreRefused()
+
+        Dim replacements As New Dictionary(Of String, String) From {
+            {"SkipUWPFileKeys", "an empty PackageScaffolds="},
+            {"WebViewPath", "WebViewRoot="},
+            {"QtWebEnginePath", "QtWebEngineRoot="},
+            {"QtWebEngineCachePath", "QtWebEngineCacheRoot="},
+            {"ElectronPath", "ElectronRoot="},
+            {"ElectronUpdaterPath", "ElectronUpdaterRoot="}
+        }
+
+        For Each pair In replacements
+
+            For Each value In {"<Package>\LocalState", ""}
+
+                Dim log As List(Of String) = Nothing
+                Dim exitCode As Integer
+                Dim spec = ParseLogged(TwoPackages & $"{pair.Key}={value}" & vbCrLf, log, exitCode)
+
+                Assert.AreEqual(1, exitCode, $"{pair.Key}={value}")
+                Assert.IsFalse(spec.Variables.IsDeclared(pair.Key), pair.Key)
+                Assert.AreEqual(0, spec.WebViewRoots.Count + spec.QtWebEngineRoots.Count + spec.QtWebEngineCacheRoots.Count +
+                                   spec.ElectronRoots.Count + spec.ElectronUpdaterRoots.Count, pair.Key)
+                Assert.IsTrue(log.Any(Function(l) l.Contains($"{pair.Key}= in [Store App *] is UWPBuilder's spelling; key dropped. Use {pair.Value} instead")),
+                              "Got: " & String.Join(" | ", log))
+
+            Next
+
+        Next
 
     End Sub
 
@@ -329,6 +697,7 @@ Imports System.Text
                 "FileKey=%LocalAppData%\VideoKeeper|*.log" & vbCrLf), menu)
 
             Dim section = winapp2ool.EntryBuilder.generateEntry(spec, webView,
+                New Dictionary(Of String, List(Of String)),
                 New Dictionary(Of String, List(Of String)),
                 New Dictionary(Of String, List(Of String)),
                 New winapp2ool.EntryBuilder.EntryBuilderStats,
@@ -433,7 +802,7 @@ Imports System.Text
     '''
     ''' <param name="archiveText">Set to the text of <c> archived.ini </c> in the archive folder, or <c> Nothing </c></param>
     '''
-    ''' <param name="outFiles">Set to the names of every file the run wrote in the output folder</param>
+    ''' <param name="outFiles">Set to the name and text of every file the run wrote in the output folder</param>
     '''
     ''' <param name="archiveArgs">
     ''' The archive folder arguments. <c> {archive} </c> in them stands for the scratch archive
@@ -442,7 +811,7 @@ Imports System.Text
     Private Shared Function RunArchiveBuild(sources As Dictionary(Of String, String),
                                             ByRef liveText As String,
                                             ByRef archiveText As String,
-                                            ByRef outFiles As List(Of String),
+                                            ByRef outFiles As Dictionary(Of String, String),
                                             ParamArray archiveArgs As String()) As Integer
 
         Dim dir = IO.Path.Combine(IO.Path.GetTempPath(), $"winapp2ool-ebarchive-{Guid.NewGuid():N}")
@@ -472,7 +841,7 @@ Imports System.Text
             Dim archivePath = IO.Path.Combine(archiveDir, "archived.ini")
             liveText = If(IO.File.Exists(livePath), IO.File.ReadAllText(livePath), Nothing)
             archiveText = If(IO.File.Exists(archivePath), IO.File.ReadAllText(archivePath), Nothing)
-            outFiles = If(IO.Directory.Exists(outDir), IO.Directory.GetFiles(outDir).Select(Function(f) IO.Path.GetFileName(f)).ToList(), New List(Of String))
+            outFiles = If(IO.Directory.Exists(outDir), IO.Directory.GetFiles(outDir).ToDictionary(Function(f) IO.Path.GetFileName(f), Function(f) IO.File.ReadAllText(f)), New Dictionary(Of String, String))
 
             Return Environment.ExitCode
 
@@ -499,7 +868,7 @@ Imports System.Text
 
         Dim live As String = Nothing
         Dim archive As String = Nothing
-        Dim outFiles As List(Of String) = Nothing
+        Dim outFiles As Dictionary(Of String, String) = Nothing
         Dim sources As New Dictionary(Of String, String) From {{"A.ini", LiveEntry & ArchivedEntry("Retired App", "Archive=Discontinued (2012)")}}
 
         Assert.AreEqual(0, RunArchiveBuild(sources, live, archive, outFiles, "-4d", "{archive}"))
@@ -521,7 +890,7 @@ Imports System.Text
         Dim savedCwd = Environment.CurrentDirectory
         Dim live As String = Nothing
         Dim archive As String = Nothing
-        Dim outFiles As List(Of String) = Nothing
+        Dim outFiles As Dictionary(Of String, String) = Nothing
         Dim sources As New Dictionary(Of String, String) From {{"A.ini", LiveEntry & ArchivedEntry("Retired App", "Archive=Gone")}}
 
         Try
@@ -609,7 +978,7 @@ Imports System.Text
 
         Dim live As String = Nothing
         Dim archive As String = Nothing
-        Dim outFiles As List(Of String) = Nothing
+        Dim outFiles As Dictionary(Of String, String) = Nothing
         Dim sources As New Dictionary(Of String, String) From {
             {"A.ini", LiveEntry},
             {"B.ini", ArchivedEntry("Alpha App", "Archive=Gone")}
@@ -629,14 +998,14 @@ Imports System.Text
 
         Dim live As String = Nothing
         Dim archive As String = Nothing
-        Dim outFiles As List(Of String) = Nothing
+        Dim outFiles As Dictionary(Of String, String) = Nothing
         Dim sources As New Dictionary(Of String, String) From {{"A.ini", LiveEntry & ArchivedEntry("Retired App", "Archive=Gone")}}
 
         Assert.AreEqual(1, RunArchiveBuild(sources, live, archive, outFiles))
         StringAssert.Contains(live, "[Alpha App *]")
         Assert.IsFalse(live.Contains("Retired App"), live)
         Assert.IsNull(archive)
-        CollectionAssert.AreEqual({"entrybuilder.ini"}, outFiles.ToArray())
+        CollectionAssert.AreEqual({"entrybuilder.ini"}, outFiles.Keys.ToArray())
 
     End Sub
 
@@ -645,7 +1014,7 @@ Imports System.Text
 
         Dim live As String = Nothing
         Dim archive As String = Nothing
-        Dim outFiles As List(Of String) = Nothing
+        Dim outFiles As Dictionary(Of String, String) = Nothing
         Dim sources As New Dictionary(Of String, String) From {{"A.ini", LiveEntry}}
 
         Assert.AreEqual(0, RunArchiveBuild(sources, live, archive, outFiles, "-4d", "{archive}"))
@@ -654,12 +1023,50 @@ Imports System.Text
 
     End Sub
 
+    ''' <summary> A Store app with <c> Archive= </c> goes to <c> archived.ini </c>, package detection and all </summary>
+    <TestMethod()> Public Sub Archive_PackageEntryRoutesToTheArchiveFile()
+
+        Dim live As String = Nothing
+        Dim archive As String = Nothing
+        Dim outFiles As Dictionary(Of String, String) = Nothing
+        Dim sources As New Dictionary(Of String, String) From {
+            {"A.ini", LiveEntry & "[Retired Store *]" & vbCrLf & "Package=Hazel.Retired_abc" & vbCrLf & "LangSecRef=3031" & vbCrLf &
+                      "FileKey=<Package>\LocalState|*.log" & vbCrLf & "PackageScaffolds=" & vbCrLf & "Archive=Delisted" & vbCrLf}
+        }
+
+        Assert.AreEqual(0, RunArchiveBuild(sources, live, archive, outFiles, "-4d", "{archive}"))
+
+        Assert.IsFalse(live.Contains("Retired Store"), live)
+        StringAssert.Contains(archive, "[Retired Store *]" & vbCrLf & "LangSecRef=3031" & vbCrLf &
+                                       "DetectFile=%LocalAppData%\Packages\Hazel.Retired_abc" & vbCrLf &
+                                       "FileKey1=%LocalAppData%\Packages\Hazel.Retired_abc\LocalState|*.log")
+
+    End Sub
+
+    ''' <summary> With <c> -split </c>, a Store app goes to the letter file of its own name </summary>
+    <TestMethod()> Public Sub Split_BucketsPackageEntriesByName()
+
+        Dim live As String = Nothing
+        Dim archive As String = Nothing
+        Dim outFiles As Dictionary(Of String, String) = Nothing
+        Dim sources As New Dictionary(Of String, String) From {
+            {"A.ini", LiveEntry & "[Zeta Store *]" & vbCrLf & "Package=Hazel.Zeta_abc" & vbCrLf & "LangSecRef=3031" & vbCrLf &
+                      "FileKey=<Package>\LocalState|*.log" & vbCrLf & "PackageScaffolds=" & vbCrLf}
+        }
+
+        Assert.AreEqual(0, RunArchiveBuild(sources, live, archive, outFiles, "-split"))
+
+        StringAssert.Contains(outFiles("Z.ini"), "[Zeta Store *]" & vbCrLf & "LangSecRef=3031" & vbCrLf & "DetectFile=%LocalAppData%\Packages\Hazel.Zeta_abc")
+        Assert.IsFalse(outFiles("A.ini").Contains("Zeta Store"), outFiles("A.ini"))
+
+    End Sub
+
     ''' <summary> With <c> -split </c>, archived entries still go to the one unsplit <c> archived.ini </c> </summary>
     <TestMethod()> Public Sub Split_LeavesTheArchiveUnsplit()
 
         Dim live As String = Nothing
         Dim archive As String = Nothing
-        Dim outFiles As List(Of String) = Nothing
+        Dim outFiles As Dictionary(Of String, String) = Nothing
         Dim sources As New Dictionary(Of String, String) From {{"A.ini", LiveEntry & ArchivedEntry("Retired App", "Archive=Gone")}}
 
         Assert.AreEqual(0, RunArchiveBuild(sources, live, archive, outFiles, "-split", "-4d", "{archive}"))

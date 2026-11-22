@@ -23,7 +23,7 @@ winapp2ool builds these files as part of the winapp2.ini build.
 
 ### Contributions
 
-Don't open changes against the winapp2.ini files in these folders. Change the files winapp2.ini is built from instead. The base entries, which are most of winapp2.ini, are in [`Assembler/Sources/EntryBuilder`](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/EntryBuilder). Browser entries are generated from [`Assembler/Sources/BrowserBuilder`](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/BrowserBuilder), and UWP entries from [`Assembler/Sources/UWPBuilder`](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/UWPBuilder).
+Don't open changes against the winapp2.ini files in these folders. Change the files winapp2.ini is built from instead. The base entries, which are most of winapp2.ini, are in [`Assembler/Sources/EntryBuilder`](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/EntryBuilder). Microsoft Store app entries are there too. Browser entries are generated from [`Assembler/Sources/BrowserBuilder`](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/BrowserBuilder).
 
 If your change is for one flavor only, edit that flavor's Transmutation rules:
 * [BleachBit](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/Flavors/BleachBit)

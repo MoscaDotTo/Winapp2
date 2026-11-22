@@ -23,7 +23,7 @@ Option Strict On
 ''' </summary>
 <TestClass()> Public Class RetiredTokensTests
 
-    ''' <summary>The stems UWPBuilder refuses today</summary>
+    ''' <summary>The retired <c> %Package </c> stem, which EntryBuilder refuses</summary>
     Private Shared ReadOnly PackageStem As String() = {"%Package"}
 
     ''' <summary>Returns the refusal message for <paramref name="template"/> against <see cref="PackageStem"/></summary>

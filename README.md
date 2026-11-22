@@ -119,9 +119,8 @@ Each build runs four stages, driven by [`build winapp2.ps1`](Assembler/build%20w
 
 | Stage | What runs | What it does |
 | :- | :- | :- |
-| Generate | [EntryBuilder](winapp2ool/modules/entrybuilder/readme.md) | Expands the per-letter [base entry sources](Assembler/Sources/EntryBuilder) into artifacts. Sources can use an optional shorthand DSL and shared scaffold catalogs for webviews |
+| Generate | [EntryBuilder](winapp2ool/modules/entrybuilder/readme.md) | Expands the per-letter [base entry sources](Assembler/Sources/EntryBuilder) into artifacts. Sources can use an optional shorthand DSL and shared scaffold catalogs for webviews and [Microsoft Store apps](winapp2ool/modules/entrybuilder/readme.md#store-and-hybrid-apps) |
 | | [BrowserBuilder](winapp2ool/modules/browserbuilder/readme.md) | Produces one entry per browser per cleaning category, crossing [browser declarations](Assembler/Sources/BrowserBuilder) with the templates that apply to their engine |
-| | [UWPBuilder](winapp2ool/modules/uwpbuilder/readme.md) | Generates Microsoft Store entries from [package declarations](Assembler/Sources/UWPBuilder) |
 | Merge | [Combine](winapp2ool/modules/combine/readme.md) | Joins the generated artifacts into one file in strict mode, which fails the build if two artifacts use the same entry name |
 | Lint | [WinappDebug](winapp2ool/modules/winappdebug/README.md) | Checks the merged file's syntax and style, and saves its own corrections |
 | Publish | [Flavorizer](winapp2ool/modules/transmute/Flavorizer/readme.md), [WinappDebug](winapp2ool/modules/winappdebug/README.md), and [Diff](winapp2ool/modules/diff/readme.md) | Applies each flavor's ruleset to make the six other variants and lints each one, then writes a changelog against the previously published version for every output whose content changed, and publishes both to [Releases](Releases) |

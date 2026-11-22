@@ -21,9 +21,9 @@ Imports System.IO
 Imports System.Text.RegularExpressions
 
 ''' <summary>
-''' Shared, use-case-agnostic substrate for embedded-Chromium FileKey generation. Consumed
-''' by entry generators (UWPBuilder, EntryBuilder) that need a curated, consistent set of
-''' cleaning targets for an application's embedded browser-engine data folder.
+''' The scaffold substrate behind EntryBuilder's scaffold families: catalogs of curated,
+''' consistent cleaning targets for an application's embedded browser-engine data folder or its
+''' Store package folder.
 ''' <br /><br />
 '''
 ''' The module is engine-family-neutral: a family is identified by the text preceding
@@ -46,6 +46,9 @@ Imports System.Text.RegularExpressions
 ''' <c> &lt;ElectronUpdaterRoot&gt; </c> (the electron-updater download cache, whose directory name
 ''' is not derivable from the userData path). Like QtWebEngine it has two placeholders, and its
 ''' consumers bind both through <see cref="BindFamilyTemplates"/>. </item>
+''' <item><c> Package </c>: the baseline of every Store app (<c> Assembler\Sources\Scaffolds\package.ini </c>),
+''' templates use <c> &lt;Package&gt; </c>, bound to each declared package's
+''' <c> %LocalAppData%\Packages\... </c> folder.</item>
 ''' </list>
 ''' <br />
 ''' <br /><br />
@@ -66,11 +69,10 @@ Imports System.Text.RegularExpressions
 ''' their own DSL provides.
 ''' <br /><br />
 '''
-''' The placeholder is implementation-neutral by name: UWPBuilder feeds it a root already
-''' resolved against the package (<c> %LocalAppData%\Packages\...\EBWebView </c>), while
-''' EntryBuilder feeds the host's data folder under <c> %LocalAppData% </c>,
-''' <c> %ProgramData% </c>, or wherever the host stores its data. We substitute a root as
-''' plain text, so a root may still carry <c> &lt;name&gt; </c> tokens
+''' The placeholder is implementation-neutral by name: a root may name a Store package's folder
+''' (<c> WebViewRoot=&lt;Package&gt;\LocalState\EBWebView </c>), the host's data folder under
+''' <c> %LocalAppData% </c> or <c> %ProgramData% </c>, or wherever the host stores its data. We
+''' substitute a root as plain text, so a root may still carry <c> &lt;name&gt; </c> tokens
 ''' (<c> WebViewRoot=&lt;Root&gt;\EBWebView </c>). The consumer's later
 ''' <see cref="VariableExpander.Expand"/> pass fans those out along with the template's own.
 ''' The placeholders share the <c> &lt;name&gt; </c> spelling but are not variables: they are
@@ -109,16 +111,22 @@ Public Module ScaffoldCatalogs
     Public Const ElectronUpdaterRootPlaceholder As String = "<ElectronUpdaterRoot>"
 
     ''' <summary>
+    ''' The Package family's placeholder, bound to each <c> Package= </c> folder under
+    ''' <c> %LocalAppData%\Packages </c>. It shares its spelling with the <c> &lt;Package&gt; </c>
+    ''' variable an entry's own keys use.
+    ''' </summary>
+    Public Const PackagePlaceholder As String = "<Package>"
+
+    ''' <summary>
     ''' The retired <c> %...% </c> spellings of the five root placeholders, as stems for
-    ''' <see cref="RetiredTokens.FindRetiredToken"/>. Both builders refuse them in their sources.
+    ''' <see cref="RetiredTokens.FindRetiredToken"/>.
     ''' </summary>
     Public ReadOnly RetiredRootStems As String() = {"%WebViewRoot", "%QtWebEngineRoot", "%QtWebEngineCacheRoot",
                                                     "%ElectronRoot", "%ElectronUpdaterRoot"}
 
     ''' <summary>
-    ''' The stems <see cref="ParseSection"/> refuses in a catalog template: the root stems plus
-    ''' UWPBuilder's retired <c> %Package </c>. Catalogs are shared, so a <c> %Package% </c> in
-    ''' one would be wrong for both builders. UWPBuilder refuses the same list in its own sources.
+    ''' The stems refused in catalog templates (<see cref="ParseSection"/>) and in EntryBuilder's
+    ''' sources: the root stems plus the retired <c> %Package </c>, now <c> &lt;Package&gt; </c>.
     ''' </summary>
     Public ReadOnly RetiredCatalogStems As String() = {"%Package"}.Concat(RetiredRootStems).ToArray()
 
@@ -129,15 +137,14 @@ Public Module ScaffoldCatalogs
     ''' added ahead of the code that reads it.
     ''' <br /><br />
     '''
-    ''' Adding a family here is not enough to ship it: each builder must also reserve the
-    ''' family's key vocabulary (<c> {Family}Root= </c>, <c> {Family}Scaffolds= </c>,
+    ''' Adding a family here is not enough to ship it: EntryBuilder must also reserve the
+    ''' family's key vocabulary (its root key, <c> {Family}Scaffolds= </c> and
     ''' <c> Exclude{Family}Scaffolds= </c>) and bind its placeholders, and
     ''' <see cref="DefaultsForFamily"/> must return a default set for it. The
-    ''' <c> ScaffoldFamilies_KeyVocabularyPresentInBothBuilders </c> test walks this array and
-    ''' checks the reserved keys in both parsers and the default set. Nothing checks the
-    ''' placeholder bindings.
+    ''' <c> ScaffoldFamilies_KeyVocabularyReservedByEntryBuilder </c> test walks this array and
+    ''' checks the reserved keys and the default set. Nothing checks the placeholder bindings.
     ''' </summary>
-    Public ReadOnly ScaffoldFamilies As String() = {"WebView", "QtWebEngine", "Electron"}
+    Public ReadOnly ScaffoldFamilies As String() = {"WebView", "QtWebEngine", "Electron", "Package"}
 
     ''' <summary>
     ''' Default scaffold names generated when a caller requests WebView2 scaffolding without
@@ -178,6 +185,12 @@ Public Module ScaffoldCatalogs
     Public ReadOnly ElectronDefaultScaffolds As String() = {"AppLogs", "Caches", "StorageQuota", "Telemetry", "UpdaterCache"}
 
     ''' <summary>
+    ''' Default scaffold names generated for an entry that declares <c> Package= </c> without an
+    ''' explicit <c> PackageScaffolds= </c> selection: the one baseline every Store app gets
+    ''' </summary>
+    Public ReadOnly PackageDefaultScaffolds As String() = {"Baseline"}
+
+    ''' <summary>
     ''' Returns the default scaffold set for <paramref name="familyLabel"/>, or an empty set
     ''' for a family with no defaults registered. Lets a consumer drive all of
     ''' <see cref="ScaffoldFamilies"/> from one loop rather than a per-family
@@ -201,6 +214,8 @@ Public Module ScaffoldCatalogs
             Case "QTWEBENGINE" : Return QtWebEngineDefaultScaffolds
 
             Case "ELECTRON" : Return ElectronDefaultScaffolds
+
+            Case "PACKAGE" : Return PackageDefaultScaffolds
 
             Case Else : Return New String() {}
 
@@ -431,8 +446,8 @@ Public Module ScaffoldCatalogs
     ''' from the source data rather than declared by the caller, so a new catalog file needs no
     ''' new setting, CLI slot, or build-script argument. A file of
     ''' <c> [TauriScaffold: …] </c> sections registers a <c> Tauri </c> family. It warns as
-    ''' unconsumed until it's named in <see cref="ScaffoldFamilies"/>, and the parity test then
-    ''' also requires its defaults and each builder's key vocabulary.
+    ''' unconsumed until it's named in <see cref="ScaffoldFamilies"/>, and the vocabulary test
+    ''' then also requires its defaults and EntryBuilder's key vocabulary.
     ''' <br /><br />
     '''
     ''' We read only the top-level <c> *.ini </c> files, in sorted order so the merge is

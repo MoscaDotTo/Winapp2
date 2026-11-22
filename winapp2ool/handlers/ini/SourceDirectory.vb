@@ -19,8 +19,7 @@ Option Strict On
 Imports System.IO
 
 ''' <summary>
-''' Reads a folder of per-letter source files into one <c> iniFile </c>, for the generators
-''' whose sources are split that way (EntryBuilder and UWPBuilder's <c> AppInfo\ </c>)
+''' Reads EntryBuilder's folder of per-letter source files into one <c> iniFile </c>
 ''' </summary>
 Public Module SourceDirectory
 
@@ -36,10 +35,6 @@ Public Module SourceDirectory
     ''' Path to the directory containing the source files
     ''' </param>
     '''
-    ''' <param name="sectionKind">
-    ''' What the warning calls a section, such as <c> AppInfo </c>
-    ''' </param>
-    '''
     ''' <param name="menuOutput">
     ''' The <c> MenuSection </c> receiving the duplicate-section warnings
     ''' </param>
@@ -48,7 +43,7 @@ Public Module SourceDirectory
     ''' The merged <c> iniFile </c>, or an empty one if the directory does not exist
     ''' or contains no parseable sections
     ''' </returns>
-    Public Function Combine(dir As String, sectionKind As String, menuOutput As MenuSection) As iniFile
+    Public Function Combine(dir As String, menuOutput As MenuSection) As iniFile
 
         Dim combined = iniFile.Empty("", "")
 
@@ -70,7 +65,7 @@ Public Module SourceDirectory
 
                 If definedIn.ContainsKey(section.Name) Then
 
-                    Dim dupeMsg = $"Duplicate {sectionKind} section [{section.Name}] at {f.Name} line {section.StartingLineNumber} ignored; keeping the first definition, in {definedIn(section.Name)}"
+                    Dim dupeMsg = $"Duplicate EntryBuilder section [{section.Name}] at {f.Name} line {section.StartingLineNumber} ignored; keeping the first definition, in {definedIn(section.Name)}"
                     gLog(dupeMsg)
                     menuOutput.AddWarning(dupeMsg)
                     markRunFailed()

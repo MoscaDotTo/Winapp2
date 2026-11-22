@@ -96,7 +96,7 @@ if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
       echo "To retire an entry, add \`Archive=<reason>\` to it in its source."
       echo
     fi
-    echo "Entry contributions belong under \`Assembler/Sources/\` (the EntryBuilder, BrowserBuilder, UWPBuilder and Scaffolds sources, and the flavor rule sets)"
+    echo "Entry contributions belong under \`Assembler/Sources/\` (the EntryBuilder, BrowserBuilder and Scaffolds sources, and the flavor rule sets)"
     echo "or \`Winapp3/Winapp3.ini\`. If you think one of these files needs a change, open an issue instead."
   } >> "$GITHUB_STEP_SUMMARY"
 fi

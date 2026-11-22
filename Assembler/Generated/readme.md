@@ -8,9 +8,8 @@ This folder holds the generated pieces the build merges into winapp2.ini. **wina
 | :- | :- | :- |
 | `EntryBuilder\#.ini`, `EntryBuilder\A.ini` … `EntryBuilder\Z.ini` | [EntryBuilder](https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/modules/entrybuilder/readme.md) | The base entry sources in [`Assembler/Sources/EntryBuilder/`](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/EntryBuilder) |
 | `BrowserBuilder\browsers.ini` | [BrowserBuilder](https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/modules/browserbuilder/readme.md) | The browser definitions in [`Assembler/Sources/BrowserBuilder/`](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/BrowserBuilder) |
-| `UWPBuilder\#.ini`, `UWPBuilder\A.ini` … `UWPBuilder\Z.ini` | [UWPBuilder](https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/modules/uwpbuilder/readme.md) | The app definitions in [`Assembler/Sources/UWPBuilder/AppInfo/`](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/UWPBuilder/AppInfo), built on the scaffold in `Assembler/Sources/UWPBuilder/UWP.ini` |
 
-EntryBuilder and UWPBuilder each write 27 files, one per letter. `A.ini` holds every entry whose name starts with A, and `#.ini` holds the ones that start with a number or symbol, so each file lines up with the source file of the same letter. A letter with no entries still gets a file. WinappDebug normalizes the entries as they're generated, but an entry here may be incomplete on its own: these files are inputs to the final merge, not a usable winapp2.ini.
+EntryBuilder writes 27 files, one per letter. `A.ini` holds every entry whose name starts with A, and `#.ini` holds the ones that start with a number or symbol, so each file lines up with the source file of the same letter. A letter with no entries still gets a file. WinappDebug normalizes the entries as they're generated, but an entry here may be incomplete on its own: these files are inputs to the final merge, not a usable winapp2.ini.
 
 ### Why are generated files committed?
 
@@ -23,5 +22,5 @@ Edit the sources, never this folder. The [contributor guidelines](https://github
 | Entry for | Source |
 | :- | :- |
 | A standard (win32) application | [`Assembler/Sources/EntryBuilder/<letter>.ini`](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/EntryBuilder). Standard winapp2.ini syntax works there as is |
+| A Microsoft Store (UWP or MSIX) app | The same files, with a [`Package=`](https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/modules/entrybuilder/readme.md#store-and-hybrid-apps) key |
 | A web browser | [`Assembler/Sources/BrowserBuilder/`](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/BrowserBuilder) |
-| A UWP (Microsoft Store) app | [`Assembler/Sources/UWPBuilder/AppInfo/`](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/UWPBuilder/AppInfo) |

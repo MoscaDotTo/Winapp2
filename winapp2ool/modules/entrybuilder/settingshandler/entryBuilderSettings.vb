@@ -54,8 +54,8 @@ Option Strict On
 ''' Shared scaffold directory (typically <c> Assembler\Sources\Scaffolds </c>). Every
 ''' <c> *.ini </c> in it is loaded at once and each scaffold family is derived from its
 ''' section headers (<c> [WebViewScaffold: ...] </c>, <c> [QtWebEngineScaffold: ...] </c>,
-''' <c> [ElectronScaffold: ...] </c>), consumed when expanding entries that declare the
-''' matching root key. Only the <c> Dir </c> of this chooser is used; the <c> Name </c> is
+''' <c> [ElectronScaffold: ...] </c>, <c> [PackageScaffold: ...] </c>), consumed when expanding
+''' entries that declare the matching root key. Only the <c> Dir </c> of this chooser is used; the <c> Name </c> is
 ''' ignored. A missing directory warns once and the run continues with no scaffold
 ''' FileKeys. A family with no catalog in the directory yields none either, and each
 ''' scaffold an entry requests from it warns as unknown.
@@ -91,8 +91,7 @@ Public Module entryBuilderSettings
     Public Property EntryBuilderFile2 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "entrybuilder.ini", "entrybuilder.ini", mustExist:=False)
 
     ''' <summary>
-    ''' The shared scaffold directory consumed by both UWPBuilder and EntryBuilder, holding
-    ''' one catalog file per engine family. Typically <c> Assembler\Sources\Scaffolds </c>.
+    ''' The scaffold directory, whose catalogs name their family in each section header. Typically <c> Assembler\Sources\Scaffolds </c>.
     ''' Only the <c> Dir </c> property is used; <c> Name </c> is ignored.
     ''' </summary>
     Public Property EntryBuilderFile3 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "", "")

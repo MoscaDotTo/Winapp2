@@ -335,14 +335,13 @@ These are the exact messages the report prints. WinappDebug fixes a **bold** mes
 
 This section is for people who maintain the winapp2.ini build, or who want to know where WinappDebug fits in it. You don't need it to use WinappDebug.
 
-Every build of winapp2.ini runs WinappDebug nine times: three times inside the entry generators, and once as the last stage of each of six flavors.
+Every build of winapp2.ini runs WinappDebug inside each entry generator, on its output and on its `archived.ini`, and once more as the last stage of each flavor and of the archive.
 
 ## Where it runs
 
 | Stage | Invocation | Gated? |
 |:-|:-|:-|
 | BrowserBuilder output | `remotedebugGuarded` (in-process, Optimizations forced on) | Yes, by the [reconciliation guard](#the-reconciliation-guard) |
-| UWPBuilder output | `remotedebugGuarded` (in-process, Optimizations forced on) | Yes |
 | EntryBuilder output | `remotedebugGuarded` (in-process, Optimizations forced on) | Yes |
 | Base winapp2.ini | `-s -offline -debug -usedate -c -opti -1f Winapp2.ini -3f Winapp2.ini` | No |
 | CCleaner flavor | same, on `winapp2-ccleaner-flavor.ini` | No |
@@ -350,6 +349,7 @@ Every build of winapp2.ini runs WinappDebug nine times: three times inside the e
 | BleachBit flavor | same, on `winapp2-bleachbit-flavor.ini` | No |
 | Tron flavor | same, on `winapp2-tron-flavor.ini` | No |
 | System Ninja flavor | same, output renamed to `Winapp2.rules` | No |
+| Archive | `-s -offline -debug -archive -usedate -c -opti -1f archived.ini -3f archived.ini` | No |
 
 ###### Note: The CCleaner 7 flavor gets no lint pass of its own because a Transmute pass makes it from the already-linted CCleaner flavor.
 

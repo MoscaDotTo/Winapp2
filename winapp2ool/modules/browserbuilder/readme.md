@@ -226,7 +226,7 @@ The rules are the same as for templates: no malformed brackets, no empty inline 
 
 ## Variables
 
-Any key a section doesn't reserve declares a variable, named after the key without any trailing digits, whose values are its comma-separated list. `Dirs1=` and `Dirs2=` both declare `Dirs`, so the second replaces the first, with a warning. You use it as `<Name>`, and each value produces its own copy of the line. Variables work the way they do in [EntryBuilder](../entrybuilder/readme.md) and [UWPBuilder](../uwpbuilder/readme.md): names match in any case, one variable can use another, and `<Name[N]>` picks the Nth value, counting from 1.
+Any key a section doesn't reserve declares a variable, named after the key without any trailing digits, whose values are its comma-separated list. `Dirs1=` and `Dirs2=` both declare `Dirs`, so the second replaces the first, with a warning. You use it as `<Name>`, and each value produces its own copy of the line. Variables work the way they do in [EntryBuilder](../entrybuilder/readme.md): names match in any case, one variable can use another, and `<Name[N]>` picks the Nth value, counting from 1.
 
 Each section's variables are its own. A browser's variables fill only its `UserDataPath=` and `RegistryRoot=` values, and a scaffold's fill only its own templates. A scaffold can't use a browser's variable, so a mistyped token in a scaffold is still caught once, before anything is generated.
 

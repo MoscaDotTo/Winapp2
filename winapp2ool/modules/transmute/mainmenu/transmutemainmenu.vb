@@ -55,7 +55,6 @@ Public Module transmuteMainMenu
             .AddDispatchedOption("winapp3.ini", "Select 'winapp3.ini'", Sub() setSourceFileName("winapp3.ini")) _
             .AddDispatchedOption("Archived Entries", "Select 'archived.ini'", Sub() setSourceFileName(winapp2file.ArchiveFileName)) _
             .AddDispatchedOption("browsers.ini", "Select 'browsers.ini'", Sub() setSourceFileName("browsers.ini")) _
-            .AddDispatchedOption("uwp.ini", "Select 'uwp.ini'", Sub() setSourceFileName("uwp.ini")) _
             .AddBlank() _
             .AddDispatchedOption("Change base file", "Select a new base file to be modified",
                 Sub() changeFileParams(TransmuteFile1, TransmuteModuleSettingsChanged, NameOf(Transmute), NameOf(TransmuteFile1), NameOf(TransmuteModuleSettingsChanged))) _

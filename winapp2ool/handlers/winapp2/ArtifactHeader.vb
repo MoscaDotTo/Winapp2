@@ -22,7 +22,7 @@ Imports System.Text
 
 ''' <summary>
 ''' Writes the do-not-edit header that every generator puts at the top of its build artifacts
-''' (EntryBuilder's, BrowserBuilder's and UWPBuilder's output under <c> Assembler\Generated </c>),
+''' (EntryBuilder's and BrowserBuilder's output under <c> Assembler\Generated </c>),
 ''' and holds the repository URL and the repository-relative source folders those headers link.
 ''' This is the only place either is spelled. <br /><br />
 '''
@@ -52,17 +52,6 @@ Public Module ArtifactHeader
     ''' BrowserBuilder's source folder, relative to the repository root
     ''' </summary>
     Public Const BrowserBuilderSources As String = GeneratorSources & "/BrowserBuilder"
-
-    ''' <summary>
-    ''' UWPBuilder's source folder, relative to the repository root. It holds <c> UWP.ini </c>
-    ''' and the <c> AppInfo </c> folder.
-    ''' </summary>
-    Public Const UWPBuilderSources As String = GeneratorSources & "/UWPBuilder"
-
-    ''' <summary>
-    ''' UWPBuilder's per-letter AppInfo folder, relative to the repository root
-    ''' </summary>
-    Public Const UWPBuilderAppInfoSources As String = UWPBuilderSources & "/AppInfo"
 
     ''' <summary>
     ''' The format of every entry count in a header, the published winapp2.ini's included.

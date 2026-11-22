@@ -47,7 +47,6 @@ Public Class MenuDefaultsTests
         InitDefaultDiffSettings()
         initDefaultCCDBSettings()
         InitDefaultBrowserBuilderSettings()
-        InitDefaultUWPBuilderSettings()
         InitDefaultEntryBuilderSettings()
         InitDefaultCombineSettings()
         InitDefaultCC7PatcherSettings()
@@ -61,7 +60,6 @@ Public Class MenuDefaultsTests
             {"CCiniDebug", AddressOf buildCCDBMenu},
             {"Entry Lab", AddressOf buildEntryLabMenu},
             {"BrowserBuilder", AddressOf buildBrowserBuilderMenu},
-            {"UWPBuilder", AddressOf buildUWPBuilderMenu},
             {"EntryBuilder", AddressOf buildEntryBuilderMenu},
             {"Combine", AddressOf buildCombineMenu},
             {"CC7Patcher", AddressOf buildCC7PatcherMenu}

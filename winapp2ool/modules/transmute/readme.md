@@ -102,7 +102,6 @@ In the menu, you make the same choices with the mode options and file choosers b
 | winapp3.ini | Set the source file name to `winapp3.ini` | Preset |
 | Archived Entries | Set the source file name to `archived.ini` | Preset |
 | browsers.ini | Set the source file name to `browsers.ini` | Preset |
-| uwp.ini | Set the source file name to `uwp.ini` | Preset |
 | Change base file | Choose the file to modify | Default: `winapp2.ini` |
 | Change source file | Choose the file holding the changes | |
 | Change save target | Choose where the output is saved | Default: `winapp2-transmuted.ini` |
@@ -157,7 +156,6 @@ Each of these sets the source file name to a predefined file. Most of them can b
 | -w | Use "winapp3.ini"          | winapp2.ini entries that may break applications. Use at your own risk!
 | -a | Use "archived.ini"         | winapp2.ini entries removed because the applications they target are no longer available
 | -b | Use "browsers.ini"         | BrowserBuilder's default output file
-| -u | Use "uwp.ini"              | UWPBuilder's default output file
 
 ###### Note: Source files *must* be local. Transmute doesn't download anything.
 

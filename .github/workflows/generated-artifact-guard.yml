@@ -13,12 +13,14 @@
 #     regenerates Generated/ in place first, so the hand-edit is gone before anything looks.
 # This guard runs no build. It only checks that the changed paths make sense together.
 #
-# It also checks that every entry in a per-letter EntryBuilder or UWPBuilder source is in its
-# letter's file (check-source-letters.sh). The build buckets output by entry name, so
-# [Zoom *] in A.ini builds fine, lands in Z.ini, and would later trip rule 2 here.
+# It also checks that every entry in a per-letter EntryBuilder source is in its letter's file
+# (check-source-letters.sh). The build buckets output by entry name, so [Zoom *] in A.ini
+# builds fine, lands in Z.ini, and would later trip rule 2 here. The same script fails on any
+# file under Assembler/Sources/UWPBuilder/, which the UWPBuilder fold retired.
 #
 # It's read-only, posts no comments and commits nothing, and it's safe on fork PRs: read-only
-# token, no secrets, and nothing runs but `git diff --name-only`, awk and the two scripts.
+# token, no secrets, and nothing runs but `git diff --name-status`, awk, find and the two
+# scripts.
 # Those come from the PR's merge commit, so a PR can edit them, but maintainer-paths-guard.yml
 # fails any fork or non-member PR that touches .github/.
 name: generated artifact guard

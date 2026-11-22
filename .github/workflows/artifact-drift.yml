@@ -14,8 +14,8 @@
 #
 # It fires on one path only: the committed exe. That's the only build input whose change should
 # leave the output byte-identical. Everything else under Assembler\ (Sources\EntryBuilder\,
-# Sources\UWPBuilder\, Sources\BrowserBuilder\, and Sources\Scaffolds\, which both builders read
-# through -3d/-4d) is a source, and editing a source is supposed to change the output. Generated
+# Sources\BrowserBuilder\, and Sources\Scaffolds\, which EntryBuilder reads through -3d) is a
+# source, and editing a source is supposed to change the output. Generated
 # stays stale from that push until build-on-merge.yml's next run commits the regeneration, and
 # despite its name that workflow is a 06:00 cron, so the window can be up to 24 hours. When we
 # watched the source paths too, every source push and every source-only PR merge (a UI merge

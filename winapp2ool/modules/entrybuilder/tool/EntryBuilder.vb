@@ -39,7 +39,8 @@ Imports System.IO
 ''' variable for <see cref="VariableExpander"/>, and a variable named <c> Root </c> also
 ''' supplies detection (see <see cref="inferRootDetection"/>). <br /><br />
 '''
-''' Scaffold families are the first shorthand category, and there are three. An entry opts into
+''' Scaffold families are the first shorthand category, and there are four. The Package family,
+''' for Store apps, is described below. An entry opts into
 ''' a family by declaring one or more root paths for it: <c> WebViewRoot= </c> (one per WebView2 /
 ''' EBWebView data root), <c> QtWebEngineRoot= </c> (one per QtWebEngine profile directory), or
 ''' <c> ElectronRoot= </c> (one per Electron <c> userData </c> folder). The module then expands
@@ -73,12 +74,24 @@ Imports System.IO
 ''' <c> QtWebEngineRoot= </c> names.
 ''' <br /><br />
 '''
+''' A Store app declares its package folders with <c> Package= </c> (repeatable as
+''' <c> Package1= </c>, <c> Package2= </c>). Each is a folder name under
+''' <c> %LocalAppData%\Packages </c>, used literally and never expanded. Declaring one adds a
+''' <c> DetectFile=&lt;Package&gt; </c>, defines the reserved <c> &lt;Package&gt; </c> variable
+''' (<c> &lt;Package[N]&gt; </c> picks one package by declaration order) for the entry's own keys,
+''' and opts the entry into the Package scaffold family, whose default <c> Baseline </c> scaffold
+''' holds the cleaning targets every Store app gets. An entry with win32 keys beside its packages
+''' is a hybrid and needs nothing more. The old <c> %Package% </c> spelling is refused, and so are
+''' UWPBuilder's leftover <c> SkipUWPFileKeys= </c> and <c> ...Path= </c> root spellings.
+''' <br /><br />
+'''
 ''' Recognized shorthand keys (stripped from output, along with variable declarations):
 ''' <c> WebViewRoot= </c>, <c> WebViewScaffolds= </c>, <c> ExcludeWebViewScaffolds= </c>,
 ''' <c> QtWebEngineRoot= </c>, <c> QtWebEngineCacheRoot= </c>, <c> QtWebEngineScaffolds= </c>,
 ''' <c> ExcludeQtWebEngineScaffolds= </c>, <c> ElectronRoot= </c>,
 ''' <c> ElectronUpdaterRoot= </c>, <c> ElectronScaffolds= </c>,
-''' <c> ExcludeElectronScaffolds= </c>, <c> FileKeyBase= </c>, <c> RegKeyBase= </c>,
+''' <c> ExcludeElectronScaffolds= </c>, <c> Package= </c>, <c> PackageScaffolds= </c>,
+''' <c> ExcludePackageScaffolds= </c>, <c> FileKeyBase= </c>, <c> RegKeyBase= </c>,
 ''' <c> ExcludeKeyBase= </c>, <c> Skip= </c>, <c> Archive= </c>. <br /><br />
 '''
 ''' An entry with <c> Archive= </c> is built like any other and then written to
@@ -89,11 +102,11 @@ Imports System.IO
 ''' <c> Assembler\Sources\Scaffolds </c>) via <see cref="ScaffoldCatalogs.LoadCatalogDirectory"/>, which
 ''' takes each family from its section headers rather than from a configured per-family
 ''' path: <c> webview.ini </c> (<c> &lt;WebViewRoot&gt; </c> templates), <c> qtwebengine.ini </c>
-''' (<c> &lt;QtWebEngineRoot&gt; </c> / <c> &lt;QtWebEngineCacheRoot&gt; </c> templates), and
-''' <c> electron.ini </c> (<c> &lt;ElectronRoot&gt; </c> / <c> &lt;ElectronUpdaterRoot&gt; </c> templates),
-''' each substituted per declared root at generation time. UWPBuilder reads the same directory
-''' and binds the same families. See <see cref="ScaffoldCatalogs.ScaffoldFamilies"/> for the
-''' parity contract.
+''' (<c> &lt;QtWebEngineRoot&gt; </c> / <c> &lt;QtWebEngineCacheRoot&gt; </c> templates),
+''' <c> electron.ini </c> (<c> &lt;ElectronRoot&gt; </c> / <c> &lt;ElectronUpdaterRoot&gt; </c> templates)
+''' and <c> package.ini </c> (<c> &lt;Package&gt; </c> templates), each substituted per declared root
+''' or package at generation time. See <see cref="ScaffoldCatalogs.ScaffoldFamilies"/> for what a
+''' new family needs.
 ''' </summary>
 Public Module EntryBuilder
 
@@ -129,13 +142,14 @@ Public Module EntryBuilder
     ''' <br /><br />
     '''
     ''' <c> Friend </c> rather than <c> Private </c> so the
-    ''' <c> ScaffoldFamilies_KeyVocabularyPresentInBothBuilders </c> test can walk
+    ''' <c> ScaffoldFamilies_KeyVocabularyReservedByEntryBuilder </c> test can walk
     ''' <see cref="ScaffoldCatalogs.ScaffoldFamilies"/> and assert this parser reserves every
-    ''' family's key vocabulary, which guards against a family shipping to one builder only.
+    ''' family's key vocabulary.
     ''' </summary>
     Friend ReadOnly ReservedKeys As String() = {
         "SECTION", "LANGSECREF",
         "WEBVIEWROOT", "QTWEBENGINEROOT", "QTWEBENGINECACHEROOT", "ELECTRONROOT", "ELECTRONUPDATERROOT",
+        "PACKAGE",
         "DETECT", "DETECTFILE", "DETECTOS", "SPECIALDETECT",
         "FILEKEY", "FILEKEYBASE",
         "REGKEY", "REGKEYBASE",
@@ -143,21 +157,57 @@ Public Module EntryBuilder
         "WEBVIEWSCAFFOLDS", "EXCLUDEWEBVIEWSCAFFOLDS",
         "QTWEBENGINESCAFFOLDS", "EXCLUDEQTWEBENGINESCAFFOLDS",
         "ELECTRONSCAFFOLDS", "EXCLUDEELECTRONSCAFFOLDS",
-        "SKIP", "ARCHIVE", "DEFAULT", "WARNING"
+        "PACKAGESCAFFOLDS", "EXCLUDEPACKAGESCAFFOLDS",
+        "SKIP", "ARCHIVE", "DEFAULT", "WARNING",
+        "SKIPUWPFILEKEYS", "WEBVIEWPATH", "QTWEBENGINEPATH", "QTWEBENGINECACHEPATH", "ELECTRONPATH", "ELECTRONUPDATERPATH"
     }
 
     ''' <summary>
     ''' The keys that mean something with no value: <c> Skip= </c>, <c> Archive= </c>, and the
     ''' scaffold selections and exclusions, where an empty list selects or excludes nothing.
     ''' <see cref="parseEntrySpec"/> drops any other key with no value, which would otherwise
-    ''' give an empty key or path.
+    ''' give an empty key or path, except the <see cref="RetiredKeys"/>, which are refused with
+    ''' or without one.
+    ''' <br /><br />
+    '''
+    ''' <c> Friend </c> so the <c> ScaffoldFamilies_KeyVocabularyReservedByEntryBuilder </c> test
+    ''' can check that every family's selection keys are here.
     ''' </summary>
-    Private ReadOnly ValueOptionalKeys As String() = {
+    Friend ReadOnly ValueOptionalKeys As String() = {
         "SKIP", "ARCHIVE",
         "WEBVIEWSCAFFOLDS", "EXCLUDEWEBVIEWSCAFFOLDS",
         "QTWEBENGINESCAFFOLDS", "EXCLUDEQTWEBENGINESCAFFOLDS",
-        "ELECTRONSCAFFOLDS", "EXCLUDEELECTRONSCAFFOLDS"
+        "ELECTRONSCAFFOLDS", "EXCLUDEELECTRONSCAFFOLDS",
+        "PACKAGESCAFFOLDS", "EXCLUDEPACKAGESCAFFOLDS"
     }
+
+    ''' <summary>
+    ''' UWPBuilder's keys that EntryBuilder refuses, each with the spelling to use instead.
+    ''' Open vocabulary would otherwise read a leftover as an unused variable and quietly drop
+    ''' its scaffold keys.
+    ''' </summary>
+    Private ReadOnly RetiredKeys As New Dictionary(Of String, String) From {
+        {"SKIPUWPFILEKEYS", "an empty PackageScaffolds="},
+        {"WEBVIEWPATH", "WebViewRoot="},
+        {"QTWEBENGINEPATH", "QtWebEngineRoot="},
+        {"QTWEBENGINECACHEPATH", "QtWebEngineCacheRoot="},
+        {"ELECTRONPATH", "ElectronRoot="},
+        {"ELECTRONUPDATERPATH", "ElectronUpdaterRoot="}
+    }
+
+    ''' <summary>
+    ''' Returns the <c> %LocalAppData%\Packages </c> folder of the package named
+    ''' <paramref name="packageName"/>
+    ''' </summary>
+    '''
+    ''' <param name="packageName">
+    ''' A <c> Package= </c> value
+    ''' </param>
+    Private Function packageFolder(packageName As String) As String
+
+        Return $"%LocalAppData%\Packages\{packageName}"
+
+    End Function
 
     ''' <summary>
     ''' Records one scaffold-family root declaration, warning first if the value looks like the
@@ -455,6 +505,30 @@ Public Module EntryBuilder
         Public ExcludedElectronScaffolds As List(Of String)
 
         ''' <summary>
+        ''' The package folder names under <c> %LocalAppData%\Packages </c>, in declaration
+        ''' order. Every <c> Package= </c> key adds one, and the digits in a key name
+        ''' (<c> Package2= </c>) are ignored, so <c> &lt;Package[1]&gt; </c> names the first one
+        ''' declared.
+        ''' </summary>
+        Public Packages As List(Of String)
+
+        ''' <summary>
+        ''' Package scaffold names explicitly selected via <c> PackageScaffolds= </c>
+        ''' </summary>
+        Public PackageScaffoldNames As List(Of String)
+
+        ''' <summary>
+        ''' Indicates whether <c> PackageScaffolds= </c> was declared at all, separately from
+        ''' whether the resulting list is empty (mirrors <see cref="WebViewScaffoldsKeyPresent"/>)
+        ''' </summary>
+        Public PackageScaffoldsKeyPresent As Boolean
+
+        ''' <summary>
+        ''' Package scaffold names to subtract from the active selection
+        ''' </summary>
+        Public ExcludedPackageScaffolds As List(Of String)
+
+        ''' <summary>
         ''' Indicates whether the entry is omitted from generation, because it declared
         ''' <c> Skip= </c> or is structurally invalid
         ''' </summary>
@@ -525,6 +599,10 @@ Public Module EntryBuilder
             ElectronScaffoldNames = New List(Of String)
             ElectronScaffoldsKeyPresent = False
             ExcludedElectronScaffolds = New List(Of String)
+            Packages = New List(Of String)
+            PackageScaffoldNames = New List(Of String)
+            PackageScaffoldsKeyPresent = False
+            ExcludedPackageScaffolds = New List(Of String)
             ShouldSkip = False
             ShouldArchive = False
             RootDetectionInferred = False
@@ -613,6 +691,9 @@ Public Module EntryBuilder
         ''' </summary>
         Public EntriesWithElectronScaffolds As Integer
 
+        ''' <summary> Generated entries that declared at least one <c> Package= </c> </summary>
+        Public EntriesWithPackages As Integer
+
         ''' <summary> Generated entries that received an inferred <c> Root </c>-based detection </summary>
         Public InferredRootEntries As Integer
 
@@ -630,6 +711,9 @@ Public Module EntryBuilder
 
         ''' <summary> Total <c> ElectronUpdaterRoot= </c> declarations across all generated entries </summary>
         Public ElectronUpdaterRootDecls As Integer
+
+        ''' <summary> Total <c> Package= </c> declarations across all generated entries </summary>
+        Public PackageDecls As Integer
 
         ''' <summary> Total <c> FileKeyBase= </c> declarations (generative) across all generated entries </summary>
         Public FileKeyBaseDecls As Integer
@@ -672,6 +756,9 @@ Public Module EntryBuilder
 
         ''' <summary> <c> FileKey </c> keys produced by Electron scaffold catalog expansion (generated) </summary>
         Public ElectronScaffoldFileKeys As Integer
+
+        ''' <summary> <c> FileKey </c> keys produced by Package scaffold catalog expansion (generated) </summary>
+        Public PackageScaffoldFileKeys As Integer
 
         ''' <summary> <c> FileKey </c> keys produced from <c> FileKeyBase= </c> templates (generated) </summary>
         Public FileKeyBaseKeys As Integer
@@ -722,14 +809,14 @@ Public Module EntryBuilder
         Public ReadOnly TangledEntries As New List(Of TangledEntry)
 
         ''' <summary>
-        ''' Content keys the builder generated from a template: WebView and QtWebEngine scaffold
-        ''' expansion plus every <c> FileKeyBase= </c> / <c> RegKeyBase= </c> /
+        ''' Content keys the builder generated from a template: WebView, QtWebEngine and Package
+        ''' scaffold expansion plus every <c> FileKeyBase= </c> / <c> RegKeyBase= </c> /
         ''' <c> ExcludeKeyBase= </c>. Electron scaffold keys
         ''' (<see cref="ElectronScaffoldFileKeys"/>) are not included.
         ''' </summary>
         Public ReadOnly Property GeneratedContentKeys As Integer
             Get
-                Return ScaffoldFileKeys + QtScaffoldFileKeys + FileKeyBaseKeys + RegKeyBaseKeys + ExcludeKeyBaseKeys
+                Return ScaffoldFileKeys + QtScaffoldFileKeys + PackageScaffoldFileKeys + FileKeyBaseKeys + RegKeyBaseKeys + ExcludeKeyBaseKeys
             End Get
         End Property
 
@@ -806,7 +893,7 @@ Public Module EntryBuilder
         output.AddBoxWithText("Building shorthand-DSL entries")
 
         Dim sourceDir = EntryBuilderFile1.Dir
-        Dim sourceIni = SourceDirectory.Combine(sourceDir, "EntryBuilder", output)
+        Dim sourceIni = SourceDirectory.Combine(sourceDir, output)
 
         If sourceIni.Count = 0 Then
 
@@ -873,6 +960,7 @@ Public Module EntryBuilder
             Dim catalog = scaffoldSet.ForFamily("WebView")
             Dim qtCatalog = scaffoldSet.ForFamily("QtWebEngine")
             Dim electronCatalog = scaffoldSet.ForFamily("Electron")
+            Dim packageCatalog = scaffoldSet.ForFamily("Package")
 
             For Each family In ScaffoldCatalogs.ScaffoldFamilies
 
@@ -912,6 +1000,7 @@ Public Module EntryBuilder
                 stats.QtWebEngineCacheRootDecls += spec.QtWebEngineCacheRoots.Count
                 stats.ElectronRootDecls += spec.ElectronRoots.Count
                 stats.ElectronUpdaterRootDecls += spec.ElectronUpdaterRoots.Count
+                stats.PackageDecls += spec.Packages.Count
                 stats.FileKeyBaseDecls += spec.FileKeyBases.Count
                 stats.FileKeyDecls += spec.FileKeys.Count
                 stats.RegKeyBaseDecls += spec.RegKeyBases.Count
@@ -921,9 +1010,10 @@ Public Module EntryBuilder
                 If spec.WebViewRoots.Count > 0 Then stats.EntriesWithScaffolds += 1
                 If spec.QtWebEngineRoots.Count > 0 OrElse spec.QtWebEngineCacheRoots.Count > 0 Then stats.EntriesWithQtScaffolds += 1
                 If spec.ElectronRoots.Count > 0 OrElse spec.ElectronUpdaterRoots.Count > 0 Then stats.EntriesWithElectronScaffolds += 1
+                If spec.Packages.Count > 0 Then stats.EntriesWithPackages += 1
                 If spec.RootDetectionInferred Then stats.InferredRootEntries += 1
 
-                Dim entrySection = generateEntry(spec, catalog, qtCatalog, electronCatalog, stats, menuOutput)
+                Dim entrySection = generateEntry(spec, catalog, qtCatalog, electronCatalog, packageCatalog, stats, menuOutput)
 
                 If spec.ShouldArchive Then
 
@@ -1055,6 +1145,7 @@ Public Module EntryBuilder
         menuOutput.AddColoredLine(statLine("With WebView scaffolds:", stats.EntriesWithScaffolds), ConsoleColor.White)
         menuOutput.AddColoredLine(statLine("With QtWebEngine scaffolds:", stats.EntriesWithQtScaffolds), ConsoleColor.White)
         menuOutput.AddColoredLine(statLine("With Electron scaffolds:", stats.EntriesWithElectronScaffolds), ConsoleColor.White)
+        menuOutput.AddColoredLine(statLine("With packages:", stats.EntriesWithPackages), ConsoleColor.White)
         menuOutput.AddColoredLine(statLine("With inferred Root:", stats.InferredRootEntries), ConsoleColor.White)
 
         menuOutput.AddBlank()
@@ -1064,6 +1155,7 @@ Public Module EntryBuilder
         menuOutput.AddColoredLine(statLine("QtWebEngineCacheRoot:", stats.QtWebEngineCacheRootDecls), ConsoleColor.White)
         menuOutput.AddColoredLine(statLine("ElectronRoot:", stats.ElectronRootDecls), ConsoleColor.White)
         menuOutput.AddColoredLine(statLine("ElectronUpdaterRoot:", stats.ElectronUpdaterRootDecls), ConsoleColor.White)
+        menuOutput.AddColoredLine(statLine("Package:", stats.PackageDecls), ConsoleColor.White)
         menuOutput.AddColoredLine(statLine("FileKeyBase (generated):", stats.FileKeyBaseDecls), ConsoleColor.White)
         menuOutput.AddColoredLine(statLine("FileKey (pass-through):", stats.FileKeyDecls), ConsoleColor.White)
         menuOutput.AddColoredLine(statLine("RegKeyBase (generated):", stats.RegKeyBaseDecls), ConsoleColor.White)
@@ -1081,6 +1173,7 @@ Public Module EntryBuilder
         menuOutput.AddColoredLine(statLine("FileKey (WebView scaffold):", stats.ScaffoldFileKeys), ConsoleColor.White)
         menuOutput.AddColoredLine(statLine("FileKey (Qt scaffold):", stats.QtScaffoldFileKeys), ConsoleColor.White)
         menuOutput.AddColoredLine(statLine("FileKey (Electron scaffold):", stats.ElectronScaffoldFileKeys), ConsoleColor.White)
+        menuOutput.AddColoredLine(statLine("FileKey (Package scaffold):", stats.PackageScaffoldFileKeys), ConsoleColor.White)
         menuOutput.AddColoredLine(statLine("FileKey (base):", stats.FileKeyBaseKeys), ConsoleColor.White)
         menuOutput.AddColoredLine(statLine("FileKey (pass-through):", stats.FileKeyPassThroughKeys), ConsoleColor.White)
         menuOutput.AddColoredLine(statLine("RegKey (base):", stats.RegKeyBaseKeys), ConsoleColor.White)
@@ -1097,7 +1190,7 @@ Public Module EntryBuilder
         renderAbstractionPayoff(stats, menuOutput)
 
         gLog($"Stats: {stats.EntriesGenerated} entries ({stats.EntriesSkipped} skipped) -> {stats.TotalKeys} keys; " &
-             $"generated {stats.GeneratedContentKeys} [scaffold {stats.ScaffoldFileKeys}, Qt scaffold {stats.QtScaffoldFileKeys}, FileKeyBase {stats.FileKeyBaseKeys}, " &
+             $"generated {stats.GeneratedContentKeys} [scaffold {stats.ScaffoldFileKeys}, Qt scaffold {stats.QtScaffoldFileKeys}, Package scaffold {stats.PackageScaffoldFileKeys}, FileKeyBase {stats.FileKeyBaseKeys}, " &
              $"RegKeyBase {stats.RegKeyBaseKeys}, ExcludeKeyBase {stats.ExcludeKeyBaseKeys}], " &
              $"pass-through {stats.PassThroughContentKeys} [FileKey {stats.FileKeyPassThroughKeys}, " &
              $"RegKey {stats.RegKeyPassThroughKeys}, ExcludeKey {stats.ExcludeKeyPassThroughKeys}]; " &
@@ -1157,10 +1250,10 @@ Public Module EntryBuilder
 
     ''' <summary>
     ''' Checks <paramref name="value"/> for a token in
-    ''' <see cref="ScaffoldCatalogs.RetiredRootStems"/>. On a hit we warn, naming the new
-    ''' spelling, and fail the run, since generator warnings are invisible in a silent build and a
-    ''' dropped key would otherwise publish a thinner entry unnoticed. <c> %Package% </c> is
-    ''' UWPBuilder's and never meant anything here, so it isn't refused.
+    ''' <see cref="ScaffoldCatalogs.RetiredCatalogStems"/>: the retired <c> %...Root% </c> and
+    ''' <c> %Package% </c> spellings. On a hit we warn, naming the new spelling, and fail the run,
+    ''' since generator warnings are invisible in a silent build and a dropped key would otherwise
+    ''' publish a thinner entry unnoticed.
     ''' </summary>
     '''
     ''' <param name="value">
@@ -1182,7 +1275,7 @@ Public Module EntryBuilder
                                         context As String,
                                         menuOutput As MenuSection) As Boolean
 
-        Dim retiredMsg = RetiredTokens.FindRetiredToken(value, ScaffoldCatalogs.RetiredRootStems, context)
+        Dim retiredMsg = RetiredTokens.FindRetiredToken(value, ScaffoldCatalogs.RetiredCatalogStems, context)
         If retiredMsg.Length = 0 Then Return False
 
         Dim dropMsg = $"{retiredMsg}; key dropped"
@@ -1198,9 +1291,9 @@ Public Module EntryBuilder
     ''' Parses one source section into a populated <see cref="EntrySpec"/>, resolves the
     ''' nested references among its variables, and infers detection from a <c> Root </c>
     ''' variable via <see cref="inferRootDetection"/>. Sets <c> ShouldSkip </c> with a warning
-    ''' when the entry has no category, or no content (no scaffold root, <c> FileKeyBase= </c>,
-    ''' <c> FileKey= </c>, <c> RegKeyBase= </c> or <c> RegKey= </c>; exclude keys alone don't
-    ''' count), and silently for <c> Skip= </c>. A key with no value is read by its name, so a
+    ''' when the entry has no category, or no content (no <c> Package= </c>, scaffold root,
+    ''' <c> FileKeyBase= </c>, <c> FileKey= </c>, <c> RegKeyBase= </c> or <c> RegKey= </c>; exclude
+    ''' keys alone don't count), and silently for <c> Skip= </c>. A key with no value is read by its name, so a
     ''' bare <c> Skip= </c> skips and an empty <c> WebViewScaffolds= </c> selects no scaffolds;
     ''' any other key with no value is dropped with a warning. <br /><br />
     '''
@@ -1213,8 +1306,14 @@ Public Module EntryBuilder
     ''' both <c> Section= </c> and <c> LangSecRef= </c> are present, keeping
     ''' <c> LangSecRef= </c>; and warns on missing detection unless the entry is already
     ''' skipped. A repeated <c> Section= </c>, <c> LangSecRef= </c> or <c> DetectOS= </c> keeps
-    ''' its last value. A key other than <c> Warning= </c> holding a retired root token is
-    ''' dropped through <see cref="refuseRetiredToken"/>.
+    ''' its last value. A key other than <c> Warning= </c> or <c> Package= </c> holding a retired
+    ''' token is dropped through <see cref="refuseRetiredToken"/>. A key in
+    ''' <see cref="RetiredKeys"/>, with or without a value, is dropped with a warning naming its
+    ''' replacement and fails the run. <br /><br />
+    '''
+    ''' Every <c> Package= </c> value is declared as the literal <c> Package </c> variable (its
+    ''' <c> %LocalAppData%\Packages </c> folder) before the variables are resolved, and
+    ''' <c> DetectFile=&lt;Package&gt; </c> goes first among the detections.
     ''' </summary>
     '''
     ''' <param name="entrySection">
@@ -1240,7 +1339,7 @@ Public Module EntryBuilder
 
             Dim keyType = key.TypeOrName().ToUpperInvariant()
 
-            If key.Value.Length = 0 AndAlso Not ValueOptionalKeys.Contains(keyType) Then
+            If key.Value.Length = 0 AndAlso Not ValueOptionalKeys.Contains(keyType) AndAlso Not RetiredKeys.ContainsKey(keyType) Then
 
                 Dim emptyMsg = $"[{entrySection.Name}].{key.Name} has no value; key dropped"
                 gLog(emptyMsg)
@@ -1249,8 +1348,8 @@ Public Module EntryBuilder
 
             End If
 
-            ' Warning= is prose, so it can't hold a token
-            If keyType <> "WARNING" AndAlso
+            ' Package= is used literally and Warning= is prose, so neither can hold a token
+            If keyType <> "PACKAGE" AndAlso keyType <> "WARNING" AndAlso
                refuseRetiredToken(key.Value, $"[{entrySection.Name}].{key.Name}", menuOutput) Then Continue For
 
             Select Case keyType
@@ -1268,6 +1367,20 @@ Public Module EntryBuilder
                 Case "ELECTRONROOT" : addScaffoldRoot(spec.ElectronRoots, key.Value, "ElectronRoot", entrySection.Name, menuOutput)
 
                 Case "ELECTRONUPDATERROOT" : addScaffoldRoot(spec.ElectronUpdaterRoots, key.Value, "ElectronUpdaterRoot", entrySection.Name, menuOutput)
+
+                Case "PACKAGE"
+
+                    ' A fan-out here would change the package list's length and shift every
+                    ' <Package[N]> in the entry, so a bracket is kept as written
+                    If key.Value.Contains("<") OrElse key.Value.Contains(">") Then
+
+                        Dim pkgTokenMsg = $"Package= value in [{entrySection.Name}] contains '<' or '>'; Package is never variable-expanded and the value is used literally"
+                        gLog(pkgTokenMsg)
+                        menuOutput.AddWarning(pkgTokenMsg)
+
+                    End If
+
+                    spec.Packages.Add(key.Value)
 
                 Case "DETECTFILE" : spec.DetectFiles.Add(key.Value)
 
@@ -1316,6 +1429,20 @@ Public Module EntryBuilder
 
                 Case "EXCLUDEELECTRONSCAFFOLDS" : spec.ExcludedElectronScaffolds = splitCsv(key.Value)
 
+                Case "PACKAGESCAFFOLDS"
+
+                    spec.PackageScaffoldNames = splitCsv(key.Value)
+                    spec.PackageScaffoldsKeyPresent = True
+
+                Case "EXCLUDEPACKAGESCAFFOLDS" : spec.ExcludedPackageScaffolds = splitCsv(key.Value)
+
+                Case "SKIPUWPFILEKEYS", "WEBVIEWPATH", "QTWEBENGINEPATH", "QTWEBENGINECACHEPATH", "ELECTRONPATH", "ELECTRONUPDATERPATH"
+
+                    Dim retiredKeyMsg = $"{key.Name}= in [{entrySection.Name}] is UWPBuilder's spelling; key dropped. Use {RetiredKeys(keyType)} instead"
+                    gLog(retiredKeyMsg)
+                    menuOutput.AddWarning(retiredKeyMsg)
+                    markRunFailed()
+
                 Case "SKIP"
 
                     spec.ShouldSkip = True
@@ -1361,6 +1488,17 @@ Public Module EntryBuilder
         ' feeds the abstraction-payoff statistic and would read as 0 afterwards.
         spec.NestedVariableRefs = spec.Variables.NestedReferenceCount()
 
+        ' Package is declared after the count so a <Package> reference doesn't move the stats.
+        ' It's literal so ResolveAll can't fan out a <a,b> in a package name and shift every
+        ' <Package[N]> index, and marked referenced because an entry with an empty
+        ' PackageScaffolds= may never use it.
+        If spec.Packages.Count > 0 Then
+
+            spec.Variables.AddLiteral("Package", spec.Packages.Select(Function(p) packageFolder(p)))
+            spec.Variables.MarkReferenced("Package")
+
+        End If
+
         ' Resolve nested <token> references inside the variables themselves
         ' (e.g. RegRoots=HKCU\...\<HKCUVersions>) so that later template-time
         ' expansion sees fully-literal value lists.
@@ -1377,9 +1515,13 @@ Public Module EntryBuilder
         ' checks below (so a Root-only entry is not falsely reported as always-on).
         inferRootDetection(spec, menuOutput)
 
+        ' After the Root inference, so the package detection lands ahead of it
+        If spec.Packages.Count > 0 Then spec.DetectFiles.Insert(0, "<Package>")
+
         Dim bothCategories = spec.LangSecRef.Length > 0 AndAlso spec.SectionName.Length > 0
         Dim noCategory = spec.LangSecRef.Length = 0 AndAlso spec.SectionName.Length = 0
-        Dim noContent = spec.WebViewRoots.Count = 0 AndAlso spec.QtWebEngineRoots.Count = 0 AndAlso
+        Dim noContent = spec.Packages.Count = 0 AndAlso
+                        spec.WebViewRoots.Count = 0 AndAlso spec.QtWebEngineRoots.Count = 0 AndAlso
                         spec.QtWebEngineCacheRoots.Count = 0 AndAlso
                         spec.ElectronRoots.Count = 0 AndAlso spec.ElectronUpdaterRoots.Count = 0 AndAlso
                         spec.FileKeyBases.Count = 0 AndAlso spec.FileKeys.Count = 0 AndAlso
@@ -1406,7 +1548,7 @@ Public Module EntryBuilder
 
         If noContent Then
 
-            Dim noContentMsg = $"[{entrySection.Name}] declares no WebViewRoot, QtWebEngineRoot, ElectronRoot, FileKeyBase, or RegKeyBase — nothing to emit, skipping"
+            Dim noContentMsg = $"[{entrySection.Name}] declares no Package, WebViewRoot, QtWebEngineRoot, ElectronRoot, FileKeyBase, or RegKeyBase — nothing to emit, skipping"
             gLog(noContentMsg)
             menuOutput.AddWarning(noContentMsg)
             spec.ShouldSkip = True
@@ -1516,7 +1658,7 @@ Public Module EntryBuilder
     End Sub
 
     ''' <summary>
-    ''' Splits a comma-separated value into a trimmed, non-empty list of tokens, for the six
+    ''' Splits a comma-separated value into a trimmed, non-empty list of tokens, for the ten
     ''' scaffold selection keys (<c> {Family}Scaffolds= </c> and
     ''' <c> Exclude{Family}Scaffolds= </c>). Every comma splits: unlike variable declarations,
     ''' this isn't <c> &lt;&gt; </c>-aware. An empty input yields an empty list.
@@ -1646,8 +1788,8 @@ Public Module EntryBuilder
     ''' <summary>
     ''' Generates one winapp2.ini section for the given entry. Emits keys in winapp2
     ''' canonical order: category, Detect, DetectFile, DetectOS, Warning, FileKey (WebView,
-    ''' QtWebEngine and Electron scaffold expansion, then <c> FileKeyBase= </c>, then literal
-    ''' <c> FileKey= </c>), RegKey, ExcludeKey. Detect and DetectFile are numbered only when there
+    ''' QtWebEngine, Electron and Package scaffold expansion, then <c> FileKeyBase= </c>, then
+    ''' literal <c> FileKey= </c>), RegKey, ExcludeKey. Detect and DetectFile are numbered only when there
     ''' is more than one; FileKey, RegKey and ExcludeKey are always numbered from 1. Never emits
     ''' <c> Default= </c>. The section hasn't been through WinappDebug yet.
     ''' </summary>
@@ -1668,6 +1810,10 @@ Public Module EntryBuilder
     ''' The shared Electron scaffold catalog
     ''' </param>
     '''
+    ''' <param name="packageCatalog">
+    ''' The shared Package scaffold catalog
+    ''' </param>
+    '''
     ''' <param name="stats">
     ''' The run-wide statistics accumulator; each key emitted here is tallied into the
     ''' relevant category counter
@@ -1684,6 +1830,7 @@ Public Module EntryBuilder
                                     catalog As Dictionary(Of String, List(Of String)),
                                     qtCatalog As Dictionary(Of String, List(Of String)),
                                     electronCatalog As Dictionary(Of String, List(Of String)),
+                                    packageCatalog As Dictionary(Of String, List(Of String)),
                                     stats As EntryBuilderStats,
                                     menuOutput As MenuSection) As iniSection
 
@@ -1755,9 +1902,10 @@ Public Module EntryBuilder
 
         Next
 
-        ' 6. FileKeys, emitted in five provenance tiers: WebView scaffold expansion (generated),
+        ' 6. FileKeys, emitted in six provenance tiers: WebView scaffold expansion (generated),
         ' QtWebEngine scaffold expansion (generated), Electron scaffold expansion (generated),
-        ' then FileKeyBase= templates (generated), then literal FileKey= (pass-through). Each tier
+        ' Package scaffold expansion (generated), then FileKeyBase= templates (generated), then
+        ' literal FileKey= (pass-through). Each tier
         ' is phase-2 expanded against the entry's variables and counted separately. Order does not
         ' survive remotedebug's per-bucket alphabetization, so the tiers are purely for accurate
         ' provenance accounting.
@@ -1807,9 +1955,24 @@ Public Module EntryBuilder
         stats.ElectronScaffoldFileKeys += fileKeys.Count - afterQtScaffold
         Dim afterElectronScaffold = fileKeys.Count
 
+        If spec.Packages.Count > 0 Then
+
+            Dim selectedPackageScaffolds = ScaffoldCatalogs.ResolveScaffolds(spec.PackageScaffoldNames, spec.PackageScaffoldsKeyPresent,
+                                                                             spec.ExcludedPackageScaffolds, packageCatalog,
+                                                                             ScaffoldCatalogs.PackageDefaultScaffolds, "Package", spec.Name, menuOutput)
+            Dim packageBindings As New List(Of ScaffoldCatalogs.ScaffoldRootBinding) From {
+                New ScaffoldCatalogs.ScaffoldRootBinding(ScaffoldCatalogs.PackagePlaceholder, spec.Packages.Select(Function(p) packageFolder(p)).ToList())
+            }
+            fileKeys.AddRange(expandScaffoldFamily(packageBindings, selectedPackageScaffolds, spec.PackageScaffoldsKeyPresent, packageCatalog, spec, stats, menuOutput))
+
+        End If
+
+        stats.PackageScaffoldFileKeys += fileKeys.Count - afterElectronScaffold
+        Dim afterPackageScaffold = fileKeys.Count
+
         For Each fkb In spec.FileKeyBases : fileKeys.AddRange(expandFully(fkb, spec, ExpansionDomain.Filesystem, "FileKey", stats, menuOutput)) : Next
 
-        stats.FileKeyBaseKeys += fileKeys.Count - afterElectronScaffold
+        stats.FileKeyBaseKeys += fileKeys.Count - afterPackageScaffold
         Dim afterBase = fileKeys.Count
 
         For Each fk In spec.FileKeys : fileKeys.AddRange(expandFully(fk, spec, ExpansionDomain.Filesystem, "FileKey", stats, menuOutput)) : Next
@@ -2045,7 +2208,8 @@ Public Module EntryBuilder
     ''' <c> &lt;ElectronRoot&gt; </c> and <c> &lt;ElectronUpdaterRoot&gt; </c>. Matching is case-insensitive.
     ''' A template containing several placeholders multiplies across all of their root lists. A
     ''' template containing a placeholder the entry declared no root for is dropped, with no
-    ''' warning.
+    ''' warning. <c> &lt;Package&gt; </c> isn't substituted here: in an entry's own keys it stays a
+    ''' variable for the phase-2 pass, where <c> &lt;Package[N]&gt; </c> can index it.
     ''' </summary>
     '''
     ''' <param name="template">
@@ -2077,7 +2241,7 @@ Public Module EntryBuilder
     ''' <summary>
     ''' Expands one scaffold family for an entry: for each selected scaffold and each
     ''' <c> FileKeyBase= </c> template in it, substitutes every binding's placeholder with that
-    ''' binding's roots and runs phase-2 variable expansion on each result. Shared by all three
+    ''' binding's roots and runs phase-2 variable expansion on each result. Shared by all four
     ''' scaffold tiers, which differ only in their bindings and catalog.
     ''' <br /><br />
     '''
@@ -2087,8 +2251,7 @@ Public Module EntryBuilder
     ''' placeholder whose binding has no roots is <em>dropped</em> rather than emitted with the
     ''' placeholder left literal. That drop rule is what makes the Electron family's
     ''' two-placeholder catalog work: an entry declaring only <c> ElectronRoot= </c> gets
-    ''' nothing from the <c> UpdaterCache </c> scaffold. UWPBuilder drives the same helper, so
-    ''' the substitution rules are shared between the two builders.
+    ''' nothing from the <c> UpdaterCache </c> scaffold.
     ''' <br /><br />
     '''
     ''' A non-empty scaffold that produced nothing at all warns only when the entry declared its
@@ -2099,7 +2262,8 @@ Public Module EntryBuilder
     ''' </summary>
     '''
     ''' <param name="bindings">
-    ''' The family's (placeholder, roots) pairs: one for WebView, two for QtWebEngine and Electron
+    ''' The family's (placeholder, roots) pairs: one for WebView and Package, two for QtWebEngine
+    ''' and Electron
     ''' </param>
     '''
     ''' <param name="selectedScaffolds">

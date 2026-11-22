@@ -8,7 +8,7 @@ Combine finds every `.ini` file under the target directory, reads them in order,
 
 ### Why Combine?
 
-The winapp2.ini build generates its entries into separate artifact files, one per letter for the base entries plus one each for the browser and UWP generators, and Combine is the step that folds them back into one database. It reports every section name that more than one file defines, naming the file that defined it first and each file that defined it again. In strict mode those collisions fail the build, which is what the pipeline wants, since its inputs are supposed to be disjoint.
+The winapp2.ini build generates its entries into separate artifact files, one per letter for the base entries plus one for the browser generator, and Combine is the step that folds them back into one database. It reports every section name that more than one file defines, naming the file that defined it first and each file that defined it again. In strict mode those collisions fail the build, which is what the pipeline wants, since its inputs are supposed to be disjoint.
 
 Outside the build, it lets you keep a large ini collection split into files small enough to work in, and join them whenever something wants a single file.
 
@@ -120,7 +120,7 @@ Command line runs always start from Combine's default settings, whatever you've 
 
 ## File Discovery
 
-Combine searches the target directory and all of its subdirectories for files with the `.ini` extension, then sorts them alphabetically by full path. Because the whole path is compared, a file in a subdirectory can sort ahead of a file in the target directory itself (see [Example 2](EXAMPLES.md#example-2-subdirectories-and-repeated-runs)). Messages name each file by its path below the target directory (`A.ini`, `UWP\A.ini`), so two files with the same name in different folders are never confused.
+Combine searches the target directory and all of its subdirectories for files with the `.ini` extension, then sorts them alphabetically by full path. Because the whole path is compared, a file in a subdirectory can sort ahead of a file in the target directory itself (see [Example 2](EXAMPLES.md#example-2-subdirectories-and-repeated-runs)). Messages name each file by its path below the target directory (`A.ini`, `Store\A.ini`), so two files with the same name in different folders are never confused.
 
 If the output file lives inside the target directory, Combine skips it. It still counts toward `Found N files`, but it contributes nothing and isn't counted in the run statistics.
 
@@ -142,8 +142,8 @@ Whenever a section name appears in more than one input file, Combine lists it on
 
 ```
  ║ 2 section names appeared in more than one input file:                                                              ║
- ║   [Anki Media Cache *] first defined in A.ini, contributed again by Browsers\browsers.ini, UWP\uwp.ini             ║
- ║   [Audacity Temp Files *] first defined in A.ini, contributed again by UWP\uwp.ini                                 ║
+ ║   [Anki Media Cache *] first defined in A.ini, contributed again by Browsers\browsers.ini, Store\store.ini         ║
+ ║   [Audacity Temp Files *] first defined in A.ini, contributed again by Store\store.ini                             ║
 ```
 
 Names are compared ignoring case, so `[Foo *]` and `[foo *]` collide. Without strict checking this report is informational. Whether a collision is a problem depends on whether your files were meant to overlap.

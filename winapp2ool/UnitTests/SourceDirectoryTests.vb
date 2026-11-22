@@ -20,9 +20,8 @@ Option Strict On
 Imports System.Text
 
 ''' <summary>
-''' Tests for <c> SourceDirectory.Combine </c>, which merges EntryBuilder's sources and
-''' UWPBuilder's <c> AppInfo\ </c>, and for the parser's <c> iniFile.DuplicateSections </c> list it
-''' relies on
+''' Tests for <c> SourceDirectory.Combine </c>, which merges EntryBuilder's sources, and for the
+''' parser's <c> iniFile.DuplicateSections </c> list it relies on
 ''' </summary>
 <TestClass()> Public Class SourceDirectoryTests
 
@@ -75,7 +74,7 @@ Imports System.Text
             Dim log As List(Of String)
 
             Using cap = winapp2ool.gLogCapture()
-                combined = winapp2ool.SourceDirectory.Combine(dir, "AppInfo", New winapp2ool.MenuSection)
+                combined = winapp2ool.SourceDirectory.Combine(dir, New winapp2ool.MenuSection)
                 log = cap.Lines.ToList()
             End Using
 
@@ -84,7 +83,7 @@ Imports System.Text
             Assert.AreEqual(2, combined.Count)
             Assert.AreEqual("A.First", combined.GetSection("Alpha *").Keys.GetKey("Package").Value)
 
-            Dim warnings = log.Where(Function(l) l.Contains("Duplicate AppInfo section")).ToList()
+            Dim warnings = log.Where(Function(l) l.Contains("Duplicate EntryBuilder section")).ToList()
             Assert.AreEqual(2, warnings.Count, allLog)
             Assert.IsTrue(warnings.Any(Function(w) w.Contains("[alpha *] at A.ini line 3") AndAlso w.EndsWith("in A.ini", StringComparison.Ordinal)), allLog)
             Assert.IsTrue(warnings.Any(Function(w) w.Contains("[Alpha *] at B.ini line 1") AndAlso w.EndsWith("in A.ini", StringComparison.Ordinal)), allLog)
@@ -113,7 +112,7 @@ Imports System.Text
             IO.File.WriteAllText(IO.Path.Combine(dir, "B.ini"), "[Beta *]" & vbCrLf & "Package=B" & vbCrLf)
 
             Environment.ExitCode = 0
-            Dim combined = winapp2ool.SourceDirectory.Combine(dir, "EntryBuilder", New winapp2ool.MenuSection)
+            Dim combined = winapp2ool.SourceDirectory.Combine(dir, New winapp2ool.MenuSection)
 
             Assert.AreEqual(2, combined.Count)
             Assert.AreEqual(0, Environment.ExitCode)
@@ -134,7 +133,7 @@ Imports System.Text
 
         Dim dir = IO.Path.Combine(IO.Path.GetTempPath(), $"sourcedir-missing-{Guid.NewGuid():N}")
 
-        Dim combined = winapp2ool.SourceDirectory.Combine(dir, "EntryBuilder", New winapp2ool.MenuSection)
+        Dim combined = winapp2ool.SourceDirectory.Combine(dir, New winapp2ool.MenuSection)
 
         Assert.AreEqual(0, combined.Count)
 

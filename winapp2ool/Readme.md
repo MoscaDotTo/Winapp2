@@ -26,7 +26,7 @@ A lot of what people do with winapp2.ini is tedious or easy to get wrong by hand
 
 **For building winapp2.ini**
 
-* [Entry Lab](modules/entrylab/readme.md): Hub for the entry generators: [Browser Builder](modules/browserbuilder/readme.md), [UWP Builder](modules/uwpbuilder/readme.md), and [Entry Builder](modules/entrybuilder/readme.md)
+* [Entry Lab](modules/entrylab/readme.md): Hub for the entry generators: [Browser Builder](modules/browserbuilder/readme.md) and [Entry Builder](modules/entrybuilder/readme.md)
 * [Combine](modules/combine/readme.md): Merges folders (including subfolders) of ini files into a single file
 
 ---
@@ -165,7 +165,7 @@ Each linked option name goes to that module's readme.
 | [Transmute](modules/transmute/readme.md) | Add, replace, or remove entire sections or individual keys from winapp2.ini | Patches whole sections or single keys. [Flavorizer](modules/transmute/Flavorizer/readme.md), which applies patches in batches, opens from this menu |
 | [Diff](modules/diff/readme.md) | Generate a context-aware changelog between two winapp2.ini files | |
 | [CCiniDebug](modules/ccdebug/readme.md) | Remove stale winapp2.ini configurations from ccleaner.ini | For CCleaner 6 and earlier only |
-| [Entry Lab](modules/entrylab/readme.md) | Generate winapp2.ini entries from templates | Hub for [Browser Builder](modules/browserbuilder/readme.md), [UWP Builder](modules/uwpbuilder/readme.md), and [Entry Builder](modules/entrybuilder/readme.md) |
+| [Entry Lab](modules/entrylab/readme.md) | Generate winapp2.ini entries from templates | Hub for [Browser Builder](modules/browserbuilder/readme.md) and [Entry Builder](modules/entrybuilder/readme.md) |
 | [Combine](modules/combine/readme.md) | Join together a collection of ini files into one | Includes subfolders |
 | [CC7Patcher](modules/cc7patcher/readme.md) | Install winapp2.ini for CCleaner 7 | Appends winapp2.ini entries into CCleaner 7's ccleaner.ini |
 | [Downloader](modules/download/readme.md) | Download files from the Winapp2 GitHub | **Unavailable in offline mode** |
@@ -200,11 +200,10 @@ Global and flavor args can go anywhere on the command line. Of the args left aft
 | `7` or `combine` | Launches [Combine](modules/combine/readme.md) |
 | `8` or `download` | Launches [Downloader](modules/download/readme.md) |
 | `9` or `flavorize` | Launches [Flavorizer](modules/transmute/Flavorizer/readme.md) |
-| `10` or `uwpbuilder` | Launches [UWP Builder](modules/uwpbuilder/readme.md) |
 | `11` or `entrybuilder` | Launches [Entry Builder](modules/entrybuilder/readme.md) |
 | `12` or `cc7patcher` | Launches [CC7Patcher](modules/cc7patcher/readme.md) |
 
-###### Note: These numbers are not the same as the numbers on the main menu.
+###### Note: These numbers are not the same as the numbers on the main menu. `10` belonged to UWPBuilder, which is now part of [Entry Builder](modules/entrybuilder/readme.md#store-and-hybrid-apps), and is left unused so the numbers after it don't change.
 
 ### Global Args
 
@@ -444,7 +443,7 @@ This section is for people who contribute to winapp2.ini, or who are curious how
 
 Nobody assembles the published winapp2.ini by hand. Its sources live in [Assembler](../Assembler), and winapp2ool runs every stage that turns them into the published files:
 
-1. [Entry Builder](modules/entrybuilder/readme.md), [Browser Builder](modules/browserbuilder/readme.md), and [UWP Builder](modules/uwpbuilder/readme.md) expand the [base entry](../Assembler/Sources/EntryBuilder), [browser](../Assembler/Sources/BrowserBuilder), and [Microsoft Store app](../Assembler/Sources/UWPBuilder) sources into the committed [build artifacts](../Assembler/Generated)
+1. [Entry Builder](modules/entrybuilder/readme.md) and [Browser Builder](modules/browserbuilder/readme.md) expand the [base entry](../Assembler/Sources/EntryBuilder) sources, [Microsoft Store apps](modules/entrybuilder/readme.md#store-and-hybrid-apps) included, and the [browser](../Assembler/Sources/BrowserBuilder) sources into the committed [build artifacts](../Assembler/Generated)
 2. [Combine](modules/combine/readme.md) joins those artifacts into one file in strict mode
 3. [WinappDebug](modules/winappdebug/README.md) applies the style and syntax rules to the merged file and saves its corrections
 4. [Flavorizer](modules/transmute/Flavorizer/readme.md) applies each flavor's ruleset to produce the CCleaner, CCleaner 7, BleachBit, FluentCleaner, Tron, and System Ninja variants, and WinappDebug lints each one

@@ -2,22 +2,22 @@
 
 **EntryBuilder** is a winapp2ool build-chain module for winapp2.ini maintainers that generates winapp2.ini entries from a shorthand DSL. You write one ini section per application. Anything already in winapp2 syntax passes through unchanged, and a few keys that only winapp2ool understands expand into ordinary winapp2 keys at generation time. It's a preprocessor for winapp2.ini: you write the repetitive parts once and EntryBuilder writes them out. If you only use winapp2.ini with a cleaner, you don't need EntryBuilder.
 
-The winapp2.ini build uses it for every entry that isn't a browser or a UWP app. Their sources are the per-letter files in `Assembler\Sources\EntryBuilder\`, which EntryBuilder reads alongside the shared scaffold catalogs in `Assembler\Sources\Scaffolds\`. By default it writes a single `entrybuilder.ini`. With `-split` it writes the 27 per-letter files that the build commits to `Assembler\Generated\EntryBuilder\` and combines into the final winapp2.ini.
+The winapp2.ini build uses it for every entry that isn't a browser, Microsoft Store apps included. Their sources are the per-letter files in `Assembler\Sources\EntryBuilder\`, which EntryBuilder reads alongside the shared scaffold catalogs in `Assembler\Sources\Scaffolds\`. By default it writes a single `entrybuilder.ini`. With `-split` it writes the 27 per-letter files that the build commits to `Assembler\Generated\EntryBuilder\` and combines into the final winapp2.ini.
 
 ### What does EntryBuilder do?
 
 EntryBuilder reads every `*.ini` file in its source directory, combines them in memory, and turns each section into an entry. It expands the shorthand, runs the result through WinappDebug, and saves it to `entrybuilder.ini`. There are two kinds of shorthand:
 
-- Scaffold families. An entry that declares `WebViewRoot=` (an embedded WebView2 data folder), `QtWebEngineRoot=` (an embedded QtWebEngine profile) or `ElectronRoot=` (an Electron app's `userData` folder) gets a baseline set of cleaning FileKeys from a shared catalog, one set per root.
+- Scaffold families. An entry that declares `WebViewRoot=` (an embedded WebView2 data folder), `QtWebEngineRoot=` (an embedded QtWebEngine profile), `ElectronRoot=` (an Electron app's `userData` folder) or `Package=` (a Store app's package folder) gets a baseline set of cleaning FileKeys from a shared catalog, one set per root or package.
 - List variables. An entry can declare a comma-separated list (`Versions=10.0,11.0,12.0`) and use it in any key as `<Versions>`. Each key that uses it becomes one key per value, or one per combination when it uses several lists.
 
 ### Why EntryBuilder?
 
 EntryBuilder makes it possible to maintain winapp2.ini correctly at scale by providing a small shorthand DSL that lowers to formal winapp2.ini syntax.
 
-Apps that embed a browser engine leave the same Chromium residue behind whatever the app is. EntryBuilder keeps those cleaning patterns in shared catalogs, one each for WebView2, QtWebEngine and Electron, so they aren't copied into every entry.
+Apps that embed a browser engine leave the same Chromium residue behind whatever the app is, and every Store app keeps the same few folders inside its package. EntryBuilder keeps those cleaning patterns in shared catalogs, one each for WebView2, QtWebEngine, Electron and packaged apps, so they aren't copied into every entry.
 
-None of it is mandatory. A plain winapp2 entry pasted into a source file comes out unchanged, so you can add shorthand to an entry a piece at a time, or never. The `<Name>` variables and the scaffold key names work the same way in winapp2ool's other builder modules.
+None of it is mandatory. A plain winapp2 entry pasted into a source file comes out unchanged, so you can add shorthand to an entry a piece at a time, or never. The `<Name>` variables work the same way in BrowserBuilder.
 
 ---
 
@@ -53,23 +53,30 @@ None of it is mandatory. A plain winapp2 entry pasted into a source file comes o
     - [The Reserved Root Variable](#the-reserved-root-variable)
     - [Undeclared Tokens](#undeclared-tokens)
     - [Typo Backstops](#typo-backstops)
-11. [Validation and Warnings](#validation-and-warnings)
-12. [Run Output](#run-output)
-13. [Tips & Best Practices](#tips--best-practices)
-14. [Troubleshooting](#troubleshooting)
+11. [Store and hybrid apps](#store-and-hybrid-apps)
+    - [Package](#package)
+    - [The Package variable](#the-package-variable)
+    - [PackageScaffolds / ExcludePackageScaffolds](#packagescaffolds--excludepackagescaffolds)
+    - [Hybrid apps](#hybrid-apps)
+    - [UWPBuilder's leftover keys](#uwpbuilders-leftover-keys)
+    - [Real entries](#real-entries)
+12. [Validation and Warnings](#validation-and-warnings)
+13. [Run Output](#run-output)
+14. [Tips & Best Practices](#tips--best-practices)
+15. [Troubleshooting](#troubleshooting)
 
 **Examples**
 
-15. **[Examples](EXAMPLES.md)**: thirteen worked examples with captured input and output
+16. **[Examples](EXAMPLES.md)**: thirteen worked examples with captured input and output
 
 ---
 
 # Requirements
 
 - A source directory containing one or more `*.ini` files with at least one parseable section
-- The shared scaffold directory (normally `Assembler\Sources\Scaffolds`), if any entry declares a scaffold root. EntryBuilder reads every `*.ini` in it and tells the catalogs apart by their section headers, not their file names: `[WebViewScaffold: ...]` sections (in `webview.ini`) serve `WebViewRoot=`, `[QtWebEngineScaffold: ...]` sections (`qtwebengine.ini`) serve `QtWebEngineRoot=` and `QtWebEngineCacheRoot=`, and `[ElectronScaffold: ...]` sections (`electron.ini`) serve `ElectronRoot=` and `ElectronUpdaterRoot=`
+- The shared scaffold directory (normally `Assembler\Sources\Scaffolds`), if any entry declares a scaffold root or a package. EntryBuilder reads every `*.ini` in it and tells the catalogs apart by their section headers, not their file names: `[WebViewScaffold: ...]` sections (in `webview.ini`) serve `WebViewRoot=`, `[QtWebEngineScaffold: ...]` sections (`qtwebengine.ini`) serve `QtWebEngineRoot=` and `QtWebEngineCacheRoot=`, `[ElectronScaffold: ...]` sections (`electron.ini`) serve `ElectronRoot=` and `ElectronUpdaterRoot=`, and `[PackageScaffold: ...]` sections (`package.ini`) serve `Package=`
 
-If the source directory is empty, missing, or holds no parseable sections, EntryBuilder reports `No EntryBuilder source definitions found in: <directory>`, writes nothing, and fails the run (exit code 1). If the scaffold directory is missing, it warns `Scaffold directory not found: <dir>; no scaffold keys will be generated` and builds the entries without scaffold keys. A directory with no catalog for a family gives no such warning, but every entry that uses the family warns `Unknown … scaffold` for each scaffold it selects, defaults included. Neither of these fails the run, and entries that declare no root aren't affected.
+If the source directory is empty, missing, or holds no parseable sections, EntryBuilder reports `No EntryBuilder source definitions found in: <directory>`, writes nothing, and fails the run (exit code 1). If the scaffold directory is missing, it warns `Scaffold directory not found: <dir>; no scaffold keys will be generated` and builds the entries without scaffold keys. A directory with no catalog for a family gives no such warning, but every entry that uses the family warns `Unknown … scaffold` for each scaffold it selects, defaults included. Neither of these fails the run, and entries that declare no root or package aren't affected. A Store app built without `package.ini` still gets its package detection, just not the baseline FileKeys.
 
 ---
 
@@ -149,9 +156,9 @@ Every run goes through the same steps:
 1. **Combine**: EntryBuilder loads every `*.ini` in the source directory, in alphabetical order by file name, and joins them in memory. When two sections share a name, the first one wins and the run fails (see [Troubleshooting](#troubleshooting)).
 2. **Parse**: each section becomes one entry definition. Keys EntryBuilder knows, winapp2 or shorthand, are claimed by name. *Every other key* declares a list variable.
 3. **Resolve variables**: a variable whose values use other variables (`<Other>` inside a declaration) gets them filled in, so every value list is plain text. A cycle is reported and left unexpanded.
-4. **Infer detection**: an entry that declares a variable named `Root` gets a `Detect=<Root>` or `DetectFile=<Root>` (see [The Reserved Root Variable](#the-reserved-root-variable)).
+4. **Infer detection**: an entry that declares a variable named `Root` gets a `Detect=<Root>` or `DetectFile=<Root>` (see [The Reserved Root Variable](#the-reserved-root-variable)), and an entry that declares `Package=` gets a `DetectFile` for each package, ahead of any other (see [Store and hybrid apps](#store-and-hybrid-apps)).
 5. **Validate**: an entry that can't be built is skipped with a warning, and a questionable one is built with a warning (see [Validation and Warnings](#validation-and-warnings)).
-6. **Generate**: EntryBuilder writes each entry's keys in winapp2 order. Each content key goes through scaffold expansion (catalog templates copied in for each selected scaffold and declared root), then root substitution (`<WebViewRoot>`, `<QtWebEngineRoot>`, `<QtWebEngineCacheRoot>`, `<ElectronRoot>` and `<ElectronUpdaterRoot>`, in any case, replaced with each declared root), then token expansion (`<Name>` fan-out). Numbered key families are renumbered from 1.
+6. **Generate**: EntryBuilder writes each entry's keys in winapp2 order. Each content key goes through scaffold expansion (catalog templates copied in for each selected scaffold and each declared root or package), then root substitution (`<WebViewRoot>`, `<QtWebEngineRoot>`, `<QtWebEngineCacheRoot>`, `<ElectronRoot>` and `<ElectronUpdaterRoot>`, in any case, replaced with each declared root), then token expansion (`<Name>` fan-out). Numbered key families are renumbered from 1.
 7. **Normalize**: WinappDebug runs over the whole file with every repair and optimization on.
 8. **Save**: EntryBuilder writes the output with a comment header (see [Run Output](#run-output)).
 
@@ -228,7 +235,7 @@ The `Base=` and plain form of each content key give the same output. The only di
 
 # Shorthand Keys
 
-Only winapp2ool understands these keys. EntryBuilder uses them up during generation, and they never reach the output.
+Only winapp2ool understands these keys. EntryBuilder uses them up during generation, and they never reach the output. `Package=` and its selectors have a section of their own, [Store and hybrid apps](#store-and-hybrid-apps).
 
 ## WebViewRoot
 
@@ -248,7 +255,7 @@ Older versions spelled the root placeholders `%WebViewRoot%`, `%QtWebEngineRoot%
 `%ElectronRoot` in [Test App *].FileKey looks like the retired `%ElectronRoot%` token, which is now spelled `<ElectronRoot>`; key dropped
 ```
 
-`%...%` is winapp2.ini's environment variable syntax, so a stale token would otherwise reach the output looking like a real path. EntryBuilder checks every key except `Warning=`. UWPBuilder's retired `%Package%` means nothing here and passes through. The shared catalogs in `Assembler\Sources\Scaffolds` are checked as they load, and a catalog template with a retired token is dropped and fails the run the same way.
+`%...%` is winapp2.ini's environment variable syntax, so a stale token would otherwise reach the output looking like a real path. EntryBuilder checks every key except `Warning=` and `Package=`, and refuses the retired `%Package%` / `%Package1%` spelling of [`<Package>`](#the-package-variable) the same way. The shared catalogs in `Assembler\Sources\Scaffolds` are checked as they load, and a catalog template with a retired token is dropped and fails the run the same way.
 
 ## WebViewScaffolds / ExcludeWebViewScaffolds
 
@@ -509,6 +516,183 @@ A variable named after a reserved key also warns (`Variable declaration 'X=' in 
 
 ---
 
+# Store and hybrid apps
+
+A Microsoft Store app (UWP or MSIX) keeps its data under `%LocalAppData%\Packages\PACKAGE_FOLDER`, and part of that folder looks the same from app to app. A Store app's entry is an ordinary EntryBuilder entry that names its package folder with `Package=`. That one key does three things:
+
+- It adds a `DetectFile=%LocalAppData%\Packages\PACKAGE_FOLDER` for each package, ahead of any other detection
+- It defines the `<Package>` variable for the entry's own keys
+- It opts the entry into the Package scaffold family, whose default `Baseline` scaffold holds the folders every Store app gets cleaned
+
+So a package and a category make a complete entry:
+
+```ini
+[BreeZip *]
+Package=3138AweZip.AweZip_ffd303wmbhcjt
+LangSecRef=3021
+```
+
+[Real entries](#real-entries) shows what EntryBuilder makes of it.
+
+## Package
+
+The value is the package's folder name under `%LocalAppData%\Packages`, used exactly as written. An app with more than one package repeats the key as `Package1=`, `Package2=` and so on. EntryBuilder ignores the digits and keeps the packages in the order they're declared.
+
+A package name is never variable-expanded, because a fan-out would change how many packages there are and shift what every `<Package[N]>` in the entry points at. A value holding `<` or `>` warns (`Package= value in [Entry] contains '<' or '>'; Package is never variable-expanded and the value is used literally`) and is used as written.
+
+`Package=` counts as content, so an entry with only packages and a category is built instead of skipped for having nothing to emit. The package detection comes from `Package=` itself, not from the scaffold catalog, so `PackageScaffolds=` never removes it, and an entry with a package never gets the always-on warning.
+
+## The Package variable
+
+`<Package>` has one value per package, `%LocalAppData%\Packages\PACKAGE_FOLDER`. It works in any key that takes [token expansion](#list-variables-and-token-expansion), including root keys (`WebViewRoot=<Package>\LocalState\EBWebView`) and your own variable declarations.
+
+- `<Package>` expands once per package, in declaration order
+- `<Package[N]>` picks one package by position, counting from 1, and doesn't fan out. An `N` of 0 or past the last package drops the key with a warning, like any other [indexed reference](#indexed-references)
+
+`<Package>` and `<Package[2]>` in one key are two separate variables, so they multiply. So do `<Package>` and a variable declared from it (`Cache=<Package>\LocalCache`): a key using both pairs each package with every package's cache, mismatched pairs included. Use one or the other in a key.
+
+The package detection is already there, so an entry never needs its own `DetectFile=<Package>`.
+
+## PackageScaffolds / ExcludePackageScaffolds
+
+The Package family's catalog is `package.ini` in the shared scaffold directory. It has one scaffold, `Baseline`, which is on by default:
+
+```ini
+[PackageScaffold: Baseline]
+FileKeyBase=<Package>\AC|*|RECURSE
+FileKeyBase=<Package>\Settings|*.log*
+FileKeyBase=<Package>\SystemAppData\Helium|*.log*
+FileKeyBase=<Package>\TempState|*|REMOVESELF
+```
+
+Each template is written out once per package, with `<Package>` replaced by that package's folder. `PackageScaffolds=` and `ExcludePackageScaffolds=` select from the catalog the same way the [WebView selectors](#webviewscaffolds--excludewebviewscaffolds) do: with no key you get `Baseline`, `All` and a named list work as they do there, and an empty `PackageScaffolds=` selects nothing.
+
+The empty form is for an entry that shares its packages with another entry. `[Spotify - Downloaded Songs *]` declares the same package as `[Spotify *]`, which already gets the baseline, so it declares an empty `PackageScaffolds=` and the two entries don't clean the same folders twice. It keeps the package detection and its own `<Package>` keys.
+
+## Hybrid apps
+
+An app that ships both a Store package and a win32 install keeps both in one entry, and that needs nothing new. Write the win32 keys beside `Package=` as you would in any entry. Other scaffold families mix in too, and their roots can sit inside the package:
+
+```ini
+[Be My Eyes *]
+Package=BeMyEyes.BeMyEyes_7yeb8xxw19svt
+WebViewRoot=<Package>\LocalCache\Local\Be My Eyes\EBWebView
+WebViewScaffolds=All
+ExcludeWebViewScaffolds=WebStorage,LoginData
+LangSecRef=3021
+FileKeyBase=<Package>\LocalCache\Local\BeMyEyes\Be My Eyes\logs|*
+```
+
+The project's sources use `FileKeyBase=` for `<Package>` paths and `FileKey=` for win32 paths. The two do the same thing, but the split keeps a hybrid readable.
+
+## UWPBuilder's leftover keys
+
+Store apps used to have a builder of their own, UWPBuilder, which winapp2ool no longer has. A few of its keys mean nothing here. Since any key EntryBuilder doesn't know declares a variable, a leftover would otherwise become an unused variable and its scaffold keys would quietly go missing, so EntryBuilder refuses them instead: it drops the key, warns, and fails the run with exit code 1.
+
+| Old key | Use instead |
+|:-|:-|
+| `SkipUWPFileKeys=` | An empty `PackageScaffolds=` |
+| `WebViewPath=` | `WebViewRoot=` |
+| `QtWebEnginePath=` | `QtWebEngineRoot=` |
+| `QtWebEngineCachePath=` | `QtWebEngineCacheRoot=` |
+| `ElectronPath=` | `ElectronRoot=` |
+| `ElectronUpdaterPath=` | `ElectronUpdaterRoot=` |
+
+The warning names the replacement:
+
+```
+SkipUWPFileKeys= in [Entry] is UWPBuilder's spelling; key dropped. Use an empty PackageScaffolds= instead
+```
+
+The retired `%Package%` spelling is refused too (see [The retired `%WebViewRoot%` spelling](#the-retired-webviewroot-spelling)).
+
+## Real entries
+
+These are entries from the project's sources, with the output EntryBuilder wrote for them in `Assembler\Generated\EntryBuilder\` (the file header is left out).
+
+###### `[BreeZip *]`, the minimal entry (`Sources\EntryBuilder\B.ini`)
+
+```ini
+[BreeZip *]
+Package=3138AweZip.AweZip_ffd303wmbhcjt
+LangSecRef=3021
+```
+
+###### Output (`Generated\EntryBuilder\B.ini`)
+
+```ini
+[BreeZip *]
+LangSecRef=3021
+DetectFile=%LocalAppData%\Packages\3138AweZip.AweZip_ffd303wmbhcjt
+FileKey1=%LocalAppData%\Packages\3138AweZip.AweZip_ffd303wmbhcjt\AC|*|RECURSE
+FileKey2=%LocalAppData%\Packages\3138AweZip.AweZip_ffd303wmbhcjt\Settings|*.log*
+FileKey3=%LocalAppData%\Packages\3138AweZip.AweZip_ffd303wmbhcjt\SystemAppData\Helium|*.log*
+FileKey4=%LocalAppData%\Packages\3138AweZip.AweZip_ffd303wmbhcjt\TempState|*|REMOVESELF
+```
+
+The detection comes from `Package=` and the four FileKeys from the `Baseline` scaffold.
+
+###### `[Samsung Bixby *]`, two packages, `<Package[N]>` and a win32 key (`Sources\EntryBuilder\S.ini`)
+
+```ini
+[Samsung Bixby *]
+Package1=SAMSUNGELECTRONICSCO.LTD.Bixby_3c1yjt4zspk6g
+Package2=SAMSUNGELECTRONICSCO.LTD.SamsungIntelligenceVoiceS_3c1yjt4zspk6g
+LangSecRef=3021
+FileKeyBase=<Package[1]>\LocalState\Samsung\Bixby\Logs|*.log
+FileKeyBase=<Package[1]>\LocalState\Microsoft\AppCenter\Errors|*
+FileKey=%ProgramData%\Samsung\Intelligence Voice Service\Logs|*
+```
+
+###### Output (`Generated\EntryBuilder\S.ini`)
+
+```ini
+[Samsung Bixby *]
+LangSecRef=3021
+DetectFile1=%LocalAppData%\Packages\SAMSUNGELECTRONICSCO.LTD.Bixby_3c1yjt4zspk6g
+DetectFile2=%LocalAppData%\Packages\SAMSUNGELECTRONICSCO.LTD.SamsungIntelligenceVoiceS_3c1yjt4zspk6g
+FileKey1=%LocalAppData%\Packages\SAMSUNGELECTRONICSCO.LTD.Bixby_3c1yjt4zspk6g\AC|*|RECURSE
+FileKey2=%LocalAppData%\Packages\SAMSUNGELECTRONICSCO.LTD.Bixby_3c1yjt4zspk6g\LocalState\Microsoft\AppCenter\Errors|*
+FileKey3=%LocalAppData%\Packages\SAMSUNGELECTRONICSCO.LTD.Bixby_3c1yjt4zspk6g\LocalState\Samsung\Bixby\Logs|*.log
+FileKey4=%LocalAppData%\Packages\SAMSUNGELECTRONICSCO.LTD.Bixby_3c1yjt4zspk6g\Settings|*.log*
+FileKey5=%LocalAppData%\Packages\SAMSUNGELECTRONICSCO.LTD.Bixby_3c1yjt4zspk6g\SystemAppData\Helium|*.log*
+FileKey6=%LocalAppData%\Packages\SAMSUNGELECTRONICSCO.LTD.Bixby_3c1yjt4zspk6g\TempState|*|REMOVESELF
+FileKey7=%LocalAppData%\Packages\SAMSUNGELECTRONICSCO.LTD.SamsungIntelligenceVoiceS_3c1yjt4zspk6g\AC|*|RECURSE
+FileKey8=%LocalAppData%\Packages\SAMSUNGELECTRONICSCO.LTD.SamsungIntelligenceVoiceS_3c1yjt4zspk6g\Settings|*.log*
+FileKey9=%LocalAppData%\Packages\SAMSUNGELECTRONICSCO.LTD.SamsungIntelligenceVoiceS_3c1yjt4zspk6g\SystemAppData\Helium|*.log*
+FileKey10=%LocalAppData%\Packages\SAMSUNGELECTRONICSCO.LTD.SamsungIntelligenceVoiceS_3c1yjt4zspk6g\TempState|*|REMOVESELF
+FileKey11=%ProgramData%\Samsung\Intelligence Voice Service\Logs|*
+```
+
+Each package gets its own detection and its own copy of the baseline. The two `<Package[1]>` keys land in the first package only, and the win32 `FileKey` passes through. WinappDebug sorts the FileKeys by value, so the app's own keys end up among the baseline ones.
+
+###### `[Spotify - Downloaded Songs *]`, a package shared with another entry (`Sources\EntryBuilder\S.ini`)
+
+```ini
+[Spotify - Downloaded Songs *]
+Package=SpotifyAB.SpotifyMusic_zpdnekdrzrea0
+PackageScaffolds=
+LangSecRef=3023
+DetectFile=%AppData%\Spotify
+FileKeyBase=<Package>\LocalState\Spotify\Storage|*|REMOVESELF
+FileKey=%LocalAppData%\Spotify\Storage|*|REMOVESELF
+```
+
+###### Output (`Generated\EntryBuilder\S.ini`)
+
+```ini
+[Spotify - Downloaded Songs *]
+LangSecRef=3023
+DetectFile1=%AppData%\Spotify
+DetectFile2=%LocalAppData%\Packages\SpotifyAB.SpotifyMusic_zpdnekdrzrea0
+FileKey1=%LocalAppData%\Packages\SpotifyAB.SpotifyMusic_zpdnekdrzrea0\LocalState\Spotify\Storage|*|REMOVESELF
+FileKey2=%LocalAppData%\Spotify\Storage|*|REMOVESELF
+```
+
+The empty `PackageScaffolds=` leaves the baseline to `[Spotify *]`. The package detection is still there, and WinappDebug's sort puts it after the hand-written `DetectFile`.
+
+---
+
 # Validation and Warnings
 
 Warnings show in the menu output after a run and go to the winapp2ool log. Advisories, marked below, go to the log only. In the messages, `[Entry]` stands for the entry name and `X` / `N` for the value.
@@ -518,7 +702,7 @@ Warnings show in the menu output after a run and go to the winapp2ool log. Advis
 | Two sections share a name | First definition kept, run fails (exit code 1) | `Duplicate EntryBuilder section [<name>] at <file> line <n> ignored; keeping the first definition, in <file>` |
 | Both `Section` and `LangSecRef` declared | `LangSecRef` wins, `Section` dropped | `Both Section and LangSecRef present in [Entry], using LangSecRef` |
 | Neither `Section` nor `LangSecRef` declared | Entry **skipped** | `No Section or LangSecRef in [Entry], skipping` |
-| No root keys and no FileKey/RegKey content in any form | Entry **skipped** | `[Entry] declares no WebViewRoot, QtWebEngineRoot, ElectronRoot, FileKeyBase, or RegKeyBase — nothing to emit, skipping` |
+| No package, no root keys and no FileKey/RegKey content in any form | Entry **skipped** | `[Entry] declares no Package, WebViewRoot, QtWebEngineRoot, ElectronRoot, FileKeyBase, or RegKeyBase — nothing to emit, skipping` |
 | No detection (after `Root` inference) | Entry emitted, always-on | `[Entry] declares no detection (Detect / DetectFile / DetectOS); generated entry will be always-on` |
 | A key other than `Skip=`, `Archive=` or a scaffold list has no value | Key dropped | `[Entry].FileKey has no value; key dropped` |
 | `Archive=False` | Entry **not built**, run fails (exit code 1) | `[Entry] declares Archive=False; delete the Archive line to keep the entry live. The entry isn't built` |
@@ -526,7 +710,9 @@ Warnings show in the menu output after a run and go to the winapp2ool log. Advis
 | Archived entries and no archive folder | Archived entries left out of both outputs, run fails (exit code 1) | `N archived entries left out of the output: no archive folder was given (-4d, or -3d for BrowserBuilder)` |
 | `Default=` declared | Key dropped | `Default= declared in [Entry]; EntryBuilder never emits Default, ignoring` |
 | `SpecialDetect=` declared | Key dropped | `SpecialDetect is deprecated; key dropped from [Entry]. Replace with Detect or DetectFile` |
-| A key uses a retired `%...Root%` spelling | Key dropped, run fails (exit code 1) | `` `%X%` in [Entry].FileKeyBase is now spelled `<X>`; key dropped `` |
+| A key uses a retired `%...Root%` or `%Package%` spelling | Key dropped, run fails (exit code 1) | `` `%X%` in [Entry].FileKeyBase is now spelled `<X>`; key dropped `` |
+| A key UWPBuilder used (`SkipUWPFileKeys=`, `WebViewPath=` and the other `...Path=` roots) | Key dropped, run fails (exit code 1) | `X= in [Entry] is UWPBuilder's spelling; key dropped. Use Y instead` |
+| A `Package=` value holds `<` or `>` | Value used as written | `Package= value in [Entry] contains '<' or '>'; Package is never variable-expanded and the value is used literally` |
 | `All` mixed with non-legacy scaffold names | Extras ignored | `WebViewScaffolds=All in [Entry] with redundant additional names (X, Y); ignoring` |
 | Explicit scaffold list mixed with exclusions | Exclusions applied | `Both WebViewScaffolds and ExcludeWebViewScaffolds set in [Entry]; applying exclusions to explicit list` |
 | Unknown scaffold name requested | Scaffold dropped | `Unknown WebView scaffold 'X' requested by [Entry], skipping` |
@@ -546,7 +732,7 @@ Warnings show in the menu output after a run and go to the winapp2ool log. Advis
 | Declared variable never referenced | Warning only | `Variable 'X=' declared in [Entry] but never referenced by any <X> token; possible typo` |
 | Variable name collides with a reserved key | Warning only | `Variable declaration 'X=' in [Entry] shadows reserved key name; possible typo` |
 
-The scaffold-family messages read `QtWebEngine` or `Electron` in place of `WebView` for those families. The log also records each `All` expansion: `WebViewScaffolds=All in [Entry]; expanded to N scaffold(s) from catalog, M legacy withheld`.
+The scaffold-family messages read `QtWebEngine`, `Electron` or `Package` in place of `WebView` for those families. The log also records each `All` expansion: `WebViewScaffolds=All in [Entry]; expanded to N scaffold(s) from catalog, M legacy withheld`.
 
 ---
 
@@ -587,11 +773,11 @@ With `-split`, each per-letter file links its own source file instead of the fol
 
 `#.ini` holds the entries beginning with symbols or numbers, and its link spells the file `%23.ini`, since a bare `#` would end the link. The links always point into the winapp2 repository, whatever source directory the run read.
 
-The build runs EntryBuilder with `-split`, and a strict Combine joins the per-letter files with BrowserBuilder's `browsers.ini` and UWPBuilder's per-letter files to make the base winapp2.ini.
+The build runs EntryBuilder with `-split`, and a strict Combine joins the per-letter files with BrowserBuilder's `browsers.ini` to make the base winapp2.ini.
 
 ### The statistics summary
 
-Each run also prints a statistics box: entry counts (read, generated, skipped, with scaffolds, with an inferred `Root`), how many shorthand keys were declared, the generated keys by category, and how many output keys came from templates (scaffolds and the `Base=` forms) against how many were passed through as written. The counts are taken before WinappDebug runs, so they describe what EntryBuilder generated rather than the saved file. A last section lists "tangled" entries, whose variables lean heavily on each other.
+Each run also prints a statistics box: entry counts (read, generated, skipped, with packages, with scaffolds, with an inferred `Root`), how many shorthand keys were declared, the generated keys by category, and how many output keys came from templates (scaffolds and the `Base=` forms) against how many were passed through as written. The counts are taken before WinappDebug runs, so they describe what EntryBuilder generated rather than the saved file. A last section lists "tangled" entries, whose variables lean heavily on each other.
 
 ---
 
@@ -633,6 +819,7 @@ Use the same declared variable twice in one key when two positions have to match
 |:-|:-|:-|
 | `No EntryBuilder source definitions found in: <dir>` and exit code 1 | Source directory is empty, missing, or contains no `*.ini` files with parseable sections | Verify the source directory in **Choose source directory** or via `-1d` |
 | Entry is silently absent from the output | `Skip=` is set, or the entry was skipped by validation (`No Section or LangSecRef...` / `...nothing to emit, skipping`) | Check the run log for the corresponding message |
+| `... is UWPBuilder's spelling; key dropped` and exit code 1 | The entry was written for UWPBuilder | Use the key the message names (see [UWPBuilder's leftover keys](#uwpbuilders-leftover-keys)) |
 | `Duplicate EntryBuilder section [<name>] at <file> line <n> ignored; keeping the first definition, in <file>` | Two sections share a name (in any case), in one file or in two. Files are read in name order and only the first definition is used. The output is still written, but the run fails with exit code 1 | Merge the two sections, or rename one |
 | `[Entry].X has no value; key dropped` | A key that needs a value, such as a root, a FileKey or a variable, was left empty | Fill in the value or delete the key |
 | Output is missing expected scaffold FileKeys | Scaffold directory not found (`Scaffold directory not found: <dir>...`), scaffold name misspelled (`Unknown WebView scaffold 'X'...`), or scaffold excluded by `Exclude*Scaffolds=` | Check the `Loaded N … scaffold(s)` line for each family, and the warnings |

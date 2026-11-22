@@ -410,7 +410,7 @@ DetectFile=%LocalAppData%\Vivaldi\User Data
 FileKey1=%LocalAppData%\Vivaldi\User Data\*\Cache|*|RECURSE
 ```
 
-###### **Target directory file (`Entries\UWP\uwp.ini`)**
+###### **Target directory file (`Entries\Store\store.ini`)**
 ```ini
 [Anki Media Cache *]
 Section=Games
@@ -437,10 +437,10 @@ winapp2ool -combine -strict -1d C:\ini\case6\Entries -3d C:\ini\case6 -3f Winapp
  ║ Found 3 files with ini extension in C:\ini\case6\Entries                                                           ║
  ║ Processed: A.ini (2 sections)                                                                                      ║
  ║ Processed: Browsers\browsers.ini (2 sections)                                                                      ║
- ║ Processed: UWP\uwp.ini (2 sections)                                                                                ║
+ ║ Processed: Store\store.ini (2 sections)                                                                            ║
  ║ 2 section names appeared in more than one input file:                                                              ║
- ║   [Anki Media Cache *] first defined in A.ini, contributed again by Browsers\browsers.ini, UWP\uwp.ini             ║
- ║   [Audacity Temp Files *] first defined in A.ini, contributed again by UWP\uwp.ini                                 ║
+ ║   [Anki Media Cache *] first defined in A.ini, contributed again by Browsers\browsers.ini, Store\store.ini         ║
+ ║   [Audacity Temp Files *] first defined in A.ini, contributed again by Store\store.ini                             ║
  ║ Strict name checking is enabled - Winapp2.ini will not be saved                                                    ║
  ║                                                                                                                    ║
  ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
@@ -643,7 +643,7 @@ FileKey2=%AppData%\HandBrake\logs|*.txt|REMOVESELF
 
 **Context**
 
-This is Combine's day job. The winapp2.ini build puts its generated artifacts under the Winapp2 repository's `Assembler\Generated\` directory: the 27 per-letter base files (`EntryBuilder\#.ini`, `EntryBuilder\A.ini` … `EntryBuilder\Z.ini`, written by EntryBuilder), `BrowserBuilder\browsers.ini` (written by BrowserBuilder) and 27 per-letter UWP files (`UWPBuilder\#.ini` … `UWPBuilder\Z.ini`, written by UWPBuilder). One strict-mode Combine merges them all into the base winapp2.ini, and strict checking makes sure no entry name comes from more than one artifact.
+This is Combine's day job. The winapp2.ini build puts its generated artifacts under the Winapp2 repository's `Assembler\Generated\` directory: the 27 per-letter base files (`EntryBuilder\#.ini`, `EntryBuilder\A.ini` … `EntryBuilder\Z.ini`, written by EntryBuilder) and `BrowserBuilder\browsers.ini` (written by BrowserBuilder). One strict-mode Combine merges them all into the base winapp2.ini, and strict checking makes sure no entry name comes from more than one artifact.
 
 **Intent**
 
@@ -662,63 +662,42 @@ winapp2ool -s -offline -combine -strict -1d \Generated -3f Winapp2.ini
  ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
  ║                    Combining files from C:\Users\hazel\source\repos\Winapp2\Assembler\Generated                    ║
  ╠════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
- ║ Found 55 files with ini extension in C:\Users\hazel\source\repos\Winapp2\Assembler\Generated                       ║
+ ║ Found 28 files with ini extension in C:\Users\hazel\source\repos\Winapp2\Assembler\Generated                       ║
  ║ Processed: BrowserBuilder\browsers.ini (1254 sections)                                                             ║
  ║ Processed: EntryBuilder\#.ini (37 sections)                                                                        ║
- ║ Processed: EntryBuilder\A.ini (370 sections)                                                                       ║
- ║ Processed: EntryBuilder\B.ini (72 sections)                                                                        ║
- ║ Processed: EntryBuilder\C.ini (166 sections)                                                                       ║
- ║ Processed: EntryBuilder\D.ini (148 sections)                                                                       ║
- ║ Processed: EntryBuilder\E.ini (88 sections)                                                                        ║
- ║ Processed: EntryBuilder\F.ini (94 sections)                                                                        ║
- ║ Processed: EntryBuilder\G.ini (82 sections)                                                                        ║
- ║ Processed: EntryBuilder\H.ini (60 sections)                                                                        ║
- ║ Processed: EntryBuilder\I.ini (99 sections)                                                                        ║
+ ║ Processed: EntryBuilder\A.ini (396 sections)                                                                       ║
+ ║ Processed: EntryBuilder\B.ini (75 sections)                                                                        ║
+ ║ Processed: EntryBuilder\C.ini (170 sections)                                                                       ║
+ ║ Processed: EntryBuilder\D.ini (160 sections)                                                                       ║
+ ║ Processed: EntryBuilder\E.ini (90 sections)                                                                        ║
+ ║ Processed: EntryBuilder\F.ini (97 sections)                                                                        ║
+ ║ Processed: EntryBuilder\G.ini (86 sections)                                                                        ║
+ ║ Processed: EntryBuilder\H.ini (69 sections)                                                                        ║
+ ║ Processed: EntryBuilder\I.ini (102 sections)                                                                       ║
  ║ Processed: EntryBuilder\J.ini (34 sections)                                                                        ║
- ║ Processed: EntryBuilder\K.ini (31 sections)                                                                        ║
- ║ Processed: EntryBuilder\L.ini (73 sections)                                                                        ║
- ║ Processed: EntryBuilder\M.ini (218 sections)                                                                       ║
- ║ Processed: EntryBuilder\N.ini (102 sections)                                                                       ║
- ║ Processed: EntryBuilder\O.ini (40 sections)                                                                        ║
+ ║ Processed: EntryBuilder\K.ini (32 sections)                                                                        ║
+ ║ Processed: EntryBuilder\L.ini (75 sections)                                                                        ║
+ ║ Processed: EntryBuilder\M.ini (260 sections)                                                                       ║
+ ║ Processed: EntryBuilder\N.ini (104 sections)                                                                       ║
+ ║ Processed: EntryBuilder\O.ini (41 sections)                                                                        ║
  ║ Processed: EntryBuilder\P.ini (160 sections)                                                                       ║
  ║ Processed: EntryBuilder\Q.ini (17 sections)                                                                        ║
- ║ Processed: EntryBuilder\R.ini (97 sections)                                                                        ║
- ║ Processed: EntryBuilder\S.ini (254 sections)                                                                       ║
- ║ Processed: EntryBuilder\T.ini (127 sections)                                                                       ║
- ║ Processed: EntryBuilder\U.ini (29 sections)                                                                        ║
- ║ Processed: EntryBuilder\V.ini (52 sections)                                                                        ║
- ║ Processed: EntryBuilder\W.ini (142 sections)                                                                       ║
+ ║ Processed: EntryBuilder\R.ini (99 sections)                                                                        ║
+ ║ Processed: EntryBuilder\S.ini (300 sections)                                                                       ║
+ ║ Processed: EntryBuilder\T.ini (130 sections)                                                                       ║
+ ║ Processed: EntryBuilder\U.ini (30 sections)                                                                        ║
+ ║ Processed: EntryBuilder\V.ini (53 sections)                                                                        ║
+ ║ Processed: EntryBuilder\W.ini (167 sections)                                                                       ║
  ║ Processed: EntryBuilder\X.ini (22 sections)                                                                        ║
  ║ Processed: EntryBuilder\Y.ini (4 sections)                                                                         ║
  ║ Processed: EntryBuilder\Z.ini (11 sections)                                                                        ║
- ║ Processed: UWPBuilder\A.ini (26 sections)                                                                          ║
- ║ Processed: UWPBuilder\B.ini (3 sections)                                                                           ║
- ║ Processed: UWPBuilder\C.ini (4 sections)                                                                           ║
- ║ Processed: UWPBuilder\D.ini (12 sections)                                                                          ║
- ║ Processed: UWPBuilder\E.ini (1 section)                                                                            ║
- ║ Processed: UWPBuilder\F.ini (3 sections)                                                                           ║
- ║ Processed: UWPBuilder\G.ini (4 sections)                                                                           ║
- ║ Processed: UWPBuilder\H.ini (9 sections)                                                                           ║
- ║ Processed: UWPBuilder\I.ini (3 sections)                                                                           ║
- ║ Processed: UWPBuilder\K.ini (1 section)                                                                            ║
- ║ Processed: UWPBuilder\L.ini (3 sections)                                                                           ║
- ║ Processed: UWPBuilder\M.ini (42 sections)                                                                          ║
- ║ Processed: UWPBuilder\N.ini (2 sections)                                                                           ║
- ║ Processed: UWPBuilder\O.ini (1 section)                                                                            ║
- ║ Processed: UWPBuilder\R.ini (2 sections)                                                                           ║
- ║ Processed: UWPBuilder\S.ini (46 sections)                                                                          ║
- ║ Processed: UWPBuilder\T.ini (3 sections)                                                                           ║
- ║ Processed: UWPBuilder\U.ini (1 section)                                                                            ║
- ║ Processed: UWPBuilder\V.ini (1 section)                                                                            ║
- ║ Processed: UWPBuilder\W.ini (25 sections)                                                                          ║
  ║                                                                                                                    ║
- ║                               Combined 48 files into Winapp2.ini with 4075 sections                                ║
+ ║                               Combined 28 files into Winapp2.ini with 4075 sections                                ║
  ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 ```
 
 **Explanation**
-- Combine finds all 55 artifact files across the subfolders and processes them in alphabetical order by full path
-- Seven UWP letters (`#`, `J`, `P`, `Q`, `X`, `Y` and `Z`) have no entries, so their files hold only a header. Combine skips a file with no sections and leaves it out of the list and the count, which is why it combined 48 of the 55
+- Combine finds all 28 artifact files across the subfolders and processes them in alphabetical order by full path
 - No two artifacts share a section name, so there's no collision report
 - The output is saved in the working directory, as `Assembler\Winapp2.ini`
 - The build itself runs in silent mode, so it prints none of this. The capture above is the same command without `-s`

@@ -25,8 +25,8 @@ Option Strict On
 ''' loader that discovers families from section headers
 ''' (<see cref="winapp2ool.ScaffoldCatalogs.LoadCatalogDirectory"/>); the placeholder substitution
 ''' engine (<see cref="winapp2ool.ScaffoldCatalogs.FanOutPlaceholder"/> and
-''' <see cref="winapp2ool.ScaffoldCatalogs.BindFamilyTemplates"/>); the three families' default
-''' sets; and the guard that every family's key vocabulary reaches both builders.
+''' <see cref="winapp2ool.ScaffoldCatalogs.BindFamilyTemplates"/>); the families' default
+''' sets; and the guard that EntryBuilder reserves every family's key vocabulary.
 ''' <br /><br />
 '''
 ''' The selection grammar is the part worth pinning: explicit list, the <c> All </c> sentinel,
@@ -234,7 +234,7 @@ Option Strict On
     End Sub
 
     ''' <summary>
-    ''' The three shipping families' default sets are asserted here so a change to any of them is a
+    ''' The shipping families' default sets are asserted here so a change to any of them is a
     ''' deliberate test edit rather than a silent shift in what every entry cleans. Electron's set
     ''' has no <c> VisitedLinks </c> scaffold, though QtWebEngine's does: Electron apps rarely write
     ''' <c> Visited Links </c>, so its pattern rides in one of Electron's <c> Telemetry </c> templates.
@@ -249,6 +249,9 @@ Option Strict On
 
         CollectionAssert.AreEqual({"AppLogs", "Caches", "StorageQuota", "Telemetry", "UpdaterCache"},
                                   winapp2ool.ScaffoldCatalogs.ElectronDefaultScaffolds)
+
+        CollectionAssert.AreEqual({"Baseline"},
+                                  winapp2ool.ScaffoldCatalogs.PackageDefaultScaffolds)
 
     End Sub
 
@@ -715,8 +718,8 @@ Option Strict On
     End Sub
 
     ''' <summary>
-    ''' A catalog is shared by both builders, so a <c> %Package% </c> in one is refused too, as is
-    ''' a root token missing its closing <c> % </c>
+    ''' A <c> %Package% </c> in a catalog is refused too, as is a root token missing its closing
+    ''' <c> % </c>
     ''' </summary>
     <TestMethod()> Public Sub ParseSection_RetiredPackageToken_DropsTemplateAndFails()
 
@@ -775,30 +778,30 @@ Option Strict On
 
     ''' <summary>
     ''' Every family in <see cref="winapp2ool.ScaffoldCatalogs.ScaffoldFamilies"/> is reserved by
-    ''' <b> both </b> builders: each one's reserved-key array holds the family's <c> {Family}Root= </c>,
-    ''' <c> {Family}Scaffolds= </c> and <c> Exclude{Family}Scaffolds= </c> keys, and the family has
-    ''' a default set. Second root keys such as <c> ElectronUpdaterRoot= </c> and the placeholder
-    ''' bindings aren't checked.
-    ''' <br /><br />
-    '''
-    ''' This is the parity guard. UWPBuilder's hybrid win32+UWP entries carry the desktop install's
-    ''' paths too, and a hybrid's win32 half is where engines like Electron turn up, so every family
-    ''' belongs in both builders. A family reaching one builder and not the other is not a visible
-    ''' failure; it is silently missing FileKeys. This test is what makes it visible.
+    ''' EntryBuilder: its root key is in <c> ReservedKeys </c>, its <c> {Family}Scaffolds= </c> and
+    ''' <c> Exclude{Family}Scaffolds= </c> keys are in both <c> ReservedKeys </c> and
+    ''' <c> ValueOptionalKeys </c> (so an empty selection selects none rather than the default
+    ''' set), and it has a default set. The root key is <c> {Family}Root= </c>, except for the
+    ''' Package family, whose root key is <c> Package= </c>. Second root keys such as
+    ''' <c> ElectronUpdaterRoot= </c> and the placeholder bindings aren't checked.
     ''' </summary>
-    <TestMethod()> Public Sub ScaffoldFamilies_KeyVocabularyPresentInBothBuilders()
+    <TestMethod()> Public Sub ScaffoldFamilies_KeyVocabularyReservedByEntryBuilder()
+
+        Dim isIn = Function(list As IEnumerable(Of String), key As String) list.Any(
+                       Function(r) String.Equals(r, key, StringComparison.InvariantCultureIgnoreCase))
 
         For Each family In winapp2ool.ScaffoldCatalogs.ScaffoldFamilies
 
-            For Each key In {$"{family}ROOT", $"{family}SCAFFOLDS", $"EXCLUDE{family}SCAFFOLDS"}
+            Dim rootKey = If(family = "Package", "PACKAGE", $"{family}ROOT")
+            Assert.IsTrue(isIn(winapp2ool.EntryBuilder.ReservedKeys, rootKey),
+                          $"EntryBuilder does not reserve '{rootKey}=' for the {family} family")
 
-                Assert.IsTrue(winapp2ool.EntryBuilder.ReservedKeys.Any(
-                                  Function(r) String.Equals(r, key, StringComparison.InvariantCultureIgnoreCase)),
+            For Each key In {$"{family}SCAFFOLDS", $"EXCLUDE{family}SCAFFOLDS"}
+
+                Assert.IsTrue(isIn(winapp2ool.EntryBuilder.ReservedKeys, key),
                               $"EntryBuilder does not reserve '{key}=' for the {family} family")
-
-                Assert.IsTrue(winapp2ool.UWPBuilder.UWPReservedKeys.Any(
-                                  Function(r) String.Equals(r, key, StringComparison.InvariantCultureIgnoreCase)),
-                              $"UWPBuilder does not reserve '{key}=' for the {family} family")
+                Assert.IsTrue(isIn(winapp2ool.EntryBuilder.ValueOptionalKeys, key),
+                              $"EntryBuilder drops an empty '{key}=' for the {family} family")
 
             Next
 

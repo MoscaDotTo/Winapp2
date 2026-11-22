@@ -2,8 +2,8 @@
 #
 # Source-letter check: is every entry in a per-letter source file filed under its own letter?
 #
-# EntryBuilder and UWPBuilder use each source section header verbatim as the entry name, and
-# -split buckets their output by that name's first character (LetterSplitOutput.LetterBucketFor:
+# EntryBuilder uses each source section header verbatim as the entry name, and
+# -split buckets its output by that name's first character (LetterSplitOutput.LetterBucketFor:
 # A-Z in any case, anything else is #). Nothing ties an entry to the file it was written in, so
 # [Zoom *] in Sources/EntryBuilder/A.ini builds fine and lands in Generated/EntryBuilder/Z.ini,
 # whose header then names Z.ini as its source. That's easy to miss when alphabetizing by hand,
@@ -13,6 +13,12 @@
 # We scan the whole tree rather than the changed files, so a misfiled entry already on a
 # branch can't hide. It only reads section headers, so it takes well under a second.
 #
+# It also fails on any file under the three UWPBuilder folders. UWPBuilder was folded into
+# EntryBuilder, so nothing builds or writes them. A stale branch that brings back
+# Sources/UWPBuilder/ would drop its entries while the build stays green, and the full build's
+# Combine would read a revived Generated/UWPBuilder/. The generated-artifact guard skips
+# [regen] commits, so only this whole-tree check sees the output folders every time.
+#
 # Usage:
 #   check-source-letters.sh [<repo-root>]   # defaults to the current directory
 # Exit 0 = every entry is in its letter's file, 1 = at least one isn't, 2 = bad invocation.
@@ -20,18 +26,43 @@
 set -uo pipefail
 
 root=${1:-.}
-dirs="Assembler/Sources/EntryBuilder Assembler/Sources/UWPBuilder/AppInfo"
+dir="Assembler/Sources/EntryBuilder"
+retired_dirs="Assembler/Sources/UWPBuilder Assembler/Generated/UWPBuilder Assembler/Archived/UWPBuilder"
 
+retired=$(for d in $retired_dirs; do find "$root/$d" -type f 2>/dev/null; done)
+if [ -n "$retired" ]; then
+  while IFS= read -r f; do
+    shown=${f#"$root/"}
+    msg="UWPBuilder was folded into EntryBuilder and nothing builds or writes this file. A Store app is an EntryBuilder entry with Package= in $dir/<L>.ini: move any entry there and delete the file"
+    if [ -n "${GITHUB_ACTIONS:-}" ]; then
+      echo "::error file=$shown::$msg"
+    else
+      echo "error: $shown: $msg"
+    fi
+  done <<EOF
+$retired
+EOF
+  if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
+    {
+      echo "### Source-letter check: fail"
+      echo
+      echo "The UWPBuilder folders under \`Assembler/\` were retired when UWPBuilder was folded into"
+      echo "EntryBuilder. Move each Store-app entry into \`$dir/<L>.ini\` as an EntryBuilder entry"
+      echo "with \`Package=\`, and delete the folders."
+    } >> "$GITHUB_STEP_SUMMARY"
+  fi
+  echo "Source-letter check FAILED: a UWPBuilder folder exists, but UWPBuilder was folded into EntryBuilder."
+  exit 1
+fi
+
+[ -d "$root/$dir" ] || { echo "error: $root/$dir not found" >&2; exit 2; }
 files=()
-for d in $dirs; do
-  [ -d "$root/$d" ] || { echo "error: $root/$d not found" >&2; exit 2; }
-  for f in "$root/$d"/*.ini; do
-    [ -e "$f" ] || continue
-    # Only the 27 letter files. Anything else isn't split by letter.
-    case "${f##*/}" in
-      '#.ini'|[A-Z].ini) files+=("$f") ;;
-    esac
-  done
+for f in "$root/$dir"/*.ini; do
+  [ -e "$f" ] || continue
+  # Only the 27 letter files. Anything else isn't split by letter.
+  case "${f##*/}" in
+    '#.ini'|[A-Z].ini) files+=("$f") ;;
+  esac
 done
 
 if [ "${#files[@]}" -eq 0 ]; then
@@ -58,7 +89,7 @@ misfiled=$(LC_ALL=C awk -v root="$root/" '
 ' "${files[@]}")
 
 if [ -z "$misfiled" ]; then
-  echo "OK: every entry in the per-letter EntryBuilder and UWPBuilder sources is in its letter's file."
+  echo "OK: every entry in the per-letter EntryBuilder sources is in its letter's file."
   exit 0
 fi
 

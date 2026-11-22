@@ -8,7 +8,7 @@ This folder holds everything winapp2ool needs to build winapp2.ini and its flavo
 
 Put a copy of winapp2ool in this folder and run `& '.\build winapp2.ps1'` from PowerShell. A clone of the repository already has one. The script refuses a winapp2ool older than the version the sources need, and tells you which version that is.
 
-The script regenerates the committed build artifacts in [Generated](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Generated): the base entries from the [EntryBuilder](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/EntryBuilder) sources, plus BrowserBuilder's and UWPBuilder's output (EntryBuilder and UWPBuilder also read the shared cleaning-pattern catalogs in [Scaffolds](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/Scaffolds)). One strict Combine pass joins them into the base winapp2.ini, and each flavor is made from that. Every flavor and its changelog goes to [Releases](https://github.com/MoscaDotTo/Winapp2/tree/master/Releases) at the repository root, under the name it has on each GitHub release. Nothing in this folder is published.
+The script regenerates the committed build artifacts in [Generated](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Generated): the base entries from the [EntryBuilder](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/EntryBuilder) sources, plus BrowserBuilder's output (EntryBuilder also reads the shared cleaning-pattern catalogs in [Scaffolds](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/Scaffolds)). One strict Combine pass joins them into the base winapp2.ini, and each flavor is made from that. Every flavor and its changelog goes to [Releases](https://github.com/MoscaDotTo/Winapp2/tree/master/Releases) at the repository root, under the name it has on each GitHub release. Nothing in this folder is published.
 
 Entries marked `Archive=` in the sources go to [Archived](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Archived) instead, one `archived.ini` per generator. A second strict Combine joins those into the archive, which goes to `Releases` as `archived.ini` with its own changelog. The build fails if an entry name is in both winapp2.ini and the archive.
 
@@ -31,10 +31,9 @@ Changes to winapp2.ini or its flavors go in the files under `Sources\`, never in
 
 | Folder | Contents |
 | :- | :- |
-| [EntryBuilder](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/EntryBuilder) | The sources for every base entry, which is most of winapp2.ini. EntryBuilder's shorthand is optional here |
+| [EntryBuilder](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/EntryBuilder) | The sources for every base entry, which is most of winapp2.ini, Microsoft Store apps included. EntryBuilder's shorthand is optional here |
 | [BrowserBuilder](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/BrowserBuilder) | The rules that generate entries for Chromium and Gecko browsers, and the Transmutation rules that correct them |
-| [UWPBuilder](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/UWPBuilder) | The scaffold and AppInfo definitions UWPBuilder turns into entries for Microsoft Store apps |
-| [Scaffolds](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/Scaffolds) | The shared cleaning-pattern catalogs (WebView2, QtWebEngine, Electron) EntryBuilder and UWPBuilder draw on |
+| [Scaffolds](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/Scaffolds) | The shared cleaning-pattern catalogs (WebView2, QtWebEngine, Electron, Store app packages) EntryBuilder draws on |
 | [Flavors\BleachBit](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/Flavors/BleachBit) | The Transmutation rules for the BleachBit flavor |
 | [Flavors\CCleaner](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/Flavors/CCleaner) | The Transmutation rules for the CCleaner flavor |
 | [Flavors\CCleaner7](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/Flavors/CCleaner7) | The Transmutation rules that convert the CCleaner flavor to CCleaner 7's format |
@@ -48,7 +47,6 @@ Changes to winapp2.ini or its flavors go in the files under `Sources\`, never in
 | :- | :- |
 | [EntryBuilder](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Generated/EntryBuilder) | `#.ini`, `A.ini` ... `Z.ini`, written by EntryBuilder from `Sources\EntryBuilder` |
 | BrowserBuilder | `browsers.ini`, written by BrowserBuilder from `Sources\BrowserBuilder` |
-| [UWPBuilder](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Generated/UWPBuilder) | `#.ini`, `A.ini` ... `Z.ini`, written by UWPBuilder from `Sources\UWPBuilder` |
 
 These are the pieces the build's strict Combine joins into the base winapp2.ini. We commit them so every change to winapp2.ini can be reviewed entry by entry.
 

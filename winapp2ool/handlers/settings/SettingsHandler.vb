@@ -88,7 +88,6 @@ Public Module SettingsHandler
         If Not readSettingsFromDisk Then Return
 
         LoadModule(NameOf(Diff), GetType(diffsettings))
-        LoadModule(NameOf(UWPBuilder), GetType(uwpbuildersettings))
         LoadModule(NameOf(EntryBuilder), GetType(entryBuilderSettings))
         LoadModule(NameOf(BrowserBuilder), GetType(browserbuildersettings))
         LoadModule(NameOf(CC7Patcher), GetType(cc7patchersettings))

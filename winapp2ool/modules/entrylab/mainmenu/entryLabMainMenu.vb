@@ -36,9 +36,7 @@ Module entryLabMainMenu
         Return MenuSection.CreateCompleteMenu("Entry Lab", menuDesc, ConsoleColor.Cyan).AddBlank() _
             .AddDispatchedColoredOption(NameOf(BrowserBuilder), "Generate winapp2.ini entries for web browsers", ConsoleColor.DarkYellow,
                 Sub() initModule(NameOf(BrowserBuilder), AddressOf buildBrowserBuilderMenu), isDefault:=True) _
-            .AddDispatchedColoredOption(NameOf(UWPBuilder), "Generate winapp2.ini entries for Universal Windows Platform apps", ConsoleColor.Blue,
-                Sub() initModule(NameOf(UWPBuilder), AddressOf buildUWPBuilderMenu)) _
-            .AddDispatchedColoredOption(NameOf(EntryBuilder), "Generate winapp2.ini entries for win32 apps", ConsoleColor.DarkCyan,
+            .AddDispatchedColoredOption(NameOf(EntryBuilder), "Generate winapp2.ini entries for win32, Store and hybrid apps", ConsoleColor.DarkCyan,
                 Sub() initModule(NameOf(EntryBuilder), AddressOf buildEntryBuilderMenu))
 
     End Function
