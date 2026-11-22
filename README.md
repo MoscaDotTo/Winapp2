@@ -117,24 +117,24 @@ Winapp2.ini is generated from the sources in [Assembler](Assembler) by [winapp2o
 
 Each build runs four stages, driven by [`build winapp2.ps1`](Assembler/build%20winapp2.ps1):
 
-| Stage | What runs | What it does |
+| Build Stage | Modules | Effect |
 | :- | :- | :- |
-| Generate | [EntryBuilder](winapp2ool/modules/entrybuilder/readme.md) | Expands the per-letter [base entry sources](Assembler/Sources/EntryBuilder) into artifacts. Sources can use an optional shorthand DSL and shared scaffold catalogs for webviews and [Microsoft Store apps](winapp2ool/modules/entrybuilder/readme.md#store-and-hybrid-apps) |
+| Generate | [EntryBuilder](winapp2ool/modules/entrybuilder/readme.md) | Expands the [base entry sources](Assembler/Sources/EntryBuilder) into artifacts. Sources can use an optional shorthand DSL and shared scaffold catalogs for webviews and [Microsoft Store apps](winapp2ool/modules/entrybuilder/readme.md#store-and-hybrid-apps) |
 | | [BrowserBuilder](winapp2ool/modules/browserbuilder/readme.md) | Produces one entry per browser per cleaning category, crossing [browser declarations](Assembler/Sources/BrowserBuilder) with the templates that apply to their engine |
 | Merge | [Combine](winapp2ool/modules/combine/readme.md) | Joins the generated artifacts into one file in strict mode, which fails the build if two artifacts use the same entry name |
 | Lint | [WinappDebug](winapp2ool/modules/winappdebug/README.md) | Checks the merged file's syntax and style, and saves its own corrections |
-| Publish | [Flavorizer](winapp2ool/modules/transmute/Flavorizer/readme.md), [WinappDebug](winapp2ool/modules/winappdebug/README.md), and [Diff](winapp2ool/modules/diff/readme.md) | Applies each flavor's ruleset to make the six other variants and lints each one, then writes a changelog against the previously published version for every output whose content changed, and publishes both to [Releases](Releases) |
+| Publish | [Flavorizer](winapp2ool/modules/transmute/Flavorizer/readme.md), [WinappDebug](winapp2ool/modules/winappdebug/README.md), and [Diff](winapp2ool/modules/diff/readme.md) | Creates, lints, and produces a changelog for each flavor, then publishes a new [Release](Releases) |
 
 ### CI/CD
 
-The build artifacts under [Assembler/Generated](Assembler/Generated) are committed to the repository instead of living only for the length of a build. That lets us check the build against itself, and gives CI something to hold still while it varies one input at a time:
+The build artifacts under [Assembler/Generated](Assembler/Generated) are used by the CI:
 
-| Check | What it does |
+| Action Name | Purpose |
 | :- | :- |
-| **Generated artifact guard** | Fails a change that edits build output without touching the source that produces it, or that puts an entry in the wrong letter's source file, and names the file you should have edited |
-| **PR verify** | Builds winapp2.ini from `master`, then again with the pull request merged, and comments either the changelog the pull request would produce or the stage where it broke the build |
-| **Artifact drift** | Regenerates every artifact into a scratch folder and compares it byte for byte with what's committed, which catches generator output changing when it shouldn't |
-| **Binary parity** | Checks that the committed winapp2ool.exe still matches the source beside it. Otherwise every published file would come from code that isn't in the repository |
-| **Update signature** | Checks that copies of winapp2ool already out there will accept the committed update: its signature has to verify, and `version.txt` has to match the exe |
-| **Maintainer paths guard** | Fails a pull request from outside the project that touches winapp2ool's source, its committed exe, the build scripts, or the workflows |
-| **Daily build and release** | Rebuilds from current sources. When the content changed, it commits the result and cuts a tagged release with every flavor and changelog attached |
+| **Generated artifact guard** | Fails a change that edits build output without also editing a corresponding source, or that puts an entry in the wrong letter's source file, and reports the file that should have been edited |
+| **PR verify** | Builds winapp2.ini from `master`, then again with the pull request merged, and comments either the changelog the pull request would produce or the stage at which the build failed |
+| **Artifact drift** | Regenerates every artifact and compares it with what's committed |
+| **Binary parity** |  Verifies that the committed winapp2ool matches the source beside it |
+| **Update signature** | Verifies that winapp2ool's update signature is valid and `version.txt` matches the executable |
+| **Maintainer paths guard** | Fails outside pull requests touching winapp2ool's source, exe, the build scripts, or the workflows |
+| **Daily build and release** | Rebuilds from current sources. When content changes, commits the result and publishes a tagged release |
