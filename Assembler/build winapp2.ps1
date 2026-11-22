@@ -23,23 +23,19 @@
     committed artifacts match their sources
 
 .PARAMETER Verify
-    Regenerate all artifacts into Verify\ and VerifyArchived\ and byte-compare each against
-    its committed tree (Generated\, Archived\) instead of building. Exits 0 when every
-    artifact matches, 1 on any drift (the scratch output is retained for
+    Regenerate all artifacts into Verify\Generated\ and Verify\Archived\ and byte-compare
+    each against its committed tree (Generated\, Archived\) instead of building. Exits 0
+    when every artifact matches, 1 on any drift (the scratch output is retained for
     inspection on failure).
 
 .PARAMETER GenerateTo
-    Regenerate the three generator artifacts into the given root and stop -- no
-    combine, no flavors, no comparison. The root is winapp2ool-relative (leading
-    backslash, e.g. '\Parity\Source'). Paired with -ToolPath this is how CI runs
-    two different winapp2ool binaries over the same sources and diffs the results.
-    Only the root's BrowserBuilder, UWPBuilder and EntryBuilder folders are cleared
-    first; anything else in the root is left alone. Needs -ArchiveTo.
-
-.PARAMETER ArchiveTo
-    With -GenerateTo, the root the builders write their archived.ini files into, cleared
-    the same way (e.g. '\Archived'). It must sit outside the -GenerateTo root, so an
-    archive can never land in a tree the strict Combine reads.
+    Regenerate the three generators' artifacts into <root>\Generated\ and <root>\Archived\
+    and stop -- no combine, no flavors, no comparison. The root is winapp2ool-relative
+    (leading backslash, e.g. '\Parity\Source'), and '\' regenerates the committed trees.
+    Paired with -ToolPath this is how CI runs two different winapp2ool binaries over the
+    same sources and diffs the results. Only the builders' folders under the two trees
+    are cleared first; anything else is left alone. A root inside Generated\, Archived\
+    or Sources\ is refused, since the build reads those trees.
 
 .PARAMETER ToolPath
     Use this winapp2ool.exe instead of the one beside this script. Directory args
@@ -56,7 +52,6 @@
 param(
     [switch]$Verify,
     [string]$GenerateTo,
-    [string]$ArchiveTo,
     [string]$ToolPath
 )
 
@@ -325,8 +320,12 @@ function Backup-Files {
 }
 
 function Build-Artifacts {
-    # Each builder writes its live output under OutputRoot and its archived.ini under ArchiveRoot
-    param([string]$OutputRoot, [string]$ArchiveRoot)
+    # Each builder writes its live output under <Root>\Generated and its archived.ini under
+    # <Root>\Archived. Root is winapp2ool-relative, and '' is the committed trees.
+    param([string]$Root = '')
+
+    $OutputRoot = "$Root\Generated"
+    $ArchiveRoot = "$Root\Archived"
 
     Write-Step "Generating browser entries"
     if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-browserbuilder', '-1d', '\Sources\BrowserBuilder', `
@@ -353,7 +352,7 @@ function Build-Artifacts {
 function Build-MainFile {
     Write-Step "Building winapp2.ini, please wait"
 
-    if (-not (Build-Artifacts -OutputRoot '\Generated' -ArchiveRoot '\Archived')) { return $false }
+    if (-not (Build-Artifacts)) { return $false }
 
     Write-Step "Merging entry artifacts"
     if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-combine', '-strict', '-1d', '\Generated', '-3f', 'Winapp2.ini' `
@@ -661,30 +660,58 @@ function Compare-ArtifactTree {
     return $drift
 }
 
+function New-Artifacts {
+    # Clears the builders' folders under <Root>\Generated and <Root>\Archived and regenerates
+    # them. A tracked file beside those folders survives (-GenerateTo '\Generated' used to
+    # delete Generated\readme.md). Refuses a root inside Generated, Archived or Sources: the
+    # full build's Combine reads the first two recursively, and the third is its input.
+    param([string]$Root)
+
+    $rel = $Root.Trim('\')
+    $Root = if ($rel) { "\$rel" } else { '' }
+    $target = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot $rel)).TrimEnd('\')
+
+    foreach ($tree in 'Generated', 'Archived', 'Sources') {
+        $treePath = Join-Path $PSScriptRoot $tree
+        if ($target -eq $treePath -or $target.StartsWith("$treePath\", [StringComparison]::OrdinalIgnoreCase)) {
+            Write-ErrorMsg "Can't generate into $target`: it's inside $tree\, which the build reads"
+            return $false
+        }
+    }
+
+    foreach ($tree in 'Generated', 'Archived') {
+        foreach ($builder in 'BrowserBuilder', 'UWPBuilder', 'EntryBuilder') {
+            $folder = Join-Path $target "$tree\$builder"
+            if (Test-Path $folder) { Remove-Item $folder -Recurse -Force }
+        }
+    }
+
+    return (Build-Artifacts -Root $Root)
+}
+
 function Test-Artifacts {
     Write-Step "Regenerating artifacts into scratch for characteristic testing"
 
     $scratch = Join-Path $PSScriptRoot 'Verify'
-    $archiveScratch = Join-Path $PSScriptRoot 'VerifyArchived'
-    foreach ($dir in $scratch, $archiveScratch) {
-        if (Test-Path $dir) { Remove-Item $dir -Recurse -Force }
-    }
+    if (Test-Path $scratch) { Remove-Item $scratch -Recurse -Force }
 
-    if (-not (Build-Artifacts -OutputRoot '\Verify' -ArchiveRoot '\VerifyArchived')) { return $false }
+    if (-not (New-Artifacts -Root '\Verify')) { return $false }
 
     Write-Step "Comparing regenerated artifacts against committed artifacts under Generated and Archived"
 
-    $drift = @(Compare-ArtifactTree -Committed (Join-Path $PSScriptRoot 'Generated') -Scratch $scratch)
-    $drift += @(Compare-ArtifactTree -Committed (Join-Path $PSScriptRoot 'Archived') -Scratch $archiveScratch)
+    $drift = @()
+    foreach ($tree in 'Generated', 'Archived') {
+        $drift += @(Compare-ArtifactTree -Committed (Join-Path $PSScriptRoot $tree) -Scratch (Join-Path $scratch $tree))
+    }
 
     if ($drift.Count -gt 0) {
         Write-ErrorMsg "Artifact drift detected - committed artifacts under Generated or Archived do not match their sources"
         $drift | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }
-        Write-Host "Regenerated artifacts retained in $scratch and $archiveScratch for inspection" -ForegroundColor Yellow
+        Write-Host "Regenerated artifacts retained in $scratch for inspection" -ForegroundColor Yellow
         return $false
     }
 
-    Remove-Item $scratch, $archiveScratch -Recurse -Force
+    Remove-Item $scratch -Recurse -Force
     Write-Host "All committed artifacts match their sources" -ForegroundColor Green
     return $true
 }
@@ -719,33 +746,9 @@ try {
     # Generate-and-stop. Deliberately does NOT compare against Generated\: the caller is
     # diffing two generated trees against each other, so the committed artifacts are
     # not part of the question and their staleness must not fail the run.
-    if ($ArchiveTo -and -not $GenerateTo) {
-        Write-ErrorMsg "-ArchiveTo only goes with -GenerateTo"
-        exit 1
-    }
-
     if ($GenerateTo) {
-        if (-not $ArchiveTo) {
-            Write-ErrorMsg "-GenerateTo needs -ArchiveTo, the root for the archived entries (e.g. -GenerateTo '\Generated' -ArchiveTo '\Archived')"
-            exit 1
-        }
-        $target = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot $GenerateTo.TrimStart('\'))).TrimEnd('\')
-        $archiveTarget = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot $ArchiveTo.TrimStart('\'))).TrimEnd('\')
-        if ($archiveTarget -eq $target -or $archiveTarget.StartsWith("$target\", [StringComparison]::OrdinalIgnoreCase) -or
-            $target.StartsWith("$archiveTarget\", [StringComparison]::OrdinalIgnoreCase)) {
-            Write-ErrorMsg "-ArchiveTo and -GenerateTo must not overlap: the strict Combine would read the archive as live entries"
-            exit 1
-        }
-        # Clear only the builders' folders, so a tracked file beside them survives
-        # (-GenerateTo '\Generated' used to delete Generated\readme.md)
-        foreach ($root in $target, $archiveTarget) {
-            foreach ($builder in 'BrowserBuilder', 'UWPBuilder', 'EntryBuilder') {
-                $folder = Join-Path $root $builder
-                if (Test-Path $folder) { Remove-Item $folder -Recurse -Force }
-            }
-        }
-        if (-not (Build-Artifacts -OutputRoot $GenerateTo -ArchiveRoot $ArchiveTo)) { exit 1 }
-        Write-Host "`nArtifacts generated into $target and $archiveTarget" -ForegroundColor Green
+        if (-not (New-Artifacts -Root $GenerateTo)) { exit 1 }
+        Write-Host "`nArtifacts generated into Generated and Archived under $GenerateTo" -ForegroundColor Green
         exit 0
     }
 

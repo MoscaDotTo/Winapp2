@@ -53,7 +53,7 @@ jobs:
         working-directory: Assembler
         run: |
           if (-not (Test-Path 'winapp2ool.exe')) { throw 'winapp2ool.exe missing from Assembler; a Release build stages it there, and it should be committed' }
-          pwsh -File './build winapp2.ps1' -GenerateTo '\Parity\Committed\Generated' -ArchiveTo '\Parity\Committed\Archived'
+          pwsh -File './build winapp2.ps1' -GenerateTo '\Parity\Committed'
           exit $LASTEXITCODE
 
       - name: Set up MSBuild
@@ -85,10 +85,11 @@ jobs:
         shell: pwsh
         working-directory: Assembler
         run: |
-          pwsh -File './build winapp2.ps1' -GenerateTo '\Parity\Source\Generated' -ArchiveTo '\Parity\Source\Archived' -ToolPath '..\winapp2ool\bin\Release\winapp2ool.exe'
+          pwsh -File './build winapp2.ps1' -GenerateTo '\Parity\Source' -ToolPath '..\winapp2ool\bin\Release\winapp2ool.exe'
           exit $LASTEXITCODE
 
-      # Each side's live and archive trees sit under one root, so the recursive compare covers both.
+      # -GenerateTo puts each side's Generated and Archived trees under its root, so the
+      # recursive compare covers both.
       - name: Compare the two generated trees
         shell: pwsh
         working-directory: Assembler

@@ -118,6 +118,14 @@ src_uwp_global=0        # a UWPBuilder source outside AppInfo/<L>.ini changed
 global=0                # a global input changed -> suppress rule 2
 global_why=""
 
+# Each reason is listed once, however many of its files changed.
+add_why() {
+  case ", $global_why, " in
+    *", $1, "*) ;;
+    *) global_why="${global_why}${global_why:+, }$1" ;;
+  esac
+}
+
 while IFS= read -r f; do
   [ -n "$f" ] || continue
 
@@ -130,19 +138,19 @@ while IFS= read -r f; do
     # is its pre-move path (now Assembler/Sources/Scaffolds/), kept for branches made earlier.
     'Assembler/Sources/Scaffolds/'*|'Assembler/Scaffolds/'*)
       src_count=$((src_count + 1)); global=1
-      global_why="${global_why}${global_why:+, }shared scaffold catalogs"
+      add_why "shared scaffold catalogs"
       continue ;;
     'Assembler/winapp2ool.exe')
       src_count=$((src_count + 1)); global=1
-      global_why="${global_why}${global_why:+, }the committed winapp2ool.exe"
+      add_why "the committed winapp2ool.exe"
       continue ;;
     'Assembler/build winapp2.ps1')
       src_count=$((src_count + 1)); global=1
-      global_why="${global_why}${global_why:+, }the build script"
+      add_why "the build script"
       continue ;;
     'winapp2ool/'*)
       src_count=$((src_count + 1)); global=1
-      global_why="${global_why}${global_why:+, }winapp2ool source"
+      add_why "winapp2ool source"
       continue ;;
 
     # ---- generated artifacts.

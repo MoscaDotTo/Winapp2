@@ -78,8 +78,8 @@ jobs:
           # string keeps the normal behavior for push and dispatch.
           ref: ${{ github.event_name == 'workflow_run' && 'master' || '' }}
 
-      # -Verify regenerates every artifact into Assembler/Verify and Assembler/VerifyArchived and
-      # byte-compares them against the committed Assembler/Generated and Assembler/Archived,
+      # -Verify regenerates every artifact into Assembler/Verify/Generated and Assembler/Verify/Archived
+      # and byte-compares them against the committed Assembler/Generated and Assembler/Archived,
       # exiting 1 on drift and keeping the scratch folders.
       # We run it as a child process so the script's `exit N` lands in $LASTEXITCODE.
       - name: Characteristic test (build winapp2.ps1 -Verify)
@@ -98,7 +98,6 @@ jobs:
           name: artifact-drift-failure
           path: |
             Assembler/Verify/**
-            Assembler/VerifyArchived/**
             Assembler/winapp2ool.log
           if-no-files-found: ignore
           retention-days: 7
