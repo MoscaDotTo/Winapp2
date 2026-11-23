@@ -27,6 +27,11 @@ Imports System.IO
 
     Private Const ArchiveKey As String = "Archive"
 
+    Private Const Winapp3Key As String = "Winapp3"
+
+    ''' <summary>The keys of the rows that publish a file that isn't a flavor</summary>
+    Private Shared ReadOnly NonFlavorKeys As New HashSet(Of String) From {ArchiveKey, Winapp3Key}
+
     ''' <summary>Reads the manifest's rows as column name to value, header row excluded</summary>
     Private Shared Function ReadManifest() As List(Of Dictionary(Of String, String))
 
@@ -57,7 +62,7 @@ Imports System.IO
     ''' <summary>Each flavor row names a flavor and carries the asset and changelog names the tool downloads</summary>
     <TestMethod()> Public Sub FlavorRows_MatchTheTable()
 
-        For Each row In ReadManifest().Where(Function(r) r("Key") <> ArchiveKey)
+        For Each row In ReadManifest().Where(Function(r) Not NonFlavorKeys.Contains(r("Key")))
 
             Dim flavor As winapp2ool.WinappFlavor
             Assert.IsTrue([Enum].TryParse(row("Key"), flavor) AndAlso [Enum].IsDefined(GetType(winapp2ool.WinappFlavor), flavor) AndAlso
@@ -92,6 +97,26 @@ Imports System.IO
 
         Assert.AreEqual(1, archiveRows.Count)
         Assert.AreEqual(winapp2ool.winapp2file.ArchiveFileName, archiveRows(0)("Asset"))
+
+    End Sub
+
+    ''' <summary>
+    ''' winapp3.ini's row publishes the file and the changelog the published winapp3.ini header
+    ''' links. Inconclusive until the build gains the row.
+    ''' </summary>
+    <TestMethod()> Public Sub Winapp3Row_MatchesTheLinkedNames()
+
+        Dim winapp3Rows = ReadManifest().Where(Function(r) r("Key") = Winapp3Key).ToList()
+
+        If winapp3Rows.Count = 0 Then
+
+            Assert.Inconclusive("flavors.csv has no Winapp3 row yet")
+
+        End If
+
+        Assert.AreEqual(1, winapp3Rows.Count)
+        Assert.AreEqual(winapp2ool.winapp2file.Winapp3FileName, winapp3Rows(0)("Asset"))
+        Assert.AreEqual(winapp2ool.winapp2file.Winapp3ChangelogFileName, winapp3Rows(0)("Changelog"))
 
     End Sub
 

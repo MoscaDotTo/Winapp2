@@ -392,6 +392,7 @@ C:\Tools\winapp2\
 ```
 
 **Explanation**
+- Both files come from the latest GitHub release
 - `-1f "\subdir\name"` put both files in `archive\`. The first download created it, since it didn't exist yet
 - `-a` names `archived.ini` as Transmute's source file, and `-2d` points it at `archive\`. Use `-w` instead to merge winapp3.ini
 - The Transmute step writes to `winapp2-extended.ini`, leaving the original winapp2.ini intact

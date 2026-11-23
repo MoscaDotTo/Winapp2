@@ -20,7 +20,7 @@ Option Strict On
 Imports System.Text
 
 ''' <summary>
-''' Tests for the survival of the version comment, the flavor line and the archive marker across
+''' Tests for the survival of the version comment, the flavor line and the two file markers across
 ''' the <c> iniFile </c> to <c> winapp2file </c> round trip. Diff reads the version off the
 ''' first comment of the file <see cref="winapp2ool.winapp2file.ToIni"/> returns to build its header
 ''' </summary>
@@ -240,10 +240,10 @@ Imports System.Text
     <TestMethod()> Public Sub ArchiveMarkerSurvivesRepeatedRoundTrips()
 
         Dim first As New winapp2ool.winapp2file(MakeIni(WithPreambleLine("; archive: Retired winapp2.ini entries")))
-        Assert.IsTrue(first.IsArchive)
+        Assert.AreEqual(winapp2ool.WinappFileKind.Archive, first.Kind)
 
         Dim third As New winapp2ool.winapp2file(New winapp2ool.winapp2file(first.ToIni()).ToIni())
-        Assert.IsTrue(third.IsArchive, "ToIni dropped the archive marker")
+        Assert.AreEqual(winapp2ool.WinappFileKind.Archive, third.Kind, "ToIni dropped the archive marker")
         Assert.IsFalse(third.Flavor.HasValue)
 
         Dim text = third.ToWinapp2String()
@@ -254,7 +254,7 @@ Imports System.Text
         StringAssert.Contains(text, ";   https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources" & vbCrLf)
         StringAssert.Contains(text, "/blob/master/CONTRIBUTING.md")
         Assert.IsFalse(text.Contains("; Flavor:"))
-        Assert.IsFalse(text.Contains("in every flavor"))
+        Assert.IsFalse(text.Contains("every published file"))
 
     End Sub
 
@@ -263,8 +263,9 @@ Imports System.Text
 
         Dim wa2 As New winapp2ool.winapp2file(New winapp2ool.winapp2file(MakeIni(WithPreambleLine("; Flavor: Tron"))).ToIni())
 
-        Assert.IsFalse(wa2.IsArchive)
+        Assert.AreEqual(winapp2ool.WinappFileKind.None, wa2.Kind)
         Assert.IsFalse(wa2.ToWinapp2String().Contains("; Archive:"))
+        Assert.IsFalse(wa2.ToWinapp2String().Contains("; Winapp3:"))
 
     End Sub
 
@@ -274,13 +275,115 @@ Imports System.Text
     <TestMethod()> Public Sub ArchiveHeaderStartsWithVersionAndCount()
 
         Dim wa2 As New winapp2ool.winapp2file(MakeIni(VersionedFile))
-        wa2.IsArchive = True
+        wa2.Kind = winapp2ool.WinappFileKind.Archive
 
         Dim lines = wa2.ToWinapp2String().Split({vbCrLf}, StringSplitOptions.None)
 
         Assert.AreEqual("; Version: 260219", lines(0))
         Assert.AreEqual("; # of entries: 2", lines(1))
         Assert.AreEqual(winapp2ool.winapp2file.ArchiveMarkerLine, lines(2))
+
+    End Sub
+
+    ''' <summary>
+    ''' The winapp3.ini marker survives repeated round trips, in any case, and gives winapp3.ini's
+    ''' header: the version, the count and the marker, the warning, how to add the file, and its
+    ''' own links
+    ''' </summary>
+    <TestMethod()> Public Sub Winapp3MarkerSurvivesRepeatedRoundTrips()
+
+        Dim first As New winapp2ool.winapp2file(MakeIni(WithPreambleLine("; winapp3: Aggressive entries for power users")))
+        Assert.AreEqual(winapp2ool.WinappFileKind.Winapp3, first.Kind)
+
+        Dim third As New winapp2ool.winapp2file(New winapp2ool.winapp2file(first.ToIni()).ToIni())
+        Assert.AreEqual(winapp2ool.WinappFileKind.Winapp3, third.Kind, "ToIni dropped the winapp3.ini marker")
+        Assert.IsFalse(third.Flavor.HasValue)
+
+        Dim expected = String.Join(vbCrLf,
+            "; Version: 260219",
+            "; # of entries: 2",
+            "; Winapp3: aggressive entries for power users",
+            ";",
+            "; These entries are more aggressive than the ones in winapp2.ini",
+            "; Some may delete files their software or your system needs, and some take a very long time to scan",
+            "; Back up your system first, and only enable an entry when you understand what it removes",
+            ";",
+            "; To add them to your winapp2.ini:",
+            ";   winapp2ool -transmute -1f winapp2.ini -2f winapp3.ini -3f winapp2.ini",
+            ";",
+            "; Latest copy of this file:",
+            ";   https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp3.ini",
+            "; Changelog for the latest release:",
+            ";   https://github.com/MoscaDotTo/Winapp2/releases/latest/download/changelog-winapp3.txt",
+            "; Each changelog compares one release with the one before it",
+            "; Source folder:",
+            ";   https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/Winapp3",
+            ";",
+            "; About winapp2.ini, and how to install it for your cleaner:",
+            "")
+
+        Dim text = third.ToWinapp2String()
+        Assert.IsTrue(text.StartsWith(expected, StringComparison.Ordinal), text)
+        StringAssert.Contains(text, "/blob/master/CONTRIBUTING.md")
+        Assert.IsFalse(text.Contains("; Flavor:"))
+        Assert.IsFalse(text.Contains("; Archive:"))
+        Assert.IsFalse(text.Contains("every published file"))
+
+    End Sub
+
+    ''' <summary>
+    ''' A file carrying both marker lines is flagged and refused, whichever comes first, and a
+    ''' file with one marker and no flavor isn't
+    ''' </summary>
+    <TestMethod()> Public Sub BothMarkers_AreAConflict()
+
+        Dim lines = {winapp2ool.winapp2file.ArchiveMarkerLine, winapp2ool.winapp2file.Winapp3MarkerLine}
+
+        For Each pair In {lines, lines.Reverse().ToArray()}
+
+            Dim wa2 As New winapp2ool.winapp2file(MakeIni(WithPreambleLine(pair(0) & vbCrLf & pair(1))))
+            Assert.IsTrue(wa2.HasConflictingMarkers)
+            Assert.AreNotEqual("", wa2.MarkerConflict())
+
+        Next
+
+        For Each line In lines
+
+            Dim wa2 As New winapp2ool.winapp2file(MakeIni(WithPreambleLine(line)))
+            Assert.IsFalse(wa2.HasConflictingMarkers)
+            Assert.AreEqual("", wa2.MarkerConflict())
+
+        Next
+
+    End Sub
+
+    ''' <summary>
+    ''' A marked file with a flavor, from its header or set afterwards, is refused
+    ''' </summary>
+    <TestMethod()> Public Sub MarkedFileWithFlavor_IsAConflict()
+
+        Dim fromHeader As New winapp2ool.winapp2file(MakeIni(WithPreambleLine("; Flavor: Tron" & vbCrLf & winapp2ool.winapp2file.Winapp3MarkerLine)))
+        Assert.AreNotEqual("", fromHeader.MarkerConflict())
+
+        Dim setLater As New winapp2ool.winapp2file(MakeIni(VersionedFile))
+        setLater.Kind = winapp2ool.WinappFileKind.Winapp3
+        setLater.Flavor = winapp2ool.WinappFlavor.Base
+        Assert.AreNotEqual("", setLater.MarkerConflict())
+
+    End Sub
+
+    ''' <summary>
+    ''' A file with no flavor and no marker links the latest release under the label that names
+    ''' no product
+    ''' </summary>
+    <TestMethod()> Public Sub UnflavoredUnmarkedFile_LinksTheLatestReleaseNeutrally()
+
+        Dim text = New winapp2ool.winapp2file(MakeIni(VersionedFile)).ToWinapp2String()
+
+        StringAssert.Contains(text, "; # of entries: 2" & vbCrLf & ";" & vbCrLf &
+                                    "; Latest copy of every published file:" & vbCrLf &
+                                    ";   https://github.com/MoscaDotTo/Winapp2/releases/latest" & vbCrLf & ";" & vbCrLf)
+        Assert.IsFalse(text.Contains("in every flavor"))
 
     End Sub
 

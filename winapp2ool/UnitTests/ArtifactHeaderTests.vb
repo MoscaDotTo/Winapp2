@@ -42,7 +42,7 @@ Option Strict On
             ";   https://github.com/MoscaDotTo/Winapp2/blob/master/Assembler/Sources/EntryBuilder/A.ini",
             ";",
             "; This file is not intended to be used standalone or with any cleaning software",
-            "; Latest winapp2.ini, in every flavor:",
+            "; Latest copy of every published file:",
             ";   https://github.com/MoscaDotTo/Winapp2/releases/latest",
             ";",
             "; To add or fix an entry, see:",
@@ -72,7 +72,7 @@ Option Strict On
             ";   https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/BrowserBuilder",
             ";",
             "; This file is not intended to be used standalone or with any cleaning software",
-            "; Latest winapp2.ini, in every flavor:",
+            "; Latest copy of every published file:",
             ";   https://github.com/MoscaDotTo/Winapp2/releases/latest",
             ";",
             "; To add or fix an entry, see:",
@@ -88,7 +88,7 @@ Option Strict On
 
     ''' <summary>
     ''' An archive artifact is a piece of archived.ini, so it links that release asset and not
-    ''' the latest winapp2.ini
+    ''' the latest release
     ''' </summary>
     <TestMethod()> Public Sub ArchiveArtifact_LinksArchivedIni()
 
@@ -98,7 +98,7 @@ Option Strict On
 
         StringAssert.Contains(actual, "; Latest copy of archived.ini:" & vbCrLf &
                                       ";   https://github.com/MoscaDotTo/Winapp2/releases/latest/download/archived.ini" & vbCrLf)
-        Assert.IsFalse(actual.Contains("in every flavor"), actual)
+        Assert.IsFalse(actual.Contains("every published file"), actual)
         Assert.IsFalse(actual.Contains("/releases/latest" & vbCrLf), actual)
 
     End Sub
@@ -115,6 +115,83 @@ Option Strict On
                         winapp2ool.ArtifactHeader.SourceLink(winapp2ool.ArtifactHeader.BrowserBuilderSources, True))
         Assert.AreEqual("https://github.com/MoscaDotTo/Winapp2/blob/master/Assembler/Sources/EntryBuilder/%23.ini",
                         winapp2ool.ArtifactHeader.SourceLink("Assembler/Sources/EntryBuilder/#.ini", False))
+
+    End Sub
+
+    ''' <summary>
+    ''' A source folder links as its path from the nearest folder named <c> Assembler </c>, in
+    ''' any case, spelled as it is on disk, and a folder with no such ancestor gets the fallback
+    ''' </summary>
+    <TestMethod()> Public Sub RepoSourceFolder_ReadsThePathBelowAssembler()
+
+        Dim root = IO.Path.Combine(IO.Path.GetTempPath(), $"winapp2ool-repofolder-{Guid.NewGuid():N}")
+        Dim onDisk = IO.Path.Combine(root, "repo", "Assembler", "Sources", "Winapp3")
+
+        Try
+
+            IO.Directory.CreateDirectory(onDisk)
+
+            Assert.AreEqual("Assembler/Sources/Winapp3", winapp2ool.ArtifactHeader.RepoSourceFolder(onDisk, "fallback"))
+            Assert.AreEqual("Assembler/Sources/Winapp3", winapp2ool.ArtifactHeader.RepoSourceFolder(onDisk & "\", "fallback"))
+            Assert.AreEqual("Assembler/Sources/Winapp3", winapp2ool.ArtifactHeader.RepoSourceFolder(IO.Path.Combine(root, "repo", "assembler", "sources", "winapp3"), "fallback"))
+            Assert.AreEqual("Assembler/Sources/Winapp3", winapp2ool.ArtifactHeader.RepoSourceFolder(IO.Path.Combine(onDisk, "..", "Winapp3"), "fallback"))
+            Assert.AreEqual("fallback", winapp2ool.ArtifactHeader.RepoSourceFolder(IO.Path.Combine(root, "repo"), "fallback"))
+            Assert.AreEqual("fallback", winapp2ool.ArtifactHeader.RepoSourceFolder("", "fallback"))
+
+        Finally
+
+            IO.Directory.Delete(root, recursive:=True)
+
+        End Try
+
+    End Sub
+
+    ''' <summary>
+    ''' A folder that refuses to be listed never fails the link: outside the repository nothing
+    ''' is listed at all, and inside it the folder's name is kept as given
+    ''' </summary>
+    <TestMethod()> Public Sub RepoSourceFolder_SurvivesAFolderThatRefusesListing()
+
+        Dim root = IO.Path.Combine(IO.Path.GetTempPath(), $"winapp2ool-repofolder-{Guid.NewGuid():N}")
+        Dim lockedOutside = IO.Path.Combine(root, "locked")
+        Dim lockedInside = IO.Path.Combine(root, "repo", "Assembler", "Locked")
+        Dim denyList As New Security.AccessControl.FileSystemAccessRule(Security.Principal.WindowsIdentity.GetCurrent().User,
+                                                                          Security.AccessControl.FileSystemRights.ListDirectory,
+                                                                          Security.AccessControl.AccessControlType.Deny)
+
+        Try
+
+            IO.Directory.CreateDirectory(IO.Path.Combine(lockedOutside, "src"))
+            IO.Directory.CreateDirectory(IO.Path.Combine(lockedInside, "Sources", "Winapp3"))
+
+            For Each folder In {lockedOutside, lockedInside}
+
+                Dim acl = IO.Directory.GetAccessControl(folder)
+                acl.AddAccessRule(denyList)
+                IO.Directory.SetAccessControl(folder, acl)
+
+            Next
+
+            Assert.AreEqual("fallback", winapp2ool.ArtifactHeader.RepoSourceFolder(IO.Path.Combine(lockedOutside, "src"), "fallback"))
+            Assert.AreEqual("Assembler/Locked/Sources/Winapp3", winapp2ool.ArtifactHeader.RepoSourceFolder(IO.Path.Combine(lockedInside, "Sources", "Winapp3"), "fallback"))
+
+        Finally
+
+            For Each folder In {lockedOutside, lockedInside}
+
+                If IO.Directory.Exists(folder) Then
+
+                    Dim acl = IO.Directory.GetAccessControl(folder)
+                    acl.RemoveAccessRule(denyList)
+                    IO.Directory.SetAccessControl(folder, acl)
+
+                End If
+
+            Next
+
+            IO.Directory.Delete(root, recursive:=True)
+
+        End Try
 
     End Sub
 

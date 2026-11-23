@@ -116,7 +116,10 @@ Command-line runs always use the default scan settings. Changes you've saved in 
 | `-usedate` | Use today's date (yymmdd) as the version line in the saved file's header, e.g. `; Version: 260724` |
 | `-opti` | Turn on the experimental Optimizations rule (the FileKey merger) for this run |
 | `-keepdefaults` | Leave existing `Default=` keys alone instead of reporting and removing them; see [Default Key Policy](#default-key-policy) |
-| `-archive` | Mark the saved file as `archived.ini`, the archive of retired entries.|
+| `-archive` | Mark the saved file as `archived.ini`, the archive of retired entries, and gives it the archive's header |
+| `-winapp3` | Mark the saved file as `winapp3.ini`, the aggressive entries, and gives it winapp3.ini's header |
+
+A marked file keeps its marker on later runs without the flag. A marked file never has a flavor, and a file is only ever one kind, so each of these saves nothing and fails the run: `-archive` or `-winapp3` beside a flavor flag, `-archive` beside `-winapp3`, a flavor flag on a marked file, a marker flag that disagrees with the file's own marker (`-winapp3` on an `archived.ini`), and a file that carries both markers.
 
 Two of winapp2ool's global flags matter for scripted lint runs. They aren't WinappDebug arguments: they work with any module and can go anywhere on the command line.
 

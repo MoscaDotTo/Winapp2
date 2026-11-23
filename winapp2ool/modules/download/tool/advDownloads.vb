@@ -32,7 +32,7 @@ Public Module advDownloads
         Return MenuSection.CreateCompleteMenu("Advanced Downloads", menuDesc, ConsoleColor.DarkCyan) _
             .AddDispatchedOption("Winapp3.ini", "Extended and/or potentially unsafe entries",
                 Sub()
-                    downloadFile.Name = "winapp3.ini"
+                    downloadFile.Name = winapp2file.Winapp3FileName
                     download(downloadFile, wa3link)
                 End Sub) _
             .AddDispatchedOption("archived.ini", "Entries for old or discontinued software",

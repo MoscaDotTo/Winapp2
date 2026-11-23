@@ -22,7 +22,8 @@ Imports System.IO
 ''' <summary>
 ''' Tests for which writers put a flavor on the file they save: Flavorizer and WinappDebug
 ''' replace it when told one, and keep the input's otherwise. Also covers WinappDebug's
-''' <c> -archive </c> marker, which a file never carries beside a flavor.
+''' <c> -archive </c> and <c> -winapp3 </c> markers, which a file never carries beside a flavor
+''' or each other, and Transmute's merge of a marked file into winapp2.ini.
 ''' </summary>
 <TestClass()> Public Class FlavorStampTests
 
@@ -46,7 +47,15 @@ Imports System.IO
     ''' <summary>Returns a small winapp2.ini whose preamble carries the archive marker</summary>
     Private Shared Function ArchiveText() As String
 
-        Return "; Version: 260219" & vbCrLf & "; # of entries: 1" & vbCrLf & winapp2ool.winapp2file.ArchiveMarkerLine & vbCrLf & vbCrLf & Entries
+        Return MarkedText(winapp2ool.winapp2file.ArchiveMarkerLine)
+
+    End Function
+
+    ''' <summary>Returns a small winapp2.ini whose preamble carries the given marker lines</summary>
+    ''' <param name="markerLines">The marker lines, in preamble order</param>
+    Private Shared Function MarkedText(ParamArray markerLines As String()) As String
+
+        Return "; Version: 260219" & vbCrLf & "; # of entries: 1" & vbCrLf & String.Join("", markerLines.Select(Function(l) l & vbCrLf)) & vbCrLf & Entries
 
     End Function
 
@@ -109,10 +118,12 @@ Imports System.IO
     ''' <param name="flagFlavor">The flavor the command line named, or <c> Nothing </c></param>
     ''' <param name="markArchive">Indicates whether to pass <c> -archive </c></param>
     ''' <param name="inputText">The input's whole text, used in place of <paramref name="inputFlavor"/> when given</param>
+    ''' <param name="markWinapp3">Indicates whether to pass <c> -winapp3 </c></param>
     ''' <returns>The saved text, or <c> Nothing </c> when nothing was saved</returns>
     Private Function RunLint(inputFlavor As String, flagFlavor As winapp2ool.WinappFlavor?,
                     Optional markArchive As Boolean = False,
-                    Optional inputText As String = Nothing) As String
+                    Optional inputText As String = Nothing,
+                    Optional markWinapp3 As Boolean = False) As String
 
         Dim savedSuppress = winapp2ool.SuppressOutput
         Dim savedMode = winapp2ool.commandLineHandler.IsCommandLineMode
@@ -128,6 +139,7 @@ Imports System.IO
 
             Dim args = {"-1d", _dir, "-1f", "in.ini", "-3d", _dir, "-3f", "out.ini", "-c"}
             If markArchive Then args = args.Concat({"-archive"}).ToArray()
+            If markWinapp3 Then args = args.Concat({"-winapp3"}).ToArray()
             setCmdLineArgs(AddressOf winapp2ool.WinappDebug.HandleLintCmdLine, args)
 
             Dim outPath = Path.Combine(_dir, "out.ini")
@@ -248,8 +260,12 @@ Imports System.IO
     ''' <summary>A flavor run never gains the marker, from the lint or from Flavorizer</summary>
     <TestMethod()> Public Sub FlavorRuns_NeverGainTheMarker()
 
-        Assert.IsFalse(RunLint(Nothing, winapp2ool.WinappFlavor.Base).Contains("; Archive:"))
-        Assert.IsFalse(RunFlavorize(Nothing, winapp2ool.WinappFlavor.Tron).Contains("; Archive:"))
+        For Each marker In {"; Archive:", "; Winapp3:"}
+
+            Assert.IsFalse(RunLint(Nothing, winapp2ool.WinappFlavor.Base).Contains(marker))
+            Assert.IsFalse(RunFlavorize(Nothing, winapp2ool.WinappFlavor.Tron).Contains(marker))
+
+        Next
 
     End Sub
 
@@ -260,6 +276,116 @@ Imports System.IO
 
         Assert.AreEqual(1, ExitCodeAfter(Sub() text = RunFlavorize(Nothing, winapp2ool.WinappFlavor.Tron, baseText:=ArchiveText())))
         Assert.IsNull(text)
+
+    End Sub
+
+    ''' <summary><c> -winapp3 </c> marks the saved file as winapp3.ini and gives it winapp3.ini's header</summary>
+    <TestMethod()> Public Sub Lint_Winapp3FlagMarksTheFile()
+
+        Dim text As String = Nothing
+
+        Assert.AreEqual(0, ExitCodeAfter(Sub() text = RunLint(Nothing, Nothing, markWinapp3:=True)))
+        StringAssert.Contains(text, "; # of entries: 1" & vbCrLf & winapp2ool.winapp2file.Winapp3MarkerLine & vbCrLf)
+        Assert.IsFalse(text.Contains("; Flavor:"))
+        Assert.IsFalse(text.Contains("; Archive:"))
+
+    End Sub
+
+    ''' <summary>A lint of a file marked as winapp3.ini keeps the marker without being told again, and a matching flag is fine</summary>
+    <TestMethod()> Public Sub Lint_KeepsTheWinapp3Marker()
+
+        Dim marked = MarkedText(winapp2ool.winapp2file.Winapp3MarkerLine)
+        Dim text As String = Nothing
+
+        StringAssert.Contains(RunLint(Nothing, Nothing, inputText:=marked), winapp2ool.winapp2file.Winapp3MarkerLine & vbCrLf)
+        Assert.AreEqual(0, ExitCodeAfter(Sub() text = RunLint(Nothing, Nothing, inputText:=marked, markWinapp3:=True)))
+        StringAssert.Contains(text, winapp2ool.winapp2file.Winapp3MarkerLine & vbCrLf)
+
+    End Sub
+
+    ''' <summary>
+    ''' Each of these saves nothing and fails the run: <c> -winapp3 </c> beside <c> -archive </c>
+    ''' or a flavor flag, a flavor flag on a file marked as winapp3.ini, a marker flag that
+    ''' disagrees with the file's own marker, and a file that carries both markers
+    ''' </summary>
+    <TestMethod()> Public Sub Lint_Winapp3Conflicts_AreRefused()
+
+        Dim winapp3Text = MarkedText(winapp2ool.winapp2file.Winapp3MarkerLine)
+        Dim bothText = MarkedText(winapp2ool.winapp2file.ArchiveMarkerLine, winapp2ool.winapp2file.Winapp3MarkerLine)
+
+        Dim runs As New Dictionary(Of String, Func(Of String)) From {
+            {"-winapp3 with -archive", Function() RunLint(Nothing, Nothing, markArchive:=True, markWinapp3:=True)},
+            {"-winapp3 with a flavor flag", Function() RunLint(Nothing, winapp2ool.WinappFlavor.Base, markWinapp3:=True)},
+            {"a flavor flag on a winapp3.ini", Function() RunLint(Nothing, winapp2ool.WinappFlavor.CCleaner, inputText:=winapp3Text)},
+            {"-winapp3 on an archive", Function() RunLint(Nothing, Nothing, inputText:=ArchiveText(), markWinapp3:=True)},
+            {"-archive on a winapp3.ini", Function() RunLint(Nothing, Nothing, markArchive:=True, inputText:=winapp3Text)},
+            {"both markers", Function() RunLint(Nothing, Nothing, inputText:=bothText)},
+            {"both markers, flagged as the first", Function() RunLint(Nothing, Nothing, markArchive:=True, inputText:=bothText)}
+        }
+
+        For Each run In runs
+
+            Dim text As String = "unset"
+            Assert.AreEqual(1, ExitCodeAfter(Sub() text = run.Value.Invoke()), run.Key)
+            Assert.IsNull(text, run.Key)
+
+        Next
+
+    End Sub
+
+    ''' <summary>
+    ''' Flavorizing a file marked as winapp3.ini with a flavor stamp, or a file that carries both
+    ''' markers at all, saves nothing and fails the run
+    ''' </summary>
+    <TestMethod()> Public Sub Flavorize_Winapp3Conflicts_AreRefused()
+
+        Dim runs As New Dictionary(Of String, Func(Of String)) From {
+            {"stamped winapp3.ini", Function() RunFlavorize(Nothing, winapp2ool.WinappFlavor.Tron, baseText:=MarkedText(winapp2ool.winapp2file.Winapp3MarkerLine))},
+            {"both markers", Function() RunFlavorize(Nothing, Nothing, baseText:=MarkedText(winapp2ool.winapp2file.Winapp3MarkerLine, winapp2ool.winapp2file.ArchiveMarkerLine))}
+        }
+
+        For Each run In runs
+
+            Dim text As String = "unset"
+            Assert.AreEqual(1, ExitCodeAfter(Sub() text = run.Value.Invoke()), run.Key)
+            Assert.IsNull(text, run.Key)
+
+        Next
+
+    End Sub
+
+    ''' <summary>
+    ''' Merging a marked winapp3.ini into winapp2.ini, as winapp3.ini's header says to, keeps
+    ''' winapp2.ini's header and gains no marker
+    ''' </summary>
+    <TestMethod()> Public Sub Transmute_MergingWinapp3_KeepsTheBaseHeader()
+
+        Dim savedSuppress = winapp2ool.SuppressOutput
+
+        Try
+
+            winapp2ool.SuppressOutput = True
+            File.WriteAllText(Path.Combine(_dir, "winapp2.ini"), FileText("Base"))
+            File.WriteAllText(Path.Combine(_dir, "winapp3.ini"),
+                              MarkedText(winapp2ool.winapp2file.Winapp3MarkerLine).Replace("Test Entry A", "Test Entry W").Replace("TestA", "TestW"))
+
+            Dim baseFile = winapp2ool.iniFile.FromFile(Path.Combine(_dir, "winapp2.ini"))
+            Dim sourceFile = winapp2ool.iniFile.FromFile(Path.Combine(_dir, "winapp3.ini"))
+            Dim outputFile = winapp2ool.iniFile.Empty(_dir, "winapp2.ini")
+
+            Assert.IsTrue(winapp2ool.RemoteTransmute(baseFile, sourceFile, outputFile, True, New winapp2ool.MenuSection))
+
+            Dim text = File.ReadAllText(Path.Combine(_dir, "winapp2.ini"))
+            StringAssert.Contains(text, "; # of entries: 2" & vbCrLf & "; Flavor: Base" & vbCrLf)
+            StringAssert.Contains(text, "[Test Entry W *]")
+            Assert.IsFalse(text.Contains("; Winapp3:"), text)
+            Assert.IsFalse(text.Contains("aggressive"), text)
+
+        Finally
+
+            winapp2ool.SuppressOutput = savedSuppress
+
+        End Try
 
     End Sub
 

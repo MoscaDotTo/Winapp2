@@ -61,7 +61,7 @@ Module Downloader
     ''' <summary> 
     ''' The web address of winapp3.ini 
     ''' </summary>
-    Public ReadOnly Property wa3link As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/Winapp3.ini"
+    Public ReadOnly Property wa3link As String = winapp2file.LatestDownloadUrl & winapp2file.Winapp3FileName
 
     ''' <summary>
     ''' The web address of <c> archived.ini </c>, the archive of retired entries, in the latest
@@ -120,7 +120,7 @@ Module Downloader
                             downloadFile.Name = "readme.txt"
                         Case "4", "WINAPP3"
                             fileLink = wa3link
-                            downloadFile.Name = "winapp3.ini"
+                            downloadFile.Name = winapp2file.Winapp3FileName
                         Case "5", "ARCHIVED"
                             fileLink = archivedLink
                             downloadFile.Name = winapp2file.ArchiveFileName

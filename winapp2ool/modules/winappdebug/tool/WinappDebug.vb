@@ -196,13 +196,18 @@ Public Module WinappDebug
     ''' <c> -keepdefaults </c> preserve existing Default keys instead of removing them (for flavors
     ''' that deliberately set Default values, such as FluentCleaner) <br />
     ''' <c> -archive </c> mark the saved file as the archive of retired entries, which gives it
-    ''' the archive's header. A flavor flag beside it fails the run.
+    ''' the archive's header <br />
+    ''' <c> -winapp3 </c> mark the saved file as winapp3.ini, which gives it winapp3.ini's header.
+    ''' <br /><br />
+    ''' A marker flag beside a flavor flag or the other marker flag fails the run, as does one
+    ''' that disagrees with the input's own marker.
     ''' </remarks>
     Public Sub HandleLintCmdLine()
 
         InitDefaultLintSettings()
 
         Dim markArchive = False
+        Dim markWinapp3 = False
 
         Dim spec As New CliArgSpec(NameOf(WinappDebug))
         spec.WithFile(1, winappDebugFile1) _
@@ -212,11 +217,21 @@ Public Module WinappDebug
             .WithFlag("-opti", Sub() lintOpti.turnOn()) _
             .WithFlag("-keepdefaults", Sub() PreserveDefaultKeys = True) _
             .WithFlag("-archive", Sub() markArchive = True) _
+            .WithFlag("-winapp3", Sub() markWinapp3 = True) _
             .Parse()
 
         If cmdargs.Contains("UNIT_TESTING_HALT") Then Return
 
-        InitDebug(FlavorFromCommandLine, markArchive)
+        If markArchive AndAlso markWinapp3 Then
+
+            refuseLint("-archive and -winapp3 mark a file as two different kinds, so nothing was linted or saved")
+            Return
+
+        End If
+
+        Dim markKind = If(markArchive, WinappFileKind.Archive, If(markWinapp3, WinappFileKind.Winapp3, WinappFileKind.None))
+
+        InitDebug(FlavorFromCommandLine, markKind)
 
     End Sub
 
@@ -262,6 +277,21 @@ Public Module WinappDebug
     End Function
 
     ''' <summary>
+    ''' Reports why a command line lint saved nothing, and fails the run
+    ''' </summary>
+    '''
+    ''' <param name="reason">
+    ''' The message to log and show above the next menu
+    ''' </param>
+    Private Sub refuseLint(reason As String)
+
+        gLog(reason)
+        setNextMenuHeaderText(reason, printColor:=ConsoleColor.Red)
+        markRunFailed()
+
+    End Sub
+
+    ''' <summary>
     ''' Loads <see cref="winappDebugFile1"/>, lints it, and prints the report and a summary.
     ''' When <see cref="SaveChanges"/> is on, writes the linted file to
     ''' <see cref="winappDebugFile3"/>. Returns without linting when the file is missing or
@@ -274,15 +304,15 @@ Public Module WinappDebug
     ''' Optional, Default: <c> Nothing </c>
     ''' </param>
     '''
-    ''' <param name="markArchive">
-    ''' Indicates whether to mark the saved file as the archive of retired entries. A file that
-    ''' would then carry both the marker and a flavor, from the input or from
-    ''' <paramref name="stampFlavor"/>, isn't linted or saved, and the run fails. Only the
-    ''' command line passes it. <br /><br />
-    ''' Optional, Default: <c> False </c>
+    ''' <param name="markKind">
+    ''' The kind to mark the saved file as, or <c> None </c> to keep the input's. A file already
+    ''' marked as another kind, a file carrying more than one marker, and a marked file with a
+    ''' flavor, from the input or from <paramref name="stampFlavor"/>, aren't linted or saved,
+    ''' and the run fails. Only the command line passes it. <br /><br />
+    ''' Optional, Default: <c> WinappFileKind.None </c>
     ''' </param>
     Public Sub InitDebug(Optional stampFlavor As WinappFlavor? = Nothing,
-                         Optional markArchive As Boolean = False)
+                         Optional markKind As WinappFileKind = WinappFileKind.None)
 
         Dim inputFile = winappDebugFile1.Load(LintModuleSettingsChanged, NameOf(WinappDebug), NameOf(winappDebugFile1), NameOf(LintModuleSettingsChanged))
 
@@ -290,18 +320,24 @@ Public Module WinappDebug
 
         Dim wa2 As New winapp2file(inputFile, UseCurrentDate)
         If stampFlavor.HasValue Then wa2.Flavor = stampFlavor
-        If markArchive Then
+        If markKind <> WinappFileKind.None AndAlso wa2.Kind <> WinappFileKind.None AndAlso wa2.Kind <> markKind Then
 
-            wa2.IsArchive = True
+            refuseLint($"{winappDebugFile1.Name} is marked as {winapp2file.KindDescription(wa2.Kind)}, not {winapp2file.KindDescription(markKind)}, so nothing was linted or saved")
+            Return
 
         End If
 
-        If wa2.IsArchive AndAlso wa2.Flavor.HasValue Then
+        If markKind <> WinappFileKind.None Then
 
-            Dim bothMsg = $"{winappDebugFile1.Name} would be both the archive and the {WinappFlavorInfo.Lookup(wa2.Flavor.Value).DisplayName} flavor; the archive has no flavors, so nothing was linted or saved"
-            gLog(bothMsg)
-            setNextMenuHeaderText(bothMsg, printColor:=ConsoleColor.Red)
-            markRunFailed()
+            wa2.Kind = markKind
+
+        End If
+
+        Dim conflict = wa2.MarkerConflict()
+
+        If conflict.Length > 0 Then
+
+            refuseLint($"{conflict}, so nothing was linted or saved")
             Return
 
         End If

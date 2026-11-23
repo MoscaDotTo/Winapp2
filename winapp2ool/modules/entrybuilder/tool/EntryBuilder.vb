@@ -1071,18 +1071,20 @@ Public Module EntryBuilder
 
             outputFile = remotedebugGuarded(outputFile, NameOf(EntryBuilder), menuOutput)
 
+            Dim sourceFolder = RepoSourceFolder(EntryBuilderFile1.Dir, EntryBuilderSources)
+
             If EntryBuilderSplitOutput Then
 
-                WriteSplitOutput(outputFile, EntryBuilderFile2.Dir, NameOf(EntryBuilder), EntryBuilderSources, menuOutput)
+                WriteSplitOutput(outputFile, EntryBuilderFile2.Dir, NameOf(EntryBuilder), sourceFolder, menuOutput)
 
             Else
 
-                Dim header = ArtifactHeader.Text(NameOf(EntryBuilder), outputFile.Count, EntryBuilderSources, sourceIsFolder:=True)
+                Dim header = ArtifactHeader.Text(NameOf(EntryBuilder), outputFile.Count, sourceFolder, sourceIsFolder:=True)
                 outputFile.OverwriteToFile(header & outputFile.ToString())
 
             End If
 
-            WriteArchive(archiveFile, EntryBuilderArchiveFile.Dir, NameOf(EntryBuilder), EntryBuilderSources, menuOutput)
+            WriteArchive(archiveFile, EntryBuilderArchiveFile.Dir, NameOf(EntryBuilder), sourceFolder, menuOutput)
 
             gLog("EntryBuilder source files processed successfully")
 

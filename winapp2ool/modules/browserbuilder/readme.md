@@ -309,7 +309,7 @@ The saved file starts with this header:
 ;   https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/BrowserBuilder
 ;
 ; This file is not intended to be used standalone or with any cleaning software
-; Latest winapp2.ini, in every flavor:
+; Latest copy of every published file:
 ;   https://github.com/MoscaDotTo/Winapp2/releases/latest
 ;
 ; To add or fix an entry, see:

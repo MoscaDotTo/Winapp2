@@ -20,6 +20,28 @@ Imports System.Globalization
 Imports System.Text
 
 ''' <summary>
+''' What a <see cref="winapp2file"/> is, which its preamble says with a marker line
+''' </summary>
+Public Enum WinappFileKind
+
+    ''' <summary>
+    ''' A winapp2.ini, of any flavor or none
+    ''' </summary>
+    None
+
+    ''' <summary>
+    ''' The archive of retired entries, marked with <see cref="winapp2file.ArchiveMarkerLine"/>
+    ''' </summary>
+    Archive
+
+    ''' <summary>
+    ''' winapp3.ini, the aggressive entries, marked with <see cref="winapp2file.Winapp3MarkerLine"/>
+    ''' </summary>
+    Winapp3
+
+End Enum
+
+''' <summary>
 ''' Represents a winapp2.ini file, with its entries grouped into the file's sections.
 ''' Built from an <c> iniFile </c>.
 ''' </summary>
@@ -59,6 +81,22 @@ Public Class winapp2file
     ''' </summary>
     Public Const ArchiveMarkerLine As String = "; Archive: retired winapp2.ini entries"
 
+    ''' <summary>
+    ''' The file name of winapp3.ini, both as the build writes it and as its release asset
+    ''' </summary>
+    Public Const Winapp3FileName As String = "winapp3.ini"
+
+    ''' <summary>
+    ''' The release asset name of winapp3.ini's changelog
+    ''' </summary>
+    Public Const Winapp3ChangelogFileName As String = "changelog-winapp3.txt"
+
+    ''' <summary>
+    ''' The preamble line that marks a file as winapp3.ini. It's fixed, and we match it in any
+    ''' case.
+    ''' </summary>
+    Public Const Winapp3MarkerLine As String = "; Winapp3: aggressive entries for power users"
+
     ' One category list per FileSectionHeaders entry, at the same index
     Private ReadOnly _categories As New List(Of List(Of winapp2entry))
 
@@ -86,11 +124,19 @@ Public Class winapp2file
     Public Property Flavor As WinappFlavor?
 
     ''' <summary>
-    ''' Indicates whether the file is the archive of retired entries, which its preamble says
-    ''' with <see cref="ArchiveMarkerLine"/>. A marked file gets the archive's header. Only
-    ''' WinappDebug's <c> -archive </c> flag marks a file, and the archive never has a flavor.
+    ''' What the file is, which its preamble says with <see cref="ArchiveMarkerLine"/> or
+    ''' <see cref="Winapp3MarkerLine"/>. A marked file gets its own header. Only WinappDebug's
+    ''' <c> -archive </c> and <c> -winapp3 </c> flags mark a file, and a marked file never has
+    ''' a flavor.
     ''' </summary>
-    Public Property IsArchive As Boolean
+    Public Property Kind As WinappFileKind
+
+    ''' <summary>
+    ''' Indicates whether the source file's preamble held more than one marker line.
+    ''' <see cref="Kind"/> is then the first one's, and <see cref="MarkerConflict"/> refuses the
+    ''' file.
+    ''' </summary>
+    Public ReadOnly Property HasConflictingMarkers As Boolean
 
     ''' <summary>
     ''' The version comment string, e.g. "; Version: 260219". It's <c> ; Version: 000000 </c>
@@ -148,7 +194,13 @@ Public Class winapp2file
 
         Flavor = ReadFlavor(file)
 
-        IsArchive = ReadArchiveMarker(file)
+        Dim markedKinds = ReadMarkedKinds(file)
+        If markedKinds.Count > 0 Then
+
+            Kind = markedKinds(0)
+
+        End If
+        HasConflictingMarkers = markedKinds.Count > 1
 
         Version = DetermineVersionString(file, useTodaysDate)
 
@@ -208,13 +260,64 @@ Public Class winapp2file
     End Function
 
     ''' <summary>
-    ''' Returns whether the preamble, read as <see cref="ReadFlavor"/> reads it, holds
-    ''' <see cref="ArchiveMarkerLine"/>
+    ''' Returns the marker line of <paramref name="fileKind"/>
+    ''' </summary>
+    '''
+    ''' <param name="fileKind">A file kind other than <c> None </c></param>
+    Public Shared Function MarkerLine(fileKind As WinappFileKind) As String
+
+        Select Case fileKind
+
+            Case WinappFileKind.Archive
+
+                Return ArchiveMarkerLine
+
+            Case WinappFileKind.Winapp3
+
+                Return Winapp3MarkerLine
+
+            Case Else
+
+                Throw New ArgumentOutOfRangeException(NameOf(fileKind))
+
+        End Select
+
+    End Function
+
+    ''' <summary>
+    ''' Returns how a message names a file of <paramref name="fileKind"/>
+    ''' </summary>
+    '''
+    ''' <param name="fileKind">A file kind other than <c> None </c></param>
+    Public Shared Function KindDescription(fileKind As WinappFileKind) As String
+
+        Select Case fileKind
+
+            Case WinappFileKind.Archive
+
+                Return "the archive of retired entries"
+
+            Case WinappFileKind.Winapp3
+
+                Return Winapp3FileName
+
+            Case Else
+
+                Throw New ArgumentOutOfRangeException(NameOf(fileKind))
+
+        End Select
+
+    End Function
+
+    ''' <summary>
+    ''' Returns the kinds whose marker lines the preamble, read as <see cref="ReadFlavor"/>
+    ''' reads it, holds, in the order they appear
     ''' </summary>
     '''
     ''' <param name="file">A winapp2.ini format <c> iniFile </c></param>
-    Private Shared Function ReadArchiveMarker(file As iniFile) As Boolean
+    Private Shared Function ReadMarkedKinds(file As iniFile) As List(Of WinappFileKind)
 
+        Dim kinds As New List(Of WinappFileKind)
         Dim expectedLine = 1
 
         For Each comment In file.Comments
@@ -222,11 +325,49 @@ Public Class winapp2file
             If comment.LineNumber <> expectedLine Then Exit For
             expectedLine += 1
 
-            If comment.Text.Trim().Equals(ArchiveMarkerLine, StringComparison.OrdinalIgnoreCase) Then Return True
+            For Each markedKind In {WinappFileKind.Archive, WinappFileKind.Winapp3}
+
+                If Not kinds.Contains(markedKind) AndAlso
+                   comment.Text.Trim().Equals(MarkerLine(markedKind), StringComparison.OrdinalIgnoreCase) Then
+
+                    kinds.Add(markedKind)
+
+                End If
+
+            Next
 
         Next
 
-        Return False
+        Return kinds
+
+    End Function
+
+    ''' <summary>
+    ''' Returns why the file can't be saved as it stands: it carries more than one marker line,
+    ''' or it's marked and has a flavor. A writer given a reason writes nothing and fails the
+    ''' run.
+    ''' </summary>
+    '''
+    ''' <returns>
+    ''' The reason, <br />
+    ''' <c> "" </c> when the file can be saved
+    ''' </returns>
+    Public Function MarkerConflict() As String
+
+        If HasConflictingMarkers Then
+
+            Return $"{Name} carries more than one file marker, and a file is only ever one kind"
+
+        End If
+
+        If Kind <> WinappFileKind.None AndAlso Flavor.HasValue Then
+
+            Dim desc = KindDescription(Kind)
+            Return $"{Name} would be both {desc} and the {WinappFlavorInfo.Lookup(Flavor.Value).DisplayName} flavor, and {desc} has no flavors"
+
+        End If
+
+        Return ""
 
     End Function
 
@@ -258,7 +399,7 @@ Public Class winapp2file
     ''' Returns all entries as a single <c> iniFile </c> in winapp2.ini order. <br /> <br />
     '''
     ''' We re-emit the preamble state this class carries, the version string, the flavor and
-    ''' the archive marker, as comments on consecutive lines of the returned file. Without them
+    ''' the file kind's marker, as comments on consecutive lines of the returned file. Without them
     ''' a round trip through the winapp2 layer silently resets the version to <c> 000000 </c>
     ''' and forgets what the file is, since this class' constructor reads them back off
     ''' <c> iniFile.Comments </c>, and Diff reads the version there too
@@ -273,8 +414,8 @@ Public Class winapp2file
             out.Comments.Add(New iniComment($"; Flavor: {WinappFlavorInfo.Lookup(Flavor.Value).DisplayName}", out.Comments.Count + 1))
         End If
 
-        If IsArchive Then
-            out.Comments.Add(New iniComment(ArchiveMarkerLine, out.Comments.Count + 1))
+        If Kind <> WinappFileKind.None Then
+            out.Comments.Add(New iniComment(MarkerLine(Kind), out.Comments.Count + 1))
         End If
 
         For Each entry In Entries
@@ -375,10 +516,12 @@ Public Class winapp2file
     ''' The header's first two lines, the version and the entry count, are read by the
     ''' updater, Diff and the build, so their format is fixed. A file with a
     ''' <see cref="Flavor"/> gets a <c> ; Flavor: </c> third line, a description and links to
-    ''' its own release assets. A file marked <see cref="IsArchive"/> gets
+    ''' its own release assets. A file whose <see cref="Kind"/> is the archive gets
     ''' <see cref="ArchiveMarkerLine"/> as its third line instead, then says what the archive
-    ''' is and how to add it to winapp2.ini, and links its release asset and its sources. Any
-    ''' other file gets the same header minus those, linking to the latest release.
+    ''' is and how to add it to winapp2.ini, and links its release asset and its sources.
+    ''' winapp3.ini gets <see cref="Winapp3MarkerLine"/>, a warning, how to add it to
+    ''' winapp2.ini, and links to its release asset, its changelog and its sources. Any other
+    ''' file gets the same header minus those, linking to the latest release.
     ''' </summary>
     Public Function ToWinapp2String() As String
 
@@ -387,7 +530,7 @@ Public Class winapp2file
         builder.AppendLine(Version)
         builder.AppendLine(EntryCountLine(Count))
 
-        If IsArchive Then
+        If Kind = WinappFileKind.Archive Then
 
             builder.AppendLine(ArchiveMarkerLine)
             builder.AppendLine(";")
@@ -404,6 +547,25 @@ Public Class winapp2file
             builder.AppendLine("; This file contains the entries marked Archive= in the generator sources")
             builder.AppendLine("; Source folder:")
             builder.AppendLine($";   {SourceLink(GeneratorSources, sourceIsFolder:=True)}")
+
+        ElseIf Kind = WinappFileKind.Winapp3 Then
+
+            builder.AppendLine(Winapp3MarkerLine)
+            builder.AppendLine(";")
+            builder.AppendLine("; These entries are more aggressive than the ones in winapp2.ini")
+            builder.AppendLine("; Some may delete files their software or your system needs, and some take a very long time to scan")
+            builder.AppendLine("; Back up your system first, and only enable an entry when you understand what it removes")
+            builder.AppendLine(";")
+            builder.AppendLine("; To add them to your winapp2.ini:")
+            builder.AppendLine($";   winapp2ool -transmute -1f winapp2.ini -2f {Winapp3FileName} -3f winapp2.ini")
+            builder.AppendLine(";")
+            builder.AppendLine("; Latest copy of this file:")
+            builder.AppendLine($";   {LatestDownloadUrl}{Winapp3FileName}")
+            builder.AppendLine("; Changelog for the latest release:")
+            builder.AppendLine($";   {LatestDownloadUrl}{Winapp3ChangelogFileName}")
+            builder.AppendLine("; Each changelog compares one release with the one before it")
+            builder.AppendLine("; Source folder:")
+            builder.AppendLine($";   {SourceLink(Winapp3Sources, sourceIsFolder:=True)}")
 
         ElseIf Flavor.HasValue Then
 
@@ -423,7 +585,7 @@ Public Class winapp2file
         Else
 
             builder.AppendLine(";")
-            builder.AppendLine("; Latest winapp2.ini, in every flavor:")
+            builder.AppendLine($"; {LatestReleaseLabel}")
             builder.AppendLine($";   {RepoUrl}/releases/latest")
 
         End If

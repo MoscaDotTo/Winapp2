@@ -1075,4 +1075,112 @@ Imports System.Text
 
     End Sub
 
+    ''' <summary>
+    ''' Builds one live and one archived entry from a source folder at
+    ''' <paramref name="sourceFolder"/> below a scratch folder, and returns the headers' text
+    ''' </summary>
+    '''
+    ''' <param name="sourceFolder">The source folder's path below the scratch folder, created as given</param>
+    '''
+    ''' <param name="sourceArg">The <c> -1d </c> path below the scratch folder, which may differ from <paramref name="sourceFolder"/> in case</param>
+    '''
+    ''' <param name="split">Indicates whether to pass <c> -split </c></param>
+    '''
+    ''' <param name="liveText">Set to the text of <c> entrybuilder.ini </c>, or of <c> A.ini </c> with <paramref name="split"/></param>
+    '''
+    ''' <param name="archiveText">Set to the text of <c> archived.ini </c></param>
+    Private Shared Sub RunBuildFrom(sourceFolder As String,
+                                    sourceArg As String,
+                                    split As Boolean,
+                                    ByRef liveText As String,
+                                    ByRef archiveText As String)
+
+        Dim dir = IO.Path.Combine(IO.Path.GetTempPath(), $"winapp2ool-ebheader-{Guid.NewGuid():N}")
+        Dim sourceDir = IO.Path.Combine(dir, sourceFolder)
+        Dim outDir = IO.Path.Combine(dir, "Out")
+        Dim archiveDir = IO.Path.Combine(dir, "Archived")
+        Dim saved = {winapp2ool.EntryBuilderFile1, winapp2ool.EntryBuilderFile2, winapp2ool.EntryBuilderFile3, winapp2ool.EntryBuilderArchiveFile}
+        Dim savedSplit = winapp2ool.EntryBuilderSplitOutput
+        Dim savedSuppress = winapp2ool.SuppressOutput
+        Dim savedExitCode = Environment.ExitCode
+
+        Try
+
+            IO.Directory.CreateDirectory(sourceDir)
+            IO.Directory.CreateDirectory(IO.Path.Combine(dir, "Scaffolds"))
+            IO.File.WriteAllText(IO.Path.Combine(sourceDir, "A.ini"), LiveEntry & ArchivedEntry("Retired App", "Archive=Gone"))
+
+            winapp2ool.SuppressOutput = True
+
+            Dim args = {"-1d", IO.Path.Combine(dir, sourceArg), "-2d", outDir, "-3d", IO.Path.Combine(dir, "Scaffolds"), "-4d", archiveDir}
+            If split Then args = args.Concat({"-split"}).ToArray()
+            setCmdLineArgs(AddressOf winapp2ool.EntryBuilder.handleCmdLine, args)
+
+            liveText = IO.File.ReadAllText(IO.Path.Combine(outDir, If(split, "A.ini", "entrybuilder.ini")))
+            archiveText = IO.File.ReadAllText(IO.Path.Combine(archiveDir, "archived.ini"))
+
+        Finally
+
+            winapp2ool.EntryBuilderFile1 = saved(0)
+            winapp2ool.EntryBuilderFile2 = saved(1)
+            winapp2ool.EntryBuilderFile3 = saved(2)
+            winapp2ool.EntryBuilderArchiveFile = saved(3)
+            winapp2ool.EntryBuilderSplitOutput = savedSplit
+            winapp2ool.SuppressOutput = savedSuppress
+            Environment.ExitCode = savedExitCode
+            IO.Directory.Delete(dir, recursive:=True)
+
+        End Try
+
+    End Sub
+
+    ''' <summary>
+    ''' The live and archive headers link the source folder the run read, as its path from the
+    ''' nearest <c> Assembler </c> folder spelled as it is on disk, whatever case <c> -1d </c>
+    ''' used; a split letter file links its own source file there
+    ''' </summary>
+    <TestMethod()> Public Sub Header_LinksTheSourceFolderRead()
+
+        ' The folder to create, its -1d spelling, and the link the headers carry
+        Dim cases = {
+            {"Assembler\Sources\EntryBuilder", "Assembler\Sources\EntryBuilder", "Assembler/Sources/EntryBuilder"},
+            {"Assembler\Sources\Winapp3", "Assembler\Sources\Winapp3", "Assembler/Sources/Winapp3"},
+            {"repo\Assembler\Sources\Winapp3", "repo\assembler\sources\winapp3", "Assembler/Sources/Winapp3"}
+        }
+
+        For i = 0 To cases.GetLength(0) - 1
+
+            Dim live As String = Nothing
+            Dim archive As String = Nothing
+            Dim folderLink = $"; Source folder:{vbCrLf};   https://github.com/MoscaDotTo/Winapp2/tree/master/{cases(i, 2)}{vbCrLf}"
+
+            RunBuildFrom(cases(i, 0), cases(i, 1), split:=False, live, archive)
+            StringAssert.Contains(live, folderLink)
+            StringAssert.Contains(archive, folderLink)
+
+            RunBuildFrom(cases(i, 0), cases(i, 1), split:=True, live, archive)
+            StringAssert.Contains(live, $"; Source file:{vbCrLf};   https://github.com/MoscaDotTo/Winapp2/blob/master/{cases(i, 2)}/A.ini{vbCrLf}")
+            StringAssert.Contains(archive, folderLink)
+
+        Next
+
+    End Sub
+
+    ''' <summary>
+    ''' A source folder with no <c> Assembler </c> ancestor links EntryBuilder's own source folder,
+    ''' in the live and the archive headers
+    ''' </summary>
+    <TestMethod()> Public Sub Header_FallsBackOutsideTheRepository()
+
+        Dim live As String = Nothing
+        Dim archive As String = Nothing
+        Dim fallbackLink = $"; Source folder:{vbCrLf};   https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/EntryBuilder{vbCrLf}"
+
+        RunBuildFrom("MySources\Winapp3", "MySources\Winapp3", split:=False, live, archive)
+
+        StringAssert.Contains(live, fallbackLink)
+        StringAssert.Contains(archive, fallbackLink)
+
+    End Sub
+
 End Class

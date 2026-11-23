@@ -285,7 +285,7 @@ Public Module Transmute
             .WithFlag("-dontlint", Sub() isWinapp = Not isWinapp) _
             .WithFlag("-noglobal", Sub() recognizeGlobals = Not recognizeGlobals) _
             .WithFileAlias("-c", TransmuteFile2, "custom.ini") _
-            .WithFileAlias("-w", TransmuteFile2, "winapp3.ini") _
+            .WithFileAlias("-w", TransmuteFile2, winapp2file.Winapp3FileName) _
             .WithFileAlias("-a", TransmuteFile2, winapp2file.ArchiveFileName) _
             .WithFileAlias("-b", TransmuteFile2, "browsers.ini") _
         .Parse()
@@ -1297,8 +1297,9 @@ Public Module Transmute
     ''' <param name="stampFlavor">
     ''' The flavor to name in the output's header when <paramref name="isWinapp"/> is
     ''' <c> True </c>. When <c> Nothing </c>, the output keeps the flavor
-    ''' <paramref name="baseFile"/> names, if any. A flavored output of a file marked as the
-    ''' archive is refused: we warn, write nothing and fail the run. <br /><br />
+    ''' <paramref name="baseFile"/> names, if any. A flavored output of a marked file (the
+    ''' archive or winapp3.ini), or any output of a file carrying more than one marker, is
+    ''' refused: we warn, write nothing and fail the run. <br /><br />
     ''' Optional, Default: <c> Nothing </c>
     ''' </param>
     '''
@@ -1349,9 +1350,11 @@ Public Module Transmute
             Dim wf As New winapp2file(baseFile)
             If stampFlavor.HasValue Then wf.Flavor = stampFlavor
 
-            If wf.IsArchive AndAlso wf.Flavor.HasValue Then
+            Dim conflict = wf.MarkerConflict()
 
-                Dim bothMsg = $"{baseFile.Name} is the archive of retired entries, which has no flavors; {outputFile.Name} was not saved"
+            If conflict.Length > 0 Then
+
+                Dim bothMsg = $"{conflict}; {outputFile.Name} was not saved"
                 gLog(bothMsg)
                 menuOutput.AddWarning(bothMsg)
                 markRunFailed()

@@ -153,7 +153,7 @@ Each of these sets the source file name to a predefined file. Most of them can b
 |Arg|Effect|Description
 |:-|:-|:-
 | -c | Use "custom.ini"           | The suggested name for a file of your own additions
-| -w | Use "winapp3.ini"          | winapp2.ini entries that may break applications. Use at your own risk!
+| -w | Use "winapp3.ini"          | Aggressive entries that may break applications or take a very long time to scan. Use at your own risk!
 | -a | Use "archived.ini"         | winapp2.ini entries removed because the applications they target are no longer available
 | -b | Use "browsers.ini"         | BrowserBuilder's default output file
 
@@ -453,6 +453,8 @@ The output is written as a winapp2.ini file:
 - Entries are sorted alphabetically. Only winapp3.ini's sections (`Language Files`, `Dangerous Long`, `Dangerous`) appear in labeled groups
 - The keys in each entry are regrouped into winapp2.ini key order (categorization, then detection, then the cleaning keys), keeping their order within each group
 - The winapp2.ini header comments (version line, entry count, the flavor if the base file names one, and the project and license links) are written fresh at the top of the file
+- Only the base file's header counts, so adding a marked `winapp3.ini` or `archived.ini` to your winapp2.ini keeps winapp2.ini's header
+- Flavorizer refuses a base file marked as `winapp3.ini` or `archived.ini` when you give it a flavor, and a base file that carries both markers: it saves nothing and the run fails
 
 Because of the regrouping, a key that Add mode put at the end of an entry may not be at the end in the output. [Example 7](EXAMPLES.md#example-7-chaining-operations-together-1) shows this happening.
 

@@ -18,19 +18,21 @@
 Option Strict On
 
 Imports System.Globalization
+Imports System.IO
 Imports System.Text
 
 ''' <summary>
 ''' Writes the do-not-edit header that every generator puts at the top of its build artifacts
 ''' (EntryBuilder's and BrowserBuilder's output under <c> Assembler\Generated </c>),
 ''' and holds the repository URL and the repository-relative source folders those headers link.
-''' This is the only place either is spelled. <br /><br />
+''' This is the only place either is spelled. <see cref="RepoSourceFolder"/> reads EntryBuilder's
+''' link off the folder a run read instead, falling back to <see cref="EntryBuilderSources"/>.
+''' <br /><br />
 '''
 ''' A header names the generator, links the sources its entries come from on <c> master </c>,
-''' and points to the finished file (winapp2.ini, or archived.ini for an archive) and the
-''' contributor guide. It carries
-''' no license: the artifacts are repository files, and the published winapp2.ini carries the
-''' license.
+''' and points to the latest release (or archived.ini, for an archive) and the contributor
+''' guide. It carries no license: the artifacts are repository files, and the published files
+''' carry the license.
 ''' </summary>
 Public Module ArtifactHeader
 
@@ -53,6 +55,118 @@ Public Module ArtifactHeader
     ''' BrowserBuilder's source folder, relative to the repository root
     ''' </summary>
     Public Const BrowserBuilderSources As String = GeneratorSources & "/BrowserBuilder"
+
+    ''' <summary>
+    ''' winapp3.ini's source folder, relative to the repository root, as the published
+    ''' winapp3.ini links it
+    ''' </summary>
+    Public Const Winapp3Sources As String = GeneratorSources & "/Winapp3"
+
+    ''' <summary>
+    ''' The one label of the link to the latest release, in artifact headers and in the header
+    ''' of a published file with no flavor or marker
+    ''' </summary>
+    Public Const LatestReleaseLabel As String = "Latest copy of every published file:"
+
+    ''' <summary>
+    ''' The name of the repository folder that holds the generator sources, matched in any case
+    ''' </summary>
+    Private Const RepoAnchorFolder As String = "Assembler"
+
+    ''' <summary>
+    ''' Returns <paramref name="sourceDir"/>'s path from its nearest ancestor named
+    ''' <c> Assembler </c>, that folder included, with forward slashes, so
+    ''' <c> C:\repo\Assembler\Sources\Winapp3 </c> gives <c> Assembler/Sources/Winapp3 </c>
+    ''' whatever the checkout root or the working directory. Each folder is spelled as it is on
+    ''' disk, since GitHub's <c> tree/ </c> links are case-sensitive and a hand-typed
+    ''' <c> -1d \sources\winapp3 </c> would otherwise link nowhere.
+    ''' </summary>
+    '''
+    ''' <param name="sourceDir">
+    ''' The folder a generator read its sources from
+    ''' </param>
+    '''
+    ''' <param name="fallback">
+    ''' The repository-relative folder to return when <paramref name="sourceDir"/> has no
+    ''' <c> Assembler </c> ancestor, as a folder outside the repository doesn't
+    ''' </param>
+    Public Function RepoSourceFolder(sourceDir As String,
+                                     fallback As String) As String
+
+        If String.IsNullOrEmpty(sourceDir) Then
+
+            Return fallback
+
+        End If
+
+        Dim fullPath = Path.GetFullPath(sourceDir)
+
+        If fullPath.Length > Path.GetPathRoot(fullPath).Length Then
+
+            fullPath = fullPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+
+        End If
+
+        ' Find the anchor by name before touching the disk, so a folder outside the repository
+        ' never lists anything
+        Dim chain As New List(Of DirectoryInfo)
+        Dim current As New DirectoryInfo(fullPath)
+
+        Do While current.Parent IsNot Nothing
+
+            chain.Insert(0, current)
+            current = current.Parent
+
+            If current.Name.Equals(RepoAnchorFolder, StringComparison.OrdinalIgnoreCase) Then
+
+                chain.Insert(0, current)
+                Return String.Join("/", chain.Select(Function(folder) OnDiskName(folder)))
+
+            End If
+
+        Loop
+
+        Return fallback
+
+    End Function
+
+    ''' <summary>
+    ''' Returns <paramref name="folder"/>'s name as its parent lists it, or as given when it
+    ''' doesn't exist or its parent refuses to be listed
+    ''' </summary>
+    '''
+    ''' <param name="folder">
+    ''' A folder that isn't a drive root
+    ''' </param>
+    Private Function OnDiskName(folder As DirectoryInfo) As String
+
+        Try
+
+            If Not folder.Exists Then
+
+                Return folder.Name
+
+            End If
+
+            Dim listed = folder.Parent.GetDirectories(folder.Name).FirstOrDefault(Function(d) d.Name.Equals(folder.Name, StringComparison.OrdinalIgnoreCase))
+
+            Return If(listed Is Nothing, folder.Name, listed.Name)
+
+        Catch ex As UnauthorizedAccessException
+
+            Return folder.Name
+
+        Catch ex As IOException
+
+            Return folder.Name
+
+        Catch ex As Security.SecurityException
+
+            Return folder.Name
+
+        End Try
+
+    End Function
 
     ''' <summary>
     ''' The format of every entry count in a header, the published winapp2.ini's included.
@@ -130,7 +244,7 @@ Public Module ArtifactHeader
     '''
     ''' <param name="isArchive">
     ''' Indicates whether the artifact is a piece of <c> archived.ini </c>, which links that
-    ''' release asset instead of the latest winapp2.ini <br /><br />
+    ''' release asset instead of the latest release <br /><br />
     ''' Optional, Default: <c> False </c>
     ''' </param>
     Public Function Text(generatorName As String,
@@ -165,7 +279,7 @@ Public Module ArtifactHeader
 
         Else
 
-            sb.AppendLine("; Latest winapp2.ini, in every flavor:")
+            sb.AppendLine($"; {LatestReleaseLabel}")
             sb.AppendLine($";   {RepoUrl}/releases/latest")
 
         End If

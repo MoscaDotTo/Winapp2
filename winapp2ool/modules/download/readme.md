@@ -252,7 +252,7 @@ An update never installs an older version, even one with a valid signature. Sinc
 
 ### Winapp3 and Archived Entries
 
-`winapp3.ini` and `archived.ini` are not part of the standard winapp2.ini distribution. They may contain entries that are incomplete, actively dangerous for your system, or written for software that no longer exists. Review them before use.
+`winapp3.ini` and `archived.ini` are not part of the standard winapp2.ini distribution. They may contain entries that are incomplete, actively dangerous for your system, or written for software that no longer exists. Review them before use. Each file's header gives the Transmute command that adds it to your winapp2.ini.
 
 ---
 
@@ -292,12 +292,11 @@ Every winapp2.ini flavor is downloaded from the [latest release](https://github.
 | winapp2.ini (CCleaner 7) | `winapp2-ccleaner7.ini` |
 | winapp2.ini (FluentCleaner) | `winapp2-fluentcleaner.ini` |
 
-Each flavor is saved as `winapp2.ini` (`winapp2.rules` for System Ninja), whatever its asset is called. `archived.ini` comes from the latest release too, as the asset of the same name. Everything else is fetched from `github.com/MoscaDotTo/Winapp2` on the `master` branch:
+Each flavor is saved as `winapp2.ini` (`winapp2.rules` for System Ninja), whatever its asset is called. `winapp3.ini` and `archived.ini` come from the latest release too, each as the asset of the same name. Everything else is fetched from `github.com/MoscaDotTo/Winapp2` on the `master` branch:
 
 | File | Path in the repository |
 |:-|:-|
 | winapp2ool.exe | `winapp2ool/bin/Release/winapp2ool.exe` |
 | readme | `winapp2ool/Readme.md` |
-| winapp3.ini | `Winapp3/Winapp3.ini` |
 
 With **Beta Participation** enabled (main menu → Settings), `winapp2ool.exe` is taken from the `Branch1` branch instead of `master`. No other file is affected by the beta setting.

@@ -754,7 +754,7 @@ The output file begins with this comment header, where the first line counts its
 ;   https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/EntryBuilder
 ;
 ; This file is not intended to be used standalone or with any cleaning software
-; Latest winapp2.ini, in every flavor:
+; Latest copy of every published file:
 ;   https://github.com/MoscaDotTo/Winapp2/releases/latest
 ;
 ; To add or fix an entry, see:
@@ -774,14 +774,14 @@ With `-split`, each per-letter file links its own source file instead of the fol
 ;   https://github.com/MoscaDotTo/Winapp2/blob/master/Assembler/Sources/EntryBuilder/A.ini
 ;
 ; This file is not intended to be used standalone or with any cleaning software
-; Latest winapp2.ini, in every flavor:
+; Latest copy of every published file:
 ;   https://github.com/MoscaDotTo/Winapp2/releases/latest
 ;
 ; To add or fix an entry, see:
 ;   https://github.com/MoscaDotTo/Winapp2/blob/master/CONTRIBUTING.md
 ```
 
-`#.ini` holds the entries beginning with numbers or symbols, and its link spells the file `%23.ini`, since a bare `#` would end the link. The links always point into the winapp2 repository, whatever source directory the run read.
+`#.ini` holds the entries beginning with numbers or symbols, and its link spells the file `%23.ini`, since a bare `#` would end the link. The links always point into the winapp2 repository. They name the source directory the run read, as its path from the nearest folder called `Assembler` and spelled as it is on disk, so `-1d \Sources\Winapp3` run from `Assembler` links `Assembler/Sources/Winapp3`. A source directory with no `Assembler` folder above it links `Assembler/Sources/EntryBuilder`.
 
 The build runs EntryBuilder with `-split`, and a strict Combine joins the per-letter files with BrowserBuilder's `browsers.ini` to make the base winapp2.ini.
 
