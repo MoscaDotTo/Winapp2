@@ -1,33 +1,32 @@
 # Winapp2ool
 
-Winapp2ool is the tool that builds winapp2.ini, and a companion utility for the people who use it. The published winapp2.ini files (the base file, each of its [flavors](../README.md#what-are-flavors), and the changelog shipped alongside each one) are [generated from source](#how-winapp2ini-gets-built) by winapp2ool rather than edited by hand, and every pull-request check and release in GitHub Actions runs through it. You can use it through its menus, or run any of its modules from a script with command-line arguments.
+Winapp2ool is a custom build toolchain and client side manager for winapp2.ini. It generates and assembles winapp2.ini from its source files, and creates the release and PR changelogs for the repo. It also provides several useful features to end users, such as showing custom changelogs, downloading files from the repo, or keeping winapp2.ini up to date and trimmed for individual machines.
 
-### What is winapp2.ini?
+Winapp2ool runs in a headless mode for CLI and automation use, or as a standard console application with a text based numbered menu system. It provides a suite of utilities for: 
 
-Winapp2.ini is a community-maintained database of declarative cleaning routines for Windows. CCleaner, BleachBit, System Ninja, Avira System Speedup, R-Wipe&Clean, HDCleaner, FluentCleaner, and Reg Organizer can all read it. It has [its own readme](../README.md).
+**Using winapp2.ini**
 
-### Why winapp2ool?
-
-A lot of what people do with winapp2.ini is tedious or easy to get wrong by hand. Winapp2ool's modules take care of it, grouped here by who they're for:
-
-**For using winapp2.ini**
-
-* [Downloader](modules/download/readme.md): Downloads winapp2.ini and related files from GitHub
 * [Trim](modules/trim/README.md): Reduces the database to entries relevant to the current system
-* [Diff](modules/diff/readme.md): Generates a semantic changelog between any two winapp2.ini versions that tracks additions and removals, follows entries through renames and merges, and tracks keys that moved from one entry to another
-* [CC7Patcher](modules/cc7patcher/readme.md): Installs winapp2.ini entries into CCleaner 7's ccleaner.ini
-* [CCiniDebug](modules/ccdebug/readme.md): Removes stale winapp2.ini settings from CCleaner 6's ccleaner.ini
+* [Diff](modules/diff/readme.md): Generates a semantic changelog between any two winapp2.ini versions that tracks additions and removals, follows entries through renames and merges, and tracks keys that were captured by others or moved between entries
+* [Downloader](modules/download/readme.md): Downloads winapp2.ini and related files from GitHub
+* [CC7Patcher](modules/cc7patcher/readme.md): Installs winapp2.ini into CCleaner 7
+* [CCiniDebug](modules/ccdebug/readme.md): Removes stale winapp2.ini settings from CCleaner Classic
 
-**For customizing winapp2.ini**
+**Customizing winapp2.ini**
 
 * [Transmute](modules/transmute/readme.md): Applies individual structured patches to ini files
 * [Flavorizer](modules/transmute/Flavorizer/readme.md): Applies batches of structured patches to ini files
-* [WinappDebug](modules/winappdebug/README.md): Performs static analysis and corrects style and syntax errors
+* [WinappDebug](modules/winappdebug/README.md): Performs static analysis on winapp2.ini and corrects style and syntax errors
 
-**For building winapp2.ini**
+**And building winapp2.ini**
 
-* [Entry Lab](modules/entrylab/readme.md): Hub for the entry generators: [Browser Builder](modules/browserbuilder/readme.md) and [Entry Builder](modules/entrybuilder/readme.md)
+* [Browser Builder](modules/browserbuilder/readme.md): Generates entries for every web browser from small templates
+* [Entry Builder](modules/entrybuilder/readme.md): Generates winapp2.ini entries from an optional shorthand syntax 
 * [Combine](modules/combine/readme.md): Merges folders (including subfolders) of ini files into a single file
+
+### What is winapp2.ini?
+
+Winapp2.ini is a community maintained database of declarative cleaning routines for Windows that works with FluentCleaner, BleachBit, CCleaner (*including CCleaner 7*), System Ninja, Avira System Speedup, R-Wipe&Clean, HDCleaner, and Reg Organizer. It has [its own readme](../README.md).
 
 ---
 
@@ -85,7 +84,7 @@ When a new version of winapp2ool is out, the main menu offers `Update Winapp2ool
 
 ### Beta builds
 
-We sometimes publish beta builds while a feature is still in development. They live on [Branch1](https://github.com/MoscaDotTo/Winapp2/tree/Branch1). To try one, turn on beta participation in the [winapp2ool settings](modules/maintool/readme.md), and winapp2ool downloads and launches the newest beta right away. Beta participation requires .NET Framework 4.8.
+Beta builds are occasionally made available while features are in development. They live on [Branch1](https://github.com/MoscaDotTo/Winapp2/tree/Branch1). To try one, turn on `Beta Participation` in the [winapp2ool settings](modules/maintool/readme.md), and winapp2ool will download and launch the latest beta if one is available.  
 
 ---
 
@@ -155,7 +154,7 @@ Each module's readme has its own Common Uses table near the top. Every module is
 
 # Menu Options
 
-Each linked option name goes to that module's readme.
+Click a module's name to see its readme
 
 | Option | Effect | Notes |
 |:-|:-|:-|
@@ -165,7 +164,7 @@ Each linked option name goes to that module's readme.
 | [Transmute](modules/transmute/readme.md) | Add, replace, or remove entire sections or individual keys from winapp2.ini | Patches whole sections or single keys. [Flavorizer](modules/transmute/Flavorizer/readme.md), which applies patches in batches, opens from this menu |
 | [Diff](modules/diff/readme.md) | Generate a context-aware changelog between two winapp2.ini files | |
 | [CCiniDebug](modules/ccdebug/readme.md) | Remove stale winapp2.ini configurations from ccleaner.ini | For CCleaner 6 and earlier only |
-| [Entry Lab](modules/entrylab/readme.md) | Generate winapp2.ini entries from templates | Hub for [Browser Builder](modules/browserbuilder/readme.md) and [Entry Builder](modules/entrybuilder/readme.md) |
+| [Entry Lab](modules/entrylab/readme.md) | Generate winapp2.ini entries from templates | Menu containing [Browser Builder](modules/browserbuilder/readme.md) and [Entry Builder](modules/entrybuilder/readme.md) |
 | [Combine](modules/combine/readme.md) | Join together a collection of ini files into one | Includes subfolders |
 | [CC7Patcher](modules/cc7patcher/readme.md) | Install winapp2.ini for CCleaner 7 | Appends winapp2.ini entries into CCleaner 7's ccleaner.ini |
 | [Downloader](modules/download/readme.md) | Download files from the Winapp2 GitHub | **Unavailable in offline mode** |
@@ -203,7 +202,7 @@ Global and flavor args can go anywhere on the command line. Of the args left aft
 | `11` or `entrybuilder` | Launches [Entry Builder](modules/entrybuilder/readme.md) |
 | `12` or `cc7patcher` | Launches [CC7Patcher](modules/cc7patcher/readme.md) |
 
-###### Note: These numbers are not the same as the numbers on the main menu. `10` belonged to UWPBuilder, which is now part of [Entry Builder](modules/entrybuilder/readme.md#store-and-hybrid-apps), and is left unused so the numbers after it don't change.
+###### Note: These numbers are not the same as the numbers on the main menu.
 
 ### Global Args
 
@@ -230,7 +229,7 @@ The active [Flavor](../README.md#what-are-flavors) determines which variant of w
 
 ### File Selection Args
 
-Every module numbers the files it works with. Two kinds of arg change where a numbered file lives:
+Every module numbers the files with which it works:
 
 | Arg | Effect | Notes |
 |:-|:-|:-|
@@ -294,7 +293,7 @@ Nothing is printed to the console. `winapp2.ini` is downloaded from GitHub and s
 
 **Context**
 
-The same maintenance script should produce a winapp2.ini that's already trimmed for the machine it runs on. This is the scripted version of `Update & Trim` from Example 1.
+The same maintenance script should produce a winapp2.ini that's already trimmed for the machine on which it runs. This is a scripted version of `Update & Trim` from Example 1.
 
 **Command**
 
@@ -323,7 +322,7 @@ Nothing is printed to the console. `winapp2.ini` appears in the working director
 
 **Context**
 
-A BleachBit user wants the BleachBit flavor of winapp2.ini instead of the default base one.
+A BleachBit 5 user wants the BleachBit flavor of winapp2.ini instead of the default base one.
 
 **Command**
 
@@ -345,7 +344,7 @@ The BleachBit flavor of `winapp2.ini` is downloaded and saved to the current dir
 
 **Context**
 
-You keep your own additions to winapp2.ini in a `custom.ini` file. A script applies them to your local winapp2.ini and then fixes the style and syntax of the result. Your network connection is bad, and winapp2ool lags on startup while it tries to reach GitHub.
+You keep your own additions to winapp2.ini in a `custom.ini` file. A script applies them to your local winapp2.ini and then fixes the style and syntax of the result. Your network connection is bad, and winapp2ool lags on startup while it tries to reach GitHub, so you do this offline.
 
 **Files**
 
@@ -434,22 +433,3 @@ Winapp2ool doesn't back up ini files before it changes them, so keep your own co
 Windows XP users should use winapp2oolXP. It can still download and trim the latest winapp2.ini, but it's no longer maintained, and we can't offer support for it.
 
 This readme describes the modern state of Winapp2ool and not Winapp2oolXP, though most basic menus and functions are similar.
-
----
-
-# How winapp2.ini gets built
-
-This section is for people who contribute to winapp2.ini, or who are curious how the published files get made. You don't need it to use winapp2ool.
-
-Nobody assembles the published winapp2.ini by hand. Its sources live in [Assembler](../Assembler), and winapp2ool runs every stage that turns them into the published files:
-
-1. [Entry Builder](modules/entrybuilder/readme.md) and [Browser Builder](modules/browserbuilder/readme.md) expand the [base entry](../Assembler/Sources/EntryBuilder) sources, [Microsoft Store apps](modules/entrybuilder/readme.md#store-and-hybrid-apps) included, and the [browser](../Assembler/Sources/BrowserBuilder) sources into the committed [build artifacts](../Assembler/Generated)
-2. [Combine](modules/combine/readme.md) joins those artifacts into one file in strict mode
-3. [WinappDebug](modules/winappdebug/README.md) applies the style and syntax rules to the merged file and saves its corrections
-4. [Flavorizer](modules/transmute/Flavorizer/readme.md) applies each flavor's ruleset to produce the CCleaner, CCleaner 7, BleachBit, FluentCleaner, Tron, and System Ninja variants, and WinappDebug lints each one
-5. [Diff](modules/diff/readme.md) writes a changelog against the previous version for the base file and each flavor whose content changed, and the build publishes both to [Releases](../Releases), named as they are on each GitHub release
-
-The artifacts under [Generated](../Assembler/Generated) are committed to the repository instead of living only for the length of a build, so we can check the build against itself. `build winapp2.ps1 -Verify` regenerates all of them, compares them byte for byte with what's committed, and exits nonzero if anything drifted. GitHub Actions runs that check, and two more jobs:
-
-* A pull request that touches the build sources gets built twice, once from master alone and once with the pull request merged in. A bot comment then posts either the changelog the change produces or the stage where it broke the build
-* The sources are rebuilt every day. When the output changes, the build commits it back and cuts a release with every flavor and changelog attached
