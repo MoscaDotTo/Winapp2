@@ -1,4 +1,4 @@
-; Version: 260915
+; Version: 261121
 ; # of entries: 4,068
 ;
 ; Winapp2.ini is fully licensed under the CC-BY-SA-4.0 license agreement. Please refer to our license agreement before using Winapp2.ini: https://github.com/MoscaDotTo/Winapp2/blob/master/License.md
@@ -211,7 +211,7 @@ FileKey2=%LocalAppData%\1browser\1browser\User Data\*\Sessions|*|REMOVESELF
 
 [1Browser Web Storage *]
 DetectFile=%LocalAppData%\1browser\1browser\User Data
-FileKey1=%LocalAppData%\1browser\1browser\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\1browser\1browser\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\1browser\1browser\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\1browser\1browser\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\1browser\1browser\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -555,7 +555,7 @@ FileKey3=%AppData%\360se6\User Data\*\Sessions|*|REMOVESELF
 
 [360 Secure Browser Web Storage *]
 DetectFile=%AppData%\360se6\User Data
-FileKey1=%AppData%\360se6\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%AppData%\360se6\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%AppData%\360se6\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%AppData%\360se6\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%AppData%\360se6\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -2899,7 +2899,7 @@ FileKey2=%LocalAppData%\AOL\AOL Shield\User Data\*\Sessions|*|REMOVESELF
 
 [AOL Shield Web Storage *]
 DetectFile=%LocalAppData%\AOL\AOL Shield\User Data
-FileKey1=%LocalAppData%\AOL\AOL Shield\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\AOL\AOL Shield\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\AOL\AOL Shield\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\AOL\AOL Shield\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\AOL\AOL Shield\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -3344,7 +3344,7 @@ FileKey2=%LocalAppData%\Packages\TheBrowserCompany.Arc_ttt1ap7aakyb4\LocalCache\
 
 [Arc Web Storage *]
 DetectFile=%LocalAppData%\Packages\TheBrowserCompany.Arc_ttt1ap7aakyb4\LocalCache\Local\Arc\User Data
-FileKey1=%LocalAppData%\Packages\TheBrowserCompany.Arc_ttt1ap7aakyb4\LocalCache\Local\Arc\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\Packages\TheBrowserCompany.Arc_ttt1ap7aakyb4\LocalCache\Local\Arc\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\Packages\TheBrowserCompany.Arc_ttt1ap7aakyb4\LocalCache\Local\Arc\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\Packages\TheBrowserCompany.Arc_ttt1ap7aakyb4\LocalCache\Local\Arc\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\Packages\TheBrowserCompany.Arc_ttt1ap7aakyb4\LocalCache\Local\Arc\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -4878,7 +4878,7 @@ FileKey2=%LocalAppData%\Avast Software\Browser\User Data\*\Sessions|*|REMOVESELF
 
 [Avast Secure Browser Web Storage *]
 DetectFile=%LocalAppData%\Avast Software\Browser\User Data
-FileKey1=%LocalAppData%\Avast Software\Browser\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\Avast Software\Browser\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\Avast Software\Browser\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\Avast Software\Browser\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\Avast Software\Browser\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -5113,7 +5113,7 @@ FileKey2=%LocalAppData%\AVG\Browser\User Data\*\Sessions|*|REMOVESELF
 
 [AVG Secure Browser Web Storage *]
 DetectFile=%LocalAppData%\AVG\Browser\User Data
-FileKey1=%LocalAppData%\AVG\Browser\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\AVG\Browser\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\AVG\Browser\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\AVG\Browser\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\AVG\Browser\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -5319,7 +5319,7 @@ FileKey2=%LocalAppData%\Avira\Browser\User Data\*\Sessions|*|REMOVESELF
 
 [Avira Secure Browser Web Storage *]
 DetectFile=%LocalAppData%\Avira\Browser\User Data
-FileKey1=%LocalAppData%\Avira\Browser\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\Avira\Browser\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\Avira\Browser\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\Avira\Browser\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\Avira\Browser\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -6169,7 +6169,7 @@ FileKey2=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\Sessions|*|REMOVE
 
 [Brave Origin Web Storage *]
 DetectFile=%LocalAppData%\BraveSoftware\Brave-Origin\User Data
-FileKey1=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -6312,7 +6312,7 @@ FileKey2=%LocalAppData%\BraveSoftware\Brave-Browser*\User Data\*\Sessions|*|REMO
 DetectFile1=%LocalAppData%\BraveSoftware\Brave-Browser
 DetectFile2=%LocalAppData%\BraveSoftware\Brave-Browser-Beta
 DetectFile3=%LocalAppData%\BraveSoftware\Brave-Browser-Nightly
-FileKey1=%LocalAppData%\BraveSoftware\Brave-Browser*\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\BraveSoftware\Brave-Browser*\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\BraveSoftware\Brave-Browser*\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\BraveSoftware\Brave-Browser*\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\BraveSoftware\Brave-Browser*\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -6595,7 +6595,7 @@ FileKey4=%LocalAppData%\BriskBard\WebView\UserData\EBWebView\*\Sessions|*|REMOVE
 [BriskBard Web Storage *]
 DetectFile1=%LocalAppData%\BriskBard
 DetectFile2=%LocalAppData%\BriskBard\WebView\UserData\EBWebView
-FileKey1=%LocalAppData%\BriskBard\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\BriskBard\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\BriskBard\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\BriskBard\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\BriskBard\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -6603,7 +6603,7 @@ FileKey5=%LocalAppData%\BriskBard\*\Local Storage\*\WebStorage|*|RECURSE
 FileKey6=%LocalAppData%\BriskBard\*\Local Storage\leveldb|*|REMOVESELF
 FileKey7=%LocalAppData%\BriskBard\*\Session Storage|*|REMOVESELF
 FileKey8=%LocalAppData%\BriskBard\*\WebStorage|*|REMOVESELF
-FileKey9=%LocalAppData%\BriskBard\WebView\UserData\EBWebView\*\IndexedDB|*|REMOVESELF
+FileKey9=%LocalAppData%\BriskBard\WebView\UserData\EBWebView\*\IndexedDB\http*|*|REMOVESELF
 FileKey10=%LocalAppData%\BriskBard\WebView\UserData\EBWebView\*\Local Storage\*\IndexedDB\https*|*
 FileKey11=%LocalAppData%\BriskBard\WebView\UserData\EBWebView\*\Local Storage\*\Session Storage|*
 FileKey12=%LocalAppData%\BriskBard\WebView\UserData\EBWebView\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -6790,7 +6790,7 @@ FileKey2=%LocalAppData%\BrowserOS\BrowserOS\User Data\*\Sessions|*|REMOVESELF
 
 [BrowserOS Web Storage *]
 DetectFile=%LocalAppData%\BrowserOS\BrowserOS\User Data
-FileKey1=%LocalAppData%\BrowserOS\BrowserOS\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\BrowserOS\BrowserOS\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\BrowserOS\BrowserOS\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\BrowserOS\BrowserOS\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\BrowserOS\BrowserOS\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -7209,7 +7209,7 @@ FileKey2=%LocalAppData%\CCleaner Browser\User Data\*\Sessions|*|REMOVESELF
 
 [CCleaner Browser Web Storage *]
 DetectFile=%LocalAppData%\CCleaner Browser\User Data
-FileKey1=%LocalAppData%\CCleaner Browser\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\CCleaner Browser\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\CCleaner Browser\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\CCleaner Browser\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\CCleaner Browser\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -7396,7 +7396,7 @@ FileKey2=%LocalAppData%\CentBrowser\User Data\*\Sessions|*|REMOVESELF
 
 [Cent Browser Web Storage *]
 DetectFile=%LocalAppData%\CentBrowser\User Data
-FileKey1=%LocalAppData%\CentBrowser\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\CentBrowser\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\CentBrowser\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\CentBrowser\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\CentBrowser\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -7685,7 +7685,7 @@ FileKey2=%LocalAppData%\Chromium\User Data\*\Sessions|*|REMOVESELF
 
 [Chromium Web Storage *]
 DetectFile=%LocalAppData%\Chromium\User Data
-FileKey1=%LocalAppData%\Chromium\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\Chromium\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\Chromium\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\Chromium\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\Chromium\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -8042,7 +8042,7 @@ FileKey2=%LocalAppData%\CocCoc\Browser\User Data\*\Sessions|*|REMOVESELF
 
 [Coc Coc Web Storage *]
 DetectFile=%LocalAppData%\CocCoc\Browser\User Data
-FileKey1=%LocalAppData%\CocCoc\Browser\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\CocCoc\Browser\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\CocCoc\Browser\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\CocCoc\Browser\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\CocCoc\Browser\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -8255,7 +8255,7 @@ FileKey2=%LocalAppData%\Perplexity\Comet\User Data\*\Sessions|*|REMOVESELF
 
 [Comet Web Storage *]
 DetectFile=%LocalAppData%\Perplexity\Comet\User Data
-FileKey1=%LocalAppData%\Perplexity\Comet\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\Perplexity\Comet\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\Perplexity\Comet\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\Perplexity\Comet\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\Perplexity\Comet\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -8453,7 +8453,7 @@ FileKey2=%LocalAppData%\Comodo\Dragon\User Data\*\Sessions|*|REMOVESELF
 
 [Comodo Dragon Web Storage *]
 DetectFile=%LocalAppData%\Comodo\Dragon\User Data
-FileKey1=%LocalAppData%\Comodo\Dragon\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\Comodo\Dragon\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\Comodo\Dragon\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\Comodo\Dragon\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\Comodo\Dragon\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -8903,7 +8903,7 @@ FileKey2=%LocalAppData%\Cromite\User Data\*\Sessions|*|REMOVESELF
 
 [Cromite Web Storage *]
 DetectFile=%LocalAppData%\Cromite\User Data
-FileKey1=%LocalAppData%\Cromite\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\Cromite\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\Cromite\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\Cromite\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\Cromite\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -10363,7 +10363,7 @@ FileKey4=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnviron
 [DuckDuckGo Web Storage *]
 DetectFile1=%LocalAppData%\Packages\63909DuckDuckGoInc.DuckDuckGoPrivateBrowser_qzdjx70tn762j
 DetectFile2=%LocalAppData%\Packages\DuckDuckGo.DesktopBrowser_ya2fgkz3nks94
-FileKey1=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -10371,7 +10371,7 @@ FileKey5=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*\Loc
 FileKey6=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*\Local Storage\leveldb|*|REMOVESELF
 FileKey7=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*\Session Storage|*|REMOVESELF
 FileKey8=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*\WebStorage|*|REMOVESELF
-FileKey9=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnvironment\EBWebView\*\IndexedDB|*|REMOVESELF
+FileKey9=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnvironment\EBWebView\*\IndexedDB\http*|*|REMOVESELF
 FileKey10=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnvironment\EBWebView\*\Local Storage\*\IndexedDB\https*|*
 FileKey11=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnvironment\EBWebView\*\Local Storage\*\Session Storage|*
 FileKey12=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnvironment\EBWebView\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -10859,7 +10859,7 @@ FileKey2=%LocalAppData%\EcosiaBrowser\User Data\*\Sessions|*|REMOVESELF
 
 [Ecosia Browser Web Storage *]
 DetectFile=%LocalAppData%\EcosiaBrowser\User Data
-FileKey1=%LocalAppData%\EcosiaBrowser\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\EcosiaBrowser\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\EcosiaBrowser\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\EcosiaBrowser\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\EcosiaBrowser\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -11216,7 +11216,7 @@ FileKey2=%LocalAppData%\Epic Privacy Browser\User Data\*\Sessions|*|REMOVESELF
 
 [Epic Privacy Browser Web Storage *]
 DetectFile=%LocalAppData%\Epic Privacy Browser\User Data
-FileKey1=%LocalAppData%\Epic Privacy Browser\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\Epic Privacy Browser\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\Epic Privacy Browser\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\Epic Privacy Browser\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\Epic Privacy Browser\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -11844,7 +11844,7 @@ FileKey2=%LocalAppData%\Slimjet\User Data\*\Sessions|*|REMOVESELF
 
 [FlashPeak SlimJet Web Storage *]
 DetectFile=%LocalAppData%\Slimjet\User Data
-FileKey1=%LocalAppData%\Slimjet\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\Slimjet\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\Slimjet\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\Slimjet\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\Slimjet\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -12654,7 +12654,7 @@ FileKey2=%LocalAppData%\GensparkSoftware\Genspark-Browser\User Data\*\Sessions|*
 
 [Genspark Browser Web Storage *]
 DetectFile=%LocalAppData%\GensparkSoftware\Genspark-Browser\User Data
-FileKey1=%LocalAppData%\GensparkSoftware\Genspark-Browser\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\GensparkSoftware\Genspark-Browser\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\GensparkSoftware\Genspark-Browser\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\GensparkSoftware\Genspark-Browser\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\GensparkSoftware\Genspark-Browser\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -12893,7 +12893,7 @@ FileKey2=%LocalAppData%\GhostBrowser\User Data\*\Sessions|*|REMOVESELF
 
 [Ghost Browser Web Storage *]
 DetectFile=%LocalAppData%\GhostBrowser\User Data
-FileKey1=%LocalAppData%\GhostBrowser\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\GhostBrowser\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\GhostBrowser\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\GhostBrowser\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\GhostBrowser\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -13373,7 +13373,7 @@ DetectFile1=%LocalAppData%\Google\Chrome
 DetectFile2=%LocalAppData%\Google\Chrome Beta
 DetectFile3=%LocalAppData%\Google\Chrome Dev
 DetectFile4=%LocalAppData%\Google\Chrome SxS
-FileKey1=%LocalAppData%\Google\Chrome*\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\Google\Chrome*\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\Google\Chrome*\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\Google\Chrome*\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\Google\Chrome*\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -13855,7 +13855,7 @@ FileKey2=%LocalAppData%\imput\Helium\User Data\*\Sessions|*|REMOVESELF
 
 [Helium Web Storage *]
 DetectFile=%LocalAppData%\imput\Helium\User Data
-FileKey1=%LocalAppData%\imput\Helium\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\imput\Helium\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\imput\Helium\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\imput\Helium\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\imput\Helium\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -15328,7 +15328,7 @@ FileKey2=%LocalAppData%\Iridium\User Data\*\Sessions|*|REMOVESELF
 
 [Iridium Web Storage *]
 DetectFile=%LocalAppData%\Iridium\User Data
-FileKey1=%LocalAppData%\Iridium\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\Iridium\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\Iridium\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\Iridium\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\Iridium\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -15590,7 +15590,7 @@ FileKey2=%LocalAppData%\Jatter\Jatter\User Data\*\Sessions|*|REMOVESELF
 
 [Jatter Web Storage *]
 DetectFile=%LocalAppData%\Jatter\Jatter\User Data
-FileKey1=%LocalAppData%\Jatter\Jatter\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\Jatter\Jatter\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\Jatter\Jatter\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\Jatter\Jatter\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\Jatter\Jatter\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -16993,7 +16993,7 @@ FileKey2=%LocalAppData%\Maxthon\User Data\*\Sessions|*|REMOVESELF
 
 [Maxthon Web Storage *]
 DetectFile=%LocalAppData%\Maxthon\User Data
-FileKey1=%LocalAppData%\Maxthon\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\Maxthon\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\Maxthon\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\Maxthon\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\Maxthon\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -17765,7 +17765,7 @@ DetectFile1=%LocalAppData%\Microsoft\Edge
 DetectFile2=%LocalAppData%\Microsoft\Edge Beta
 DetectFile3=%LocalAppData%\Microsoft\Edge Dev
 DetectFile4=%LocalAppData%\Microsoft\Edge SxS
-FileKey1=%LocalAppData%\Microsoft\Edge*\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\Microsoft\Edge*\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\Microsoft\Edge*\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\Microsoft\Edge*\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\Microsoft\Edge*\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -20127,7 +20127,7 @@ FileKey2=%LocalAppData%\Naver\Naver Whale\User Data\*\Sessions|*|REMOVESELF
 
 [NAVER Whale Web Storage *]
 DetectFile=%LocalAppData%\Naver\Naver Whale\User Data
-FileKey1=%LocalAppData%\Naver\Naver Whale\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\Naver\Naver Whale\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\Naver\Naver Whale\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\Naver\Naver Whale\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\Naver\Naver Whale\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -20759,7 +20759,7 @@ FileKey2=%LocalAppData%\NEO\User Data\*\Sessions|*|REMOVESELF
 
 [Norton Neo Web Storage *]
 DetectFile=%LocalAppData%\NEO\User Data
-FileKey1=%LocalAppData%\NEO\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\NEO\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\NEO\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\NEO\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\NEO\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -20933,7 +20933,7 @@ FileKey2=%LocalAppData%\Norton\Browser\User Data\*\Sessions|*|REMOVESELF
 
 [Norton Secure Browser Web Storage *]
 DetectFile=%LocalAppData%\Norton\Browser\User Data
-FileKey1=%LocalAppData%\Norton\Browser\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\Norton\Browser\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\Norton\Browser\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\Norton\Browser\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\Norton\Browser\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -21673,7 +21673,7 @@ FileKey4=%AppData%\Opera Software\Opera GX*\Sessions|*|REMOVESELF
 
 [Opera GX Web Storage *]
 DetectFile=%AppData%\Opera Software\Opera GX Stable
-FileKey1=%AppData%\Opera Software\Opera GX*\_side_profiles\*\IndexedDB|*|REMOVESELF
+FileKey1=%AppData%\Opera Software\Opera GX*\_side_profiles\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%AppData%\Opera Software\Opera GX*\_side_profiles\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%AppData%\Opera Software\Opera GX*\_side_profiles\*\Local Storage\*\Session Storage|*
 FileKey4=%AppData%\Opera Software\Opera GX*\_side_profiles\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -21681,7 +21681,7 @@ FileKey5=%AppData%\Opera Software\Opera GX*\_side_profiles\*\Local Storage\*\Web
 FileKey6=%AppData%\Opera Software\Opera GX*\_side_profiles\*\Local Storage\leveldb|*|REMOVESELF
 FileKey7=%AppData%\Opera Software\Opera GX*\_side_profiles\*\Session Storage|*|REMOVESELF
 FileKey8=%AppData%\Opera Software\Opera GX*\_side_profiles\*\WebStorage|*|REMOVESELF
-FileKey9=%AppData%\Opera Software\Opera GX*\IndexedDB|*|REMOVESELF
+FileKey9=%AppData%\Opera Software\Opera GX*\IndexedDB\http*|*|REMOVESELF
 FileKey10=%AppData%\Opera Software\Opera GX*\Local Storage\*\IndexedDB\https*|*
 FileKey11=%AppData%\Opera Software\Opera GX*\Local Storage\*\Session Storage|*
 FileKey12=%AppData%\Opera Software\Opera GX*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -21824,7 +21824,7 @@ DetectFile1=%AppData%\Opera Software\Opera Air Stable
 DetectFile2=%AppData%\Opera Software\Opera Developer
 DetectFile3=%AppData%\Opera Software\Opera Next
 DetectFile4=%AppData%\Opera Software\Opera Stable
-FileKey1=%AppData%\Opera Software\Opera*\*\IndexedDB|*|REMOVESELF
+FileKey1=%AppData%\Opera Software\Opera*\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%AppData%\Opera Software\Opera*\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%AppData%\Opera Software\Opera*\*\Local Storage\*\Session Storage|*
 FileKey4=%AppData%\Opera Software\Opera*\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -23115,7 +23115,7 @@ FileKey2=%LocalAppData%\Tencent\QQBrowser\User Data\*\Sessions|*|REMOVESELF
 
 [QQBrowser Web Storage *]
 DetectFile=%LocalAppData%\Tencent\QQBrowser\User Data
-FileKey1=%LocalAppData%\Tencent\QQBrowser\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\Tencent\QQBrowser\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\Tencent\QQBrowser\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\Tencent\QQBrowser\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\Tencent\QQBrowser\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -24236,7 +24236,7 @@ FileKey2=%LocalAppData%\Samsung\Internet\User Data\*\Sessions|*|REMOVESELF
 
 [Samsung Internet Web Storage *]
 DetectFile=%LocalAppData%\Samsung\Internet\User Data
-FileKey1=%LocalAppData%\Samsung\Internet\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\Samsung\Internet\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\Samsung\Internet\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\Samsung\Internet\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\Samsung\Internet\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -25096,7 +25096,7 @@ FileKey2=%LocalAppData%\Shift\User Data\*\Sessions|*|REMOVESELF
 
 [Shift Web Storage *]
 DetectFile=%LocalAppData%\Shift\User Data
-FileKey1=%LocalAppData%\Shift\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\Shift\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\Shift\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\Shift\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\Shift\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -25300,7 +25300,7 @@ FileKey2=%LocalAppData%\Sigma\User Data\*\Sessions|*|REMOVESELF
 
 [Sigma Web Storage *]
 DetectFile=%LocalAppData%\Sigma\User Data
-FileKey1=%LocalAppData%\Sigma\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\Sigma\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\Sigma\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\Sigma\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\Sigma\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -25587,7 +25587,7 @@ FileKey1=%AppData%\Fenrir Inc\Sleipnir5\setting\client\backup|tab*
 
 [Sleipnir Web Storage *]
 DetectFile=%AppData%\Fenrir Inc\Sleipnir5\setting\modules\ChromiumViewer
-FileKey1=%AppData%\Fenrir Inc\Sleipnir5\setting\modules\ChromiumViewer\*\IndexedDB|*|REMOVESELF
+FileKey1=%AppData%\Fenrir Inc\Sleipnir5\setting\modules\ChromiumViewer\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%AppData%\Fenrir Inc\Sleipnir5\setting\modules\ChromiumViewer\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%AppData%\Fenrir Inc\Sleipnir5\setting\modules\ChromiumViewer\*\Local Storage\*\Session Storage|*
 FileKey4=%AppData%\Fenrir Inc\Sleipnir5\setting\modules\ChromiumViewer\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -26595,7 +26595,7 @@ FileKey2=%LocalAppData%\Supermium\User Data\*\Sessions|*|REMOVESELF
 
 [Supermium Web Storage *]
 DetectFile=%LocalAppData%\Supermium\User Data
-FileKey1=%LocalAppData%\Supermium\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\Supermium\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\Supermium\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\Supermium\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\Supermium\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -27248,7 +27248,7 @@ FileKey2=%LocalAppData%\Thorium\User Data\*\Sessions|*|REMOVESELF
 
 [Thorium Web Storage *]
 DetectFile=%LocalAppData%\Thorium\User Data
-FileKey1=%LocalAppData%\Thorium\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\Thorium\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\Thorium\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\Thorium\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\Thorium\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -28066,7 +28066,7 @@ FileKey2=%LocalAppData%\UC\User Data\*\Sessions|*|REMOVESELF
 
 [UC Web Storage *]
 DetectFile=%LocalAppData%\UC\User Data
-FileKey1=%LocalAppData%\UC\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\UC\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\UC\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\UC\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\UC\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -28230,7 +28230,7 @@ FileKey2=%LocalAppData%\Zoho\Ulaa\User Data\*\Sessions|*|REMOVESELF
 
 [Ulaa Web Storage *]
 DetectFile=%LocalAppData%\Zoho\Ulaa\User Data
-FileKey1=%LocalAppData%\Zoho\Ulaa\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\Zoho\Ulaa\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\Zoho\Ulaa\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\Zoho\Ulaa\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\Zoho\Ulaa\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -28759,7 +28759,7 @@ FileKey2=%LocalAppData%\Vivaldi\User Data\*\Sessions|*|REMOVESELF
 
 [Vivaldi Web Storage *]
 DetectFile=%LocalAppData%\Vivaldi\User Data
-FileKey1=%LocalAppData%\Vivaldi\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\Vivaldi\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\Vivaldi\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\Vivaldi\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\Vivaldi\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -29222,7 +29222,7 @@ FileKey2=%LocalAppData%\Waveboxapp\User Data\*\Sessions|*|REMOVESELF
 
 [Wavebox Web Storage *]
 DetectFile=%LocalAppData%\Waveboxapp\User Data
-FileKey1=%LocalAppData%\Waveboxapp\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\Waveboxapp\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\Waveboxapp\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\Waveboxapp\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\Waveboxapp\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
@@ -30908,7 +30908,7 @@ FileKey2=%LocalAppData%\Yandex\YandexBrowser\User Data\*\Sessions|*|REMOVESELF
 
 [Yandex Web Storage *]
 DetectFile=%LocalAppData%\Yandex\YandexBrowser\User Data
-FileKey1=%LocalAppData%\Yandex\YandexBrowser\User Data\*\IndexedDB|*|REMOVESELF
+FileKey1=%LocalAppData%\Yandex\YandexBrowser\User Data\*\IndexedDB\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\Yandex\YandexBrowser\User Data\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\Yandex\YandexBrowser\User Data\*\Local Storage\*\Session Storage|*
 FileKey4=%LocalAppData%\Yandex\YandexBrowser\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
