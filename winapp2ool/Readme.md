@@ -53,10 +53,6 @@ Winapp2.ini is a community maintained database of declarative cleaning routines 
 8. [Troubleshooting](#troubleshooting)
 9. [Notes](#notes)
 
-**For Contributors**
-
-10. [How winapp2.ini gets built](#how-winapp2ini-gets-built)
-
 ---
 
 # Requirements
