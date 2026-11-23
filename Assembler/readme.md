@@ -2,7 +2,7 @@
 
 ### What is this?
 
-This folder holds everything winapp2ool needs to build winapp2.ini and its flavors: the hand-written sources, the build script, and the generated pieces the build puts together.
+This folder holds everything winapp2ool needs to build winapp2.ini, its flavors, and winapp3.ini: the hand-written sources, the build script, and the generated pieces the build puts together.
 
 ### Building Winapp2.ini
 
@@ -12,20 +12,23 @@ The script regenerates the committed build artifacts in [Generated](https://gith
 
 Entries marked `Archive=` in the sources go to [Archived](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Archived) instead, one `archived.ini` per generator. A second strict Combine joins those into the archive, which goes to `Releases` as `archived.ini` with its own changelog. The build fails if an entry name is in both winapp2.ini and the archive.
 
-`& '.\build winapp2.ps1' -Verify` builds nothing. It regenerates every artifact into scratch folders, byte-compares the result against the committed files under `Generated\` and `Archived\`, and fails if anything differs.
+A second EntryBuilder run builds winapp3.ini from the [Winapp3](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/Winapp3) sources into [Winapp3](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Winapp3). It goes to `Releases` as `winapp3.ini` with its own changelog. The build fails if an entry name is in winapp3.ini and in winapp2.ini or the archive.
+
+`& '.\build winapp2.ps1' -Verify` builds nothing. It regenerates every artifact into scratch folders, byte-compares the result against the committed files under `Generated\`, `Archived\` and `Winapp3\`, and fails if anything differs.
 
 ### Contributions
 
-Changes to winapp2.ini or its flavors go in the files under `Sources\`, never in a built winapp2.ini. The [contributor guidelines](https://github.com/MoscaDotTo/Winapp2/blob/master/CONTRIBUTING.md) explain how to write and submit them.
+Changes to winapp2.ini, its flavors, or winapp3.ini go in the files under `Sources\`, never in a built file. The [contributor guidelines](https://github.com/MoscaDotTo/Winapp2/blob/master/CONTRIBUTING.md) explain how to write and submit them.
 
 # Files and Folders
 
 | Name | Description |
 | :- | :- |
-| [`build winapp2.ps1`](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/build%20winapp2.ps1) | The build script. Builds the base winapp2.ini and every flavor |
+| [`build winapp2.ps1`](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/build%20winapp2.ps1) | The build script. Builds the base winapp2.ini, every flavor, the archive, and winapp3.ini |
 | [`Sources\`](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources) | Everything written by hand. This is the only place to make changes |
 | [`Generated\`](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Generated) | Everything the build writes for itself. Never edit these files |
 | [`Archived\`](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Archived) | The entries marked `Archive=`, one `archived.ini` per generator. The build writes these too. Never edit them |
+| [`Winapp3\`](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Winapp3) | `winapp3.ini`, written by EntryBuilder from `Sources\Winapp3`. Never edit it |
 
 ## Sources\
 
@@ -33,6 +36,7 @@ Changes to winapp2.ini or its flavors go in the files under `Sources\`, never in
 | :- | :- |
 | [EntryBuilder](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/EntryBuilder) | The sources for every base entry, which is most of winapp2.ini, Microsoft Store apps included. EntryBuilder's shorthand is optional here |
 | [BrowserBuilder](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/BrowserBuilder) | The rules that generate entries for Chromium and Gecko browsers, and the Transmutation rules that correct them |
+| [Winapp3](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/Winapp3) | The sources for every entry in winapp3.ini, the aggressive entries for power users, split by first letter like the EntryBuilder sources |
 | [Scaffolds](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/Scaffolds) | The shared cleaning-pattern catalogs (WebView2, QtWebEngine, Electron, Store app packages) EntryBuilder draws on |
 | [Flavors\BleachBit](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/Flavors/BleachBit) | The Transmutation rules for the BleachBit flavor |
 | [Flavors\CCleaner](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Sources/Flavors/CCleaner) | The Transmutation rules for the CCleaner flavor |
@@ -64,3 +68,4 @@ It isn't one to one. CCleaner 7 and FluentCleaner are both built with the CClean
 | `Flavors\Tron` | `winapp2-tron.ini` |
 | `Flavors\SystemNinja` | `winapp2-systemninja.rules` |
 | none (the entries marked `Archive=`, from `Archived\`) | `archived.ini` |
+| none (from `Winapp3\`) | `winapp3.ini` |

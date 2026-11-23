@@ -10,6 +10,9 @@
 # and it trips the generated-artifact guard's rule 2 later, when an edit to it changes Z.ini
 # with only A.ini touched.
 #
+# Sources/Winapp3 is split by the same rule. Its run writes one unsplit winapp3.ini, so a
+# misfiled entry there still builds, but people look for an entry in its letter's file.
+#
 # We scan the whole tree rather than the changed files, so a misfiled entry already on a
 # branch can't hide. It only reads section headers, so it takes well under a second.
 #
@@ -27,6 +30,7 @@ set -uo pipefail
 
 root=${1:-.}
 dir="Assembler/Sources/EntryBuilder"
+letter_dirs="$dir Assembler/Sources/Winapp3"
 retired_dirs="Assembler/Sources/UWPBuilder Assembler/Generated/UWPBuilder Assembler/Archived/UWPBuilder"
 
 retired=$(for d in $retired_dirs; do find "$root/$d" -type f 2>/dev/null; done)
@@ -55,14 +59,16 @@ EOF
   exit 1
 fi
 
-[ -d "$root/$dir" ] || { echo "error: $root/$dir not found" >&2; exit 2; }
 files=()
-for f in "$root/$dir"/*.ini; do
-  [ -e "$f" ] || continue
-  # Only the 27 letter files. Anything else isn't split by letter.
-  case "${f##*/}" in
-    '#.ini'|[A-Z].ini) files+=("$f") ;;
-  esac
+for d in $letter_dirs; do
+  [ -d "$root/$d" ] || { echo "error: $root/$d not found" >&2; exit 2; }
+  for f in "$root/$d"/*.ini; do
+    [ -e "$f" ] || continue
+    # Only the 27 letter files. Anything else isn't split by letter.
+    case "${f##*/}" in
+      '#.ini'|[A-Z].ini) files+=("$f") ;;
+    esac
+  done
 done
 
 if [ "${#files[@]}" -eq 0 ]; then
@@ -89,7 +95,7 @@ misfiled=$(LC_ALL=C awk -v root="$root/" '
 ' "${files[@]}")
 
 if [ -z "$misfiled" ]; then
-  echo "OK: every entry in the per-letter EntryBuilder sources is in its letter's file."
+  echo "OK: every entry in the per-letter EntryBuilder and Winapp3 sources is in its letter's file."
   exit 0
 fi
 

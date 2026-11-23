@@ -3,7 +3,7 @@
     Builds winapp2.ini and its various flavors using winapp2ool.
 
 .DESCRIPTION
-    This script requires winapp2ool v1.8.9821.32740 or newer, and refuses to run an older one:
+    This script requires winapp2ool v1.8.9822.37354 or newer, and refuses to run an older one:
     Creates backups, regenerates the committed build artifacts under Generated\
     (base entries, Store apps included, from Sources\EntryBuilder into Generated\EntryBuilder,
     and browser entries into Generated\BrowserBuilder), merges them with a single strict-mode
@@ -19,25 +19,32 @@
     -archive, checked against winapp2.ini for shared names, and published with its own
     changelog like a flavor.
 
+    A second EntryBuilder run builds winapp3.ini from Sources\Winapp3 into Winapp3\. It is
+    linted with -winapp3, checked so that no entry name is in more than one of winapp2.ini,
+    archived.ini and winapp3.ini, and published with its own changelog like a flavor.
+
     With -Verify, no build is performed: all artifacts are instead regenerated into
-    scratch directories and byte-compared against the committed Generated\ and Archived\ artifacts,
+    scratch directories and byte-compared against the committed Generated\, Archived\ and
+    Winapp3\ artifacts,
     exiting nonzero on any drift. This is the characteristic test used to prove the
     committed artifacts match their sources
 
 .PARAMETER Verify
-    Regenerate all artifacts into Verify\Generated\ and Verify\Archived\ and byte-compare
-    each against its committed tree (Generated\, Archived\) instead of building. Exits 0
+    Regenerate all artifacts into Verify\Generated\, Verify\Archived\ and Verify\Winapp3\ and
+    byte-compare each against its committed tree (Generated\, Archived\, Winapp3\) instead of
+    building. Exits 0
     when every artifact matches, 1 on any drift (the scratch output is retained for
     inspection on failure).
 
 .PARAMETER GenerateTo
     Regenerate the two generators' artifacts (EntryBuilder and BrowserBuilder) into
-    <root>\Generated\ and <root>\Archived\ and stop -- no combine, no flavors, no comparison. The root is winapp2ool-relative
+    <root>\Generated\, <root>\Archived\ and <root>\Winapp3\ and stop -- no combine, no flavors, no comparison. The root is winapp2ool-relative
     (leading backslash, e.g. '\Parity\Source'), and '\' regenerates the committed trees.
     Paired with -ToolPath this is how CI runs two different winapp2ool binaries over the
-    same sources and diffs the results. Only the builders' folders under the two trees
-    are cleared first; anything else is left alone. A root inside Generated\, Archived\
-    or Sources\ is refused, since the build reads those trees.
+    same sources and diffs the results. Only the builders' folders under Generated\ and
+    Archived\, and the .ini files in Winapp3\, are cleared first; anything else is left alone.
+    A root inside Generated\, Archived\, Winapp3\ or Sources\ is refused, since the build
+    reads those trees.
 
 .PARAMETER ToolPath
     Use this winapp2ool.exe instead of the one beside this script. Directory args
@@ -46,7 +53,7 @@
 
 .NOTES
     Author: Hazel Ward
-    Version 20261121
+    Version 20261122
     Copyright 2026
 #>
 
@@ -350,7 +357,8 @@ function Complete-Flavor {
 
 function Build-Artifacts {
     # Each builder writes its live output under <Root>\Generated and its archived.ini under
-    # <Root>\Archived. Root is winapp2ool-relative, and '' is the committed trees.
+    # <Root>\Archived, and the Winapp3 run writes <Root>\Winapp3\winapp3.ini. Root is
+    # winapp2ool-relative, and '' is the committed trees.
     param([string]$Root = '')
 
     $OutputRoot = "$Root\Generated"
@@ -367,6 +375,14 @@ function Build-Artifacts {
         '-3d', '\Sources\Scaffolds', '-4d', "$ArchiveRoot\EntryBuilder" `
         -ErrorMessage "Failed to generate EntryBuilder entries" `
         -RequiredDirs @((Join-Path $PSScriptRoot 'Sources\EntryBuilder'), (Join-Path $PSScriptRoot 'Sources\Scaffolds')))) { return $false }
+
+    # No -4d: an Archive= line in a Winapp3 source has nowhere to go, so EntryBuilder drops the
+    # entry and fails
+    Write-Step "Generating winapp3.ini entries from EntryBuilder sources"
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-entrybuilder', '-1d', '\Sources\Winapp3', `
+        '-2d', "$Root\Winapp3", '-2f', 'winapp3.ini', '-3d', '\Sources\Scaffolds' `
+        -ErrorMessage "Failed to generate winapp3.ini entries" `
+        -RequiredDirs @((Join-Path $PSScriptRoot 'Sources\Winapp3'), (Join-Path $PSScriptRoot 'Sources\Scaffolds')))) { return $false }
 
     return $true
 }
@@ -393,26 +409,34 @@ function Get-SectionNames {
     return @(Get-Content -LiteralPath $Path | Where-Object { $_ -match '^\[(.+)\]\s*$' } | ForEach-Object { $Matches[1] })
 }
 
-function Test-ArchiveNames {
+function Test-UniqueNames {
     <#
     .SYNOPSIS
-        Fails when an entry name is both live and archived.
+        Fails when an entry name is in more than one of the given published files.
 
     .DESCRIPTION
         EntryBuilder catches a live and an archived entry of one name inside its own sources,
-        but nothing else sees across builders: an archived EntryBuilder entry named like a
-        generated browser entry would otherwise ship in both files.
+        but nothing else sees across builders or source folders: an archived EntryBuilder entry
+        named like a generated browser entry, or a Winapp3 entry named like a winapp2.ini one,
+        would otherwise ship in both files.
     #>
-    param([string]$Live, [string]$Archive)
+    param([string[]]$Paths)
 
-    $liveNames = New-Object 'System.Collections.Generic.HashSet[string]' ([StringComparer]::OrdinalIgnoreCase)
-    foreach ($name in Get-SectionNames $Live) { [void]$liveNames.Add($name) }
+    $owner = New-Object 'System.Collections.Generic.Dictionary[string,string]' ([StringComparer]::OrdinalIgnoreCase)
+    $clashes = @()
+    foreach ($path in $Paths) {
+        foreach ($name in Get-SectionNames $path) {
+            if ($owner.ContainsKey($name)) {
+                $clashes += "[$name] is in both $($owner[$name]) and $path"
+            } else {
+                $owner[$name] = $path
+            }
+        }
+    }
+    if ($clashes.Count -eq 0) { return $true }
 
-    $both = @(Get-SectionNames $Archive | Where-Object { $liveNames.Contains($_) })
-    if ($both.Count -eq 0) { return $true }
-
-    Write-ErrorMsg "$($both.Count) entry name(s) are in both $Live and $Archive. An entry is either live or archived:"
-    $both | ForEach-Object { Write-Host "  [$_]" -ForegroundColor Red }
+    Write-ErrorMsg "$($clashes.Count) entry name(s) are in more than one of $($Paths -join ', '). An entry belongs to one file:"
+    $clashes | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }
     return $false
 }
 
@@ -436,9 +460,30 @@ function Build-Archive {
         -ErrorMessage "Failed archive analysis")) { return $false }
 
     Write-Step "Checking that no entry is both live and archived"
-    if (-not (Test-ArchiveNames -Live 'Winapp2.ini' -Archive 'archived.ini')) { return $false }
+    if (-not (Test-UniqueNames -Paths 'Winapp2.ini', 'archived.ini')) { return $false }
 
     return (Complete-Flavor -Key Archive -Built 'archived.ini')
+}
+
+function Build-Winapp3 {
+    Write-Step "Building winapp3.ini"
+
+    # Build-MainFile's generators already wrote it under Winapp3\
+    $artifact = Join-Path $PSScriptRoot 'Winapp3\winapp3.ini'
+    if (-not (Test-Path -LiteralPath $artifact)) {
+        Write-ErrorMsg "The Winapp3 generator wrote no $artifact"
+        return $false
+    }
+    Copy-Item -LiteralPath $artifact 'winapp3.ini' -Force
+
+    Write-Step "Performing static analysis on winapp3.ini and saving corrections"
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-debug', '-winapp3', '-usedate', '-c', '-opti', '-1f', 'winapp3.ini', '-3f', 'winapp3.ini' `
+        -ErrorMessage "Failed winapp3.ini analysis")) { return $false }
+
+    Write-Step "Checking that no entry is in more than one published file"
+    if (-not (Test-UniqueNames -Paths 'Winapp2.ini', 'archived.ini', 'winapp3.ini')) { return $false }
+
+    return (Complete-Flavor -Key Winapp3 -Built 'winapp3.ini')
 }
 
 function Build-CCCleanerFlavor {
@@ -555,17 +600,18 @@ function Compare-ArtifactTree {
 }
 
 function New-Artifacts {
-    # Clears the builders' folders under <Root>\Generated and <Root>\Archived and regenerates
-    # them. A tracked file beside those folders survives (-GenerateTo '\Generated' used to
-    # delete Generated\readme.md). Refuses a root inside Generated, Archived or Sources: the
-    # full build's Combine reads the first two recursively, and the third is its input.
+    # Clears the builders' folders under <Root>\Generated and <Root>\Archived, and the .ini files
+    # in <Root>\Winapp3, and regenerates them. A tracked file beside those survives (-GenerateTo
+    # '\Generated' used to delete Generated\readme.md). Refuses a root inside Generated, Archived,
+    # Winapp3 or Sources: the full build's Combine reads the first two recursively,
+    # Build-Winapp3 reads the third, and the fourth is the input.
     param([string]$Root)
 
     $rel = $Root.Trim('\')
     $Root = if ($rel) { "\$rel" } else { '' }
     $target = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot $rel)).TrimEnd('\')
 
-    foreach ($tree in 'Generated', 'Archived', 'Sources') {
+    foreach ($tree in 'Generated', 'Archived', 'Winapp3', 'Sources') {
         $treePath = Join-Path $PSScriptRoot $tree
         if ($target -eq $treePath -or $target.StartsWith("$treePath\", [StringComparison]::OrdinalIgnoreCase)) {
             Write-ErrorMsg "Can't generate into $target`: it's inside $tree\, which the build reads"
@@ -579,6 +625,8 @@ function New-Artifacts {
             if (Test-Path $folder) { Remove-Item $folder -Recurse -Force }
         }
     }
+    $winapp3 = Join-Path $target 'Winapp3'
+    if (Test-Path $winapp3) { Remove-Item (Join-Path $winapp3 '*.ini') -Force }
 
     return (Build-Artifacts -Root $Root)
 }
@@ -591,15 +639,15 @@ function Test-Artifacts {
 
     if (-not (New-Artifacts -Root '\Verify')) { return $false }
 
-    Write-Step "Comparing regenerated artifacts against committed artifacts under Generated and Archived"
+    Write-Step "Comparing regenerated artifacts against committed artifacts under Generated, Archived and Winapp3"
 
     $drift = @()
-    foreach ($tree in 'Generated', 'Archived') {
+    foreach ($tree in 'Generated', 'Archived', 'Winapp3') {
         $drift += @(Compare-ArtifactTree -Committed (Join-Path $PSScriptRoot $tree) -Scratch (Join-Path $scratch $tree))
     }
 
     if ($drift.Count -gt 0) {
-        Write-ErrorMsg "Artifact drift detected - committed artifacts under Generated or Archived do not match their sources"
+        Write-ErrorMsg "Artifact drift detected - committed artifacts under Generated, Archived or Winapp3 do not match their sources"
         $drift | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }
         Write-Host "Regenerated artifacts retained in $scratch for inspection" -ForegroundColor Yellow
         return $false
@@ -619,6 +667,7 @@ function Remove-TemporaryFiles {
         'winapp2*.ini',
         'winapp2.rules',
         'archived*.ini',
+        'winapp3*.ini',
         'diff.txt',
         'diffsummary.txt'
     )
@@ -642,7 +691,7 @@ try {
     # not part of the question and their staleness must not fail the run.
     if ($GenerateTo) {
         if (-not (New-Artifacts -Root $GenerateTo)) { exit 1 }
-        Write-Host "`nArtifacts generated into Generated and Archived under $GenerateTo" -ForegroundColor Green
+        Write-Host "`nArtifacts generated into Generated, Archived and Winapp3 under $GenerateTo" -ForegroundColor Green
         exit 0
     }
 
@@ -670,6 +719,7 @@ try {
 
     if (-not (Build-MainFile)) { exit 1 }
     if (-not (Build-Archive)) { exit 1 }
+    if (-not (Build-Winapp3)) { exit 1 }
     if (-not (Build-CCCleanerFlavor)) { exit 1 }
     if (-not (Build-CCleaner7Flavor)) { exit 1 }
     if (-not (Build-FluentCleanerFlavor)) { exit 1 }

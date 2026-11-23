@@ -84,11 +84,13 @@ jobs:
 
           # Only the tracked build outputs, never the log or scratch. Every path must exist or be
           # tracked: one unmatched pathspec makes `git add` stage nothing, which would read as
-          # "no changes". $DeprecatedFiles are the old copies build winapp2.ps1 still writes
-          # during the deprecation window.
+          # "no changes". The three Assembler trees are the committed generator artifacts, and
+          # $DeprecatedFiles are the old copies build winapp2.ps1 still writes during the
+          # deprecation window.
           $outputs = @(
             'Assembler/Generated'
             'Assembler/Archived'
+            'Assembler/Winapp3'
             $ReleaseFiles
             $DeprecatedFiles
           )

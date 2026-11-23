@@ -88,8 +88,8 @@ jobs:
           pwsh -File './build winapp2.ps1' -GenerateTo '\Parity\Source' -ToolPath '..\winapp2ool\bin\Release\winapp2ool.exe'
           exit $LASTEXITCODE
 
-      # -GenerateTo puts each side's Generated and Archived trees under its root, so the
-      # recursive compare covers both.
+      # -GenerateTo puts each side's Generated, Archived and Winapp3 trees under its root, so the
+      # recursive compare covers all three.
       - name: Compare the two generated trees
         shell: pwsh
         working-directory: Assembler

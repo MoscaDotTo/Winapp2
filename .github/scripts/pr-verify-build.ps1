@@ -67,7 +67,8 @@ Set-Content -Path (Join-Path $ReportDir 'pr-number.txt') -Value $PrNumber -NoNew
 
 # Each published file, relative to the repo root, paired with its manifest key and the
 # changelog the build script publishes beside it. The archive is here so a PR that
-# archives an entry shows both halves of the move: out of Base, into Archive.
+# archives an entry shows both halves of the move: out of Base, into Archive. Winapp3 is
+# a row too, so a PR that edits only Winapp3 sources still has a delta to report.
 $Outputs = @($PublishedFiles | ForEach-Object {
     @{ Flavor = $_.Key; Output = "Releases\$($_.Asset)"; Diff = "Releases\$($_.Changelog)" }
 })

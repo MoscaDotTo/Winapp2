@@ -13,8 +13,8 @@
 #     regenerates Generated/ in place first, so the hand-edit is gone before anything looks.
 # This guard runs no build. It only checks that the changed paths make sense together.
 #
-# It also checks that every entry in a per-letter EntryBuilder source is in its letter's file
-# (check-source-letters.sh). The build buckets output by entry name, so [Zoom *] in A.ini
+# It also checks that every entry in a per-letter EntryBuilder or Winapp3 source is in its
+# letter's file (check-source-letters.sh). The build buckets output by entry name, so [Zoom *] in A.ini
 # builds fine, lands in Z.ini, and would later trip rule 2 here. The same script fails on any
 # file under Assembler/Sources/UWPBuilder/, which the UWPBuilder fold retired.
 #
@@ -45,6 +45,7 @@ on:
       - 'Non-CCleaner/**'
       - 'Releases/**'
       - 'Winapp3/Archived entries.ini'
+      - 'Winapp3/Winapp3.ini'
       - '.github/workflows/generated-artifact-guard.yml'
       - '.github/scripts/check-generated-sources.sh'
       - '.github/scripts/check-source-letters.sh'

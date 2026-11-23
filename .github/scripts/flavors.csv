@@ -7,3 +7,4 @@ FluentCleaner,FluentCleaner,winapp2-fluentcleaner.ini,changelog-fluentcleaner.tx
 Tron,Tron,winapp2-tron.ini,changelog-tron.txt,Non-CCleaner/Tron/Winapp2.ini,Non-CCleaner/Tron/diff.txt
 SystemNinja,System Ninja,winapp2-systemninja.rules,changelog-systemninja.txt,Non-CCleaner/SystemNinja/Winapp2.rules,Non-CCleaner/SystemNinja/diff.txt
 Archive,Archive,archived.ini,changelog-archived.txt,Winapp3/Archived entries.ini,
+Winapp3,Winapp3,winapp3.ini,changelog-winapp3.txt,Winapp3/Winapp3.ini,
