@@ -184,8 +184,9 @@ Public Module ArchiveOutput
 
         toWrite = remotedebugGuarded(toWrite, generatorName, menuOutput)
 
-        Dim header = ArtifactHeader.Text(toWrite.Name, generatorName, toWrite.Count, sourceFolder, sourceIsFolder:=True,
-                                         description:="It contains the entries marked Archive= in those sources.")
+        Dim header = ArtifactHeader.Text(generatorName, toWrite.Count, sourceFolder, sourceIsFolder:=True,
+                                         description:=$"This file contains the entries marked Archive= in the {generatorName} sources",
+                                         isArchive:=True)
 
         If toWrite.OverwriteToFile(header & toWrite.ToString()) Then
 

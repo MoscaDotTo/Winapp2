@@ -38,7 +38,7 @@ Public NotInheritable Class WinappFlavorInfo
     ''' <summary>The name written on a file's <c> ; Flavor: </c> line</summary>
     Public ReadOnly Property DisplayName As String
 
-    ''' <summary>The description lines written under the flavor line, without their leading <c> ; </c></summary>
+    ''' <summary>The description written under the flavor line, one sentence per line, without its leading <c> ; </c></summary>
     Public ReadOnly Property Description As IReadOnlyList(Of String)
 
     ''' <summary>The flavor's file name among the release assets</summary>
@@ -98,29 +98,33 @@ Public NotInheritable Class WinappFlavorInfo
     ''' <summary>Every flavor, in download menu order</summary>
     Public Shared ReadOnly Property All As IReadOnlyList(Of WinappFlavorInfo) = New List(Of WinappFlavorInfo) From {
         New WinappFlavorInfo(WinappFlavor.Base, "Base", "winapp2.ini", "changelog-base.txt", ConsoleColor.Cyan, {"-base", "-ncc"},
-            "This is the base flavor of winapp2.ini, with no entries removed or changed. Use it with",
-            "BleachBit 6+, and with any program that has no flavor of its own. This file will not",
-            "work with System Ninja or CCleaner 7+, use those applications' respective flavors with them."),
+            "This is the base flavor of winapp2.ini, with no entries removed or changed",
+            "Use it with BleachBit 6+, and with any program that has no flavor of its own",
+            "This file will not work with System Ninja or CCleaner 7+",
+            "Use the System Ninja flavor with System Ninja, and winapp2ool's CC7Patcher with CCleaner 7+"),
         New WinappFlavorInfo(WinappFlavor.CCleaner, "CCleaner", "winapp2-ccleaner.ini", "changelog-ccleaner.txt", ConsoleColor.DarkRed, {"-ccleaner", "-cc"},
-            "This is the CCleaner flavor of winapp2.ini, for CCleaner 6.41 and earlier. It re-categorizes entries",
-            "to better fit the CCleaner Classic UI. CCleaner 7 is not compatible with this file. To use winapp2.ini",
-            "with CCleaner 7+, use winapp2ool's CC7Patcher."),
+            "This is the CCleaner flavor of winapp2.ini, for CCleaner 6.41 and earlier",
+            "It re-categorizes entries to better fit the CCleaner Classic UI",
+            "CCleaner 7 is not compatible with this file",
+            "To use winapp2.ini with CCleaner 7+, use winapp2ool's CC7Patcher"),
         New WinappFlavorInfo(WinappFlavor.CCleaner7, "CCleaner 7", "winapp2-ccleaner7.ini", "changelog-ccleaner7.txt", ConsoleColor.Magenta, {"-ccleaner7", "-cc7"},
-            "This is the CCleaner 7 flavor of winapp2.ini, converted to CCleaner 7's entry format.",
-            "Don't install it by hand: winapp2ool's CC7Patcher patches it into ccleaner.ini.",
+            "This is the CCleaner 7 flavor of winapp2.ini, converted to CCleaner 7's entry format",
+            "Do not install it by hand",
+            "Winapp2ool's CC7Patcher patches it into ccleaner.ini",
             "Do not use this file with applications other than CCleaner 7"),
         New WinappFlavorInfo(WinappFlavor.BleachBit, "BleachBit", "winapp2-bleachbit.ini", "changelog-bleachbit.txt", ConsoleColor.DarkCyan, {"-bleachbit", "-bb"},
-            "This is the BleachBit flavor of winapp2.ini, for BleachBit 5 and earlier. It removes the",
-            "registry exclusions those versions reject. BleachBit 6 and newer should use the base flavor."),
+            "This is the BleachBit flavor of winapp2.ini, for BleachBit 5 and earlier",
+            "It removes the registry exclusions those versions reject",
+            "BleachBit 6+ should use the base flavor"),
         New WinappFlavorInfo(WinappFlavor.FluentCleaner, "FluentCleaner", "winapp2-fluentcleaner.ini", "changelog-fluentcleaner.txt", ConsoleColor.Green, {"-fluentcleaner", "-fc"},
-            "This is the FluentCleaner flavor of winapp2.ini, which carries the changes FluentCleaner",
-            "makes to winapp2.ini downstream."),
+            "This is the FluentCleaner flavor of winapp2.ini, for use with FluentCleaner",
+            "It already includes the changes FluentCleaner makes to winapp2.ini itself"),
         New WinappFlavorInfo(WinappFlavor.SystemNinja, "System Ninja", "winapp2-systemninja.rules", "changelog-systemninja.txt", ConsoleColor.Blue, {"-systemninja", "-sn"},
-            "This is the System Ninja flavor of winapp2.ini. It replaces keys System Ninja can't run",
-            "with ones it can."),
+            "This is the System Ninja flavor of winapp2.ini",
+            "It replaces keys System Ninja cannot run with ones it can"),
         New WinappFlavorInfo(WinappFlavor.Tron, "Tron", "winapp2-tron.ini", "changelog-tron.txt", ConsoleColor.Red, {"-tron"},
-            "This is the Tron flavor of winapp2.ini, which carries the changes Tron makes to",
-            "winapp2.ini downstream.")
+            "This is the Tron flavor of winapp2.ini, for use with Tron",
+            "It already includes the changes Tron makes to winapp2.ini itself")
     }
 
     Private Shared ReadOnly Table As Dictionary(Of WinappFlavor, WinappFlavorInfo) = All.ToDictionary(Function(info) info.Flavor)

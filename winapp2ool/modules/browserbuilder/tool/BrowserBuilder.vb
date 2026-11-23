@@ -235,7 +235,8 @@ Public Module BrowserBuilder
 
             outputFile = remotedebugGuarded(outputFile, NameOf(BrowserBuilder), output)
 
-            Dim header = ArtifactHeader.Text(outputFile.Name, NameOf(BrowserBuilder), outputFile.Count, BrowserBuilderSources, sourceIsFolder:=True)
+            Dim header = ArtifactHeader.Text(NameOf(BrowserBuilder), outputFile.Count, BrowserBuilderSources, sourceIsFolder:=True,
+                                             description:="This file contains an entry for each supported web browser in each cleaning category")
             outputFile.OverwriteToFile(header & outputFile.ToString())
 
             WriteArchive(archiveFile, BuilderArchiveFile.Dir, NameOf(BrowserBuilder), BrowserBuilderSources, output)

@@ -391,15 +391,18 @@ Public Class winapp2file
 
             builder.AppendLine(ArchiveMarkerLine)
             builder.AppendLine(";")
-            builder.AppendLine("; These entries were removed from winapp2.ini because the software they clean is discontinued,")
-            builder.AppendLine("; or because they are out of date with their target software.")
+            builder.AppendLine("; These entries were removed from winapp2.ini because they target discontinued software,")
+            builder.AppendLine("; software that is no longer available from its vendor, or a live service that has shut down")
+            builder.AppendLine("; Others were removed because they are out of date with modern versions of their target software")
+            builder.AppendLine("; Entries in this file are still functional and can be used on systems running legacy software")
             builder.AppendLine(";")
             builder.AppendLine("; To add them to your winapp2.ini:")
             builder.AppendLine($";   winapp2ool -transmute -1f winapp2.ini -2f {ArchiveFileName} -3f winapp2.ini")
             builder.AppendLine(";")
             builder.AppendLine("; Latest copy of this file:")
             builder.AppendLine($";   {LatestDownloadUrl}{ArchiveFileName}")
-            builder.AppendLine("; Its entries come from the generator sources, each marked with an Archive= line:")
+            builder.AppendLine("; This file contains the entries marked Archive= in the generator sources")
+            builder.AppendLine("; Source folder:")
             builder.AppendLine($";   {SourceLink(GeneratorSources, sourceIsFolder:=True)}")
 
         ElseIf Flavor.HasValue Then
@@ -414,13 +417,13 @@ Public Class winapp2file
             builder.AppendLine($";   {LatestDownloadUrl}{info.AssetName}")
             builder.AppendLine("; Changelog for the latest release:")
             builder.AppendLine($";   {LatestDownloadUrl}{info.ChangelogAssetName}")
-            builder.AppendLine("; Each changelog compares one release with the one before it. To see what changed since your")
-            builder.AppendLine("; own copy, compare it with the latest using winapp2ool's Diff.")
+            builder.AppendLine("; Each changelog compares one release with the one before it")
+            builder.AppendLine("; To see what changed since your own copy, compare it with the latest using winapp2ool's Diff")
 
         Else
 
             builder.AppendLine(";")
-            builder.AppendLine("; Latest copy of winapp2.ini, in every flavor:")
+            builder.AppendLine("; Latest winapp2.ini, in every flavor:")
             builder.AppendLine($";   {RepoUrl}/releases/latest")
 
         End If
@@ -429,15 +432,17 @@ Public Class winapp2file
         builder.AppendLine("; About winapp2.ini, and how to install it for your cleaner:")
         builder.AppendLine($";   {RepoUrl}")
         builder.AppendLine(";")
-        builder.AppendLine("; Winapp2ool installs, updates and trims this file:")
+        builder.AppendLine("; Winapp2ool installs, updates, and trims this file:")
         builder.AppendLine($";   {RepoUrl}/tree/master/winapp2ool")
         builder.AppendLine($";   {LatestDownloadUrl}winapp2ool.exe")
         builder.AppendLine(";")
-        builder.AppendLine("; winapp2.ini is licensed under CC BY-SA 4.0. You may share and adapt it if you credit the")
-        builder.AppendLine("; winapp2 project and release your changes under the same license:")
+        builder.AppendLine("; Winapp2.ini is licensed under CC BY-SA 4.0")
+        builder.AppendLine("; You may share and adapt it if you credit the winapp2 project")
+        builder.AppendLine("; and release your changes under the same license:")
         builder.AppendLine($";   {RepoUrl}/blob/master/License.md")
         builder.AppendLine(";")
-        builder.AppendLine("; This file is built automatically from the winapp2 repository. To add or fix an entry, see:")
+        builder.AppendLine("; This file is built automatically from the winapp2 repository")
+        builder.AppendLine("; To add or fix an entry, see:")
         builder.AppendLine($";   {RepoUrl}/blob/master/CONTRIBUTING.md")
 
         For i = 0 To _categories.Count - 2

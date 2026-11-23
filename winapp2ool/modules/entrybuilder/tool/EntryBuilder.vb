@@ -1077,7 +1077,7 @@ Public Module EntryBuilder
 
             Else
 
-                Dim header = ArtifactHeader.Text(outputFile.Name, NameOf(EntryBuilder), outputFile.Count, EntryBuilderSources, sourceIsFolder:=True)
+                Dim header = ArtifactHeader.Text(NameOf(EntryBuilder), outputFile.Count, EntryBuilderSources, sourceIsFolder:=True)
                 outputFile.OverwriteToFile(header & outputFile.ToString())
 
             End If

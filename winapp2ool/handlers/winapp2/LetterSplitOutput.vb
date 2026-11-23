@@ -111,11 +111,11 @@ Public Module LetterSplitOutput
         For Each letter In Letters
 
             Dim bucket = buckets(letter)
-            Dim letterDesc = If(letter = "#", "symbols or numbers", $"the letter {letter}")
+            Dim letterDesc = If(letter = "#", "numbers or symbols", $"the letter {letter}")
 
-            Dim header = ArtifactHeader.Text(bucket.Name, generatorName, bucket.Count,
+            Dim header = ArtifactHeader.Text(generatorName, bucket.Count,
                                              $"{sourceFolder}/{letter}.ini", sourceIsFolder:=False,
-                                             description:=$"It contains entries beginning with {letterDesc}.")
+                                             description:=$"This file contains entries for applications whose names begin with {letterDesc}")
 
             If bucket.OverwriteToFile(header & bucket.ToString()) Then
 
