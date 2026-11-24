@@ -1,49 +1,35 @@
 # WinappDebug
 
-**WinappDebug** is a winapp2.ini [linter](https://en.wikipedia.org/wiki/Lint_(software)) for anyone who writes or edits winapp2.ini entries. It checks winapp2.ini for style and syntax errors in a wide range of categories you can turn on and off, and it can repair many of those errors for you.
-
-### What does WinappDebug do?
-
-WinappDebug reads a winapp2.ini file, checks every entry against winapp2.ini's syntax and style rules, and prints each problem it finds along with the key responsible. It repairs errors in memory as it finds them. Turn saving on and it writes the repaired file to the save target, which is `winapp2-debugged.ini` unless you choose another.
-
-### Why WinappDebug?
-
-Run it on new entries before you contribute them, and after any hand edit to winapp2.ini, to catch typos and ordering or numbering mistakes. It also brings the style of files from Transmute or a hand merge back in line. WinappDebug is an important build tool for winapp2.ini: see [WinappDebug in the winapp2.ini Build](#winappdebug-in-the-winapp2ini-build).
+**WinappDebug** is a [linter](https://en.wikipedia.org/wiki/Lint_(software)) for winapp2.ini. It checks winapp2.ini entries for style and syntax errors across a wide range of configurable categories, and repairs many of those errors automatically.
 
 ---
 
 # Table of Contents
 
-**Using WinappDebug**
+#### **Using WinappDebug**
 
 1. [Requirements](#requirements)
 2. [Quick Start](#quick-start)
 3. [Common Uses](#common-uses)
-4. [Menu Options](#menu-options)
-5. [Command-Line Arguments](#command-line-arguments)
-   - [Toggles](#toggles)
-   - [File Selection](#file-selection)
-   - [Flavor Selection](#flavor-selection)
-6. [How It Works](#how-it-works)
-   - [Scan, Repair, and Save](#scan-repair-and-save)
-   - [Scan Settings](#scan-settings)
-   - [Default Key Policy](#default-key-policy)
-   - [Flavor-Aware Checks](#flavor-aware-checks)
+4. [Main Menu Options](#menu-options)
+5. [Command-Line Arguments](#command-line-arguments) 
+    - [Toggles](#toggles)
+    - [File Selection](#file-selection)
+    - [Flavor Selection](#flavor-selection)
+6. [Configuration](#configuration)
+    - [Scan Settings](#scan-settings)
+    - [Default Key Policy](#default-key-policy)
+    - [Flavor-Aware Checks](#flavor-aware-checks)
 7. [Detected Errors](#detected-errors)
 8. [Troubleshooting](#troubleshooting)
+9. **[Usage Examples](EXAMPLES.md)**
 
-**For Contributors**
+#### **For Contributors**
 
 9. [WinappDebug in the winapp2.ini Build](#winappdebug-in-the-winapp2ini-build)
-   - [Where it runs](#where-it-runs)
-   - [The reconciliation guard](#the-reconciliation-guard)
-
-**Examples**
-
-10. **[Examples](EXAMPLES.md)**: sixteen worked examples with captured input and output
+    - [The reconciliation guard](#the-reconciliation-guard)
 
 ---
-
 
 # Requirements
 
@@ -65,7 +51,7 @@ Run it on new entries before you contribute them, and after any hand edit to win
 2. Select **Toggle Saving** to turn saving on
 3. Select **Run**. WinappDebug repairs every error it can and saves the result to `winapp2-debugged.ini`
 
-###### Note: WinappDebug saves to `winapp2-debugged.ini` and leaves your input file alone unless you tell it otherwise. To overwrite the input instead, point **File Chooser (save)** (or `-3f` on the command line) at it.
+###### Note: WinappDebug saves to `winapp2-debugged.ini` and leaves your input file alone unless you tell it otherwise. To overwrite the input instead, point **File Chooser (save)** (or `-3f` on the command-line) at it.
 
 ---
 
@@ -81,12 +67,12 @@ Run it on new entries before you contribute them, and after any hand edit to win
 | Scan with the System Ninja flavor checks on | `winapp2ool -sn -debug` | [Flavor-aware linting (System Ninja)](EXAMPLES.md#example-11-flavor-aware-linting-system-ninja) |
 | Repair in place from a script with no console output, writing `winapp2ool.log` | `winapp2ool -s -offline -writelog -debug -usedate -c -opti -1f Winapp2.ini -3f Winapp2.ini` | [Scripted in-place repair](EXAMPLES.md#example-16-scripted-in-place-repair) |
 
-In the menu, you make the same choices with **Toggle Saving** and **File Chooser (save)** before you select **Run**, and **Scan Settings** turns individual checks on and off. See [Menu Options](#menu-options). `-s`, `-offline` and `-writelog` are winapp2ool [global args](../../Readme.md#global-args), not WinappDebug's own.
+In the menu, you make the same choices with **Toggle Saving** and **File Chooser (save)** before you select **Run**, and **Scan Settings** turns individual checks on and off. See [Menu Options](#menu-options). `-s`, `-offline` and `-writelog` are [winapp2ool global args](../../Readme.md#global-args).
 
 ---
 
 
-# Menu Options
+# Main Menu Options
 
 | Option | Effect | Notes |
 |:-|:-|:-|
@@ -104,9 +90,9 @@ In the menu, you make the same choices with **Toggle Saving** and **File Chooser
 
 # Command-Line Arguments
 
-On the command line, WinappDebug is `winapp2ool -debug` (`debug`, `-1` and `1` also work).
+From the command-line, WinappDebug is invoked with `winapp2ool -debug` (`debug`, `-1` and `1` also work).
 
-Command-line runs always use the default scan settings. Changes you've saved in Scan Settings from the menu don't apply to them. The exceptions are `-opti` and `-keepdefaults`, which each change one rule for a single run and leave your saved settings alone.
+Command-line runs always use the default scan settings, most of which are on by default. `-opti` and `-keepdefaults` each enable an off-by-default rule for a single run.
 
 ### Toggles
 
@@ -114,19 +100,16 @@ Command-line runs always use the default scan settings. Changes you've saved in 
 |:-|:-|
 | `-c` | Save the corrected file |
 | `-usedate` | Use today's date (yymmdd) as the version line in the saved file's header, e.g. `; Version: 260724` |
-| `-opti` | Turn on the experimental Optimizations rule (the FileKey merger) for this run |
+| `-opti` | Turn on FileKey merging for this run |
 | `-keepdefaults` | Leave existing `Default=` keys alone instead of reporting and removing them; see [Default Key Policy](#default-key-policy) |
-| `-archive` | Mark the saved file as `archived.ini`, the archive of retired entries, and gives it the archive's header |
-| `-winapp3` | Mark the saved file as `winapp3.ini`, the aggressive entries, and gives it winapp3.ini's header |
+| `-archive` | Save corrections with the `archive.ini` header |
+| `-winapp3` | Save corrections with the `winapp3.ini` header |
 
-A marked file keeps its marker on later runs without the flag. A marked file never has a flavor, and a file is only ever one kind, so each of these saves nothing and fails the run: `-archive` or `-winapp3` beside a flavor flag, `-archive` beside `-winapp3`, a flavor flag on a marked file, a marker flag that disagrees with the file's own marker (`-winapp3` on an `archived.ini`), and a file that carries both markers.
-
-Two of winapp2ool's global flags matter for scripted lint runs. They aren't WinappDebug arguments: they work with any module and can go anywhere on the command line.
-
+### Winapp2 Global Args 
 | Arg | Effect |
 |:-|:-|
 | `-s` | Silent mode. Suppresses **all** console output, so a lint run under `-s` prints nothing at all |
-| `-writelog` | Write `winapp2ool.log` even when the run succeeds. Without it, a silent run only writes the log when it exits with a nonzero code |
+| `-writelog` | Write `winapp2ool.log` on exit to see lint results from scripted runs |
 
 ### File Selection
 
@@ -139,11 +122,9 @@ Two of winapp2ool's global flags matter for scripted lint runs. They aren't Wina
 | `-3f name` | Set the output file name | `winapp2-debugged.ini` |
 | `-3f subdir\name` | Save to a subfolder of the output directory | |
 
-###### Note: The output goes to `winapp2-debugged.ini` unless you name another file, so your input stays as it was. To repair the input in place, pass its name to `-3f`.
-
 ### Flavor Selection
 
-The global flavor flags turn on a flavor's [flavor-aware checks](#flavor-aware-checks) for one run. They don't change the Flavor setting saved in the menu.
+The global flavor flags turn on a flavor's [flavor-aware checks](#flavor-aware-checks) for one run.
 
 | Arg | Alias | Flavor |
 |:-|:-|:-|
@@ -157,40 +138,13 @@ The global flavor flags turn on a flavor's [flavor-aware checks](#flavor-aware-c
 
 ---
 
-# How It Works
-
-## Scan, Repair, and Save
-
-WinappDebug goes through winapp2.ini one entry at a time. It checks every key against the rules that are turned on and records each error, repairing it on the spot if that category's repair is on. When every entry is done, it sorts the entry list alphabetically and reports any entry that was out of place.
-
-Each category has two switches:
-
-- The **scan** finds the error and reports it
-- The **repair** fixes it in memory
-
-Both are on for every category except Optimizations. With a scan on and its repair off, you get the report and the content stays as it was. Repairs happen in memory and get reported whether or not you save, but WinappDebug only writes a file when saving is on (`-c` on the command line).
-
-Each error is reported as a block naming the entry, the error, and usually the key responsible:
-
-```
-Error in [7-Zip *]:
-Forward slash (/) detected in lieu of backslash (\).
-Key: FileKey1=%AppData%/7-Zip|*.tmp
-```
-
-At the end, a summary gives the entry count and the number of possible errors. That number is green at 0, yellow below 10, and red at 10 or more. **Log Viewer** in the menu shows the full report again.
-
-###### Note: Because WinappDebug repairs errors as it finds them, a later message can name a key by the value or number an earlier repair gave it. [Example 5](EXAMPLES.md#example-5-renumbering-and-re-alphabetization) and [Example 8](EXAMPLES.md#example-8-flag-and-excludekey-repairs) both show this.
+# Configuration
 
 ## Scan Settings
 
-The **Scan Settings** menu turns each category on or off. It lists all fifteen **Scan Options** first (items 1–15), then the matching fifteen **Repair Options** (items 16–30).
+The **Scan Settings** menu turns each category on or off. It lists all fifteen **Scan Options** first (items 1–15), then their corresponding **Repair Options** (items 16–30).
 
-Each switch pulls the other along in one direction:
-
-- Turning a category's scan off turns its repair off too
-- Turning a category's repair on turns its scan back on if it is off
-- Turning only the repair off leaves the scan on, so you still see the category's errors but they don't get fixed. See [Example 3](EXAMPLES.md#example-3-reporting-without-repairing)
+Turning a category's scan off turns its repair off too and turning a category's repair on turns its scan on.
 
 | Category | What it detects | What the repair does |
 |:-|:-|:-|
@@ -212,37 +166,26 @@ Each switch pulls the other along in one direction:
 
 ###### Note: Type `alloff` at the Scan Settings menu to turn every scan and repair off at once.
 
-Some checks don't belong to any category and always run, whatever Scan Settings says. [Detected Errors](#detected-errors) marks them *(always on)*.
-
-Scan Settings changes you make in the menu are saved and carry over to your next session, but only menu runs use them. Command-line runs always lint with the defaults. Two flags change that for a single run: `-opti` turns the Optimizations rule on, and `-keepdefaults` turns the Defaults rule off.
-
 ## Default Key Policy
 
-Current winapp2.ini style leaves `Default=` keys out of entries, and by default WinappDebug enforces that: it reports any `Default` key (`Entry has a Default key where there should be none`), and the repair removes it.
+By default, WinappDebug reports `Default=` keys as errors and removes them. Enabling the **Default Value Audit** instead enforces that every entry *should* have a `Default=` key. If it is absent, one is inserted according to the **Expected Default** value (`False` by default). If one is present but has an incorrect value, its value is corrected. See [Example 13](EXAMPLES.md#example-13-auditing-default-key-values).
 
-**Toggle Default Value Audit** turns that around. Every entry must then have a `Default` key with a set value, `False` unless you change it with **Toggle Expected Default**. With the audit on:
-
-- An entry with no `Default` key is reported (`No Default Key found`) and gets one with the expected value, whatever the Defaults scan and repair switches say
-- A `Default` key with the wrong value is reported (`Incorrect value for Default Key found`) and corrected
-
-See [Example 13](EXAMPLES.md#example-13-auditing-default-key-values).
-
-`-keepdefaults` only exists on the command line. It leaves `Default=` keys exactly as it finds them, neither removing them nor requiring them.
+`-keepdefaults` only exists on the command-line. It leaves `Default=` keys exactly as it finds them, neither removing them nor requiring them.
 
 ## Flavor-Aware Checks
 
-A few checks depend on winapp2ool's global **Flavor** setting. You'll find it in the Winapp2ool Settings menu, or you can set it for one run with the [flavor command-line flags](#flavor-selection):
+There are a few checks for specific flavors of winapp2.ini. These checks only run when winapp2ool's flavor setting is set accordingly. 
 
-| Flavor | Additional check |
+| Flavor | Additional check | 
 |:-|:-|
 | System Ninja | `Wildcard (*) found in DetectFile`: System Ninja doesn't support wildcards in detection keys |
-| BleachBit | `ExcludeKey contains REG flag in BleachBit flavor`: BleachBit doesn't support registry ExcludeKeys |
+| BleachBit | `ExcludeKey contains REG flag in BleachBit flavor`: BleachBit 5 and older don't support registry ExcludeKeys |
 
 ---
 
 # Detected Errors
 
-These are the exact messages the report prints. WinappDebug fixes a **bold** message automatically while its category's repair is on. A plain message is only reported, and you'll have to fix it yourself. The category in parentheses is the [Scan Settings](#scan-settings) entry that controls the check, unless it's marked *(always on)*.
+These are the exact messages the report prints. Messages in **bold** can be automatically repaired. The category in parentheses is the [Scan Settings](#scan-settings) entry that controls the check, unless it's marked *(always on)*.
 
 ### Entry structure
 
@@ -315,7 +258,7 @@ These are the exact messages the report prints. WinappDebug fixes a **bold** mes
 - **`No Default Key found`** *(always on under the audit)*: [Default Value Audit](#default-key-policy) only. The report and the insertion both ignore the Defaults switches, so with the audit on, every entry ends up with a `Default` key
 - **`Incorrect value for Default Key found`** *(Defaults)*: Default Value Audit only. The value is corrected
 
-### Optimizations (experimental, off by default)
+### Optimizations (Off by default)
 
 - FileKeys that match another key in the same entry on both path and flag are merged into one key. See [Example 15](EXAMPLES.md#example-15-merging-redundant-filekeys-optimizations)
 
@@ -327,7 +270,6 @@ These are the exact messages the report prints. WinappDebug fixes a **bold** mes
 |:-|:-|
 | A **File Chooser** opens with the header `winapp2.ini does not exist` | WinappDebug couldn't find the input file |
 | The menu header says `winapp2.ini was empty or not found` | The input file exists but has no entries |
-| `0 possible errors detected.` on a file you expected to fail | The file is already clean, the categories you expected are turned off, or the check you expected only runs for a certain [flavor](#flavor-aware-checks) |
 | Errors are reported but no file appears | Saving is off, which is the default |
 | The summary says `winapp2-debugged.ini was not saved` | WinappDebug couldn't write to the save target |
 | Log Viewer isn't in the menu | The last run found no errors, or you haven't run WinappDebug yet this session |
@@ -336,27 +278,8 @@ These are the exact messages the report prints. WinappDebug fixes a **bold** mes
 
 # WinappDebug in the winapp2.ini Build
 
-This section is for people who maintain the winapp2.ini build, or who want to know where WinappDebug fits in it. You don't need it to use WinappDebug.
-
 Every build of winapp2.ini runs WinappDebug inside each entry generator, on its output and on its `archived.ini`, and once more as the last stage of each flavor and of the archive.
-
-## Where it runs
-
-| Stage | Invocation | Gated? |
-|:-|:-|:-|
-| BrowserBuilder output | `remotedebugGuarded` (in-process, Optimizations forced on) | Yes, by the [reconciliation guard](#the-reconciliation-guard) |
-| EntryBuilder output | `remotedebugGuarded` (in-process, Optimizations forced on) | Yes |
-| Base winapp2.ini | `-s -offline -debug -usedate -c -opti -1f Winapp2.ini -3f Winapp2.ini` | No |
-| CCleaner flavor | same, on `winapp2-ccleaner-flavor.ini` | No |
-| FluentCleaner flavor | same, **plus `-keepdefaults`** | No |
-| BleachBit flavor | same, on `winapp2-bleachbit-flavor.ini` | No |
-| Tron flavor | same, on `winapp2-tron-flavor.ini` | No |
-| System Ninja flavor | same, output renamed to `Winapp2.rules` | No |
-| Archive | `-s -offline -debug -archive -usedate -c -opti -1f archived.ini -3f archived.ini` | No |
-
-###### Note: The CCleaner 7 flavor gets no lint pass of its own because a Transmute pass makes it from the already-linted CCleaner flavor.
 
 ## The reconciliation guard
 
-Each generator's lint pass goes through the Lint Reconciler, which compares what the generator's entries mean before and after the lint. The lint may reorder and renumber keys, sort FileKey patterns, merge FileKeys that share a path and flag, drop exact duplicates, and change case. Any other difference, such as a dropped entry, a malformed key thrown away, or a rewritten value, means the generator wrote invalid data and the lint quietly destroyed it. That's a bug in the generator's source data, so the guard fails the build. It reports every difference it found and saves the entries as they were before the lint to `<name>.prelint.ini` beside the output.
-
+Each generator's lint pass goes through the Lint Reconciler, which compares generator's entries before and after the lint. The lint may make syntactic changes such as reordering or renumbering keys, sorting FileKey patterns, merging FileKeys, dropping duplicates, and changing case. Any semantic differences, such as a dropped entry, a malformed or discarded key, or a rewritten value, means the generator wrote invalid data that was destroyed by the lint, so the guard fails the build. It reports every difference it found and saves the entries as they were before the lint to `<name>.prelint.ini` beside the output.
