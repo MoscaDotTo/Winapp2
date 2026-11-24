@@ -1,6 +1,6 @@
 # Trim Examples
 
-Worked examples for [Trim](README.md). The [Common Uses](README.md#common-uses) table in the readme lists the commands; these show what each one does, with real input and output.
+###### Trim produces results that are fit to individual machines; you may not be able to reproduce the examples locally.
 
 # Table of Contents
 
@@ -10,21 +10,19 @@ Worked examples for [Trim](README.md). The [Common Uses](README.md#common-uses) 
 4. [Example 4: Never-Trim and Always-Trim Overrides](#example-4-never-trim-and-always-trim-overrides)
 5. [Example 5: VirtualStore Key Generation](#example-5-virtualstore-key-generation)
 
----
-
-The outputs below were captured from real runs on a Windows 11 computer. Trim's results are machine-specific by design, so expect different counts and a different set of survivors on yours.
+--- 
 
 ## Example 1: Anatomy of a Trim
 
 **Context**
 
-Six entries are enough to show how Trim treats `Detect`, `DetectFile` and `DetectOS`, and an entry with none of them. Four come straight from winapp2.ini and two are made up for this example: `[My Custom Cleanup *]` has no detection keys at all, and `[Windows XP Era Application *]` uses `DetectOS`, which no entry in the official winapp2.ini uses anymore.
+We have a file containing various detection criteria: `Detect`, `DetectFile` and `DetectOS`, and an entry with none of them. 
 
 This computer has 7-Zip, Firefox, Steam, and Windows Calculator installed.
 
 **Intent**
 
-We want to trim this file in place and see which entries survive, and why.
+We want to trim this file in place and see which entries are kept
 
 **Files**
 
@@ -121,14 +119,19 @@ FileKey4=%LocalAppData%\Packages\Microsoft.WindowsCalculator_*\Settings|*.log*
 
 **Explanation**
 
-| Entry | Result | Why |
-|:-|:-|:-|
-| `[7-Zip ZS *]` | Removed | `HKCU\Software\7-Zip-Zstandard` does not exist. 7-Zip itself is installed, but this entry looks for the Zstandard fork's own key |
-| `[Mozilla Firefox Autofill Data *]` | Kept | `DetectFile1` (`%AppData%\Mozilla\Firefox\Profiles`) exists |
-| `[My Custom Cleanup *]` | Kept | An entry with no detection keys is always kept |
-| `[Steam Packages *]` | Kept | `HKCU\Software\Valve\Steam` exists |
-| `[Windows Calculator *]` | Kept | The wildcard `DetectFile` expanded to the real package folder `Microsoft.WindowsCalculator_8wekyb3d8bbwe` |
-| `[Windows XP Era Application *]` | Removed | `DetectOS=\|5.2` requires Windows ≤ 5.2 (XP/Server 2003); this machine reports 10.0 |
+• `[7-Zip ZS *]` is removed, `HKCU\Software\7-Zip-Zstandard` does not exist on this machine. 7-Zip itself is installed, but this entry targets for the Zstandard fork
+
+• `[Mozilla Firefox Autofill Data *]` is kept, `%AppData%\Mozilla\Firefox\Profiles` exists 
+
+• `[My Custom Cleanup *]` is kept; an entry with no detection criteria is always kept
+
+
+• `[Steam Packages *]` is kept, `HKCU\Software\Valve\Steam` exists
+
+
+• `[Windows Calculator *]` is kept, the wildcard `DetectFile` expanded to the real package folder `Microsoft.WindowsCalculator_8wekyb3d8bbwe`
+
+• `[Windows XP Era Application *]` is removed, `DetectOS=\|5.2` requires Windows ≤ 5.2 (XP/Server 2003); this machine has 10.0 (11)
 
 ---
 
@@ -136,7 +139,7 @@ FileKey4=%LocalAppData%\Packages\Microsoft.WindowsCalculator_*\Settings|*.log*
 
 **Context**
 
-This is the ordinary case: running Trim over the whole database to get a copy that fits one machine.
+A freshly downloaded winapp2.ini is untrimmed.
 
 **Intent**
 
@@ -178,7 +181,7 @@ winapp2ool -trim -3f winapp2-trimmed.ini
 - The input is `winapp2.ini` in the current directory, the default
 - Trim writes `winapp2-trimmed.ini` and leaves the input alone
 - Trim removed 91% of the database. The 349 entries left are the ones that passed detection on this machine
-- The `; Version: 251109` line comes from the input file, and `; # of entries:` now gives the trimmed count
+- The `; Version: 251109` line comes from the input file, and `; # of entries:` shows the count after trimming
 
 ---
 
@@ -186,11 +189,11 @@ winapp2ool -trim -3f winapp2-trimmed.ini
 
 **Context**
 
-If the trimmed file is all you keep, you never need the full database sitting on disk.
+We only ever want a trimmed file, so we don't need to keep a copy of the complete database on disk. 
 
 **Intent**
 
-We want to download the latest winapp2.ini from GitHub and trim it in a single command, starting from an empty directory.
+We want to download the latest winapp2.ini from GitHub and trim it to fit the current machine. 
 
 **Command**
 
@@ -214,7 +217,7 @@ winapp2ool -trim -d -3f winapp2-trimmed.ini
 
 **Explanation**
 
-- You don't need a local winapp2.ini: `-d` downloads the latest database and trims that
+- `-d` downloads the latest database and trims it without needing a local file to be present first
 - `-d` ignores the `-1f`/`-1d` input file settings
 - The output is `winapp2-trimmed.ini`
 
@@ -224,11 +227,11 @@ winapp2ool -trim -d -3f winapp2-trimmed.ini
 
 **Context**
 
-Continuing from [Example 1](#example-1-anatomy-of-a-trim): suppose we plan to install 7-Zip Zstandard soon, so we want its entry to survive trimming even though it isn't detected yet. Meanwhile, we prefer Steam's own cleanup for its package cache and never want `[Steam Packages *]` in our output, even though Steam is installed.
+Continuing from [Example 1](#example-1-anatomy-of-a-trim): suppose we plan to install 7-Zip Zstandard soon, so we want its entry to be kept even though it isn't detected yet. Likewise, we never want `[Steam Packages *]`, even though Steam is installed.
 
 **Intent**
 
-We want to keep `[7-Zip ZS *]` and drop `[Steam Packages *]`, whatever their detection keys say.
+We want to keep `[7-Zip ZS *]` and drop `[Steam Packages *]`, irrespective of whether or not they're installed on the current system 
 
 **Files**
 
@@ -267,13 +270,11 @@ winapp2ool -trim -includes -excludes -3f winapp2-trimmed.ini
 
 - `[7-Zip ZS *]` is now kept: the include list overrides its failing `Detect`
 - `[Steam Packages *]` is now removed: the exclude list overrides its passing `Detect`
-- `[Windows XP Era Application *]` is still removed, since neither list names it
+- `[Windows XP Era Application *]` is still removed as it was in example 1
 
 **Notes**
 
-- Trim checks both lists before it looks at any detection key
-- If an entry appears in both files, the include list wins
-- Command-line runs don't remember the lists, so pass `-includes` and `-excludes` every time you want them
+Trim checks both lists before it looks at any detection key. If an entry appears in both files, the include list wins and the entry is always kept. 
 
 ---
 
@@ -281,7 +282,7 @@ winapp2ool -trim -includes -excludes -3f winapp2-trimmed.ini
 
 **Context**
 
-On a machine upgraded from older versions of Windows, Windows may have quietly redirected a pre-UAC program's writes to `Program Files` into `%LocalAppData%\VirtualStore`, and an entry that cleans only the original location misses that copy. This computer has no such leftovers, so for this example we created an empty `%LocalAppData%\VirtualStore\Program Files (x86)\Steam\package` folder before running Trim, and deleted it afterwards.
+Under some circumstances, Windows may redirect a program's writes to into the VirtualStore. This computer has no such leftovers, so for this example we created an empty `%LocalAppData%\VirtualStore\Program Files (x86)\Steam\package` folder before running Trim
 
 **Intent**
 
@@ -319,5 +320,5 @@ FileKey2=%ProgramFiles%\Steam\package|*.zip.*
 **Explanation**
 
 - `[Steam Packages *]` passed detection, so Trim looked for VirtualStore counterparts of its FileKeys
-- `FileKey1=%ProgramFiles%\Steam\package|*.zip.*` maps to `%LocalAppData%\VirtualStore\Program Files*\Steam\package`. That folder existed during this run, so Trim added a key for it and renumbered the entry's FileKeys
-- Without that folder, the entry passes through unchanged, as it did in Example 1
+- `%ProgramFiles%\Steam\package` maps to `%LocalAppData%\VirtualStore\Program Files*\Steam\package`. That folder existed during this run, so Trim added a key for it and renumbered the entry's FileKeys
+- Without that folder, the entry would passe through unchanged, as it did in Example 1
