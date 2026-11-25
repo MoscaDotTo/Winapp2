@@ -1,7 +1,5 @@
 # Transmute Examples
 
-With Syntax on (the default), Transmute writes the winapp2.ini header comments at the top of the output file. The outputs below leave the header out.
-
 # Table of Contents
 
 1. [Adding Content](#adding-content)
